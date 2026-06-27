@@ -4,20 +4,20 @@
 
 ## 자기소개.md
 
+> frontmatter는 운영용 메타데이터예요. 본문 카드의 📋 칸은 사전 서베이로 채웁니다.
+
 | 필드 | 타입 | 필수 | 설명 | 예시 |
 |------|------|:---:|------|------|
-| `member` | string | ✅ | 멤버 닉네임 | `dani` |
-| `crew` | string | ✅ | 소속 조 | `A조` |
-| `domain` | string | ✅ | 관심·작업 분야 | `프론트엔드` |
-| `github` | string | ✅ | GitHub 아이디 | `selfishclub` |
-| `goal` | string | ✅ | 6주 뒤 만들고 싶은 것 | `포트폴리오 사이트` |
+| `member` | string | ✅ | 이름 | `이예성` |
+| `조` | string | ✅ | 소속 조 (1~6) | `1` |
+| `domain` | string | ⬜ | 직무 카테고리 (서베이) | `개발자·엔지니어` |
 
 ## 주차 submission.md (W1~W6)
 
 | 필드 | 타입 | 필수 | 설명 | 예시 |
 |------|------|:---:|------|------|
 | `member` | string | ✅ | 멤버 닉네임 | `dani` |
-| `crew` | string | ✅ | 소속 조 | `A조` |
+| `조` | string | ✅ | 소속 조 | `A조` |
 | `week` | number | ✅ | 주차 (1~6) | `1` |
 | `type` | string | ✅ | 문서 유형 (고정값 `weekly`) | `weekly` |
 | `title` | string | ✅ | 제출물 제목 | `첫 배포 성공` |

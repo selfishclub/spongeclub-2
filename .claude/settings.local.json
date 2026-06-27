@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git clone *)",
+      "Bash(python3 /tmp/sc_build.py)",
+      "Bash(cd /Users/songda-eun/Desktop/ClaudeProjects/spongeclub-2 *)",
+      "Bash(git add *)",
+      "Bash(rm -f .git/index.lock)",
+      "Bash(git commit -q -m ' *)",
+      "Bash(git push *)",
+      "Bash(echo \"푸시 종료코드: $?\")",
+      "Bash(python3 -)"
+    ]
+  }
+}
