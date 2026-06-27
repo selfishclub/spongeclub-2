@@ -7,3 +7,6 @@
 
 # Claude Code 로컬 설정
 .claude/
+
+# omc 관련 파일 제외
+.omc/
