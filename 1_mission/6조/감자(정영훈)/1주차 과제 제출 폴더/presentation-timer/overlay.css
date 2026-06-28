@@ -1,0 +1,127 @@
+/* 스폰지 발표 타이머 — 플로팅 오버레이
+   모든 규칙을 #sponge-timer-overlay 로 스코프하고, 페이지 스타일 간섭을 막기 위해
+   핵심 속성은 명시적으로 선언한다. */
+
+#sponge-timer-overlay {
+  all: initial;
+  position: fixed;
+  z-index: 2147483647;
+  top: 24px;
+  left: 24px;
+  width: 212px;
+  box-sizing: border-box;
+  padding: 0 0 12px;
+  border-radius: 22px;
+  font-family: system-ui, -apple-system, "Apple SD Gothic Neo", "Segoe UI", sans-serif;
+  color: #4a3500;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 18%, rgba(255,255,255,.55) 0 6px, transparent 7px),
+    radial-gradient(circle at 78% 30%, rgba(166,110,0,.12) 0 8px, transparent 9px),
+    radial-gradient(circle at 64% 82%, rgba(166,110,0,.10) 0 11px, transparent 12px),
+    radial-gradient(circle at 34% 66%, rgba(255,255,255,.32) 0 5px, transparent 6px),
+    linear-gradient(160deg, #FFE27A, #FFC400 55%, #F2A900);
+  box-shadow: 0 10px 30px rgba(120,80,0,.35), inset 0 0 0 2px rgba(255,255,255,.45);
+  transition: box-shadow .25s ease;
+}
+
+#sponge-timer-overlay * { box-sizing: border-box; }
+
+/* 상태별 카드 강조 */
+#sponge-timer-overlay[data-stage="warn"]   { box-shadow: 0 10px 30px rgba(120,80,0,.35), 0 0 0 3px rgba(255,159,28,.9); }
+#sponge-timer-overlay[data-stage="danger"] { box-shadow: 0 10px 30px rgba(120,80,0,.35), 0 0 0 3px rgba(244,68,46,.95); }
+#sponge-timer-overlay[data-stage="over"]   { box-shadow: 0 10px 34px rgba(180,30,10,.45), 0 0 0 4px rgba(244,68,46,1); }
+
+/* 헤더 (드래그 핸들) */
+#sponge-timer-overlay .spg-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 11px 4px;
+  cursor: grab;
+}
+#sponge-timer-overlay .spg-head:active { cursor: grabbing; }
+#sponge-timer-overlay .spg-logo { width: 24px; height: 16px; display: block; flex: 0 0 auto; }
+#sponge-timer-overlay .spg-name {
+  font-size: 11px; font-weight: 800; letter-spacing: 1.6px; color: #6b4f00;
+  flex: 1 1 auto;
+}
+#sponge-timer-overlay .spg-x {
+  all: unset;
+  cursor: pointer;
+  width: 20px; height: 20px;
+  display: grid; place-items: center;
+  border-radius: 7px;
+  font-size: 13px; font-weight: 800; color: #6b4f00;
+  background: rgba(255,255,255,.45);
+}
+#sponge-timer-overlay .spg-x:hover { background: rgba(255,255,255,.85); }
+
+/* 시간 표시 */
+#sponge-timer-overlay .spg-time {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-size: 52px;
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #3a2a00;
+  text-shadow: 0 1px 0 rgba(255,255,255,.5);
+  padding: 2px 8px 4px;
+}
+#sponge-timer-overlay[data-stage="danger"] .spg-time { color: #d62f12; }
+#sponge-timer-overlay[data-stage="over"]   .spg-time { color: #c01f06; animation: spg-blink 1s steps(2, start) infinite; }
+@keyframes spg-blink { 50% { opacity: .25; } }
+
+/* 진행 바 (남은 시간 = 흡수된 물) */
+#sponge-timer-overlay .spg-track {
+  margin: 2px 14px 12px;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(120,80,0,.18);
+  overflow: hidden;
+}
+#sponge-timer-overlay .spg-fill {
+  height: 100%;
+  width: 100%;
+  border-radius: 999px;
+  background: #2fa968;
+  transition: width .22s linear, background .3s ease;
+}
+#sponge-timer-overlay[data-stage="warn"]   .spg-fill { background: #ff9f1c; }
+#sponge-timer-overlay[data-stage="danger"] .spg-fill,
+#sponge-timer-overlay[data-stage="over"]   .spg-fill { background: #f4442e; }
+
+/* 스톱워치 모드: 진행 바 숨김 (목표 시간 없음) */
+#sponge-timer-overlay[data-mode="stopwatch"] .spg-track { display: none; }
+#sponge-timer-overlay[data-mode="stopwatch"] .spg-time { padding-bottom: 14px; }
+
+/* 컨트롤 */
+#sponge-timer-overlay .spg-ctrl {
+  display: flex;
+  gap: 6px;
+  padding: 0 11px;
+}
+#sponge-timer-overlay .spg-btn {
+  all: unset;
+  cursor: pointer;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: #4a3500;
+  padding: 8px 6px;
+  border-radius: 11px;
+  background: rgba(255,255,255,.5);
+  box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.5);
+  transition: transform .07s ease, background .15s ease;
+}
+#sponge-timer-overlay .spg-btn:hover { background: rgba(255,255,255,.82); }
+#sponge-timer-overlay .spg-btn:active { transform: scale(.93); }
+#sponge-timer-overlay .spg-play { flex: 1 1 auto; }
+#sponge-timer-overlay .spg-play.is-run { background: #4a3500; color: #ffe27a; box-shadow: none; }
+#sponge-timer-overlay .spg-reset,
+#sponge-timer-overlay .spg-add,
+#sponge-timer-overlay .spg-sound { flex: 0 0 auto; min-width: 34px; }
+#sponge-timer-overlay .spg-sound.is-off { opacity: .45; }
