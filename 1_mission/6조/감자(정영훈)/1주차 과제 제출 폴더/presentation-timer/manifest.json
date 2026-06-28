@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "스폰지 타이머",
+  "version": "1.1.0",
+  "description": "발표·일상에 두루 쓰는 스폰지 타이머 — 카운트다운과 스톱워치, 색상·소리 경고, 단축키 지원.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "스폰지 타이머"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": ["scripting", "storage", "activeTab"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "commands": {
+    "toggle-timer": {
+      "suggested_key": { "default": "Ctrl+Shift+Y", "mac": "Command+Shift+Y" },
+      "description": "현재 탭에 카운트다운 타이머 띄우기 / 시작·정지"
+    },
+    "toggle-stopwatch": {
+      "suggested_key": { "default": "Ctrl+Shift+U", "mac": "Command+Shift+U" },
+      "description": "현재 탭에 스톱워치 띄우기 / 시작·정지"
+    }
+  }
+}
