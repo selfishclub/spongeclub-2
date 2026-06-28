@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "강아지 발표 시계 & 타이머",
+  "version": "1.0.0",
+  "description": "현재 시각(디지털+아날로그)과 발표용 카운트다운 타이머를 한 화면에. 시·분·초침은 우리집 강아지!",
+  "permissions": ["storage"],
+  "action": {
+    "default_title": "강아지 시계 열기",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
