@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Fullscreen Clock & Timer",
-  "version": "1.0.0",
-  "description": "새 탭을 전체화면 시계·세계시간·타이머·스톱워치로. 미니멀 다크 테마.",
+  "name": "Julie Timer Extension",
+  "version": "1.0.1",
+  "description": "Fullscreen clock, world time, timer & stopwatch for your new tab. By Philly Julie — SpongeClub yellow theme.",
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },

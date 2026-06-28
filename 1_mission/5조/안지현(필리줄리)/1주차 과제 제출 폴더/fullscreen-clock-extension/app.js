@@ -69,7 +69,7 @@ const swStart = $("#swStart");
 
 /* ========== 모드 전환 ========== */
 function switchMode(mode) {
-  $$(".tab").forEach((t) => t.classList.toggle("is-active", t.dataset.mode === mode));
+  $$(".tab").forEach((el) => el.classList.toggle("is-active", el.dataset.mode === mode));
   $$(".view").forEach((v) => v.classList.toggle("is-active", v.dataset.view === mode));
   store.set("lastMode", mode);
 }
@@ -242,7 +242,7 @@ function fireAlarm() {
 }
 function stopAlarm() {
   if (alarmTimer) { clearInterval(alarmTimer); alarmTimer = null; }
-  document.title = "SpongeClub Clock";
+  document.title = "Julie Timer";
 }
 document.addEventListener("click", () => { if (alarmTimer) stopAlarm(); }, true);
 

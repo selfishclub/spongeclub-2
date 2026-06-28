@@ -1,3 +1,11 @@
+@font-face {
+  font-family: "Montserrat";
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+  src: url("fonts/Montserrat.woff2") format("woff2");
+}
+
 :root {
   --y1: #FFE14D;
   --y2: #FFD000;
@@ -77,6 +85,12 @@ body::before {
 .brand .gen {
   font-weight: 800; font-size: clamp(13px, 1.3vw, 16px);
   color: var(--y1); background: var(--ink); padding: 5px 12px; border-radius: 10px;
+}
+.brand .by {
+  font-weight: 800; font-size: clamp(11px, 1.2vw, 14px); letter-spacing: 0.3px;
+  color: var(--ink); background: rgba(255, 255, 255, 0.30);
+  border: 1.5px solid var(--line); padding: 4px 12px; border-radius: 999px;
+  backdrop-filter: blur(6px);
 }
 .lang-btn {
   font-family: var(--font); font-weight: 800; font-size: 14px; color: var(--ink);
