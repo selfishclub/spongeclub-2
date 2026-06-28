@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>강아지 발표 시계 & 타이머</title>
+  <link rel="stylesheet" href="clock.css" />
+</head>
+<body>
+  <div id="app" class="state-idle">
+    <!-- 상단: 디지털 시각 (초 없음) -->
+    <header class="digital">
+      <div class="digital-time"><span id="dH">--</span><span class="colon">:</span><span id="dM">--</span></div>
+      <div id="digitalDate" class="digital-date">----년 --월 --일</div>
+    </header>
+
+    <!-- 중앙: 강아지 사진 시계판 + 뼈다귀 시·분침 + 카운트다운 진행 링 -->
+    <main class="clock-area">
+      <div class="clock-wrap" id="clockWrap">
+        <svg id="clockSvg" viewBox="0 0 360 360" width="360" height="360" aria-hidden="true">
+          <defs>
+            <clipPath id="dialClip"><circle cx="180" cy="180" r="140" /></clipPath>
+          </defs>
+
+          <!-- 카운트다운 진행 링 -->
+          <circle class="ring-track" cx="180" cy="180" r="168" />
+          <circle id="ringProgress" class="ring-progress" cx="180" cy="180" r="168"
+                  transform="rotate(-90 180 180)" />
+          <circle id="ringHead" class="ring-head" cx="180" cy="12" r="6" />
+
+          <!-- 강아지 사진 시계판 (원형으로 클립 + 대비용 어둡게 오버레이) -->
+          <circle class="dial-base" cx="180" cy="180" r="140" />
+          <image id="dialPhoto" href="assets/dog-bg.jpg" x="40" y="40" width="280" height="280"
+                 preserveAspectRatio="xMidYMid slice" clip-path="url(#dialClip)" />
+          <!-- 숫자가 있는 바깥 띠만 어둡게 (가운데 강아지 얼굴은 밝게 유지) -->
+          <circle class="dial-numband" cx="180" cy="180" r="124" clip-path="url(#dialClip)" />
+          <circle class="dial-rim" cx="180" cy="180" r="140" />
+
+          <g id="ticks"></g>
+          <g id="numbers"></g>
+
+          <!-- 시·분·초침 = 롤렉스 스타일 (JS로 생성) -->
+          <g id="handHour"   class="hand hand-hour"></g>
+          <g id="handMinute" class="hand hand-minute"></g>
+          <g id="handSecond" class="hand hand-second"></g>
+
+          <circle class="center-cap" cx="180" cy="180" r="8" />
+        </svg>
+      </div>
+    </main>
+
+    <!-- 하단: 타이머 -->
+    <footer class="timer">
+      <div id="timerReadout" class="timer-readout">05:00</div>
+
+      <div class="timer-controls">
+        <div class="timer-inputs">
+          <label>분 <input id="inMin" type="number" min="0" max="180" value="5" /></label>
+          <label>초 <input id="inSec" type="number" min="0" max="59" value="0" /></label>
+          <div class="presets">
+            <button class="preset" data-sec="180">3분</button>
+            <button class="preset" data-sec="300">5분</button>
+            <button class="preset" data-sec="600">10분</button>
+          </div>
+        </div>
+        <div class="timer-buttons">
+          <button id="btnStart" class="btn btn-primary">시작</button>
+          <button id="btnPause" class="btn">일시정지</button>
+          <button id="btnReset" class="btn">리셋</button>
+          <button id="btnSound" class="btn" title="종료 알림음 켜기/끄기">🔔</button>
+          <button id="btnFull" class="btn" title="전체화면">⛶</button>
+        </div>
+      </div>
+    </footer>
+
+    <!-- 우클릭 → 사진 교체 팝업 -->
+    <div id="photoModal" class="modal hidden">
+      <div class="modal-card">
+        <h2>🐶 시계판 사진 바꾸기</h2>
+        <p>강아지 사진을 고르면 자동으로 정사각형으로 맞춰 시계판에 적용됩니다.</p>
+        <label class="file-btn">
+          사진 선택…
+          <input id="photoFile" type="file" accept="image/*" hidden />
+        </label>
+        <div class="modal-buttons">
+          <button id="photoReset" class="btn">기본 사진으로</button>
+          <button id="photoClose" class="btn btn-primary">닫기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="clock.js"></script>
+</body>
+</html>
