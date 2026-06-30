@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>1초 가계부</title>
+<style>
+  :root{
+    --bg:#f5f6f8; --card:#ffffff; --line:#e8eaed; --text:#1f2329; --muted:#8a8f98;
+    --move:#3b82f6; --bank:#10b981; --invest:#7c5cff; --toss:#2f6bdf; --danger:#ef4444;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",sans-serif;
+    background:var(--bg); color:var(--text); display:flex; justify-content:center;
+    padding:22px 14px 60px; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{width:100%; max-width:460px;}
+  header{text-align:center; margin-bottom:14px;}
+  header h1{font-size:22px; letter-spacing:-0.5px;}
+  header p{color:var(--muted); font-size:12px; margin-top:3px;}
+
+  .tabs{display:flex; background:#e9ebee; border-radius:12px; padding:4px; gap:3px; margin-bottom:16px;}
+  .tab{flex:1; text-align:center; padding:9px 2px; font-size:12.5px; font-weight:600; color:var(--muted);
+       border-radius:9px; cursor:pointer; border:none; background:transparent; font-family:inherit; transition:.12s; white-space:nowrap;}
+  .tab.active{background:#fff; color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  .view{display:none;} .view.on{display:block;}
+
+  .inputcard{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:14px;}
+  .inputcard h2{font-size:12px; color:var(--muted); margin-bottom:8px; font-weight:600;}
+  .inputcard .big{width:100%; border:none; border-bottom:2px solid var(--line); font-size:26px; font-weight:800;
+                  text-align:right; padding:3px 2px; font-family:inherit; color:var(--text); letter-spacing:-0.5px;}
+  .inputcard .big:focus{outline:none; border-color:var(--text);}
+  .inputcard .unit{text-align:right; font-size:11px; color:var(--muted); margin-top:2px;}
+  .srow{display:flex; gap:8px; margin-bottom:8px; align-items:center;}
+  .srow .sname{width:100px; border:1px solid var(--line); border-radius:8px; padding:9px 10px; font-size:13px; font-family:inherit;}
+  .srow .samt{flex:1; border:none; border-bottom:2px solid var(--line); font-size:21px; font-weight:800; text-align:right; padding:3px 2px; font-family:inherit; color:var(--text); letter-spacing:-0.5px;}
+  .srow .samt:focus{outline:none; border-color:var(--text);}
+  .stotal{display:flex; justify-content:space-between; align-items:center; margin-top:4px; padding-top:11px; border-top:1px solid #f1f2f4; font-size:13px; color:var(--muted);}
+  .stotal b{font-size:21px; color:var(--text);}
+  .living{display:flex; justify-content:center; align-items:center; gap:5px; font-size:12px; color:var(--muted); margin:-6px 0 14px; flex-wrap:wrap;}
+  .living input{width:84px; border:none; border-bottom:1px dashed #cfd3d8; text-align:right; font-size:12.5px; font-weight:700; color:var(--text); font-family:inherit; background:transparent; padding:1px 2px;}
+  .living input:focus{outline:none; border-bottom-color:var(--text);}
+  .living .note{opacity:.7;}
+
+  .hero{border-radius:20px; padding:22px; margin-bottom:14px; box-shadow:0 6px 20px rgba(0,0,0,.12);}
+  .hero.yellow{background:linear-gradient(135deg,#ffd95a,#ffbe1a); color:#3a2c00; box-shadow:0 6px 20px rgba(240,165,0,.25);}
+  .hero.blue{background:linear-gradient(135deg,#4d8bf5,#2f6bdf); color:#fff; box-shadow:0 6px 20px rgba(47,107,223,.28);}
+  .hero .label{font-size:13px; font-weight:600; opacity:.9;}
+  .hero .amount{font-size:33px; font-weight:800; letter-spacing:-1px; margin:6px 0 8px;}
+  .hero .break{font-size:12px; opacity:.92; line-height:1.5;}
+  .hero .amount.neg{color:#ffd2d2;}
+
+  .calc{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:14px;}
+  .calc .ch{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px;}
+  .calc .ch .t{font-size:13px; color:var(--muted);}
+  .calc .ch .sum{font-size:16px; font-weight:800;}
+  .calc .row{display:flex; gap:6px; margin-bottom:8px;}
+  .calc input{border:1px solid var(--line); border-radius:8px; padding:9px 10px; font-size:13px; font-family:inherit;}
+  .calc input.memo{flex:1;} .calc input.amt{width:96px; text-align:right;}
+  .calc .add{border:none; background:var(--text); color:#fff; border-radius:8px; width:40px; font-size:18px; cursor:pointer;}
+  .cline{display:flex; align-items:center; gap:8px; padding:7px 2px; border-top:1px solid #f1f2f4; font-size:13px;}
+  .cline .m{flex:1; color:var(--text);} .cline .a{font-weight:700;}
+  .cline .x{border:none; background:transparent; color:var(--danger); cursor:pointer; opacity:.5; font-size:15px;}
+  .cline .x:hover{opacity:1;}
+
+  .stat{background:var(--card); border:1px solid var(--line); border-radius:13px; padding:13px 16px;
+        display:flex; justify-content:space-between; align-items:center; margin-bottom:9px;}
+  .stat .sl{font-size:13px; color:var(--muted);}
+  .stat .sv{font-size:15px; font-weight:700;}
+  .stat.hl{background:#eef4ff; border-color:#d6e4ff;}
+  .stat.hl .sl{color:var(--toss); font-weight:600;} .stat.hl .sv{color:var(--toss); font-size:18px;}
+
+  .ghead{display:flex; justify-content:space-between; align-items:baseline; padding:0 4px 10px;}
+  .gtitle{font-size:14px; font-weight:700;}
+  .gtitle.move{color:var(--move);} .gtitle.bank{color:var(--bank);} .gtitle.invest{color:var(--invest);}
+  .gsum{font-size:14px; font-weight:700;}
+  .item{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:8px 10px;
+        display:flex; align-items:center; gap:5px; margin-bottom:7px;}
+  .item input{border:1px solid transparent; background:transparent; border-radius:7px; padding:6px 7px;
+              font-family:inherit; font-size:14px; color:var(--text);}
+  .item input:hover{background:#f4f5f7;}
+  .item input:focus{outline:none; border-color:var(--line); background:#fff;}
+  .item .e-name{flex:1.2; font-weight:600; min-width:0;}
+  .item .e-memo{flex:0.8; font-size:12px; color:var(--muted); min-width:0;}
+  .item .daywrap{display:flex; align-items:center; gap:0; flex:0 0 auto;}
+  .item .e-day{width:26px; text-align:right; font-size:13px; font-weight:600; color:var(--muted); padding:6px 2px;}
+  .item .dl{font-size:11px; color:var(--muted); padding-right:2px;}
+  .item .e-amt{width:90px; text-align:right; font-weight:700;}
+  .item .del{border:none; background:transparent; color:var(--danger); cursor:pointer; font-size:18px; line-height:1; padding:2px 4px; opacity:.45;}
+  .item .del:hover{opacity:1;}
+  .empty{color:var(--muted); font-size:12px; text-align:center; padding:14px;}
+
+  .form{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:15px; margin-top:14px;}
+  .form h2{font-size:12px; color:var(--muted); margin-bottom:10px; font-weight:600;}
+  .frow{display:flex; gap:8px; margin-bottom:8px;}
+  .form input{border:1px solid var(--line); border-radius:9px; padding:10px 11px; font-size:14px; font-family:inherit; background:#fff;}
+  .form input.name{flex:1;} .form input.memo{flex:1;} .form input.amount{width:112px; text-align:right;}
+  .addbtn{width:100%; border:none; background:var(--text); color:#fff; border-radius:10px; padding:11px; font-size:15px; font-weight:600; cursor:pointer; margin-top:2px; font-family:inherit;}
+  .addbtn:active{transform:scale(.99);}
+  footer{text-align:center; color:var(--muted); font-size:11px; margin-top:22px; line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><h1>🪙 1초 가계부</h1><p>월급날 통장 정리, 1초 만에</p></header>
+
+  <div class="living">🍚 평소 생활비 <input id="living" type="text" inputmode="numeric" oninput="commaFmt(this)" />원 <span class="note">· 평소 쓰는 금액을 적어요</span></div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="summary" onclick="showTab('summary')">📊 요약</button>
+    <button class="tab" data-tab="bank" onclick="showTab('bank')">🏦 우리</button>
+    <button class="tab" data-tab="move" onclick="showTab('move')">→ 케이</button>
+    <button class="tab" data-tab="invest" onclick="showTab('invest')">💰 투자</button>
+  </div>
+
+  <!-- 📊 요약 -->
+  <div class="view on" id="view-summary">
+    <div class="inputcard">
+      <h2>💰 이번 달 월급 (2곳)</h2>
+      <div class="srow">
+        <input class="sname" id="salName1" placeholder="직장 ①" />
+        <input class="samt" type="text" inputmode="numeric" id="sal1" oninput="commaFmt(this)" placeholder="0" />
+      </div>
+      <div class="srow">
+        <input class="sname" id="salName2" placeholder="직장 ②" />
+        <input class="samt" type="text" inputmode="numeric" id="sal2" oninput="commaFmt(this)" placeholder="0" />
+      </div>
+      <div class="stotal"><span>총 월급</span><b id="salTotal">0원</b></div>
+    </div>
+
+    <div class="hero yellow">
+      <div class="label">→ 케이뱅크로 옮겨야 할 돈</div>
+      <div class="amount" id="moveAmount">0원</div>
+      <div class="break" id="moveBreak"></div>
+    </div>
+
+    <div class="calc">
+      <div class="ch"><span class="t">전달 더 쓴 금액 (계산기)</span><span class="sum" id="surplusSum">0원</span></div>
+      <div class="row">
+        <input class="memo" id="spMemo" placeholder="내역 (선택 · 예: 4월말 추가지출)" />
+        <input class="amt" id="spAmt" type="text" inputmode="numeric" oninput="commaFmt(this)" placeholder="금액" />
+        <button class="add" onclick="addSurplus()">＋</button>
+      </div>
+      <div id="surplusList"></div>
+    </div>
+
+    <div class="stat"><span class="sl">🏦 우리은행 직접 인출</span><span class="sv" id="s_bank">0원</span></div>
+    <div class="stat"><span class="sl">→ 케이뱅크로 옮길 돈</span><span class="sv" id="s_move">0원</span></div>
+    <div class="stat"><span class="sl">💰 투자</span><span class="sv" id="s_invest">0원</span></div>
+    <div class="stat"><span class="sl">🍚 생활비</span><span class="sv" id="s_living">0원</span></div>
+    <div class="stat hl"><span class="sl">🟦 남는 돈 → 토스뱅크 (투자잉여)</span><span class="sv" id="s_left">0원</span></div>
+  </div>
+
+  <!-- 🏦 우리은행 -->
+  <div class="view" id="view-bank">
+    <div class="ghead"><span class="gtitle bank">🏦 우리은행 직접 인출</span><span class="gsum" id="bankSum">0원</span></div>
+    <div id="bankList"></div>
+    <div class="form">
+      <h2>＋ 우리은행 항목 추가</h2>
+      <div class="frow"><input class="name" id="bName" placeholder="이름 (예: 핸드폰)" /><input class="amount" id="bAmt" type="text" inputmode="numeric" oninput="commaFmt(this)" placeholder="금액" /></div>
+      <div class="frow"><input class="memo" id="bMemo" placeholder="메모 (선택)" /></div>
+      <button class="addbtn" onclick="addItem('bank')">추가하기</button>
+    </div>
+  </div>
+
+  <!-- → 케이뱅크 -->
+  <div class="view" id="view-move">
+    <div class="ghead"><span class="gtitle move">→ 케이뱅크로 옮길 항목</span><span class="gsum" id="moveSum">0원</span></div>
+    <div id="moveList"></div>
+    <div class="form">
+      <h2>＋ 케이뱅크 항목 추가</h2>
+      <div class="frow"><input class="name" id="mName" placeholder="이름 (예: 넷플릭스)" /><input class="amount" id="mAmt" type="text" inputmode="numeric" oninput="commaFmt(this)" placeholder="금액" /></div>
+      <div class="frow"><input class="memo" id="mMemo" placeholder="메모 (선택 · 예: 구글페이먼트)" /></div>
+      <button class="addbtn" onclick="addItem('move')">추가하기</button>
+    </div>
+  </div>
+
+  <!-- 💰 투자 -->
+  <div class="view" id="view-invest">
+    <div class="hero blue">
+      <div class="label">→ 토스뱅크로 옮길 투자잉여금</div>
+      <div class="amount" id="leftAmount">0원</div>
+      <div class="break" id="leftBreak"></div>
+    </div>
+    <div class="ghead"><span class="gtitle invest">💰 투자 항목</span><span class="gsum" id="investSum">0원</span></div>
+    <div id="investList"></div>
+    <div class="form">
+      <h2>＋ 투자 항목 추가</h2>
+      <div class="frow"><input class="name" id="iName" placeholder="이름 (예: 증권사)" /><input class="amount" id="iAmt" type="text" inputmode="numeric" oninput="commaFmt(this)" placeholder="금액" /></div>
+      <div class="frow"><input class="memo" id="iMemo" placeholder="메모 (선택 · 예: 연금/IRP)" /></div>
+      <button class="addbtn" onclick="addItem('invest')">추가하기</button>
+    </div>
+  </div>
+
+  <footer>1초 가계부 · 내 데이터는 이 컴퓨터에만 저장돼요 (localStorage)<br>made for 스폰지클럽 2기 · 골프청년</footer>
+</div>
+
+<script>
+  const won = n => Math.round(n||0).toLocaleString('ko-KR') + '원';
+  const num = v => Number(String(v).replace(/[^\d]/g,'')) || 0;     // 쉼표 등 제거 후 숫자
+  const $ = id => document.getElementById(id);
+  function commaFmt(el){ const v=String(el.value).replace(/[^\d]/g,''); el.value = v? Number(v).toLocaleString('ko-KR'):''; }
+
+  const SEED = [];        // 빈 템플릿 — 항목은 사용자가 직접 추가
+  const INVEST_SEED = [];  // 빈 템플릿
+
+  let items = JSON.parse(localStorage.getItem('ilcho_items') || 'null');
+  if(items === null){ items = SEED.slice(); }
+  if(!localStorage.getItem('ilcho_invest_seeded')){ items = items.concat(INVEST_SEED); localStorage.setItem('ilcho_invest_seeded','1'); }
+  localStorage.setItem('ilcho_items', JSON.stringify(items));   // 시드·마이그레이션 즉시 반영
+  let surplusItems = JSON.parse(localStorage.getItem('ilcho_surplusItems') || '[]');
+  let sal1 = Number(localStorage.getItem('ilcho_sal1') || 0);
+  let sal2 = Number(localStorage.getItem('ilcho_sal2') || 0);
+  let salName1 = localStorage.getItem('ilcho_salName1') || '';
+  let salName2 = localStorage.getItem('ilcho_salName2') || '';
+  let living = Number(localStorage.getItem('ilcho_living') || 0);
+  $('living').value = living.toLocaleString('ko-KR');
+  $('living').addEventListener('input', e=>{ living=num(e.target.value); localStorage.setItem('ilcho_living', String(living)); updateTotals(); });
+  $('sal1').value = sal1 ? sal1.toLocaleString('ko-KR') : '';
+  $('sal2').value = sal2 ? sal2.toLocaleString('ko-KR') : '';
+  $('salName1').value = salName1;
+  $('salName2').value = salName2;
+
+  function save(){
+    localStorage.setItem('ilcho_items', JSON.stringify(items));
+    localStorage.setItem('ilcho_surplusItems', JSON.stringify(surplusItems));
+    localStorage.setItem('ilcho_sal1', String(sal1));
+    localStorage.setItem('ilcho_sal2', String(sal2));
+    localStorage.setItem('ilcho_salName1', salName1);
+    localStorage.setItem('ilcho_salName2', salName2);
+  }
+  function showTab(name){
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+    $('view-'+name).classList.add('on');
+    document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
+  }
+
+  function addItem(type){
+    const p = type==='bank'?'b':type==='move'?'m':'i';
+    const name=$(p+'Name').value.trim(), amt=num($(p+'Amt').value), memo=$(p+'Memo').value.trim();
+    if(!name){ alert('이름을 입력해 주세요'); return; }
+    if(!amt){ alert('금액을 입력해 주세요'); return; }
+    items.push({id:Date.now(), type, name, memo, amt});
+    $(p+'Name').value=''; $(p+'Amt').value=''; $(p+'Memo').value='';
+    save(); render(); $(p+'Name').focus();
+  }
+  function editItem(id, field, val){
+    const it = items.find(x=>x.id===id); if(!it) return;
+    if(field==='amt') it.amt = num(val);
+    else if(field==='day') it.day = num(val) || null;
+    else it[field] = val;
+    save(); updateTotals();
+  }
+  function delItem(id){ items=items.filter(x=>x.id!==id); save(); render(); }
+
+  function addSurplus(){
+    const memo=$('spMemo').value.trim(), amt=num($('spAmt').value);
+    if(!amt){ alert('금액을 입력해 주세요'); return; }
+    surplusItems.push({id:Date.now(), memo, amt});
+    $('spMemo').value=''; $('spAmt').value='';
+    save(); renderSurplus(); updateTotals(); $('spMemo').focus();
+  }
+  function delSurplus(id){ surplusItems=surplusItems.filter(x=>x.id!==id); save(); renderSurplus(); updateTotals(); }
+
+  $('sal1').addEventListener('input', e=>{ sal1=num(e.target.value); save(); updateTotals(); });
+  $('sal2').addEventListener('input', e=>{ sal2=num(e.target.value); save(); updateTotals(); });
+  $('salName1').addEventListener('input', e=>{ salName1=e.target.value; save(); });
+  $('salName2').addEventListener('input', e=>{ salName2=e.target.value; save(); });
+  [['bName','bAmt','bMemo','bank'],['mName','mAmt','mMemo','move'],['iName','iAmt','iMemo','invest']].forEach(g=>
+    g.slice(0,3).forEach(id=>$(id).addEventListener('keydown',e=>{ if(e.key==='Enter') addItem(g[3]); })));
+  ['spMemo','spAmt'].forEach(id=>$(id).addEventListener('keydown',e=>{ if(e.key==='Enter') addSurplus(); }));
+
+  function esc(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function itemHTML(it){
+    return `<div class="item">
+      <input class="e-name" value="${esc(it.name)}" onchange="editItem(${it.id},'name',this.value)" />
+      <input class="e-memo" value="${esc(it.memo)}" placeholder="메모" onchange="editItem(${it.id},'memo',this.value)" />
+      <span class="daywrap"><input class="e-day" type="text" inputmode="numeric" value="${it.day||''}" placeholder="-" onchange="editItem(${it.id},'day',this.value)" /><span class="dl">일</span></span>
+      <input class="e-amt" type="text" inputmode="numeric" value="${it.amt.toLocaleString('ko-KR')}" oninput="commaFmt(this)" onchange="editItem(${it.id},'amt',this.value)" />
+      <button class="del" onclick="delItem(${it.id})" title="삭제">×</button></div>`;
+  }
+  function renderSurplus(){
+    $('surplusList').innerHTML = surplusItems.map(s=>`<div class="cline">
+      <span class="m">${esc(s.memo)||'추가지출'}</span><span class="a">${won(s.amt)}</span>
+      <button class="x" onclick="delSurplus(${s.id})">×</button></div>`).join('');
+  }
+  function totals(){
+    const f=t=>items.filter(x=>x.type===t).reduce((s,x)=>s+x.amt,0);
+    const bank=f('bank'), move=f('move'), invest=f('invest');
+    const surplus=surplusItems.reduce((s,x)=>s+x.amt,0);
+    const salary=sal1+sal2;
+    const toMove=move+surplus, left=salary-invest-toMove-bank-living;
+    return {bank,move,invest,surplus,toMove,left,salary};
+  }
+  function updateTotals(){
+    const t=totals();
+    $('moveAmount').textContent=won(t.toMove);
+    $('moveBreak').innerHTML=`구독 ${won(t.move)}${t.surplus?` ＋ 전달 초과분 ${won(t.surplus)}`:''}`;
+    $('surplusSum').textContent=won(t.surplus);
+    $('s_bank').textContent=won(t.bank); $('s_move').textContent=won(t.toMove);
+    $('s_invest').textContent=won(t.invest); $('s_living').textContent=won(living); $('s_left').textContent=won(t.left);
+    $('bankSum').textContent=won(t.bank); $('moveSum').textContent=won(t.move); $('investSum').textContent=won(t.invest);
+    $('salTotal').textContent=won(t.salary);
+    const la=$('leftAmount'); la.textContent=won(t.left); la.classList.toggle('neg', t.left<0);
+    $('leftBreak').innerHTML = t.salary
+      ? `월급 ${won(t.salary)} − 투자 ${won(t.invest)} − 케이뱅크 ${won(t.toMove)} − 우리은행 ${won(t.bank)} − 생활비 ${won(living)}`
+      : `요약 탭에서 '이번 달 월급'을 입력하면 계산돼요`;
+  }
+  function listFor(type, el, emptyMsg){
+    const arr=items.filter(x=>x.type===type);
+    $(el).innerHTML = arr.length? arr.map(itemHTML).join('') : `<div class="empty">${emptyMsg}</div>`;
+  }
+  function render(){
+    listFor('bank','bankList','우리은행에서 바로 빠지는 항목');
+    listFor('move','moveList','케이뱅크로 옮겨야 할 항목');
+    listFor('invest','investList','투자 항목을 추가해 보세요');
+    renderSurplus(); updateTotals();
+  }
+  render();
+</script>
+</body>
+</html>
