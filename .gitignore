@@ -8,3 +8,6 @@
 # Claude Code 로컬 설정 (skills 폴더만 추적, 나머지는 무시)
 .claude/*
 !.claude/skills/
+
+# OMC 내부 상태 (세션/로그) — repo에 안 올림
+.omc/
