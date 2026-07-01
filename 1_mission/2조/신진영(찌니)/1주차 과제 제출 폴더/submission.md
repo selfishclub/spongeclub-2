@@ -5,7 +5,7 @@ week: 1
 type: weekly
 title: 
 summary: 
-date: 
+date: 2026-07-01
 ---
 
 ## 결과물
