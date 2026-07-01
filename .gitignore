@@ -8,3 +8,6 @@
 # Claude Code 로컬 설정 (skills 폴더만 추적, 나머지는 무시)
 .claude/*
 !.claude/skills/
+
+# 개인 노트 폴더(로컬 전용) — 서버로 푸시하지 않기 위해 무시
+1_mission/5조/최강훈/notes/
