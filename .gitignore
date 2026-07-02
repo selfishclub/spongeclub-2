@@ -5,8 +5,6 @@
 .vscode/
 .idea/
 
-# Claude Code 로컬 설정
-.claude/
-
-# omc 관련 파일 제외
-.omc/
+# Claude Code 로컬 설정 (skills 폴더만 추적, 나머지는 무시)
+.claude/*
+!.claude/skills/
