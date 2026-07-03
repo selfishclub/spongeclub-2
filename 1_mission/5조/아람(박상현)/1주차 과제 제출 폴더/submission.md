@@ -76,6 +76,8 @@ date: 2026-07-03
 마지막으로 셀피쉬 크루와 저와 함께 어려움을 겪고 있는 스펀지 2기 크루들, 그리고 1기 멤버들에게 깊은 감사를 느낍니다.
 
 - **인증 링크:**
+  - Instagram → https://www.instagram.com/p/DaUlMPLGuhl/
+  - Naver Blog → https://blog.naver.com/ianlove80/224335422408
 
 ---
 
