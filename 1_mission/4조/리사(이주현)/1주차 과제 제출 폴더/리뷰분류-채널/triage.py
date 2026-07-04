@@ -124,10 +124,12 @@ def load_rows(path):
         except (TypeError, ValueError):
             helpful = 0
         ff = (g("풀필먼트사") or "").strip()
+        photo_raw = (g("포토/영상") or "").strip()
+        photo_urls = [u for u in re.split(r"\s+", photo_raw) if u.startswith("http")]
         out.append({
             "주문번호": g("상품주문번호"), "등록자": g("등록자"), "리뷰번호": g("리뷰글번호"),
             "상품명": g("상품명"), "평점": score, "내용": text,
-            "포토영상": bool((g("포토/영상") or "").strip()),
+            "포토영상": bool(photo_raw), "포토URL": photo_urls,
             "도움수": helpful, "답글여부": g("답글여부"),
             "배송": "대한통운(풀필먼트)" if ff else "자체공장(도착보장)",
             "등록일": g("리뷰등록일"),
