@@ -10,3 +10,7 @@
 
 # 개인 노트 폴더(로컬 전용) — 서버로 푸시하지 않기 위해 무시
 1_mission/5조/최강훈/notes/
+
+# API 키·시크릿
+.env
+node_modules/
