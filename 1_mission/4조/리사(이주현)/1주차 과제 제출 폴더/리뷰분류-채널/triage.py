@@ -38,6 +38,30 @@ REASON_MAP = {
     "기타불만": ["최악", "별로", "별루", "실망", "돈 아까", "돈아까", "다신 안", "다시는 안",
               "두 번 다시", "두번다시", "짜증", "화가", "화나", "사기", "속았", "엉망", "형편없"],
 }
+# 체험단·협찬 리뷰 → 진짜 고객 반응이 아니므로 분류에서 제외
+# (아래 강한 단어가 하나라도 있으면 단독으로 제외. 공백은 무시하고 비교)
+SPONSORED_STRONG = [
+    "체험단", "협찬", "원고료", "무상지원", "무상제공", "무상으로지원", "무상으로제공",
+    "무료제공", "무료로제공", "제공받아작성", "제공받아작성되", "제품을제공받아",
+    "대가를받", "대가로작성", "소정의",
+]
+# 문구 변형이 다양해서, 아래 세 묶음이 한 문장에 함께 나오면 체험단성으로 판정
+SPONSORED_ANY_A = ["업체"]                       # 제공 주체
+SPONSORED_ANY_B = ["제공", "지원", "무상", "협찬", "무료"]   # 혜택
+SPONSORED_ANY_C = ["작성", "후기", "제품"]         # 리뷰 고지 문구
+
+def _nospace(s):
+    return re.sub(r"\s+", "", str(s or ""))
+
+def is_sponsored(row):
+    t = _nospace(row["내용"])
+    if any(_nospace(k) in t for k in SPONSORED_STRONG):
+        return True
+    if (any(k in t for k in SPONSORED_ANY_A)
+            and any(k in t for k in SPONSORED_ANY_B)
+            and any(k in t for k in SPONSORED_ANY_C)):
+        return True
+    return False
 
 def load_rows(path):
     z = zipfile.ZipFile(path)
@@ -160,6 +184,20 @@ def summarize(text, n=40):
 def esc(x):
     return str(x if x is not None else "").replace("|", "\\|")
 
+MASK = False
+
+def mask_name(x):
+    s = str(x or "")
+    if not MASK or len(s) <= 1:
+        return s
+    return s[0] + "*" * (len(s) - 1)
+
+def mask_id(x):
+    s = str(x or "")
+    if not MASK or len(s) <= 4:
+        return s
+    return s[:4] + "*" * (len(s) - 4)
+
 def reason_of(text):
     for reason, kws in REASON_MAP.items():
         if any(k in text for k in kws):
@@ -180,14 +218,14 @@ def daily_report(rows, top):
     L.append("|---|---|---|---|---|---|---|---|")
     for r in neg:
         L.append("| {} | {} | {} | {} | {} | {} | {} | {} |".format(
-            esc(r["주문번호"]), esc(r["등록자"]), esc(r["리뷰번호"]), esc(summarize(r["상품명"], 20)),
+            esc(mask_id(r["주문번호"])), esc(mask_name(r["등록자"])), esc(r["리뷰번호"]), esc(summarize(r["상품명"], 20)),
             esc(r["평점"]), esc(r["배송"]), reason_of(r["내용"]), esc(summarize(r["내용"]))))
     L.append(f"\n## 🟢 칭찬 대상 (상 드릴 분) — 상위 {len(praise)}명\n")
     L.append("| 상품주문번호 | 등록자 | 리뷰글번호 | 상품명 | 평점 | 배송 | 포토 | 도움수 | 리뷰 요약 |")
     L.append("|---|---|---|---|---|---|---|---|---|")
     for r in praise:
         L.append("| {} | {} | {} | {} | {} | {} | {} | {} | {} |".format(
-            esc(r["주문번호"]), esc(r["등록자"]), esc(r["리뷰번호"]), esc(summarize(r["상품명"], 20)),
+            esc(mask_id(r["주문번호"])), esc(mask_name(r["등록자"])), esc(r["리뷰번호"]), esc(summarize(r["상품명"], 20)),
             esc(r["평점"]), esc(r["배송"]), "📷" if r["포토영상"] else "", esc(r["도움수"]),
             esc(summarize(r["내용"]))))
     return "\n".join(L)
@@ -224,9 +262,16 @@ def main():
     ap.add_argument("--mode", choices=["daily", "monthly"], default="daily")
     ap.add_argument("--out")
     ap.add_argument("--top", type=int, default=20)
+    ap.add_argument("--mask", action="store_true", help="이름·주문번호를 가려서 출력 (공개·스크린샷용)")
     a = ap.parse_args()
-    rows = load_rows(a.xlsx)
-    report = daily_report(rows, a.top) if a.mode == "daily" else monthly_report(rows)
+    global MASK
+    MASK = a.mask
+    all_rows = load_rows(a.xlsx)
+    rows = [r for r in all_rows if not is_sponsored(r)]
+    excluded = len(all_rows) - len(rows)
+    note = f"> ℹ️ 체험단·협찬 리뷰 {excluded}건 제외 후 분석 (전체 {len(all_rows)}건 → 실고객 {len(rows)}건)\n\n"
+    body = daily_report(rows, a.top) if a.mode == "daily" else monthly_report(rows)
+    report = note + body
     if a.out:
         with open(a.out, "w", encoding="utf-8") as f:
             f.write(report)
