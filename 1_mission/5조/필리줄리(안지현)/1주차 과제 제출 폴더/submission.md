@@ -57,6 +57,8 @@ Chrome 확장 프로그램 **Fullscreen Clock & Timer** (`fullscreen-clock-exten
 
 설치: `chrome://extensions` → 개발자 모드 ON → 압축해제된 확장 프로그램 로드 → 폴더 선택
 
+![새 탭 시계 확장 화면](이미지첨부/clock-extension.png)
+
 **② AI 전화 에이전트 — 커미션 스플릿 확인 콜 (1단계 코드까지 만들고 중단)**
 
 미션 1·2에서 나온 "전화 대행 OS"의 1단계 코드는 만들어뒀다 (`ai-call-agent/` 폴더, Vapi 연동).
@@ -76,6 +78,8 @@ Chrome 확장 프로그램 **Fullscreen Clock & Timer** (`fullscreen-clock-exten
 - 공개 발행·발송·삭제·결제처럼 되돌리기 어려운 작업은 **승인 전 자동으로 멈추는 안전장치** 포함
 - `00_inbox → 10_raw → 20_wiki → 30_reviews → 40_publish → 50_trace`로 이어지는 폴더 구조 위에서 돌아감
 
+![Julie Agent OS 화면](이미지첨부/julie-agent-os.png)
+
 전화 에이전트는 "완성해야 하는 큰 프로젝트 하나"였다면, 이 OS는 "이미 있는 작은 자동화들을 잃어버리지 않게 모아 놓은 것"에 가깝다 — 그래서 부담 없이 끝까지 완성할 수 있었다.
 
 **결과물 / 링크:**
@@ -86,6 +90,8 @@ Chrome 확장 프로그램 **Fullscreen Clock & Timer** (`fullscreen-clock-exten
 ## 📱 미션 4. SNS 1주차 소감
 > AI 도움 없이 직접 작성! (인증하면 셀 지급)
 - **인증 링크:** _(직접 SNS에 작성 후 링크 추가 예정)_
+https://www.instagram.com/p/DaZn3h0joOJ/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==
+
 
 ## 삽질 과정
 > 1주차 전체를 돌아보며
