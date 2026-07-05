@@ -29,4 +29,4 @@ date: 2026-07-05
 
 ## 📱 미션 4. SNS 1주차 소감
 > AI 도움 없이 직접 작성! (인증하면 셀 지급)
-- **인증 링크:**
+- **인증 링크:** https://www.instagram.com/p/DaZsZNJDxMo/?img_index=1&igsh=MTZ6eDA0dDMzMG00bw==
