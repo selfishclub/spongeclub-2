@@ -20,7 +20,7 @@
 ```bash
 pip install -r requirements.txt
 python3 -m pytest -q        # 76 tests
-python3 build_wiki.py       # 동봉된 sample-knowledge/로 그래프 생성
+python3 build_wiki.py       # 동봉된 knowledge/(실지식 비식별화본)로 그래프 생성
 open wiki.html
 ```
 
@@ -55,7 +55,7 @@ python3 -m wiki.plaud_ingest          # 수동 적층 실행
 | `fetch_plaud.sh` | 헤드리스 claude로 Plaud MCP에서 요약 JSON |
 | `wiki/plaud_*.py` | 파싱 → 노드 변환 → 자동 링크 → 적층 → 액션 추출 |
 | `wiki/` 나머지 | 수집·파싱·링크해석·그래프·렌더·검색·분류 |
-| `sample-knowledge/` | 바로 실행해볼 수 있는 가상 지식 샘플 |
+| `knowledge/` | 실제 지식베이스 비식별화본 (거래처·개인정보 가명/마스킹, 고위험 문서 제외) |
 | `tests/` | 76 tests (LLM·텔레그램·API 전부 목킹) |
 
-> 실데이터(내 지식·녹음·위키HTML)는 개인정보라 제외했고, 가상 샘플로 대체했다.
+> `knowledge/`는 실제로 쌓아온 지식베이스다. 거래처·인명은 가명(A의원·G엔터·멘토K…), 금액은 변수(n만원)로 비식별화했고, 재무·파이프라인·멘토세션 등 고위험 문서와 녹음 원본은 제외했다.
