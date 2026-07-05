@@ -3,7 +3,7 @@ member: 이보미
 조: 2
 week: 1
 type: weekly
-title: 착착착
+title: 일정 처리 보조 OS
 date: 2026-07-05
 ---
 
