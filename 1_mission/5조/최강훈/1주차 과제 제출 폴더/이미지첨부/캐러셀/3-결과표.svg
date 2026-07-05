@@ -1,0 +1,39 @@
+<svg viewBox="0 0 1080 1350" width="1080" height="1350" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="정리함 OS 정리 결과">
+<style>
+  .kr{font-family:'Malgun Gothic','Pretendard','Apple SD Gothic Neo',sans-serif;}
+  .ink{fill:#262019;} .muted{fill:#8B8173;} .deep{fill:#B4562A;} .white{fill:#FFFFFF;}
+</style>
+  <rect x="0" y="0" width="1080" height="1350" fill="#F5F1E8"/>
+  <rect x="60" y="96" width="240" height="52" rx="26" fill="#F7E3D8"/>
+  <text x="180" y="131" class="kr deep" font-size="25" font-weight="700" text-anchor="middle">③ 정리 결과</text>
+  <text x="60" y="222" class="kr ink" font-size="58" font-weight="800">필기 4장 → 17건</text>
+  <text x="60" y="278" class="kr muted" font-size="30" font-weight="500">손으로 쓴 노트가 카테고리별로 자동 정리</text>
+
+  <rect x="60" y="322" width="960" height="150" rx="24" fill="#D9713E"/>
+  <text x="540" y="392" class="kr white" font-size="46" font-weight="800" text-anchor="middle">17건 자동 분류</text>
+  <text x="540" y="440" class="kr white" font-size="28" font-weight="600" text-anchor="middle" opacity="0.92">할 일 5 · 아이디어 5 · 참고자료 7</text>
+
+  <text x="60" y="548" class="kr deep" font-size="26" font-weight="700">이렇게 정리됐어요 · 예시</text>
+  <rect x="60" y="576" width="960" height="404" rx="24" fill="#FFFFFF" stroke="#E7DFD0" stroke-width="2"/>
+
+  <!-- row 1 -->
+  <rect x="96" y="622" width="168" height="56" rx="16" fill="#F7E3D8"/>
+  <text x="180" y="659" class="kr" fill="#A9481F" font-size="25" font-weight="700" text-anchor="middle">할 일</text>
+  <text x="300" y="659" class="kr ink" font-size="31" font-weight="600">Skill 10개 써보기</text>
+  <text x="984" y="659" class="kr muted" font-size="25" text-anchor="end">골라서 실습</text>
+  <line x1="96" y1="712" x2="984" y2="712" stroke="#EEE7D9" stroke-width="2"/>
+  <!-- row 2 -->
+  <rect x="96" y="742" width="168" height="56" rx="16" fill="#F7EBCF"/>
+  <text x="180" y="779" class="kr" fill="#9A6E12" font-size="25" font-weight="700" text-anchor="middle">아이디어</text>
+  <text x="300" y="779" class="kr ink" font-size="31" font-weight="600">텔레그램 봇 연결</text>
+  <text x="984" y="779" class="kr muted" font-size="25" text-anchor="end">폰에서 클로드</text>
+  <line x1="96" y1="832" x2="984" y2="832" stroke="#EEE7D9" stroke-width="2"/>
+  <!-- row 3 -->
+  <rect x="96" y="862" width="168" height="56" rx="16" fill="#DCEAE5"/>
+  <text x="180" y="899" class="kr" fill="#2F6357" font-size="25" font-weight="700" text-anchor="middle">참고자료</text>
+  <text x="300" y="899" class="kr ink" font-size="31" font-weight="600">프롬프트 방법론</text>
+  <text x="984" y="899" class="kr muted" font-size="25" text-anchor="end">보관</text>
+
+  <text x="540" y="1080" class="kr ink" font-size="32" font-weight="700" text-anchor="middle">넣기만 하던 메모가, 드디어 꺼내졌다.</text>
+  <text x="540" y="1250" class="kr muted" font-size="26" font-weight="700" text-anchor="middle">3 / 3</text>
+</svg>
