@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>피드백 정리 OS — 미션 3 결과 화면</title>
+<style>
+  :root{
+    --bg:#faf9f5; --card:#fff; --sub:#f1efe8;
+    --tx:#2c2c2a; --tx2:#5f5e5a; --tx3:#888780; --bd:#e5e3da;
+    --accent:#185fa5; --accent-bg:#e6f1fb;
+    --ok:#3b6d11; --ok-bg:#eaf3de;
+    --no:#a32d2d; --no-bg:#fcebeb;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);font-family:var(--sans);color:var(--tx);
+       display:flex;justify-content:center;padding:32px 16px;line-height:1.5}
+  .wrap{width:100%;max-width:720px;background:var(--sub);border-radius:12px;padding:20px}
+  .head{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+  .title{font-size:18px;font-weight:500}
+  .tag{font-size:12px;color:var(--accent);background:var(--accent-bg);padding:2px 10px;border-radius:999px}
+  .sub{font-size:13px;color:var(--tx3);margin:0 0 16px}
+  .box{background:var(--card);border:.5px solid var(--bd);border-radius:8px;padding:12px 14px;margin-bottom:20px}
+  .box .lbl{font-size:12px;color:var(--tx2);margin-bottom:6px}
+  .box .raw{font-size:12px;color:var(--tx3);font-family:var(--mono);line-height:1.7}
+  .stage{font-size:13px;font-weight:500;margin-bottom:8px;color:var(--tx2)}
+  table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed;margin-bottom:22px}
+  th{text-align:left;color:var(--tx2);font-weight:500;padding:6px 4px}
+  td{padding:7px 4px;border-top:.5px solid var(--bd);vertical-align:top}
+  .pill{padding:1px 8px;border-radius:999px;white-space:nowrap}
+  .p-ok{color:var(--ok);background:var(--ok-bg)}
+  .p-no{color:var(--no);background:var(--no-bg)}
+  .p-rev{color:var(--accent);background:var(--accent-bg)}
+  .m{color:var(--tx3)} .s{color:var(--tx2)}
+  .card2{border-left:3px solid;padding:10px 14px;margin-bottom:10px}
+  .card2 .h{font-size:12px;font-weight:500;margin-bottom:4px}
+  .card2 .d{font-size:12px;line-height:1.7}
+  .c-ok{border-color:var(--ok);background:var(--ok-bg)} .c-ok .h,.c-ok .d{color:var(--ok)}
+  .c-no{border-color:var(--no);background:var(--no-bg)} .c-no .h,.c-no .d{color:var(--no)}
+  .c-rev{border-color:var(--accent);background:var(--accent-bg)} .c-rev .h,.c-rev .d{color:var(--accent)}
+  .summary{border-top:.5px solid var(--bd);padding-top:12px;font-size:12px;color:var(--tx2);line-height:1.7}
+  .summary b{color:var(--tx);font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <span class="title">피드백 정리 OS</span>
+    <span class="tag">2단계 구현</span>
+  </div>
+  <p class="sub">설득에 쓰던 시간을, 디자인에 쓴다 · 회원가입 화면 개편</p>
+
+  <div class="box">
+    <div class="lbl">입력 — 결 안 맞는 피드백 7개 통째로 붙여넣기</div>
+    <div class="raw">(임원) 화려한 메인 배너 크게 · (현업) 가입 단계 너무 많다 · (데이터) 인증 이탈률 42% · (UX방향) 첫화면 CTA 하나 · (임원) 보라색 변경 · (CS) 비번 규칙 안내 없음 · (데이터) 카카오 로그인 70%</div>
+  </div>
+
+  <div class="stage">1단계 · 자동 분류표</div>
+  <table>
+    <thead><tr>
+      <th style="width:38%">피드백</th><th style="width:22%">분류</th><th style="width:20%">데이터 근거</th><th style="width:20%">처리</th>
+    </tr></thead>
+    <tbody>
+      <tr><td>배너 크게</td><td class="s">취향/트렌드</td><td class="m">없음</td><td><span class="pill p-no">기각</span></td></tr>
+      <tr><td>가입 단계 너무 많다</td><td class="s">사용성</td><td style="color:var(--ok)">있음 · 42%</td><td><span class="pill p-ok">반영</span></td></tr>
+      <tr><td>인증 이탈률 42%</td><td class="s">우선순위</td><td style="color:var(--ok)">있음</td><td><span class="pill p-ok">반영</span></td></tr>
+      <tr><td>첫 화면 CTA 하나</td><td class="s">단순성</td><td class="m">간접</td><td><span class="pill p-ok">반영</span></td></tr>
+      <tr><td>보라색 변경</td><td class="s">판단필요</td><td class="m">없음</td><td><span class="pill p-rev">별도검토</span></td></tr>
+      <tr><td>비번 규칙 안내</td><td class="s">사용성</td><td class="m">간접</td><td><span class="pill p-ok">반영</span></td></tr>
+      <tr><td>카카오 로그인 70%</td><td class="s">우선순위</td><td style="color:var(--ok)">있음</td><td><span class="pill p-ok">반영</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="stage">2단계 · 피드백 처리 결정서</div>
+
+  <div class="card2 c-ok">
+    <div class="h">✓ 반영 4건</div>
+    <div class="d">가입 단계 축소 · 인증 개선 · 카카오 우선 배치 · 비번 안내 추가 — 근거: 이탈률 42%, 카카오 70% 데이터가 직접 뒷받침</div>
+  </div>
+  <div class="card2 c-no">
+    <div class="h">✕ 기각 1건 — 화려한 배너</div>
+    <div class="d">데이터 근거 없는 트렌드 선호. 인증 이탈 42% 상황에서 시선 분산은 이탈을 가중 → 개편 목표와 충돌</div>
+  </div>
+  <div class="card2 c-rev">
+    <div class="h">🔎 별도검토 1건 — 보라색 변경</div>
+    <div class="d">브랜드 아이덴티티 의사결정 영역. UX 범위 밖 → 브랜드/마케팅 팀과 별도 안건</div>
+  </div>
+
+  <div class="summary">
+    <b>요약</b> — 데이터가 가리키는 이탈 지점(42%)과 다수 경로(카카오 70%)에 집중, 근거 없는 시각 요소는 흐름 밖으로 분리
+  </div>
+</div>
+</body>
+</html>
