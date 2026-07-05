@@ -31,9 +31,9 @@ date:
 > 실제로 만들어본 것 (클로드코드 '채널' 기능 활용 OK)
 - **결과물:** `~/.claude/skills/trend-research.md` — AI 활용 트렌드를 세 축으로 수집해 "이번 주 5개 + 이유 + 출처"로 정리하는 스킬. 세 축 = A 도구·능력(YouTube·AI 뉴스레터), B 경험·부업·FOMO(Reddit RSS), C 대중 관심(YouTube 한국어 조회수순 + 검색 자동완성). 오늘 날짜 확정→최근 7일 창, "이번 주 급상승"·"여러 소스 공통 등장" 가중. 실행 결과는 `project1-shorts-os/trends/2026-07-04.md`에 저장(트렌드 5개 전부 실링크·발행일 검증). 매 실행 시 날짜별 파일로 누적.
 - **링크 / 스크린샷:**
-  - [결과 .png](이미지첨부/trends-2026-07-04-result.png)
-  - [소스 테스트 결과표-01.png](이미지첨부/source-test-01.png)
-  - [소스 테스트 결과표-02.png](이미지첨부/source-test-02.png)
+  - [trends-2026-07-04-result.png](이미지첨부/trends-2026-07-04-result.png)
+  - [source-test-01.png](이미지첨부/source-test-01.png)
+  - [source-test-02.png](이미지첨부/source-test-02.png)
 
 ## 📱 미션 4. SNS 1주차 소감
 > AI 도움 없이 직접 작성! (인증하면 셀 지급)
