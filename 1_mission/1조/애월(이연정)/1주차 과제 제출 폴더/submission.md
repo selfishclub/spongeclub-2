@@ -60,7 +60,6 @@ date:
 telegram_test/
 ├── CLAUDE.md              # 세션을 '엔진'으로 부팅 + 3방 cron 자동 재등록 시퀀스
 ├── .claude/settings.json  # 권한 allowlist 9개 (무인 자동 발사용)
-├── 이미지첨부/             # 스크린샷 폴더
 └── english-os/
     ├── OS.md              # 운영 매뉴얼 (3접점·복습박스·표현추출·스트릭 규칙)
     ├── profile.md         # 진단 결과: 중급(B1), 교정 포인트=관사·전치사
