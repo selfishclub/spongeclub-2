@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aramirror — 빌드 리포트</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+  :root{
+    --fg:#1d1d1f; --muted:#6e6e73; --soft:#424245; --line:#d2d2d7; --line2:#e8e8ed; --bg:#fff;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:"Pretendard","Malgun Gothic",system-ui,sans-serif;
+    background:#e9e9ec; color:var(--fg); -webkit-font-smoothing:antialiased;
+    display:flex; align-items:center; justify-content:center; min-height:100%;
+  }
+  /* 16:9 무대 */
+  .stage{
+    position:relative; width:min(96vw,1280px); aspect-ratio:16/9; background:var(--bg);
+    box-shadow:0 20px 70px rgba(0,0,0,.18); overflow:hidden;
+  }
+  .slide{
+    position:absolute; inset:0; padding:7.2% 7.2% 6%; display:none; flex-direction:column;
+  }
+  .slide.on{display:flex;}
+  .kicker{font-size:1.05vw; font-weight:700; color:var(--muted); letter-spacing:.06em;}
+  .accent{width:3.4vw; height:.22vw; min-height:2px; background:var(--fg); margin:.9vw 0 0;}
+  .h1{font-size:3.7vw; font-weight:800; letter-spacing:-.02em; line-height:1.06;}
+  .h2{font-size:2.9vw; font-weight:800; letter-spacing:-.02em; line-height:1.1;}
+  .sub{font-size:1.42vw; color:var(--soft); margin-top:1.6vw;}
+  .meta{font-size:1.02vw; color:var(--muted); margin-top:1vw; letter-spacing:.01em;}
+  ul.b{list-style:none; margin-top:2.6vw; display:flex; flex-direction:column; gap:1.35vw;}
+  ul.b li{display:flex; gap:.9vw; align-items:baseline; font-size:1.5vw; line-height:1.28;}
+  ul.b li .d{font-weight:800;}
+  ul.b li b{font-weight:800; color:var(--fg);}
+  ul.b li span{color:var(--muted); font-size:1.3vw;}
+  .spacer{flex:1;}
+  .quote{font-size:2.1vw; font-weight:800; letter-spacing:-.01em; padding-top:1.8vw; border-top:1px solid var(--line);}
+  .foot{position:absolute; left:7.2%; right:7.2%; bottom:3.4%; display:flex; justify-content:space-between;
+        align-items:center; font-size:.92vw; color:var(--muted); border-top:1px solid var(--line); padding-top:1vw;}
+  .foot b{font-weight:700;}
+  mark{background:none; color:var(--fg); box-shadow:inset 0 -0.5vw 0 #e8e8ed;}
+  /* 컨트롤 */
+  .ctl{position:fixed; bottom:16px; left:50%; transform:translateX(-50%); display:flex; gap:8px; align-items:center;
+       background:#fff; border:1px solid var(--line); border-radius:999px; padding:6px 8px; box-shadow:0 6px 20px rgba(0,0,0,.1); z-index:10;}
+  .ctl button{font-family:inherit; border:none; background:none; cursor:pointer; font-size:14px; color:var(--fg); padding:6px 10px; border-radius:999px;}
+  .ctl button:hover{background:#f2f2f4;}
+  .ctl .pg{font-variant-numeric:tabular-nums; color:var(--muted); font-size:13px; min-width:52px; text-align:center;}
+  /* 발표자 노트 */
+  .notes{position:fixed; left:0; right:0; bottom:0; max-height:42vh; overflow:auto; background:#111; color:#eee;
+         padding:22px 26px 28px; font-size:15px; line-height:1.7; display:none; z-index:9;}
+  .notes.on{display:block;}
+  .notes h4{font-size:12px; letter-spacing:.1em; color:#9a9a9a; text-transform:uppercase; margin-bottom:8px; font-weight:700;}
+  @media print{ body{background:#fff;} .ctl,.notes{display:none!important;} .stage{box-shadow:none; page-break-after:always;} }
+</style>
+</head>
+<body>
+  <div class="stage" id="stage">
+    <!-- 1 -->
+    <section class="slide">
+      <div class="kicker">ARAMIRROR · BUILD REPORT</div><div class="accent"></div>
+      <div style="margin-top:5.5vw">
+        <div class="h1">AI는 나를 대신하지 않는다 —<br><mark>거울</mark>이 된다.</div>
+      </div>
+      <div class="sub">생각이 자산이 되는 환경 — 오늘까지의 빌드 리포트</div>
+      <div class="meta">2026.07.04 · 박상현(아람) · 스폰지클럽 2기 5조</div>
+      <div class="foot"><span><b>Aramirror</b> — AI는 거울이 된다</span><span>01 / 05</span></div>
+    </section>
+    <!-- 2 -->
+    <section class="slide">
+      <div class="kicker">01 · WHAT — 아라미러란</div><div class="accent"></div>
+      <div class="h2" style="margin-top:1.6vw">생각 → 지식 → 자산</div>
+      <ul class="b">
+        <li><span class="d">—</span><div><b>메모앱이 아니다.</b> <span>내 생각이 값(자산)이 되는 환경.</span></div></li>
+        <li><span class="d">—</span><div><b>사고 — 던진다.</b> <span>텔레그램으로 아무 때나. 입력 마찰 0.</span></div></li>
+        <li><span class="d">—</span><div><b>지식 — 엮인다.</b> <span>밤마다 자동으로 연결·서술되어 위키로 승격.</span></div></li>
+        <li><span class="d">—</span><div><b>자산 — 발행된다.</b> <span>성숙한 생각이 아라미러 사이트의 글·기록이 된다.</span></div></li>
+      </ul>
+      <div class="foot"><span><b>Aramirror</b> — AI는 거울이 된다</span><span>02 / 05</span></div>
+    </section>
+    <!-- 3 -->
+    <section class="slide">
+      <div class="kicker">02 · TODAY — 오늘 붙인 것</div><div class="accent"></div>
+      <div class="h2" style="margin-top:1.6vw">게시판과 관리자 CRUD</div>
+      <ul class="b">
+        <li><span class="d">—</span><div><b>출발점 — 이기적스폰지 공유회.</b> <span>아젠다 ② 'KEY 연결 → CRUD 게시판'에서 시작.</span></div></li>
+        <li><span class="d">—</span><div><b>게시판 /board.</b> <span>카테고리 분류 · 글 읽기. 공개 페이지.</span></div></li>
+        <li><span class="d">—</span><div><b>관리자 /admin.</b> <span>글 생성·수정·삭제, 웹페이지 상위 관리, 백업 (암호 게이트).</span></div></li>
+        <li><span class="d">—</span><div><b>정적 사이트에서 실제 동작.</b> <span>지금은 브라우저 저장 → 서버 승격 준비 완료.</span></div></li>
+      </ul>
+      <div class="foot"><span><b>Aramirror</b> — AI는 거울이 된다</span><span>03 / 05</span></div>
+    </section>
+    <!-- 4 -->
+    <section class="slide">
+      <div class="kicker">03 · HOW — 어떻게 만들었나</div><div class="accent"></div>
+      <div class="h2" style="margin-top:1.6vw">재활용이 자동화의 핵심 = 스킬</div>
+      <ul class="b">
+        <li><span class="d">—</span><div><b>서브에이전트로 정리.</b> <span>공유회 스크린샷 32장을 병렬로 MECE하게 요약.</span></div></li>
+        <li><span class="d">—</span><div><b>홈페이지 톤 그대로.</b> <span>블랙&화이트, 여백의 미. 잘 만든 디자인을 카피해 배운다.</span></div></li>
+        <li><span class="d">—</span><div><b>스크린샷 자가검수.</b> <span>실제 버그 2개 발견·수정 (빈 모달 · 재방문 TDZ 에러).</span></div></li>
+        <li><span class="d">—</span><div><b>안전 배포.</b> <span>gh-pages 배포하되 기존 앱(/me·/os)은 보존.</span></div></li>
+      </ul>
+      <div class="foot"><span><b>Aramirror</b> — AI는 거울이 된다</span><span>04 / 05</span></div>
+    </section>
+    <!-- 5 -->
+    <section class="slide">
+      <div class="kicker">04 · LIVE & NEXT — 결과와 다음</div><div class="accent"></div>
+      <div class="h2" style="margin-top:1.6vw">이미 라이브, 다음은 진짜 서버</div>
+      <ul class="b">
+        <li><span class="d">—</span><div><b>라이브 배포 완료.</b> <span>hyun-arch.github.io/board · /admin</span></div></li>
+        <li><span class="d">—</span><div><b>버그 2건 수정까지 반영.</b> <span>커밋·배포·재검증 완료.</span></div></li>
+        <li><span class="d">—</span><div><b>다음 — 진짜 서버 CRUD.</b> <span>Supabase/Vercel 연결, 키만 꽂으면 다중 기기 공유.</span></div></li>
+      </ul>
+      <div class="spacer"></div>
+      <div class="quote">“기록이 아니라 <mark>‘승격’</mark>이 핵심이다.”</div>
+      <div class="foot"><span><b>Aramirror</b> — AI는 거울이 된다</span><span>05 / 05</span></div>
+    </section>
+  </div>
+
+  <div class="ctl">
+    <button id="prev">‹ 이전</button>
+    <span class="pg" id="pg">1 / 5</span>
+    <button id="next">다음 ›</button>
+    <button id="notesBtn" title="발표자 노트 (N)">노트</button>
+  </div>
+  <div class="notes" id="notes"><h4>발표자 노트</h4><div id="noteBody"></div></div>
+
+<script>
+  const NOTES = [
+    "안녕하세요, 박상현입니다. 오늘 발표는 제가 만든 개인 OS '아라미러'를 오늘 하루 어디까지 진전시켰는지에 대한 짧은 빌드 리포트입니다. 핵심 문장은 하나 — 'AI는 나를 대신하지 않는다, 거울이 된다.' AI가 저를 대신 완성하는 게 아니라, 제 생각을 비추고 되물어 자산으로 바꿔주는 환경입니다. 5분 안에 무엇을 만들었고, 오늘 무엇을 붙였고, 어떻게 만들었는지 핵심만 보겠습니다.",
+    "아라미러는 메모앱이 아니라 '생각이 자산이 되는 환경'입니다. 세 층이에요. 1층 사고 — 떠오른 생각을 텔레그램으로 그냥 던집니다. 입력 마찰이 0이어야 계속 쓰니까요. 2층 지식 — 밤마다 AI가 지난 기록과 자동으로 엮어 위키로 승격시킵니다. 3층 자산 — 성숙한 생각이 아라미러 사이트에 글·개발일지로 발행됩니다. 오늘은 이 3층 자산 파트를 크게 키웠습니다.",
+    "오늘 붙인 핵심은 '게시판'과 '관리자 콘솔'입니다. 출발점은 오늘 오전 에이든의 이기적스폰지 공유회였고, 두 번째 아젠다가 정확히 'KEY 연결로 CRUD 게시판 만들기'였어요. 결과물은 둘 — 공개 게시판(/board)은 카테고리로 분류하고 글을 읽고, 관리자 콘솔(/admin)은 글을 만들고 고치고 지우고 웹페이지 노출까지 관리하고 백업합니다. 깃허브 페이지 정적 사이트인데도 실제로 동작하고, 서버로 올릴 준비까지 끝냈습니다.",
+    "만든 방법도 공유회에서 배운 그대로입니다. '재활용이 자동화의 핵심이고 그게 스킬이다.' 첫째, 공유회 스크린샷 32장을 서브에이전트로 병렬 MECE 정리했습니다. 둘째, 디자인은 지금 홈페이지와 똑같은 블랙앤화이트·여백 위주로 맞췄습니다. 셋째, 스크린샷 자가검수로 실제 버그 2개(빈 팝업, 로그인 후 새로고침 시 관리자 깨짐)를 잡아 고쳤습니다. 넷째, 배포 시 기존 앱을 지우지 않게 안전 배포했습니다.",
+    "결과와 다음입니다. 오늘 만든 게시판·관리자는 이미 라이브입니다 — hyun-arch.github.io 슬래시 board, 슬래시 admin. 버그 2개도 고쳐 재배포·재검증했습니다. 다음은 진짜 서버 — Supabase와 Vercel을 연결하면 어느 기기에서든 같은 데이터가 보이는 실서버 CRUD가 됩니다. 코드는 다 짰고 키만 꽂으면 됩니다. 오늘 배운 한 문장 — '기록이 아니라 승격이 핵심이다.' 던진 생각이 자산이 될 때 AI는 비로소 저를 비추는 거울이 됩니다. 감사합니다."
+  ];
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;
+  function show(n){
+    i=(n+slides.length)%slides.length;
+    slides.forEach((s,k)=>s.classList.toggle('on',k===i));
+    document.getElementById('pg').textContent=(i+1)+" / "+slides.length;
+    document.getElementById('noteBody').textContent=NOTES[i];
+    if(location.hash!=='#'+(i+1)) history.replaceState(null,'','#'+(i+1));
+  }
+  document.getElementById('prev').onclick=()=>show(i-1);
+  document.getElementById('next').onclick=()=>show(i+1);
+  document.getElementById('notesBtn').onclick=()=>document.getElementById('notes').classList.toggle('on');
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown')show(i+1);
+    else if(e.key==='ArrowLeft'||e.key==='PageUp')show(i-1);
+    else if(e.key.toLowerCase()==='n')document.getElementById('notes').classList.toggle('on');
+    else if(e.key==='Home')show(0); else if(e.key==='End')show(slides.length-1);
+  });
+  const start=parseInt((location.hash||'#1').slice(1),10);
+  show(isNaN(start)?0:start-1);
+</script>
+</body>
+</html>
