@@ -1,0 +1,46 @@
+<svg viewBox="0 0 1080 1350" width="1080" height="1350" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="ttl desc">
+<title id="ttl">정리함 OS 인스타그램 소개 카드</title>
+<desc id="desc">사진·메모를 넣으면 클로드가 분류해 표로 정리하는 정리함 OS의 3단계 흐름과 폴더 구조, 그리고 강의 필기 4장을 17건으로 자동 분류한 결과를 담은 세로형 카드.</desc>
+<style>
+  .kr{font-family:'Malgun Gothic','Pretendard','Apple SD Gothic Neo',sans-serif;}
+  .mono{font-family:'D2Coding','Consolas',monospace;}
+  .ink{fill:#2A2622;} .muted{fill:#8C8272;} .deep{fill:#B9820A;}
+</style>
+  <rect x="0" y="0" width="1080" height="1350" fill="#FAF5E9"/>
+  <text x="60" y="182" class="kr ink" font-size="72" font-weight="800">정리함 OS</text>
+  <text x="60" y="232" class="kr ink" font-size="31" font-weight="500">넣기만 하던 메모가, 스스로 정리되기 시작했다</text>
+  <g>
+    <rect x="60" y="310" width="290" height="176" rx="22" fill="#FFFFFF" stroke="#EBE2CD" stroke-width="2"/>
+    <text x="205" y="374" class="kr" font-size="46" text-anchor="middle">📥</text>
+    <text x="205" y="426" class="kr ink" font-size="30" font-weight="700" text-anchor="middle">넣기</text>
+    <text x="205" y="460" class="kr muted" font-size="22" text-anchor="middle">사진·메모를 수집함에</text>
+    <text x="372" y="414" class="kr deep" font-size="40" font-weight="800" text-anchor="middle">→</text>
+    <rect x="395" y="310" width="290" height="176" rx="22" fill="#FFFFFF" stroke="#EBE2CD" stroke-width="2"/>
+    <text x="540" y="374" class="kr" font-size="46" text-anchor="middle">🤖</text>
+    <text x="540" y="426" class="kr ink" font-size="30" font-weight="700" text-anchor="middle">분류</text>
+    <text x="540" y="460" class="kr muted" font-size="22" text-anchor="middle">클로드가 읽고 나눔</text>
+    <text x="707" y="414" class="kr deep" font-size="40" font-weight="800" text-anchor="middle">→</text>
+    <rect x="730" y="310" width="290" height="176" rx="22" fill="#FFFFFF" stroke="#EBE2CD" stroke-width="2"/>
+    <text x="875" y="374" class="kr" font-size="46" text-anchor="middle">📊</text>
+    <text x="875" y="426" class="kr ink" font-size="30" font-weight="700" text-anchor="middle">정리</text>
+    <text x="875" y="460" class="kr muted" font-size="22" text-anchor="middle">표 하나로 자동 정리</text>
+  </g>
+  <rect x="60" y="530" width="960" height="396" rx="24" fill="#FFFFFF" stroke="#EBE2CD" stroke-width="2"/>
+  <text x="92" y="584" class="kr ink" font-size="30" font-weight="800">📁 KANG_PJT — 나를 돕는 정리함 OS</text>
+  <g class="mono ink" font-size="27">
+    <text x="92" y="632">KANG_PJT/</text>
+    <text x="92" y="663">├─ CLAUDE.md            <tspan class="muted">· 처리 규칙</tspan></text>
+    <text x="92" y="694">├─ config/분류기준.md    <tspan class="muted">· 분류 규칙</tspan></text>
+    <text x="92" y="725">├─ 정리함/</text>
+    <text x="92" y="756">│   ├─ 1_수집함/   <tspan class="deep">📥 넣는 곳</tspan></text>
+    <text x="92" y="787">│   └─ 2_보관/     <tspan class="muted">📦 처리 끝난 원본</tspan></text>
+    <text x="92" y="818">├─ db/</text>
+    <text x="92" y="849">│   ├─ 정리결과.csv  <tspan class="muted">· 엑셀용</tspan></text>
+    <text x="92" y="880">│   └─ 정리결과.md   <tspan class="muted">· 보기용</tspan></text>
+    <text x="92" y="911">└─ docs/                <tspan class="muted">· 설계 기록</tspan></text>
+  </g>
+  <rect x="60" y="962" width="960" height="152" rx="24" fill="#F2B705"/>
+  <text x="540" y="1030" class="kr ink" font-size="44" font-weight="800" text-anchor="middle">필기 4장  →  17건 자동 분류</text>
+  <text x="540" y="1076" class="kr ink" font-size="27" font-weight="600" text-anchor="middle" opacity="0.82">🔴 할 일 5 · 🟡 아이디어 5 · 🔵 참고자료 7</text>
+  <text x="540" y="1210" class="kr muted" font-size="29" font-style="italic" text-anchor="middle">“기록된 모든 메모를 넣어라. 그러면 분류될 것이다.”</text>
+</svg>

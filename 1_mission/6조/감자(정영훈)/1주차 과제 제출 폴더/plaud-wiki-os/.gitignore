@@ -1,0 +1,9 @@
+wiki.html
+.env
+recordings/*.md
+recordings/processed.json
+hidden.json
+__pycache__/
+*.pyc
+.embed_cache*
+.pytest_cache/
