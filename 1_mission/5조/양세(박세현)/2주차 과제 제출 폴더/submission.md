@@ -7,6 +7,8 @@ title: 강의 영상 편집 자동화 OS (강의 → 쇼츠)
 date: 260706
 ---
 
+![2주차 미션 안내](https://github.com/selfishclub/spongeclub-2/raw/main/_meta/week2/overview.png)
+
 # 2주차 — 내 OS 구현하기 🚀
 
 > 미션을 진행하며 **기획 → 구현 → 삽질 → 결과물 → 인사이트** 를 상세히 기록해주세요.
