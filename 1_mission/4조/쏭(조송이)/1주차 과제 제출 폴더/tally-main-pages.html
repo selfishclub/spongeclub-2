@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tally 메인 페이지 — Journal · Plan · Life</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#2b2b28; --muted:#8a897f; --faint:#b6b4a8; --line:#ececE4; --line2:#e6e3da; --page:#f3f1ea; --card:#fff;
+         --green:#4a9d5b; --teal:#0f6e56; --amber:#b8863b; --red:#b5533a; --gray:#9aa08f;
+         --tint:#eef3ea; --workbg:#e7eef6; --worktx:#2f597f; --lifebg:#eaf3e7; --lifetx:#3b6d3f; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--page); color:var(--ink); line-height:1.55;
+        font-family:"Hanken Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif; }
+  .wrap{ max-width:1000px; margin:0 auto; padding:30px 18px 60px; }
+  h1{ font-size:22px; font-weight:600; margin:0 0 4px; }
+  .sub{ color:var(--muted); font-size:13.5px; margin-bottom:8px; }
+  h2{ font-size:18px; font-weight:600; margin:34px 0 3px; }
+  .lead{ color:var(--muted); font-size:13.5px; margin:0 0 14px; }
+  .mono{ font-family:"IBM Plex Mono",monospace; }
+  .device{ background:var(--card); border:1px solid var(--line2); border-radius:16px; padding:0; overflow:hidden; }
+
+  /* chrome */
+  .brand{ display:flex; align-items:center; gap:14px; padding:14px 20px; }
+  .wm{ font-weight:700; font-size:17px; }
+  .modes{ display:flex; gap:14px; font-size:13.5px; color:var(--faint); }
+  .modes .m{ display:inline-flex; align-items:center; gap:5px; }
+  .modes .on{ color:var(--ink); font-weight:500; }
+  .av{ margin-left:auto; width:26px; height:26px; border-radius:50%; background:#e3e0d7; color:#6f6e64; font-size:12px; display:flex; align-items:center; justify-content:center; }
+  .nav{ display:flex; gap:22px; padding:0 20px; border-bottom:1px solid var(--line); font-size:13.5px; color:var(--muted); }
+  .nav a{ padding:8px 0 12px; color:var(--muted); text-decoration:none; }
+  .nav a.on{ color:var(--ink); font-weight:500; border-bottom:2px solid var(--ink); }
+
+  /* JOURNAL */
+  .body{ display:grid; grid-template-columns:150px 1fr; }
+  .rail{ padding:22px 18px; border-right:1px solid var(--line); }
+  .rail .eb{ font-size:10px; letter-spacing:.14em; color:var(--faint); }
+  .rail .day{ font-size:22px; font-weight:600; margin-top:4px; }
+  .rail .dt{ font-size:12px; color:var(--muted); }
+  .main{ padding:22px 26px; }
+  .greet{ font-size:24px; font-weight:400; margin:0 0 16px; }
+  .writebox{ border:1px solid var(--line2); border-radius:14px; background:#faf9f5; padding:16px; height:120px; position:relative; }
+  .writebox .ph{ color:var(--faint); font-size:15px; }
+  .writebox .save{ position:absolute; right:12px; bottom:12px; border:1px solid var(--line2); border-radius:9px; background:#fff; font-size:12px; padding:6px 12px; color:var(--muted); }
+  .daydiv{ display:flex; justify-content:space-between; align-items:center; margin:22px 0 6px; }
+  .daydiv .l{ font-size:11px; letter-spacing:.1em; color:var(--muted); }
+  .daydiv .r{ font-size:11px; color:var(--faint); }
+  .je{ display:grid; grid-template-columns:48px 1fr auto; gap:12px; align-items:start; padding:10px 0; }
+  .je .tm{ font-size:11px; color:var(--faint); }
+  .je .tx{ font-size:14px; }
+  .stat{ font-size:11px; white-space:nowrap; }
+  .stat.ok{ color:var(--muted); } .stat.ok .d{ display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--gray); margin-right:5px; }
+  .stat.do{ border:1px solid var(--teal); color:var(--teal); border-radius:999px; padding:3px 10px; }
+  .filing{ font-size:11px; color:var(--faint); margin-top:16px; padding-top:12px; border-top:1px solid var(--line); }
+
+  /* PLAN */
+  .p-body{ display:grid; grid-template-columns:210px 1fr; }
+  .p-rail{ padding:20px 16px; border-right:1px solid var(--line); }
+  .p-mon{ font-size:10px; letter-spacing:.12em; color:var(--faint); }
+  .p-fri{ font-size:22px; font-weight:600; } .p-jun{ font-size:12px; color:var(--muted); margin-bottom:12px; }
+  .cal{ display:grid; grid-template-columns:repeat(7,1fr); gap:2px; font-size:11px; text-align:center; }
+  .cal .h{ color:var(--faint); } .cal .d{ padding:4px 0; color:var(--ink); border-radius:6px; }
+  .cal .off{ color:var(--faint); } .cal .now{ background:#c65a2e; color:#fff; }
+  .p-view{ margin-top:16px; font-size:11px; letter-spacing:.1em; color:var(--faint); }
+  .p-view .item{ font-size:13px; letter-spacing:0; color:var(--ink); padding:6px 8px; border-radius:8px; margin-top:4px; }
+  .p-view .sel{ background:#f0eee7; }
+  .p-main{ padding:20px 22px; }
+  .p-head{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .p-head h3{ font-size:20px; font-weight:400; margin:0; }
+  .p-ctl{ font-size:12.5px; color:var(--muted); } .p-ctl b{ color:var(--ink); font-weight:500; }
+  .p-add{ margin-left:auto; border:1px solid var(--line2); border-radius:999px; font-size:12px; padding:5px 12px; color:var(--muted); }
+  .p-colh{ display:grid; grid-template-columns:1fr 90px 130px 70px; gap:10px; font-size:11px; color:var(--faint); border-bottom:1px solid var(--line); padding:14px 0 6px; }
+  .quad{ font-size:11px; letter-spacing:.1em; color:var(--muted); margin:14px 0 2px; display:flex; align-items:center; gap:7px; }
+  .qm{ width:9px; height:9px; border-radius:2px; }
+  .task{ display:grid; grid-template-columns:1fr 90px 130px 70px; gap:10px; align-items:center; padding:8px 0; border-bottom:1px solid var(--line); font-size:13.5px; }
+  .task .nm{ display:flex; align-items:center; gap:9px; }
+  .ck{ width:15px; height:15px; border:1.5px solid #c9c7bd; border-radius:50%; flex:0 0 auto; }
+  .ck.done{ background:var(--green); border-color:var(--green); }
+  .done-tx{ color:var(--faint); text-decoration:line-through; }
+  .pill{ display:inline-flex; align-items:center; gap:4px; font-size:11px; border-radius:999px; padding:2px 9px; }
+  .pill.work{ background:var(--workbg); color:var(--worktx); } .pill.life{ background:var(--lifebg); color:var(--lifetx); }
+  .pill.proj{ border:1px solid #c9d3de; color:#5c6b7a; background:#fff; }
+  .due{ font-size:12px; color:var(--muted); } .mono.due{ letter-spacing:0; }
+
+  /* LIFE */
+  .l-top{ display:flex; align-items:flex-start; padding:20px 24px 6px; gap:24px; }
+  .l-left{ flex:1; }
+  .l-date{ font-size:10px; letter-spacing:.14em; color:var(--faint); }
+  .l-h{ font-size:30px; font-weight:400; margin:2px 0 8px; }
+  .l-nudge{ font-size:13.5px; color:var(--muted); }
+  .l-nudge .b{ color:var(--amber); }
+  .areas{ display:flex; gap:18px; padding-top:6px; }
+  .area .nm{ font-size:13px; font-weight:600; display:flex; align-items:center; gap:5px; }
+  .area .dot{ width:8px; height:8px; border-radius:50%; }
+  .area .sub{ font-size:11px; color:var(--faint); margin-top:3px; line-height:1.4; }
+  .lensrow{ display:flex; gap:20px; padding:8px 24px 0; font-size:13.5px; color:var(--muted); border-bottom:1px solid var(--line); }
+  .lensrow .on{ color:var(--ink); font-weight:500; border-bottom:2px solid var(--ink); padding-bottom:10px; }
+  .lensrow span{ padding-bottom:10px; }
+  .bentohd{ display:flex; justify-content:space-between; padding:14px 24px 8px; font-size:11px; letter-spacing:.08em; color:var(--faint); }
+  .bento{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; padding:0 24px 22px; }
+  .tile{ border-radius:14px; padding:15px; border:1px solid var(--line2); background:var(--card); }
+  .tile.big{ grid-column:span 2; background:var(--tint); border-color:#dfe9da; }
+  .tile .lb{ font-size:10px; letter-spacing:.12em; color:var(--muted); }
+  .tile .ti{ font-size:17px; font-weight:500; margin:5px 0 8px; }
+  .tile .ar{ font-size:11px; color:var(--muted); } .tile .ar .d{ display:inline-block; width:6px; height:6px; border-radius:50%; margin-right:5px; }
+  .tile .meta{ font-size:11.5px; color:var(--faint); margin-top:2px; }
+  .tile .enter{ font-size:12px; color:var(--teal); margin-top:9px; }
+
+  /* explanation */
+  .expl{ margin:12px 0 4px; font-size:14px; }
+  .expl .cap{ font-size:11px; letter-spacing:.05em; color:var(--faint); text-transform:uppercase; margin-bottom:4px; }
+  .expl ul{ margin:0; padding-left:18px; } .expl li{ margin:4px 0; }
+  .expl b{ font-weight:600; }
+  .foot{ margin-top:38px; border-top:1px solid var(--line2); padding-top:16px; font-size:12px; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Tally — 메인 페이지</h1>
+  <div class="sub">내 삶을 돕는 OS · 한 앱, 세 모드(Brownie · Life · Work). 실제 화면에 충실한 재현 + 부분별 설명. 앱 UI는 영어.</div>
+
+  <!-- JOURNAL -->
+  <h2>Brownie · Journal — "하루를 해낸다"</h2>
+  <div class="lead">열면 곧장 저널. 정리하지 말고 그냥 쏟아붓는 곳.</div>
+  <div class="device">
+    <div class="brand"><span class="wm">Tally</span>
+      <div class="modes"><span class="m on">Brownie</span><span class="m">Life</span><span class="m">Work</span></div>
+      <span class="av">S</span></div>
+    <div class="nav"><a class="on">Journal</a><a>Today</a><a>Plan</a><a>Log</a><a>Goal</a><a>Reflect</a></div>
+    <div class="body">
+      <div class="rail"><div class="eb mono">TODAY</div><div class="day">Wednesday</div><div class="dt mono">June 18</div></div>
+      <div class="main">
+        <div class="greet">Good evening, Song.</div>
+        <div class="writebox"><span class="ph">What happened today?</span><span class="save mono">&#9166; save</span></div>
+        <div class="daydiv"><span class="l mono">TUE · JUN 17</span><span class="r mono">added to this log</span></div>
+        <div class="je"><span class="tm mono">21:30</span><span class="tx">Didn't get to write yesterday — long one. Finally sent the cabin deposit, and Dad called; he sounded good. Want to call him back properly this weekend.</span><span class="stat ok"><span class="d"></span>sorted</span></div>
+        <div class="daydiv"><span class="l mono">TODAY · JUN 18</span></div>
+        <div class="je"><span class="tm mono">17:40</span><span class="tx">Wrapped the Bellevue zoning notes this afternoon. Still chasing the parking-variance figure from Sue before the memo can go out — pinged…</span><span class="stat do mono">sort it →</span></div>
+        <div class="je"><span class="tm mono">15:20</span><span class="tx">Picked the kids up. Mae's science fair is next Thursday and we still need posterboard and a trifold. She wants the volcano again; I'm gently steering he…</span><span class="stat ok"><span class="d"></span>sorted</span></div>
+        <div class="je"><span class="tm mono">08:05</span><span class="tx">Good run this morning — 8k, legs felt light. I want to hold three mornings a week; it's the thing that keeps the rest of the day honest.</span><span class="stat ok"><span class="d"></span>sorted</span></div>
+        <div class="filing mono">17:41 · auto-saved to Tue &amp; Wed's log</div>
+      </div>
+    </div>
+  </div>
+  <div class="expl"><div class="cap">무엇이 있나 · 어디 쓰나</div><ul>
+    <li><b>상단 브랜드·모드 + Brownie 탭</b> (Journal · Today · Plan · Log · Goal · Reflect) — 한 앱 안 하루-실행 도구들.</li>
+    <li><b>왼쪽 오늘 레일</b> — 날짜 앵커. "지금이 오늘".</li>
+    <li><b>인사 + 저널 박스</b>("What happened today?") — OS의 심장. 정리 없이 쏟는 한 칸(마찰 0).</li>
+    <li><b>하루별 기록 + 상태</b> — 소터가 분류하면 <b>sorted</b>, 아직이면 <b>sort it →</b>. 던지는 순간 <b>auto-saved</b>(안 잃어버림).</li>
+  </ul></div>
+
+  <!-- PLAN -->
+  <h2>Brownie · Plan — 사분면 To Do</h2>
+  <div class="lead">일·삶이 한 목록에서 시간을 두고 겨룬다. 긴급×중요 사분면으로.</div>
+  <div class="device">
+    <div class="brand"><span class="wm">Tally</span>
+      <div class="modes"><span class="m on">Brownie</span><span class="m">Life</span><span class="m">Work</span></div>
+      <span class="av">S</span></div>
+    <div class="nav"><a>Journal</a><a>Today</a><a class="on">Plan</a><a>Log</a><a>Goal</a><a>Reflect</a></div>
+    <div class="p-body">
+      <div class="p-rail">
+        <div class="p-mon mono">JUNE 2026</div><div class="p-fri">Friday</div><div class="p-jun mono">Jun 19</div>
+        <div class="cal mono">
+          <span class="h">M</span><span class="h">T</span><span class="h">W</span><span class="h">T</span><span class="h">F</span><span class="h">S</span><span class="h">S</span>
+          <span class="d">1</span><span class="d">2</span><span class="d">3</span><span class="d">4</span><span class="d">5</span><span class="d">6</span><span class="d">7</span>
+          <span class="d">8</span><span class="d">9</span><span class="d">10</span><span class="d">11</span><span class="d">12</span><span class="d">13</span><span class="d">14</span>
+          <span class="d">15</span><span class="d">16</span><span class="d">17</span><span class="d">18</span><span class="d now">19</span><span class="d">20</span><span class="d">21</span>
+          <span class="d">22</span><span class="d">23</span><span class="d">24</span><span class="d">25</span><span class="d">26</span><span class="d">27</span><span class="d">28</span>
+          <span class="d">29</span><span class="d">30</span><span class="d off">1</span><span class="d off">2</span><span class="d off">3</span><span class="d off">4</span><span class="d off">5</span>
+        </div>
+        <div class="p-view mono">VIEW<div class="item sel">✓ To Do</div><div class="item">▦ Calendar</div></div>
+      </div>
+      <div class="p-main">
+        <div class="p-head"><h3>To Do</h3><span class="p-ctl">Grouped by <b>Quadrant</b> ▾</span><span class="p-ctl">Filter <b>All</b> ▾</span><span class="p-ctl">Sorted by <b>Due date</b> ▾</span><span class="p-add">+ Add</span></div>
+        <div class="p-colh mono"><span>Task</span><span>Area</span><span>Project / Thread</span><span>Due</span></div>
+
+        <div class="quad"><span class="qm" style="background:var(--red)"></span>DO NOW</div>
+        <div class="task"><span class="nm"><span class="ck"></span>Finish zoning variance memo</span><span><span class="pill work">Work</span></span><span><span class="pill proj">Zoning</span></span><span class="due mono">Fri 19</span></div>
+        <div class="task"><span class="nm"><span class="ck"></span>Email Sue — parking figure</span><span><span class="pill work">Work</span></span><span><span class="pill proj">Zoning</span></span><span class="due mono">Thu 18</span></div>
+
+        <div class="quad"><span class="qm" style="background:var(--green)"></span>SCHEDULE</div>
+        <div class="task"><span class="nm"><span class="ck"></span>Bellevue review block</span><span><span class="pill work">Work</span></span><span><span class="pill proj">Bellevue</span></span><span class="due mono">Wed 17</span></div>
+        <div class="task"><span class="nm"><span class="ck"></span>Draft Q3 goals</span><span><span class="pill work">Work</span></span><span><span class="pill proj">Q3 planning</span></span><span class="due mono">Tue 16</span></div>
+        <div class="task"><span class="nm"><span class="ck"></span>Long run — 8km</span><span><span class="pill life">Life</span></span><span><span class="pill proj">Marathon</span></span><span class="due mono">Fri 19</span></div>
+
+        <div class="quad"><span class="qm" style="background:var(--amber)"></span>QUICK · DELEGATE</div>
+        <div class="task"><span class="nm"><span class="ck"></span>Order posterboard</span><span><span class="pill life">Life</span></span><span><span class="pill proj">Marathon</span></span><span class="due mono">Thu 18</span></div>
+        <div class="task"><span class="nm"><span class="ck done"></span><span class="done-tx">Reply to landlord</span></span><span><span class="pill life">Life</span></span><span></span><span class="due mono">Wed 17</span></div>
+
+        <div class="quad"><span class="qm" style="background:var(--gray)"></span>LATER · SOMEDAY</div>
+        <div class="task"><span class="nm"><span class="ck"></span>Plan Mom's birthday</span><span><span class="pill life">Life</span></span><span><span class="pill proj">Family</span></span><span class="due mono">—</span></div>
+        <div class="task"><span class="nm"><span class="ck"></span>Renew car tabs</span><span><span class="pill life">Life</span></span><span></span><span class="due mono">—</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="expl"><div class="cap">무엇이 있나 · 어디 쓰나</div><ul>
+    <li><b>왼쪽 캘린더 + View</b> — 날짜 맥락 + To Do/Calendar 전환.</li>
+    <li><b>사분면 그룹</b>(DO NOW · SCHEDULE · QUICK·DELEGATE · LATER·SOMEDAY) — 긴급×중요로 정렬. Grouped by / Filter / Sorted 로 바꿈.</li>
+    <li><b>각 태스크</b> = 체크 + <b>Area</b>(Work/Life) + <b>Project/Thread</b> + Due. → 일·삶이 <b>한 목록</b>에서 같은 시간을 두고 겨룸.</li>
+  </ul></div>
+
+  <!-- LIFE -->
+  <h2>Life · Your life — "나를 마주한다"</h2>
+  <div class="lead">열면 나를 통째로 보는 대시보드. 점수판이 아니라 반성용 거울.</div>
+  <div class="device">
+    <div class="brand"><span class="wm">Tally</span>
+      <div class="modes"><span class="m">Brownie</span><span class="m on">Life</span><span class="m">Work</span></div>
+      <span class="av">S</span></div>
+    <div class="l-top">
+      <div class="l-left">
+        <div class="l-date mono">MONDAY, JUNE 22</div>
+        <div class="l-h">Your life</div>
+        <div class="l-nudge"><span class="b">•</span> A note to Dana would mean a lot — it's been two months.</div>
+      </div>
+      <div class="areas">
+        <div class="area"><div class="nm"><span class="dot" style="background:var(--gray)"></span>Self ↗</div><div class="sub">growth<br>wellness</div></div>
+        <div class="area"><div class="nm"><span class="dot" style="background:var(--teal)"></span>Finances ↗</div><div class="sub">budget<br>savings</div></div>
+        <div class="area"><div class="nm"><span class="dot" style="background:var(--green)"></span>Family ↗</div><div class="sub">kin<br>home</div></div>
+        <div class="area"><div class="nm"><span class="dot" style="background:var(--amber)"></span>Friends ↘</div><div class="sub">people<br>social</div></div>
+        <div class="area"><div class="nm"><span class="dot" style="background:var(--red)"></span>Career ↗</div><div class="sub">learning<br>projects</div></div>
+      </div>
+    </div>
+    <div class="lensrow"><span class="on">Your life</span><span>Threads</span><span>Tracker</span><span>Money</span><span>People</span><span>Plan</span><span>Vault</span></div>
+    <div class="bentohd"><span class="mono">LENSES — HOLD &amp; DRAG TO ARRANGE · TAP TO ENTER</span><span class="mono">6 tiles · 2 big · 8 of 8 cells</span></div>
+    <div class="bento">
+      <div class="tile big"><div class="lb mono">THREADS</div><div class="ti">"I keep stalling on the flights."</div><div class="ar"><span class="d" style="background:var(--green)"></span>FAMILY</div><div class="meta">Korea · 3 open, 1 stalling</div><div class="enter">Enter threads →</div></div>
+      <div class="tile big"><div class="lb mono">PLAN</div><div class="ti">Renew passports</div><div class="ar"><span class="d" style="background:var(--green)"></span>FAMILY</div><div class="meta">due in 9 days · 5 this week</div><div class="enter">Enter plan →</div></div>
+      <div class="tile"><div class="lb mono">PEOPLE</div><div class="ti">"I miss Dana."</div><div class="ar"><span class="d" style="background:var(--amber)"></span>FRIENDS</div><div class="meta">Dana · 2 months quiet</div><div class="enter">Enter people →</div></div>
+      <div class="tile"><div class="lb mono">MONEY</div><div class="ti">Korea fund building</div><div class="ar"><span class="d" style="background:var(--teal)"></span>FINANCES</div><div class="meta">on track</div><div class="enter">Enter money →</div></div>
+      <div class="tile"><div class="lb mono">TRACKER</div><div class="ti">12-day run streak</div><div class="ar"><span class="d" style="background:var(--gray)"></span>SELF</div><div class="meta">3 habits holding</div><div class="enter">Enter tracker →</div></div>
+      <div class="tile"><div class="lb mono">VAULT</div><div class="ti">A bit of everything</div><div class="ar"><span class="d" style="background:var(--green)"></span>FAMILY</div><div class="meta">10 records kept</div><div class="enter">Enter vault →</div></div>
+    </div>
+  </div>
+  <div class="expl"><div class="cap">무엇이 있나 · 어디 쓰나</div><ul>
+    <li><b>Your life 대시보드</b> — 첫 탭. 할 일이 아니라 <i>나</i>를 먼저 보여줌("나를 통째로").</li>
+    <li><b>상단 우측 5 Areas</b>(Self·Finances·Family·Friends·Career) — dot + 두 단어(growth/wellness…) + 기울기 화살표(↗↘). 점수가 아니라 <b>균형 측정</b>.</li>
+    <li><b>넛지 한 줄</b>("A note to Dana…") — 다그치지 않고 <b>초대</b>.</li>
+    <li><b>bento (렌즈 타일 6개, 2 big)</b> — 각 타일 = 렌즈 입구 + Area 태그 + 요약. HOLD &amp; DRAG로 배치, TAP으로 입장.</li>
+  </ul></div>
+
+  <div class="foot">※ 실제 앱 화면에 충실한 <b>재현(representation)</b> (Design Claude mock + Session 46 빌드 기반). 세 번째 모드 <b>Work</b>는 <b>parse 엔진이 완성</b> — 위 Journal의 <b>sorted</b>와 Plan·Life의 <b>Area 태그</b>를 만드는 그 소터가 곧 Work 파서예요(앱의 심장). <b>UI(화면)만 다음 차례</b>. 엔진은 다 됐는데 얼굴이 아직이라 '미완'처럼 보일 뿐 — 그래서 UI가 중요하다.</div>
+</div>
+</body>
+</html>

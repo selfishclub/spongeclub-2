@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aramirror — 내가 만든 이야기 + 배움 적용</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+  :root{ --fg:#1a1a1c; --muted:#71717a; --soft:#3f3f46; --line:#d6d6db; --line2:#ececf0; --bg:#fff; --wash:#f6f6f8; }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+    background:#e9e9ec; color:var(--fg); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    display:flex; align-items:center; justify-content:center; min-height:100%;
+  }
+  .stage{
+    position:relative; width:min(96vw,1180px); aspect-ratio:16/9; background:var(--bg);
+    box-shadow:0 22px 70px rgba(0,0,0,.16); overflow:hidden;
+  }
+  .slide{ position:absolute; inset:0; padding:6.6% 7.2% 6%; display:none; flex-direction:column;
+    opacity:0; transition:opacity .28s ease; }
+  .slide.on{display:flex; opacity:1;}
+  @media (prefers-reduced-motion:reduce){ .slide{transition:none;} }
+  .kicker{font-size:1.1vw; font-weight:700; color:var(--muted); letter-spacing:.07em;}
+  .accent{width:3.4vw; height:.22vw; min-height:2px; background:var(--fg); margin:.85vw 0 0;}
+  .h1{font-size:3.9vw; font-weight:800; letter-spacing:-.02em; line-height:1.05; text-wrap:balance;}
+  .h2{font-size:2.85vw; font-weight:800; letter-spacing:-.02em; line-height:1.1; text-wrap:balance;}
+  .sub{font-size:1.48vw; color:var(--soft); margin-top:1.6vw;}
+  .meta{font-size:1.06vw; color:var(--muted); margin-top:1vw; letter-spacing:.01em;}
+  ul.b{list-style:none; margin-top:2.2vw; display:flex; flex-direction:column; gap:1.15vw;}
+  ul.b li{display:flex; gap:.9vw; align-items:baseline; font-size:1.5vw; line-height:1.26;}
+  ul.b li .d{font-weight:800;}
+  ul.b li b{font-weight:800; color:var(--fg);}
+  ul.b li span{color:var(--muted); font-size:1.3vw;}
+  ol.five{list-style:none; margin-top:2vw; display:flex; flex-direction:column; gap:.95vw;}
+  ol.five li{display:flex; gap:1vw; align-items:baseline; font-size:1.42vw; line-height:1.24;}
+  ol.five li .n{font-weight:800; min-width:1.4em; color:var(--fg);}
+  ol.five li b{font-weight:800;}
+  ol.five li span{color:var(--muted); font-size:1.24vw;}
+  .band{margin-top:1.8vw; background:var(--wash); border:1px solid var(--line2); border-radius:.7vw; padding:1.1vw 1.3vw; font-size:1.34vw;}
+  .band b{font-weight:800;}
+  .spacer{flex:1;}
+  .quote{font-size:2.1vw; font-weight:800; letter-spacing:-.01em; padding-top:1.6vw; border-top:1px solid var(--line);}
+  .foot{position:absolute; left:7.2%; right:7.2%; bottom:3.2%; display:flex; justify-content:space-between;
+        align-items:center; font-size:.95vw; color:var(--muted); border-top:1px solid var(--line); padding-top:.9vw;}
+  .foot b{font-weight:700;}
+  mark{background:none; color:var(--fg); box-shadow:inset 0 -0.5vw 0 #e8e8ed;}
+  .tap{position:absolute; top:0; bottom:9%; width:34%; z-index:4; cursor:pointer; -webkit-tap-highlight-color:transparent;}
+  .tap.l{left:0;} .tap.r{right:0;}
+  .ctl{position:fixed; bottom:16px; left:50%; transform:translateX(-50%); display:flex; gap:6px; align-items:center;
+       background:#fff; border:1px solid var(--line); border-radius:999px; padding:6px 8px; box-shadow:0 6px 20px rgba(0,0,0,.12); z-index:10;}
+  .ctl button{font-family:inherit; border:none; background:none; cursor:pointer; font-size:14px; color:var(--fg); padding:8px 12px; border-radius:999px;}
+  .ctl button:hover{background:#f2f2f4;} .ctl button:focus-visible{outline:2px solid var(--fg); outline-offset:2px;}
+  .ctl .pg{font-variant-numeric:tabular-nums; color:var(--muted); font-size:13px; min-width:52px; text-align:center;}
+  .notes{position:fixed; left:0; right:0; bottom:0; max-height:46vh; overflow:auto; background:#111; color:#eee;
+         padding:22px 26px 30px; font-size:15px; line-height:1.75; display:none; z-index:9;}
+  .notes.on{display:block;}
+  .notes h4{font-size:12px; letter-spacing:.1em; color:#9a9a9a; text-transform:uppercase; margin-bottom:8px; font-weight:700;}
+  @media print{ body{background:#fff;} .ctl,.notes,.tap{display:none!important;} .stage{box-shadow:none; page-break-after:always;} }
+  @media (min-width:1230px){
+    .kicker{font-size:13px;} .h1{font-size:46px;} .h2{font-size:34px;} .sub{font-size:17px;} .meta{font-size:12.5px;}
+    ul.b li{font-size:17.5px;} ul.b li span{font-size:15px;} ol.five li{font-size:16.5px;} ol.five li span{font-size:14.5px;}
+    .band{font-size:15.5px; border-radius:9px;} .quote{font-size:25px;} .foot{font-size:11px;} .accent{height:3px;}
+  }
+</style>
+</head>
+<body>
+  <div class="stage" id="stage">
+    <div class="tap l" id="tapL" aria-label="이전"></div>
+    <div class="tap r" id="tapR" aria-label="다음"></div>
+
+    <section class="slide">
+      <div class="kicker">ARAMIRROR · 내가 만든 이야기</div><div class="accent"></div>
+      <div style="margin-top:5vw">
+        <div class="h1">AI는 나를 대신하지 않는다 —<br><mark>거울</mark>이 된다.</div>
+      </div>
+      <div class="sub">내가 직접 기획하고, 부딪히고, 만든 나만의 OS — 그리고 배운 걸 그날 써먹은 이야기</div>
+      <div class="meta">2026.07.04 · 박상현(아람) · 스폰지클럽 2기 5조</div>
+      <div class="foot"><span><b>Aramirror</b> — AI는 거울이 된다</span><span>01 / 07</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">01 · WHY — 왜 시작했나</div><div class="accent"></div>
+      <div class="h2" style="margin-top:1.4vw">내 <mark>한계</mark>에서 시작됐다</div>
+      <ul class="b">
+        <li><span class="d">—</span><div><b>피곤한 밤이었다.</b> <span>미국 출장에서 막 돌아와, 제주 주말도 못 쉰 날. 머릿속엔 NYU 발표·스폰지클럽·풀 일들이 가득했다.</span></div></li>
+        <li><span class="d">—</span><div><b>깨달음.</b> <span>한계를 넘는 건 '더 버티기'가 아니라 '<mark>머릿속을 비우는 것</mark>'. 정리 안 된 생각이 제일 무겁다.</span></div></li>
+        <li><span class="d">—</span><div><b>다 며칠 못 갔다.</b> <span>노션·보드·태그… 정리에 내 손이 들어가니까. 그래서 원칙을 뒤집기로 했다.</span></div></li>
+      </ul>
+      <div class="foot"><span><b>Aramirror</b> — AI는 거울이 된다</span><span>02 / 07</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">02 · WHAT — 내가 뒤집은 원칙</div><div class="accent"></div>
+      <div class="h2" style="margin-top:1.4vw">입력은 0, 정리는 AI, <mark>소유는 나</mark></div>
+      <ul class="b">
+        <li><span class="d">—</span><div><b>입력 마찰 0.</b> <span>나는 텔레그램에 그냥 말만 던진다. 그날 저널에 자동으로 쌓인다.</span></div></li>
+        <li><span class="d">—</span><div><b>정리는 100% AI.</b> <span>분류·연결·서술은 전부 AI. 밤마다 지난 기록과 자동으로 엮여 지식이 된다.</span></div></li>
+        <li><span class="d">—</span><div><b>소유권은 나에게.</b> <span>AI는 편집자일 뿐, 내 생각은 내 것. 성숙하면 사이트의 글·기록으로 발행된다.</span></div></li>
+        <li><span class="d">—</span><div><b>The Wall — 생각의 벽.</b> <span>내가 세운 원칙. 내 생각(자산)과 남에서 온 것(연료)을 절대 섞지 않는다.</span></div></li>
+      </ul>
+      <div class="foot"><span><b>Aramirror</b> — AI는 거울이 된다</span><span>03 / 07</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">03 · HOW — 만들며 부딪힌 벽</div><div class="accent"></div>
+      <div class="h2" style="margin-top:1.4vw">직접 부딪히고, 직접 고쳤다</div>
+      <ul class="b">
+        <li><span class="d">—</span><div><b>"AI가 나를 대신하나?" 불안.</b> <span>가장 먼저 부딪힌 벽. 한 문장으로 매듭지었다 — <mark>대신하지 않는다, 거울이 된다.</mark></span></div></li>
+        <li><span class="d">—</span><div><b>봇이 자꾸 죽었다.</b> <span>일반 창·headless로는 즉시 꺼짐. winpty로 감싸고 자동시작 걸어 24시간 살렸다.</span></div></li>
+        <li><span class="d">—</span><div><b>배포가 깨졌다.</b> <span>모바일·PC에서 디자인이 무너짐. 흑백 미니멀로 전면 개편, 스크린샷 자가검수 후 재배포.</span></div></li>
+        <li><span class="d">—</span><div><b>손으로 다 겪었다.</b> <span>부딪히고 고치는 그 과정이, 이걸 진짜 '내 것'으로 만든 순간이었다.</span></div></li>
+      </ul>
+      <div class="foot"><span><b>Aramirror</b> — AI는 거울이 된다</span><span>04 / 07</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">04 · LEARN — 배움을 흘리지 않는다</div><div class="accent"></div>
+      <div class="h2" style="margin-top:1.4vw">이기적스폰지 공유회, <mark>5가지</mark></div>
+      <ol class="five">
+        <li><span class="n">①</span><div><b>기본 스킬</b> <span>— 반복하는 일을 skill.md로 굳혀 자동 발동.</span></div></li>
+        <li><span class="n">②</span><div><b>KEY 연결 → CRUD 게시판</b> <span>— .env 하나로 GitHub·Supabase·Vercel 배선.</span></div></li>
+        <li><span class="n">③</span><div><b>딥인터뷰</b> <span>— "뭘 만들까"가 아니라 "뭐가 불편한가"부터.</span></div></li>
+        <li><span class="n">④</span><div><b>씽킹노트</b> <span>— 배운 걸 흘리지 말고 노트로 붙잡아 쌓기.</span></div></li>
+        <li><span class="n">⑤</span><div><b>서브에이전트 · 동적 워크플로우</b> <span>— 큰 일은 쪼개서 병렬로.</span></div></li>
+      </ol>
+      <div class="band">💡 <b>한 문장:</b> 재활용이 자동화의 핵심 = <mark>스킬</mark>. 스킬과 서브에이전트는 본질적으로 한 몸이다.</div>
+      <div class="foot"><span><b>Aramirror</b> — AI는 거울이 된다</span><span>05 / 07</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">05 · APPLY — 배운 걸 그날 내 것에</div><div class="accent"></div>
+      <div class="h2" style="margin-top:1.4vw">듣고 끝이 아니라, <mark>그날 만들었다</mark></div>
+      <ul class="b">
+        <li><span class="d">②</span><div><b>KEY→CRUD 그대로.</b> <span>게시판 /board · 관리자 /admin 을 그날 구축. 정적 사이트 위 localStorage로 실제 동작, KEY만 꽂으면 실서버로 승격.</span></div></li>
+        <li><span class="d">⑤</span><div><b>서브에이전트 그대로.</b> <span>공유회 스크린샷 32장을 병렬 MECE로 정리 — 배운 방법을 문서화하는 그 자리에서 써먹었다.</span></div></li>
+        <li><span class="d">—</span><div><b>자가검수로 실버그 2건.</b> <span>빈 모달 노출 · 관리자 재방문 TDZ 에러를 스크린샷 검수로 잡아 고쳤다.</span></div></li>
+        <li><span class="d">—</span><div><b>라이브.</b> <span>hyun-arch.github.io/board · /admin — 이미 돌아간다.</span></div></li>
+      </ul>
+      <div class="foot"><span><b>Aramirror</b> — AI는 거울이 된다</span><span>06 / 07</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">06 · NOW — 지금, 그리고 배운 것</div><div class="accent"></div>
+      <div class="h2" style="margin-top:1.4vw">이미 살아 움직인다</div>
+      <ul class="b">
+        <li><span class="d">—</span><div><b>라이브 배포 완료.</b> <span>hyun-arch.github.io — The Wall · 몰입(Flow) · 게시판까지.</span></div></li>
+        <li><span class="d">—</span><div><b>매일 아침 7시.</b> <span>밤새 종합한 걸 텔레그램으로 받는다 → 피드백 → 다듬기. OS가 돈다.</span></div></li>
+      </ul>
+      <div class="spacer"></div>
+      <div class="quote">“기록이 아니라 <mark>‘승격’</mark>이 핵심이다.”</div>
+      <div class="meta" style="margin-top:1vw">그리고 — 강의를 들었다가 아니라 <b>‘그날 바로 하나 만들었다’</b>가 남는다. 배움도 그날 재활용해야 자산이 된다.</div>
+      <div class="foot"><span><b>Aramirror</b> — AI는 거울이 된다</span><span>07 / 07</span></div>
+    </section>
+  </div>
+
+  <div class="ctl">
+    <button id="prev" aria-label="이전 슬라이드">‹ 이전</button>
+    <span class="pg" id="pg">1 / 7</span>
+    <button id="next" aria-label="다음 슬라이드">다음 ›</button>
+    <button id="notesBtn" title="발표자 노트 (N)">노트</button>
+  </div>
+  <div class="notes" id="notes"><h4>발표자 노트</h4><div id="noteBody"></div></div>
+
+<script>
+  const NOTES = [
+    "안녕하세요, 박상현입니다. 오늘 발표는 두 가지를 하나로 묶었습니다. 하나는 제가 만든 개인 OS '아라미러' 이야기 — 왜 시작했고, 어떻게 기획했고, 만들며 무엇에 부딪혔는지. 다른 하나는 이기적스폰지 공유회에서 배운 걸 제가 그날 바로 어떻게 써먹었는지입니다. 핵심 문장은 하나예요. 'AI는 나를 대신하지 않는다, 거울이 된다.'",
+    "시작은 거창한 아이디어가 아니라 제 한계였습니다. 미국 출장에서 막 돌아오고 제주 주말도 제대로 못 쉰 어느 피곤한 밤, 머릿속이 가득 차서 한계가 느껴졌어요. 그때 깨달았습니다. 한계를 넘는 건 더 버티는 게 아니라 머릿속을 비우는 거라고. 정리 안 된 채 떠다니는 생각이 제일 무겁더라고요. 노션도 보드도 태그도 며칠을 못 갔습니다. 정리에 제 손이 들어가니까요. 그래서 원칙을 아예 뒤집기로 했습니다.",
+    "제가 뒤집은 원칙은 세 가지입니다. 첫째, 입력 마찰을 0으로 — 그냥 텔레그램에 말만 던지고 저널에 자동으로 쌓이게. 둘째, 정리는 100% AI가 — 분류·연결·서술을 맡기고 밤마다 지난 기록과 자동으로 엮이게. 셋째, 소유권은 저에게 — AI는 편집자일 뿐 생각은 제 것. 그리고 제가 특별히 세운 원칙이 The Wall, 생각의 벽입니다. 제 생각과 남에게서 온 것을 절대 섞지 않고, 연료엔 반드시 출처를 답니다.",
+    "만드는 과정은 순탄하지 않았습니다. 제가 직접 부딪힌 벽들이에요. 먼저 'AI가 나를 대신하는 거 아닌가' 하는 불안 — 한 문장으로 매듭지었습니다. 대신하지 않는다, 거울이 된다. 그다음 봇이 자꾸 죽어서 winpty로 감싸고 자동시작을 걸어 24시간 살렸고, 배포하니 모바일·PC에서 디자인이 깨져서 흑백 미니멀로 전면 개편한 뒤 스크린샷으로 직접 검수하고 다시 배포했습니다. 이 부딪히고 고치는 과정이 이걸 진짜 제 것으로 만들었습니다.",
+    "여기서부터는 배움 이야기입니다. 이기적스폰지 공유회에서 다섯 가지를 배웠어요. ①반복을 스킬로 굳히기, ②KEY를 연결해 CRUD 게시판 만들기, ③딥인터뷰로 내 재료 찾기, ④씽킹노트로 배운 걸 붙잡기, ⑤서브에이전트로 큰 일을 쪼개 병렬로. 관통하는 한 문장은 — 재활용이 자동화의 핵심이고 그게 스킬이다, 그리고 스킬과 서브에이전트는 본질적으로 한 몸이라는 겁니다.",
+    "중요한 건 듣고 끝이 아니었다는 거예요. 저는 그날 바로 세 개를 제 것에 적용했습니다. ②번 그대로, 게시판과 관리자 콘솔을 그날 만들었습니다. 정적 사이트라 지금은 브라우저 저장으로 돌지만 KEY만 꽂으면 실서버로 승격됩니다. ⑤번 그대로, 공유회 스크린샷 32장을 서브에이전트로 병렬 정리했어요. 배운 방법을 문서화하는 바로 그 자리에서 써먹은 겁니다. 그리고 스크린샷 자가검수로 실제 버그 2개를 잡아 고쳤고, 지금 라이브로 돌아갑니다.",
+    "정리하겠습니다. 아라미러는 이미 라이브고, 매일 아침 7시 텔레그램 보고로 OS가 실제로 돌고 있습니다. 제가 배운 두 문장으로 마무리할게요. 첫째, 기록이 아니라 '승격'이 핵심이다 — 던진 생각이 자산이 될 때 AI는 저를 비추는 거울이 됩니다. 둘째, 강의를 들었다가 아니라 '그날 바로 하나 만들었다'가 남는다. 배움도 그날 재활용해야 자산이 됩니다. 감사합니다."
+  ];
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;
+  function show(n){
+    i=(n+slides.length)%slides.length;
+    slides.forEach((s,k)=>s.classList.toggle('on',k===i));
+    document.getElementById('pg').textContent=(i+1)+" / "+slides.length;
+    document.getElementById('noteBody').textContent=NOTES[i];
+    if(location.hash!=='#'+(i+1)) history.replaceState(null,'','#'+(i+1));
+  }
+  document.getElementById('prev').onclick=()=>show(i-1);
+  document.getElementById('next').onclick=()=>show(i+1);
+  document.getElementById('tapL').onclick=()=>show(i-1);
+  document.getElementById('tapR').onclick=()=>show(i+1);
+  document.getElementById('notesBtn').onclick=()=>document.getElementById('notes').classList.toggle('on');
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown')show(i+1);
+    else if(e.key==='ArrowLeft'||e.key==='PageUp')show(i-1);
+    else if(e.key.toLowerCase()==='n')document.getElementById('notes').classList.toggle('on');
+    else if(e.key==='Home')show(0); else if(e.key==='End')show(slides.length-1);
+  });
+  const start=parseInt((location.hash||'#1').slice(1),10);
+  show(isNaN(start)?0:start-1);
+</script>
+</body>
+</html>
