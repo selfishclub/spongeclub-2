@@ -7,7 +7,6 @@ title: 강의 영상 편집 자동화 OS (강의 → 쇼츠)
 date: 260706
 ---
 
-![2주차 미션 안내](https://github.com/selfishclub/spongeclub-2/raw/main/_meta/week2/overview.png)
 
 # 2주차 — 내 OS 구현하기 🚀
 
@@ -103,6 +102,6 @@ OS로 한 편 뽑는 것 자체는 됐다. 근데 그걸 "그냥 나온 것"이 
 ## 📣 미션 2. 유닛 활동 참여 & SNS 공유
 > 유닛 활동에 적극 참여(유닛원으로서 or 참가자로서)한 뒤, 그 경험을 SNS에 올리기
 
-- **참여한 유닛 / 활동:**
-- **무엇을 했나 (경험):**
-- **SNS 인증 링크:**
+- **참여한 유닛 / 활동:** 영상유닛
+- **무엇을 했나 (경험):** 영상편집 반 자동화 작업 완전 자동화는 너무 멀은것 같다;;;
+- **SNS 인증 링크:** https://www.instagram.com/reel/Dafk138JzaP/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==
