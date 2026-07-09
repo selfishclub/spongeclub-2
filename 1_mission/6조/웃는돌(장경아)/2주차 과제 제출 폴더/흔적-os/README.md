@@ -42,7 +42,7 @@
 
 ## 로드맵
 - [x] **1단계** — 분류·복원 두뇌(스킬) + 역할 저장 구조
-- [x] **2단계(코드)** — 텔레그램 → inbox 자동 캡처 파이프. 코드·설치안내 완성 + 로컬 검증 통과. 배포는 계정 세팅만 남음 → [`telegram-capture/SETUP.md`](./telegram-capture/SETUP.md)
+- [x] **2단계** — 텔레그램 → inbox 자동 캡처 파이프. 🟢 **실배포·실동작 완료** (봇 `@imprint_os_bot` → `imprint-os-capture.vercel.app` → 개인 저장소 `imprint-os-data/inbox.md`). 재현 안내 → [`telegram-capture/SETUP.md`](./telegram-capture/SETUP.md)
 - [ ] **3단계** — 역할 전환 감지 시 복원 화면 자동 푸시 / 캡처 시 실시간 자동 분류
 
 ## 설치 (클로드 코드)
