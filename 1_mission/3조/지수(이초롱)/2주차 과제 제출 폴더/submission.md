@@ -50,9 +50,6 @@ Life Time·Equinox·Third Space 3사를 주제별로 조사했습니다. 가장 
 **5. Vercel 배포**
 
 직원들과 함께 쓸 수 있도록 공개 URL로 배포했습니다.
-=======
-# 2주차 — 내 OS 구현하기 🚀
->>>>>>> 6dbfb3f7925b78f6a834bee62976f50d0fe0b5a4
 
 ## 삽질 과정
 
