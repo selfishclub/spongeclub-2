@@ -1,0 +1,450 @@
+<title>반응은 봄에 가장 뜨거웠다 — 브랜드A 인사이트</title>
+<style>
+  :root {
+    --paper: #f0f2ee;
+    --page: #e9ece7;
+    --card: #ffffff;
+    --ink: #14201c;
+    --ink-2: #52625c;
+    --ink-3: #8a968f;
+    --hair: #d7ddd8;
+    --hair-strong: #c3ccc5;
+    --aqua: #1baf7a;
+    --aqua-soft: #86dcbc;
+    --aqua-wash: #dff3ea;
+    --amber: #b5790a;
+    --amber-wash: #f8ecd6;
+    --focus: #1c4d3f;
+
+    --font-display: ui-serif, Georgia, "Iowan Old Style", "Palatino Linotype", "Palatino", serif;
+    --font-sans: "Pretendard Variable", -apple-system, BlinkMacSystemFont, "Malgun Gothic", "Apple SD Gothic Neo", "Segoe UI", sans-serif;
+    --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #14181a;
+      --page: #0e1110;
+      --card: #191f1c;
+      --ink: #eef3ef;
+      --ink-2: #b7c2bc;
+      --ink-3: #7c8883;
+      --hair: #2a322e;
+      --hair-strong: #38423c;
+      --aqua: #2ec090;
+      --aqua-soft: #1c5a45;
+      --aqua-wash: #17332a;
+      --amber: #d69a3d;
+      --amber-wash: #362a12;
+      --focus: #6fd6b3;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #14181a;
+    --page: #0e1110;
+    --card: #191f1c;
+    --ink: #eef3ef;
+    --ink-2: #b7c2bc;
+    --ink-3: #7c8883;
+    --hair: #2a322e;
+    --hair-strong: #38423c;
+    --aqua: #2ec090;
+    --aqua-soft: #1c5a45;
+    --aqua-wash: #17332a;
+    --amber: #d69a3d;
+    --amber-wash: #362a12;
+    --focus: #6fd6b3;
+  }
+  :root[data-theme="light"] {
+    --paper: #f0f2ee;
+    --page: #e9ece7;
+    --card: #ffffff;
+    --ink: #14201c;
+    --ink-2: #52625c;
+    --ink-3: #8a968f;
+    --hair: #d7ddd8;
+    --hair-strong: #c3ccc5;
+    --aqua: #1baf7a;
+    --aqua-soft: #86dcbc;
+    --aqua-wash: #dff3ea;
+    --amber: #b5790a;
+    --amber-wash: #f8ecd6;
+    --focus: #1c4d3f;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--page);
+    color: var(--ink);
+    font-family: var(--font-sans);
+  }
+  body { padding: clamp(20px, 5vw, 56px) 18px 80px; }
+  .sheet {
+    max-width: 760px;
+    margin: 0 auto;
+    background: var(--paper);
+    border: 1px solid var(--hair);
+    border-radius: 14px;
+    padding: clamp(24px, 5vw, 52px);
+  }
+
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    margin: 0 0 14px;
+  }
+  h1 {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: clamp(26px, 4vw, 36px);
+    line-height: 1.28;
+    letter-spacing: -0.01em;
+    margin: 0 0 12px;
+    text-wrap: balance;
+    max-width: 18ch;
+  }
+  .thesis {
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--ink-2);
+    max-width: 62ch;
+    margin: 0 0 18px;
+  }
+  .thesis b { color: var(--ink); font-weight: 600; }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    font-size: 13px;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--hair);
+    margin-bottom: 32px;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 40px;
+  }
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--hair);
+    border-radius: 10px;
+    padding: 16px 16px 14px;
+  }
+  .stat .stat-label { font-size: 12.5px; color: var(--ink-2); margin: 0 0 8px; }
+  .stat .stat-value {
+    font-family: var(--font-display);
+    font-size: clamp(26px, 4vw, 32px);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    margin: 0 0 8px;
+  }
+  .stat.aqua .stat-value { color: var(--aqua); }
+  .stat.amber .stat-value { color: var(--amber); }
+  .stat .stat-sub { font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; line-height: 1.5; }
+
+  section.block { margin-bottom: 44px; }
+  h2.section-title { font-size: 15px; font-weight: 700; margin: 0 0 4px; }
+  .section-sub { font-size: 12.5px; color: var(--ink-3); margin: 0 0 16px; }
+
+  .chart-card { background: var(--card); border: 1px solid var(--hair); border-radius: 10px; padding: 18px 18px 10px; }
+  .legend { display: flex; gap: 18px; font-size: 12.5px; color: var(--ink-2); margin-bottom: 10px; }
+  .legend .swatch { display: inline-flex; align-items: center; gap: 6px; }
+  .legend .dot { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+  .chart-scroll { overflow-x: auto; }
+  svg text { font-family: var(--font-sans); fill: var(--ink-3); }
+  .axis-line { stroke: var(--hair-strong); stroke-width: 1; }
+  .grid-line { stroke: var(--hair); stroke-width: 1; }
+  .bar { transition: opacity .15s ease; }
+  .bar:hover { opacity: 0.78; }
+  .callout-label { font-size: 11px; fill: var(--ink); font-weight: 600; }
+
+  #er-tooltip-a {
+    position: absolute;
+    pointer-events: none;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+    padding: 6px 9px;
+    border-radius: 6px;
+    line-height: 1.4;
+    opacity: 0;
+    transform: translate(-50%, -110%);
+    white-space: nowrap;
+    transition: opacity .1s ease;
+    z-index: 5;
+  }
+  .chart-wrap { position: relative; }
+
+  .insight-groups { display: flex; flex-direction: column; gap: 22px; }
+  .insight-group { display: flex; gap: 16px; }
+  .insight-tag { flex: 0 0 74px; font-size: 12px; font-weight: 700; color: var(--ink-2); padding-top: 2px; }
+  .insight-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .insight-list li { font-size: 14.5px; line-height: 1.62; color: var(--ink); padding-left: 14px; border-left: 2px solid var(--hair-strong); }
+  .insight-list li b { color: var(--ink); }
+  .insight-list li .num { font-family: var(--font-mono); font-size: 12px; color: var(--ink-3); margin-right: 6px; }
+
+  .gap-box {
+    background: var(--amber-wash);
+    border: 1px solid var(--hair);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ink-2);
+  }
+  .gap-box b { color: var(--ink); }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+    font-family: var(--font-mono);
+    min-width: 640px;
+  }
+  thead th { text-align: right; font-weight: 600; color: var(--ink-2); border-bottom: 1px solid var(--hair-strong); padding: 7px 10px; white-space: nowrap; }
+  thead th:first-child, thead th:nth-child(2) { text-align: left; }
+  tbody td { text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--hair); color: var(--ink); white-space: nowrap; }
+  tbody td:first-child, tbody td:nth-child(2) { text-align: left; font-family: var(--font-sans); color: var(--ink-2); }
+  tbody tr.half td { font-weight: 700; background: var(--aqua-wash); }
+  tbody tr.half td:first-child, tbody tr.half td:nth-child(2) { color: var(--ink); }
+
+  footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--hair); font-size: 12px; color: var(--ink-3); line-height: 1.7; }
+
+  @media (max-width: 560px) {
+    .stats { grid-template-columns: 1fr; }
+    .insight-group { flex-direction: column; gap: 6px; }
+    .insight-tag { flex: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { .bar, #er-tooltip-a { transition: none; } }
+</style>
+
+<div class="sheet">
+  <p class="eyebrow">반기리포트 인사이트 · 브랜드A · 인스타그램</p>
+  <h1>반응은 봄에 가장 뜨거웠다</h1>
+  <p class="thesis">
+    2026년 상반기, 참여율은 <b>2월 7.9%에서 4월 11.0%</b>까지 벌어졌다.
+    노출·도달이 가장 많았던 4월에, 반응도 같은 달에 가장 뜨거웠다.
+  </p>
+  <div class="meta">
+    <span>기간 2026-01 ~ 2026-06</span>
+    <span>월별 집계 6개월</span>
+    <span>채널 인스타그램 1개</span>
+    <span>정리일 2026-07-05</span>
+  </div>
+
+  <div class="stats">
+    <div class="stat aqua">
+      <p class="stat-label">노출수</p>
+      <p class="stat-value">105,000</p>
+      <p class="stat-sub">2026 상반기 합계</p>
+    </div>
+    <div class="stat aqua">
+      <p class="stat-label">도달수</p>
+      <p class="stat-value">77,800</p>
+      <p class="stat-sub">2026 상반기 합계</p>
+    </div>
+    <div class="stat amber">
+      <p class="stat-label">참여율 (ER)</p>
+      <p class="stat-value">9.1%</p>
+      <p class="stat-sub">상반기 평균 · 최저 7.9%(2월) ~ 최고 11.0%(4월)</p>
+    </div>
+  </div>
+
+  <section class="block">
+    <h2 class="section-title">월별 노출수 vs 도달수 — 2026 상반기</h2>
+    <p class="section-sub">노출(연한 아쿠아)과 도달(짙은 아쿠아)을 나란히 놓고 본 규모</p>
+    <div class="chart-card">
+      <div class="legend">
+        <span class="swatch"><span class="dot" style="background:var(--aqua-soft)"></span>노출수</span>
+        <span class="swatch"><span class="dot" style="background:var(--aqua)"></span>도달수</span>
+      </div>
+      <div class="chart-scroll">
+        <svg viewBox="0 0 700 260" width="100%" style="min-width:560px" role="img" aria-label="2026년 상반기 월별 노출수와 도달수 비교 막대그래프">
+          <line class="grid-line" x1="40" y1="40" x2="690" y2="40"></line>
+          <line class="grid-line" x1="40" y1="140" x2="690" y2="140"></line>
+          <line class="axis-line" x1="40" y1="240" x2="690" y2="240"></line>
+
+          <g>
+            <rect class="bar" x="50" y="110.1" width="40" height="129.9" fill="var(--aqua-soft)"><title>2026-01 노출수 15,200</title></rect>
+            <rect class="bar" x="92" y="139.1" width="40" height="100.9" fill="var(--aqua)"><title>2026-01 도달수 11,800</title></rect>
+            <text x="91" y="255" text-anchor="middle" font-size="11">1월</text>
+          </g>
+          <g>
+            <rect class="bar" x="158" y="136.6" width="40" height="103.4" fill="var(--aqua-soft)"><title>2026-02 노출수 12,100</title></rect>
+            <rect class="bar" x="200" y="158.8" width="40" height="81.2" fill="var(--aqua)"><title>2026-02 도달수 9,500</title></rect>
+            <text x="199" y="255" text-anchor="middle" font-size="11">2월</text>
+          </g>
+          <g>
+            <rect class="bar" x="266" y="70.8" width="40" height="169.2" fill="var(--aqua-soft)"><title>2026-03 노출수 19,800</title></rect>
+            <rect class="bar" x="308" y="118.6" width="40" height="121.4" fill="var(--aqua)"><title>2026-03 도달수 14,200</title></rect>
+            <text x="307" y="255" text-anchor="middle" font-size="11">3월</text>
+          </g>
+          <g>
+            <rect class="bar" x="374" y="40" width="40" height="200" fill="var(--aqua-soft)"><title>2026-04 노출수 23,400 (상반기 중 최대)</title></rect>
+            <rect class="bar" x="416" y="96.4" width="40" height="143.6" fill="var(--aqua)"><title>2026-04 도달수 16,800</title></rect>
+            <text x="415" y="255" text-anchor="middle" font-size="11">4월</text>
+          </g>
+          <g>
+            <rect class="bar" x="482" y="89.6" width="40" height="150.4" fill="var(--aqua-soft)"><title>2026-05 노출수 17,600</title></rect>
+            <rect class="bar" x="524" y="128.0" width="40" height="112.0" fill="var(--aqua)"><title>2026-05 도달수 13,100</title></rect>
+            <text x="523" y="255" text-anchor="middle" font-size="11">5월</text>
+          </g>
+          <g>
+            <rect class="bar" x="590" y="95.6" width="40" height="144.4" fill="var(--aqua-soft)"><title>2026-06 노출수 16,900</title></rect>
+            <rect class="bar" x="632" y="134.0" width="40" height="106.0" fill="var(--aqua)"><title>2026-06 도달수 12,400</title></rect>
+            <text x="631" y="255" text-anchor="middle" font-size="11">6월</text>
+          </g>
+
+          <text x="35" y="44" text-anchor="end" font-size="10">23K</text>
+          <text x="35" y="144" text-anchor="end" font-size="10">12K</text>
+          <text x="35" y="244" text-anchor="end" font-size="10">0</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2 class="section-title">월별 참여율(ER) 추이 — 2026 상반기</h2>
+    <p class="section-sub">노출·도달 규모와 별개로, 반응이 가장 뜨거웠던 달은 언제였을까</p>
+    <div class="chart-card">
+      <div class="chart-scroll">
+        <div class="chart-wrap">
+        <svg id="er-svg-a" viewBox="0 0 700 200" width="100%" style="min-width:560px" role="img" aria-label="2026년 상반기 월별 참여율 추이 선그래프">
+          <line class="grid-line" x1="40" y1="20" x2="690" y2="20"></line>
+          <line class="grid-line" x1="40" y1="90" x2="690" y2="90"></line>
+          <line class="axis-line" x1="40" y1="160" x2="690" y2="160"></line>
+
+          <text x="35" y="24" text-anchor="end" font-size="10">12%</text>
+          <text x="35" y="94" text-anchor="end" font-size="10">6%</text>
+          <text x="35" y="164" text-anchor="end" font-size="10">0%</text>
+
+          <polyline fill="none" stroke="var(--amber)" stroke-width="2"
+            points="40,66.7 170,67.8 300,52.7 430,31.7 560,55.0 690,56.2" />
+
+          <g id="er-points-a">
+            <circle cx="40" cy="66.7" r="3.5" fill="var(--amber)" data-m="1월 신년 인사" data-v="8.0"></circle>
+            <circle cx="170" cy="67.8" r="4.5" fill="var(--amber)" data-m="2월 밸런타인 기획전" data-v="7.9"></circle>
+            <circle cx="300" cy="52.7" r="3.5" fill="var(--amber)" data-m="3월 봄 신상 런칭" data-v="9.2"></circle>
+            <circle cx="430" cy="31.7" r="4.5" fill="var(--amber)" data-m="4월 사용자 후기 릴스" data-v="11.0"></circle>
+            <circle cx="560" cy="55.0" r="3.5" fill="var(--amber)" data-m="5월 가정의달 이벤트" data-v="9.0"></circle>
+            <circle cx="690" cy="56.2" r="3.5" fill="var(--amber)" data-m="6월 여름 프리뷰" data-v="8.9"></circle>
+          </g>
+
+          <text x="430" y="20" text-anchor="middle" class="callout-label">4월 최고 11.0%</text>
+          <text x="170" y="86" text-anchor="middle" class="callout-label">2월 최저 7.9%</text>
+
+          <text x="40" y="178" text-anchor="middle" font-size="11">1월</text>
+          <text x="170" y="178" text-anchor="middle" font-size="11">2월</text>
+          <text x="300" y="178" text-anchor="middle" font-size="11">3월</text>
+          <text x="430" y="178" text-anchor="middle" font-size="11">4월</text>
+          <text x="560" y="178" text-anchor="middle" font-size="11">5월</text>
+          <text x="690" y="178" text-anchor="middle" font-size="11">6월</text>
+        </svg>
+        <div id="er-tooltip-a"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2 class="section-title">인사이트 초안</h2>
+    <p class="section-sub">⚠️ 초안입니다. 숫자 근거만 담았고, 최종 해석·문장 다듬기는 직접 하세요.</p>
+    <div class="insight-groups">
+      <div class="insight-group">
+        <div class="insight-tag">증감</div>
+        <ul class="insight-list">
+          <li><span class="num">01</span>참여율이 <b>4월에 상반기 최고(11.0%)</b>, 2월에 최저(7.9%)를 기록. 3~6월은 모두 8.9~11.0%로 상반기 초반보다 높음.</li>
+          <li><span class="num">02</span>참여수가 <b>4월에 정점(1,848회)</b> — 1월(940회) 대비 약 2배.</li>
+        </ul>
+      </div>
+      <div class="insight-group">
+        <div class="insight-tag">특이점</div>
+        <ul class="insight-list">
+          <li><span class="num">03</span><b>4월 '사용자 후기 릴스'</b>가 공유(120)·저장(260)에서 유독 튐 — 다른 달 공유 19~44, 저장 88~175 대비 확연히 높음. 후기·릴스 포맷의 확산력이 컸음.</li>
+          <li><span class="num">04</span><b>2월 '밸런타인 기획전'</b>은 노출(12,100) 대비 참여율(7.9%)이 상대적으로 낮음 — 도달은 나왔지만 반응 전환이 약했던 달.</li>
+        </ul>
+      </div>
+      <div class="insight-group">
+        <div class="insight-tag">효율</div>
+        <ul class="insight-list">
+          <li><span class="num">05</span>노출 대비 참여 효율은 <b>3~4월이 가장 좋음(참여율 9.2%·11.0%)</b> — 신상 런칭(3월)과 후기 릴스(4월) 콘텐츠가 효율 상위.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" style="margin-bottom: 8px;">
+    <h2 class="section-title">근거 데이터가 없어 못 뽑은 것</h2>
+    <div class="gap-box">
+      <b>전환/성과</b> — 원본에 전환 데이터가 없어 "참여가 실제 문의·구매로 이어졌는지"는 판단 불가. 문의·구매 데이터가 있으면 채널 파일에 열을 추가해 주세요. (제외한 항목은 없음 — 나머지 열은 모두 리포트 항목에 매핑됨)
+    </div>
+  </section>
+
+  <section class="block" style="margin-bottom: 0;">
+    <h2 class="section-title">정리표 원본</h2>
+    <div class="chart-scroll">
+      <table>
+        <thead>
+          <tr><th>브랜드</th><th>기간</th><th>노출수</th><th>도달수</th><th>참여수</th><th>참여율</th><th>유입수</th><th>전환/성과</th></tr>
+        </thead>
+        <tbody>
+          <tr class="half"><td>브랜드A</td><td>2026 상반기</td><td>105,000</td><td>77,800</td><td>7,118</td><td>9.1%</td><td>1,933</td><td>-</td></tr>
+          <tr><td>브랜드A</td><td>2026-01</td><td>15,200</td><td>11,800</td><td>940</td><td>8.0%</td><td>275</td><td>-</td></tr>
+          <tr><td>브랜드A</td><td>2026-02</td><td>12,100</td><td>9,500</td><td>752</td><td>7.9%</td><td>222</td><td>-</td></tr>
+          <tr><td>브랜드A</td><td>2026-03</td><td>19,800</td><td>14,200</td><td>1,300</td><td>9.2%</td><td>370</td><td>-</td></tr>
+          <tr><td>브랜드A</td><td>2026-04</td><td>23,400</td><td>16,800</td><td>1,848</td><td>11.0%</td><td>452</td><td>-</td></tr>
+          <tr><td>브랜드A</td><td>2026-05</td><td>17,600</td><td>13,100</td><td>1,180</td><td>9.0%</td><td>323</td><td>-</td></tr>
+          <tr><td>브랜드A</td><td>2026-06</td><td>16,900</td><td>12,400</td><td>1,098</td><td>8.9%</td><td>291</td><td>-</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    원본: <code>01_raw/인스타_브랜드A_2026상반기_예시.csv</code> (6행, 월별 집계 예시) ·
+    반기리포트-데이터정리-OS · 콩(공지은) · 1조
+  </footer>
+</div>
+
+<script>
+  (function () {
+    var svg = document.getElementById('er-svg-a');
+    var tooltip = document.getElementById('er-tooltip-a');
+    var points = Array.prototype.slice.call(document.querySelectorAll('#er-points-a circle'));
+    if (!svg || !tooltip || !points.length) return;
+
+    function showTooltip(pt) {
+      var wrap = svg.parentElement.getBoundingClientRect();
+      var cx = parseFloat(pt.getAttribute('cx'));
+      var cy = parseFloat(pt.getAttribute('cy'));
+      var svgRect = svg.getBoundingClientRect();
+      var scaleX = svgRect.width / 700;
+      var scaleY = svgRect.height / 200;
+      var left = (cx * scaleX) + (svgRect.left - wrap.left);
+      var top = (cy * scaleY) + (svgRect.top - wrap.top);
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.innerHTML = pt.getAttribute('data-m') + ' &nbsp;·&nbsp; 참여율 ' + pt.getAttribute('data-v') + '%';
+      tooltip.style.opacity = '1';
+    }
+
+    points.forEach(function (pt) {
+      pt.style.cursor = 'pointer';
+      pt.setAttribute('tabindex', '0');
+      pt.addEventListener('mouseenter', function () { showTooltip(pt); });
+      pt.addEventListener('mouseleave', function () { tooltip.style.opacity = '0'; });
+      pt.addEventListener('focus', function () { showTooltip(pt); });
+      pt.addEventListener('blur', function () { tooltip.style.opacity = '0'; });
+    });
+  })();
+</script>

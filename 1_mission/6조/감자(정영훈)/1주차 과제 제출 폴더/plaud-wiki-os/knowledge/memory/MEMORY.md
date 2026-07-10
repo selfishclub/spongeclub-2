@@ -1,0 +1,100 @@
+- [Ouroboros 하네스 교체](project_ouroboros_harness.md) — Ouroboros Agent OS로 하네스 전면 교체 중. 1단계 플러그인 설치 완료, 재시작+/ouroboros:setup 대기, 2단계(기존 하네스 정리) 보류 (2026-06-03)
+- [지식 위키](project_knowledge_wiki.md) — 지식 그래프+챗(RAG). Plaud 녹음 자동 적층 가동(launchd 매일 08:00, E2E 검증), v2 라벨·삭제/숨기기 완료, 액션추출 보류 (2026-07-05)
+- [macOS Mail 자동화 막힘](reference_mac_mail_automation.md) — Mail.app AppleScript timeout(-1712). 자동 메일 발송 시 SendUserFile→사용자 수동, Gmail SMTP 등 우회 (2026-05-24)
+- [외부 제출 문서 "보완/수정" 흔적 금지](feedback_no_revision_traces.md) — 표지·본문·파일명에 보완본/수정/정정/양해 표현 금지. 항상 최종본처럼 (2026-05-24)
+- [G엔터 나라장터 자동화](project_g_ent_bid.md) — Phase 1 완료. 매일 09:00 launchd 폴링 + Haiku 매칭 + Notion 적재. 29 tests PASS (2026-05-17)
+- [IG 릴스 댓글→리드 자동화](project_ig_leadmagnet_automation.md) — 하이브리드: 발송=ManyChat(Advanced Access 보유), 적재=자체 웹훅→Supabase, 로컬 어드민. DM 자체발송은 Advanced Access(App Review) 필요=미통과 (2026-05-27)
+- [LocalFalcon MCP](reference_localfalcon_mcp.md) — Bearer 헤더 필수(URL param 401), v1.4.3, GBP 측정 SOP 매핑 (2026-05-13)
+- [A의원 GBP](project_a_clinic_gbp.md) — 모발이식 강남, 5키워드 0.1mi 측정 대기, 재시작 후 진행 (2026-05-13)
+- [우리 회사 표준 상품가](project_company_pricing.md) — GBP 언어당 50만, 구글 애즈 15% 마크업/300만 미만 45만 고정 (2026-05-08)
+- [Pluuug MCP 서버](project_pluuug_mcp.md) — 거래처 → docx 치환 → GDrive 저장 → Pluuug 등록 통합 (2026-05-08)
+- [프롬프팅 교정 금지](feedback_no_prompt_correction.md) — 단답·brain-dump·지시어 남용 그대로 받고 의도 추론. 처방·템플릿 강요 금지 (2026-05-03)
+- [Pencil 새 파일 원칙](feedback_pencil_new_file.md) — 신규 작업은 무조건 새 .pen 파일 cp/생성 후 시작. 메모리 휘발 사고 방지 (2026-05-05)
+- [SOP 작성 즉시 창 띄우기](feedback_sop_auto_open.md) — SOP 신규/수정 후 반드시 `open <path>` 자동 실행 (2026-05-11)
+- [카드뉴스 자동화 Phase 1](project_cardnews_automation.md) — personal-brand/auto/ 9모듈 57테스트, launchd 매일 05:00 자동 실행 검증 완료 (python3 FDA 부여), Nova DB 주제 시드만 옵션 (2026-05-11)
+- [Pencil 역할 분담 (강화)](feedback_pencil_role_split.md) — .pen 파일 절대 직접 수정 X. 콘텐츠도 prompt 파일로 정리해서 사용자가 Pencil agent에 던지게 (2026-05-09 강화)
+- [디자인 SOP — HTML Reference 기반](feedback_design_html_reference_sop.md) — 추상 디자인 시스템 X, 마음에 드는 reference HTML 코드 → 템플릿화 → AI에게 그대로 만들라. 모든 시각 산출물 적용 (2026-05-10)
+- [IR/Pitch 카피 원칙 — Status → Impact](feedback_pitch_copy_principles.md) — "신청 완료/확보 완료" status 나열 금지. impact 중심·비즈니스 용어·단호한 단문. Gemini 검증 (2026-05-11)
+- [카피·IR 마스터 지침](feedback_korean_copywriting_master.md) — 카피·IR 키워드 시 최우선. 페르소나+금지어+4대 원칙+Before/After+훅 템플릿 (2026-05-11)
+- [recall 자연어 검색](project_recall_system.md) — 과거 세션 SQLite FTS5 검색, /recall 커맨드, 매일 03:00 증분 인덱싱 (2026-04-27)
+- [Notion Emoji](feedback_emoji_icon.md) — 미션 이모지는 제목이 아닌 페이지 아이콘으로
+- [Use 대표OS](feedback_notion_workspace_usage.md) — Notion은 대표OS [Nova] DB 사용, Claude Planner 별도 DB 사용 안함
+- [공식 API 문서 우선](feedback_official_api_docs.md) — API 연동 시 공식 문서 필수, 못 가져오면 사용자에게 요청
+- [토스 공식 자원만](feedback_toss_official_only.md) — 토스 미니앱 작업 시 docs-search/project-validator/apps-in-toss MCP 우선 (2026-05-05)
+- [사진 분류 스킵](feedback_skip_photo_classification.md) — 파일 정리 시 사진/영상은 자동 분류 제외
+- [파일 정리 규칙](feedback_file_organization.md) — 해시명 금지, dry-run 필수, 보고서는 YYMMDD_상호명_지점_채널_유형
+- [마케팅 멘토 역할](project_marketing_mentor.md) — 우리 회사 자체 마케팅 최적화, 리드 전환율 개선, API 자동화
+- [지출 ROI 체크](feedback_roi_check.md) — 비용 제안 시 잔액 확인 + ROI 근거 필수, 판단은 사용자에게
+- [터미널 상태 보고](feedback_terminal_status_report.md) — 터미널/프로세스 상태 물어보면 실행 중인 서비스 조사 후 보고
+- [iMessage 알림](feedback_imessage_notifications.md) — 알림 채널 텔레그램→iMessage 이전, self-chat(`any;-;[연락처]`)
+- [iMessage 리스너](project_imessage_listener.md) — 자동 폴링 리스너, 30초 간격, claude -p Sonnet, FDA 터미널 필수 (2026-04-07)
+- [AI 생성물 네이밍](feedback_naming_convention.md) — Claude가 만든 것에 [M] 접두어로 구분 표시
+- [공식 문서 우선](feedback_official_docs_only.md) — 시스템 설계 시 Anthropic 공식 문서만 참고, 블로그/유튜브 overhype 배제
+- [기술 용어 금지](feedback_explain_simply.md) — 파일명/스키마 나열 말고 사용자 액션 위주로 쉽게 설명
+- [작업 재개 시 git 우선](feedback_work_context.md) — 재개 요청 시 메모리보다 git log 최근 커밋을 먼저 확인
+- [메타 광고 자동화](project_meta_ads.md) — 오케스트레이터 통합, urllib 안정화, paid-ads 스킬 설치 (2026-04-03)
+- [작업 완료 시 메모리 필수](feedback_save_work_to_memory.md) — 자동화/연동 구축 후 반드시 메모리 기록
+- [서비스M](project_service_m.md) — 협조 병원 25/25 확보 완료, Google 파트너십 승인 대기 중 (2026-05-08)
+- [서비스M 광고](project_service_m_ads.md) — 병원모집 메타광고 라이브(0406), 인스턴트폼, 일 n원
+- [서비스M 사업계획서](project_service_m_business_plan.md) — 비전·3-tier 플랜(베이직/스탠다드/프리미엄)·수익모델·차별성·조직 정식 표준 (2026-05-08)
+- [우리 회사 다국어 GMB SEO Moat](project_company_multilang_seo_moat.md) — 4-5개 언어 타이틀 스터핑. E의원 カンナム 272회·C의원 다국어 검색어 데이터로 외국인 직접 demand 실증 (2026-05-08)
+- [홈페이지 리브랜딩](project_homepage_rebrand.md) — company.kr Next.js 리브랜딩, 디자인 리뉴얼 단계, UI/UX Pro Max+21st.dev 설치됨
+- [마케팅 대시보드](project_marketing_dashboard.md) — /pacemaker SOLAPI 직접 호출 (활성거래처/총문의/단계분포). MRR·만료는 SOLAPI 한도로 제외 (2026-05-05)
+- [Pluuug API spec](project_pluuug_api_spec.md) — X-API-KEY + X-Signature(HMAC-SHA256, secret key 별개) 필수 (3/31 정책). Agency 플랜 필요 (2026-05-03)
+- [SOLAPI Starter 한도](project_solapi_quota.md) — 30 properties/entity, 삭제된 것도 quota 유지. 페이스메이커 추가 기능 시 막힘 (2026-05-05)
+- [리팩토링 승인](feedback_refactor_approval.md) — 기술 변경 시 AS-IS/TO-BE/기대효과를 쉬운말로 물어보고 승인 후 진행
+- [서브에이전트 실행](feedback_subagent_execution.md) — 구현은 항상 서브에이전트 분산, 선택지 묻지 말 것
+- [피크타임 회피](feedback_peak_hours.md) — 대형 작업은 한국 오전~오후, 밤 9시 이후는 가벼운 작업
+- [원가 노출 금지](feedback_no_cost_exposure.md) — 대대행 견적서에 원가/마진 구조 절대 노출 금지, 소개 상품은 업체가격 그대로
+- [긴 명령어는 스크립트로](feedback_long_commands.md) — 터미널 붙여넣기 명령이 길면 /tmp 스크립트 파일로 제공
+- [진단 랜딩 Vercel](project_diagnostic_landing.md) — diagnostic.company.kr Vercel 배포, 24시간 가동 (2026-04-03)
+- [pluuug 데이터 필터링](feedback_pluuug_data_quality.md) — 오래된 리드 제외, 최근 30일만 활성, 계약 자동연장
+- [Google Ads 검색광고](project_google_ads.md) — MCC+운영계정 분리, Lead Form Asset, 리뷰대응 신규 광고그룹, Vercel Cron 일일 감시 (2026-04-23)
+- [토스 미니앱](project_toss_miniapp.md) — "내가 호구?" 피부과/치과 과잉진료 투명화, MVP 구현 완료, 입점 대기 (2026-04-03)
+- [비몽사몽해몽 토스 미니앱](project_bimong_haemong.md) — 6대 전통 통합 꿈해몽, Vite프론트+Next백엔드 분리, 코드 완성·입점 대기 (2026-05-04)
+- [프로틴맵 토스 미니앱](project_protein_budget_map.md) — 단백질 g당 가격 효율 랭킹. 앱인토스 정합성 수정 완료(이름·granite·geo·TDS), V2 BM 재설계 필요(외부광고 금지) (2026-05-05)
+- [음악 디깅 봇](project_music_digger.md) — Phase 0 50줄 프로토타입 검증 후 iMessage 통합 결정. Outside Voice 수용으로 매몰비용 회피 (2026-05-05)
+- [광고 파이프라인 V2](project_ad_pipeline_v2.md) — Meta+Google 통합 Lead Form, Vercel 웹훅 디스패처, 카카오채널 CTA (2026-04-23)
+- [데모 전 검증](feedback_verify_before_demo.md) — 빌드 통과 ≠ 작동, 실제 브라우저 확인 필수
+- [액션 우선 UI](feedback_action_first_design.md) — 대시보드는 시각화보다 입력/행동을 최상단에 배치
+- [CRM 자체 구축](project_crm_replacement.md) — Pluuug→Supabase 완료, 81건+200건 마이그레이션, 5개 프로젝트 전환 (2026-04-08)
+- [프롬프트 자동 기록](feedback_prompt_logging.md) — 모든 프롬프트 jsonl 기록, 매일 23시 업무일지, 주간 프롬프팅 분석 (2026-04-19)
+- [GBP 진단 메타광고](project_gbp_ad_campaign.md) — 8종 AB 캠페인 PAUSED 배포, 일 n원, 인스턴트폼+자동진단 연결 (2026-04-19)
+- [시스템 청소](project_system_cleanup.md) — 0419~0510 프로젝트/자동화 정리 + 0705 스킬 130→15 백업이동 (덜어내기 방향 전환)
+- [대면 상담 예약 시스템](project_appt_booking.md) — diagnostic.company.kr/book 라이브, 슬롯 42개 시드, 리마인더 cron 가동 (2026-04-20)
+- [GBP 순위 측정 방법론](project_gbp_rank_methodology.md) — 0.1mi 반경부터 시작, Pack 진입 확인되면 0.1mi씩 확장. 단일 순위 아닌 "Pack 진입 반경"이 핵심
+- [GBP 키워드 리서치 SOP](project_gbp_keyword_sop.md) — 5단계 워크플로우 (유입캡처→리뷰실증→자동완성→선정→제안서). D매장 한남 일본어 시딩 케이스 기반 (2026-04-21)
+- [C의원 신사 키워드](project_c_clinic_keyword.md) — 신사본점 GBP 시딩 분석 완료, 일본어 자동완성 폭발(C의원 新沙)·중국어 C의원 정착 (2026-05-05)
+- [프롬프팅 가드](project_prompting_guards.md) — 단답/중복/세션충돌 3종 훅 설치 (2026-04-21). 차단 아니라 관성 깨기 목적
+- [구글/네이버 지도 로직](project_gmap_vs_naver_logic.md) — 구글=거리·연관·유명도 3축, 네이버=획일. 퍼스널 브랜딩 전문성 핵심 논지
+- [퍼스널 브랜딩 카드뉴스](project_personal_brand.md) — Pencil 기반, 블록 창고 7개, INSIGHT 2시리즈 완성 (2026-04-21)
+- [최적화 우선](feedback_action_before_teaching.md) — 문제 해결 먼저, 수업은 그 다음. 교육 박스 앞세우지 마라
+- [광고 맥락 유지](feedback_campaign_context_lock.md) — 유입 캠페인 상품만 제안. 리마케팅 카피에 크로스셀/업셀 금지
+- [G엔터 SMS 0424](project_g_ent_sms.md) — 협업사 리드 105건 LMS 예약 발송, 2026-04-24 09:00 자동 발송 (SOLAPI)
+- [우리 회사 YT 인입 자동화](project_company_yt_inbound.md) — 유튜브 광고 lead 매시간 폴링 + LMS 자동 응답, launchd 가동 (2026-04-28)
+- [인플루언서 매칭 모델](feedback_influencer_matching_model.md) — G엔터 매칭은 유료. 표준 제안서→계약→매칭 순서. 2팀 매칭은 계약 보너스
+- [GBP 비즈니스명 키워드 스터핑](feedback_keyword_stuffing_sop.md) — 우리 SOP 명시 작업. 외부 업체에 "정책 위반"으로 진단하지 말 것
+- [지시 범위 준수](feedback_scope_lock.md) — 사용자가 X로 하라면 X만. 다른 옵션·대안 제안 금지, 부연설명도 빼라
+- [디자인 변경 범위 고정](feedback_design_scope_lock.md) — "텍스트 배치/디자인 톤 변경" 지시 시 슬라이드 구조·흐름·아키텍처 건드리지 마라 (2026-05-13)
+- [개인 브랜드 계정 포지셔닝](project_indie_brand_positioning.md) — AI FOMO 해결, 마케팅×도메인지식×자동화. 대표와 별개 브랜드, funnel 연결 X (2026-05-13)
+- [업주 발송 리포트 — 내부 정보 노출 금지](feedback_external_facing_report.md) — 회사 측 정보·내부 워크플로우 용어·시스템 식별자·추측·빈 섹션 금지. H대표 v4 톤 표준
+- [리포트 회신 시점 = 작성일](feedback_report_writing_date.md) — 업주 발송 리포트 회신 시점·작성일은 항상 today. 사용자에게 묻지 말 것
+- [번역투/AI투 표현 금지](feedback_no_translationese.md) — "박힌/자산/직격/광맥/정합/캡처/베이스라인/USP/시딩/백오피스 유입/Pack/SoLV/AGR" 등 금지. 1위 단정 X, 측정 조건 명시
+- [외국어 해석 병기](feedback_translate_foreign_keywords.md) — 일본어/중국어 키워드 노출 시 항상 `原文 (한국어 해석)` 괄호 병기 필수, 한·영 제외
+- [리포트 로드맵·결정요청·부록 금지](feedback_report_no_roadmap.md) — P0/P1/P2 액션 플랜·결정 요청·부록 섹션 전면 금지. 근거 URL은 본문 인라인 하이퍼링크로만
+- [측정 도구 이름 노출 금지](feedback_no_tool_name_exposure.md) — 거래처 발송 자료에 LocalFalcon/DataForSEO/스크립트명 등 노출 금지. 측정 결과만 사실로
+- [추적 키워드 상호 음역 금지](feedback_no_brand_in_tracking.md) — 영문 로마자·일본어 가타카나·중국어 한자 음역 모두 추적에서 제외. 어차피 1위라 클라이언트 오해 유발 (2026-05-06)
+- [산출물 GDrive 저장](feedback_artifact_storage_policy.md) — pen/pptx/pdf/docx/xlsx 산출물은 GDrive 공유드라이브 매핑 폴더로 직행, claude code 폴더에 두지 말 것
+- [B의원 서초점 키워드](project_b_clinic_keywords.md) — 강남 키워드 회피 + 압구정/신사 시딩, 시그니처 시술명 추가 A안 확정 (2026-05-05)
+- [GDrive 04_보고서 정리](project_gdrive_cleanup_0506.md) — 거래처 폴더 30+개를 03_클라이언트/{거래처}/보고서로 통합. 04는 회사 차원 4분류만. 거래종료 4건 _아카이브로 (2026-05-06)
+- [채용 권장 금지](feedback_no_hiring_recommendation.md) — 거래처 발송 자료에 인력 채용 권장 절대 노출 금지. 응대 부족은 사실로만 명시 (2026-05-06)
+- [외부 산출물 텍스트 사용자 검토 필수](feedback_external_artifact_review.md) — PPT·카드뉴스·홈페이지·리포트 등 외부 산출물의 모든 텍스트는 빌드 전 사용자 전수 검토 (2026-05-06)
+- [키워드 산출 근거 = 커뮤니티 후기 + 하이퍼링크](feedback_keyword_evidence_sources.md) — 자동완성만이 아니라 reddit·dcard·디시·더쿠 등 실제 후기 글 출처 인라인 (2026-05-06)
+- [채용 권장 금지](feedback_no_hiring_recommendation.md) — 거래처 발송 자료에 인력 채용 권장 절대 금지 (2026-05-06)
+- [사용자 직접 수정 우선](feedback_user_direct_edit_priority.md) — Pencil·코드 등 사용자 직접 수정 사항은 빌드보다 우선. 별도 파일 만들지 말고 부분 수정만 (2026-05-07)
+- [API key .env 자동 오픈](feedback_env_auto_open.md) — 키 추가 안내 시 자동으로 `open <env>` 실행. 사용자가 경로 찾지 않게 (2026-05-12)
+- [점수제 + 소크라테스 피드백](feedback_socratic_scoring.md) — 산출물 피드백 시 0~10점 + 단답 질문 1~3개로 요구사항 좁히기. 점수 떨어지면 즉시 롤백 (2026-05-12)
+- [우리 회사 디자인 시스템 참고](reference_company_design_system.md) — `design system/company_design_system.pen` 모든 디자인 작업 시 변수·토큰·컴포넌트 참조 (2026-05-07)
+- [영업 병목 제거 상시 목표 (/goal)](project_goal_sales_bottleneck.md) — 광고 응대·진단 후속·미팅·CRM 누락 1개씩 제거. 사용자 주도, Claude 보조, 발송·CRM·광고 변경은 컨펌 (2026-05-08)
+- [우리 회사 영업 운영 현실](project_company_sales_reality.md) — 1인 운영, 응대 2-3일 지연, 월 ~10건, 카카오채널 수동 미가동, 광고는 인스턴트폼 (2026-05-10)
+- [SSOT 역할 분리](project_company_ssot_design.md) — SOLAPI=인입·응답 메인(사용자 의도), Supabase=백오피스 분석 보조. 신규 인입 SOLAPI→Supabase mirror 필요 (2026-05-10)

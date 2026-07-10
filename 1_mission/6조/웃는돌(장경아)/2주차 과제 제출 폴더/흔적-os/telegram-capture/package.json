@@ -1,0 +1,10 @@
+{
+  "name": "heunjeok-os-capture",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "흔적 OS — 텔레그램 캡처 파이프 (Vercel serverless). 텔레그램 한 줄 → 개인 데이터 저장소 inbox.md",
+  "engines": {
+    "node": ">=18"
+  }
+}
