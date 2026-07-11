@@ -1,0 +1,228 @@
+<title>i_Memo v1.1 — 텔레그램으로 채우는 두 번째 뇌</title>
+<style>
+  :root{
+    --bg:#F4F5FA; --slide:#FFFFFF; --ink:#171A24; --muted:#5C6478; --line:#E4E7F0;
+    --g1:#6A5CFF; --g2:#B94BF0; --accent:#6A5CFF; --accent-soft:#EDEBFF;
+    --good:#1F9A6C;
+    --sans:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",system-ui,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{ --bg:#0C0E15; --slide:#141826; --ink:#EDEFF7; --muted:#9AA2B8; --line:#242A3B;
+      --g1:#8A7DFF; --g2:#C86BF7; --accent:#8A7DFF; --accent-soft:#20213A; --good:#37C68E; }
+  }
+  :root[data-theme="light"]{ --bg:#F4F5FA; --slide:#FFFFFF; --ink:#171A24; --muted:#5C6478;
+    --line:#E4E7F0; --g1:#6A5CFF; --g2:#B94BF0; --accent:#6A5CFF; --accent-soft:#EDEBFF; --good:#1F9A6C; }
+  :root[data-theme="dark"]{ --bg:#0C0E15; --slide:#141826; --ink:#EDEFF7; --muted:#9AA2B8;
+    --line:#242A3B; --g1:#8A7DFF; --g2:#C86BF7; --accent:#8A7DFF; --accent-soft:#20213A; --good:#37C68E; }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;scroll-snap-type:y mandatory;overflow-x:hidden}
+  .deck{}
+  .slide{min-height:100svh;scroll-snap-align:start;display:flex;flex-direction:column;
+    justify-content:center;padding:clamp(28px,7vw,80px);position:relative;
+    max-width:1000px;margin:0 auto;gap:clamp(14px,2.5vw,24px)}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--accent);display:flex;align-items:center;gap:9px}
+  .kicker .n{background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:3px 10px;font-weight:600}
+  h1{font-size:clamp(34px,7vw,68px);line-height:1.08;letter-spacing:-.03em;margin:0;
+    text-wrap:balance;font-weight:850}
+  h2{font-size:clamp(26px,4.6vw,44px);line-height:1.12;letter-spacing:-.02em;margin:0;
+    text-wrap:balance;font-weight:800}
+  .grad{background:linear-gradient(115deg,var(--g1),var(--g2));-webkit-background-clip:text;
+    background-clip:text;color:transparent}
+  p.lead{font-size:clamp(17px,2.4vw,22px);line-height:1.6;color:var(--muted);margin:0;max-width:60ch}
+  .big{font-size:clamp(20px,3vw,28px);line-height:1.5;font-weight:600;margin:0;max-width:24ch}
+
+  .logo{width:clamp(66px,10vw,104px);height:clamp(66px,10vw,104px);display:block}
+  .title-row{display:flex;align-items:center;gap:clamp(16px,3vw,26px);flex-wrap:wrap}
+  .verchip{font-family:var(--mono);font-size:13px;font-weight:600;color:#fff;
+    background:linear-gradient(115deg,var(--g1),var(--g2));padding:5px 13px;border-radius:999px}
+  .byline{color:var(--muted);font-size:15px;margin-top:8px}
+  .byline b{color:var(--ink)}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+  .card{background:var(--slide);border:1px solid var(--line);border-radius:16px;padding:20px;
+    box-shadow:0 1px 3px rgba(20,30,60,.05)}
+  .card .ic{font-size:24px}
+  .card h3{margin:10px 0 5px;font-size:16px}
+  .card p{margin:0;font-size:14px;color:var(--muted);line-height:1.55}
+  .stat{font-size:clamp(30px,5vw,46px);font-weight:850;letter-spacing:-.02em;line-height:1;
+    background:linear-gradient(115deg,var(--g1),var(--g2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .stat-lbl{font-size:13px;color:var(--muted);margin-top:6px}
+
+  /* flow */
+  .flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin-top:6px}
+  .fnode{flex:1 1 130px;min-width:120px;text-align:center;display:flex;flex-direction:column;
+    align-items:center;gap:8px;padding:6px}
+  .fnode .g{width:58px;height:58px;border-radius:16px;display:grid;place-items:center;font-size:26px;
+    background:var(--slide);border:1px solid var(--line)}
+  .fnode.hl .g{background:linear-gradient(115deg,var(--g1),var(--g2));border:none}
+  .fnode .nm{font-weight:700;font-size:14px}
+  .fnode .mt{font-size:11.5px;color:var(--muted);font-family:var(--mono)}
+  .farrow{align-self:center;color:var(--accent);font-size:22px;padding:0 2px}
+  @media (max-width:620px){ .farrow{transform:rotate(90deg)} .flow{flex-direction:column;align-items:center} }
+
+  ol.steps{list-style:none;counter-reset:s;margin:0;padding:0;display:grid;gap:12px}
+  ol.steps li{counter-increment:s;display:grid;grid-template-columns:auto 1fr;gap:15px;align-items:baseline}
+  ol.steps li::before{content:counter(s);font-family:var(--mono);font-weight:700;color:#fff;
+    background:linear-gradient(115deg,var(--g1),var(--g2));width:28px;height:28px;border-radius:8px;
+    display:grid;place-items:center;font-size:14px}
+  ol.steps b{font-weight:700}
+  ol.steps span{color:var(--muted)}
+  .tag{font-family:var(--mono);background:var(--accent-soft);color:var(--accent);padding:1px 7px;border-radius:6px;font-weight:600;font-size:.9em}
+
+  .mock{background:var(--slide);border:1px solid var(--line);border-radius:18px;padding:22px;
+    max-width:340px;box-shadow:0 12px 40px rgba(30,20,80,.12);text-align:center}
+  .mock .mlogo{width:60px;height:60px;margin:0 auto 10px;display:block}
+  .mock .mname{font-size:20px;font-weight:850}
+  .mock .mver{color:var(--muted);font-size:12.5px;margin-top:2px}
+  .mock .mbox{margin:14px 0;padding:13px;background:var(--bg);border-radius:10px;font-size:13px;
+    line-height:1.6;text-align:left}
+  .mock .mby{color:var(--muted);font-size:12px}
+
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,4vw,40px);align-items:center}
+  @media (max-width:720px){ .split{grid-template-columns:1fr} }
+
+  .scrollhint{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);color:var(--muted);
+    font-size:12px;font-family:var(--mono);letter-spacing:.1em;opacity:.7;animation:bob 2s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,5px)}}
+  @media (prefers-reduced-motion:reduce){ .scrollhint{animation:none} }
+  .foot{position:absolute;bottom:clamp(16px,3vw,30px);left:clamp(28px,7vw,80px);
+    font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.08em}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="lg" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#6A5CFF"/><stop offset="1" stop-color="#B94BF0"/></linearGradient>
+</defs></svg>
+
+<div class="deck">
+
+  <!-- 1. 타이틀 -->
+  <section class="slide">
+    <div class="title-row">
+      <svg class="logo" viewBox="0 0 32 32" fill="none" aria-label="i_Memo 로고">
+        <rect x="1" y="1" width="30" height="30" rx="8.5" fill="url(#lg)"/>
+        <g stroke="#fff" stroke-width="1.5" stroke-linecap="round" opacity=".92">
+          <path d="M16 16 L11 11"/><path d="M16 16 L21.5 10.5"/><path d="M16 16 L22 19.5"/><path d="M16 16 L12 21.5"/><path d="M11 11 L21.5 10.5"/></g>
+        <g fill="#fff"><circle cx="16" cy="16" r="2.8"/><circle cx="11" cy="11" r="2"/><circle cx="21.5" cy="10.5" r="2"/><circle cx="22" cy="19.5" r="2"/><circle cx="12" cy="21.5" r="2"/></g>
+      </svg>
+      <span class="verchip">v1.1</span>
+    </div>
+    <h1>텔레그램으로 채우는<br><span class="grad">나의 두 번째 뇌</span></h1>
+    <p class="lead">폰에서 사진 한 장, 생각 한 줄 보내면 — 맥미니가 알아서 제목 달고 분류해 저장합니다.</p>
+    <div class="byline"><b>i_Memo</b> — 개인 메모 웹앱 · 발표 <b>한정재</b> · 스폰지클럽</div>
+    <div class="scrollhint">스크롤 ↓</div>
+  </section>
+
+  <!-- 2. i_Memo란 -->
+  <section class="slide">
+    <div class="kicker"><span class="n">01</span> 출발점</div>
+    <h2>애플 노트를 대체하려<br>직접 만든 <span class="grad">개인 메모 앱</span></h2>
+    <div class="cards" style="margin-top:8px">
+      <div class="card"><div class="stat">8,460</div><div class="stat-lbl">이관한 메모 개수</div></div>
+      <div class="card"><div class="stat">46<span style="font-size:.5em">GB</span></div><div class="stat-lbl">사진·첨부 자료</div></div>
+      <div class="card"><div class="stat">24<span style="font-size:.5em">시간</span></div><div class="stat-lbl">맥미니 홈서버 상시 가동</div></div>
+    </div>
+    <p class="lead" style="margin-top:6px">검색·분류·편집·잠금까지 되는데, 딱 하나 아쉬웠던 것 — <b>“밖에서 떠오른 걸 어떻게 바로 담지?”</b></p>
+  </section>
+
+  <!-- 3. 문제 -->
+  <section class="slide">
+    <div class="kicker"><span class="n">02</span> 문제</div>
+    <h2>좋은 자료는 늘<br><span class="grad">이동 중에</span> 나타난다</h2>
+    <p class="big">명함, 간판, 문득 떠오른 생각… 그런데 “나중에 정리해야지”는 <b>영영 안 온다.</b></p>
+    <p class="lead">캡처는 쉬워야 하고, 정리는 <b>자동</b>이어야 한다. 손이 많이 가면 안 쓰게 되니까.</p>
+  </section>
+
+  <!-- 4. 해결 -->
+  <section class="slide">
+    <div class="kicker"><span class="n">03</span> 해결</div>
+    <h2>텔레그램을 <span class="grad">받아쓰는 입구</span>로</h2>
+    <p class="lead">가장 손에 익은 메신저로 그냥 보내기만. 끝에 <span class="tag">#메모</span> 한마디만 붙이면 저장, 없으면 평범한 심부름.</p>
+    <div class="cards" style="margin-top:6px">
+      <div class="card"><div class="ic">📸</div><h3>보내면 끝</h3><p>사진·글을 봇에게 전송. 앱 열 필요 없음.</p></div>
+      <div class="card"><div class="ic">🧠</div><h3>알아서 정리</h3><p>제목·분류를 AI가 달아 저장.</p></div>
+      <div class="card"><div class="ic">🔍</div><h3>바로 검색</h3><p>i_Memo 웹앱에 즉시 등장.</p></div>
+    </div>
+  </section>
+
+  <!-- 5. 구조 -->
+  <section class="slide">
+    <div class="kicker"><span class="n">04</span> 구조</div>
+    <h2>폰과 맥미니는 <span class="grad">봇 서버</span>를 우편함처럼 거친다</h2>
+    <div class="flow">
+      <div class="fnode"><div class="g">📱</div><div class="nm">내 폰</div><div class="mt">텔레그램</div></div>
+      <div class="farrow">→</div>
+      <div class="fnode"><div class="g">☁️</div><div class="nm">봇 서버</div><div class="mt">인터넷</div></div>
+      <div class="farrow">→</div>
+      <div class="fnode hl"><div class="g">🖥️</div><div class="nm" style="color:var(--accent)">맥미니</div><div class="mt">24시간 ON</div></div>
+      <div class="farrow">→</div>
+      <div class="fnode"><div class="g">🗂️</div><div class="nm">i_Memo</div><div class="mt">저장·검색</div></div>
+    </div>
+    <p class="lead" style="margin-top:10px">맥미니가 “새 메시지 있어?”를 계속 물어보다(폴링) 받아서 처리하고, 답장을 폰으로 돌려준다. 노트북이 꺼져 있어도 상관없다.</p>
+  </section>
+
+  <!-- 6. 동작 -->
+  <section class="slide">
+    <div class="kicker"><span class="n">05</span> 동작</div>
+    <h2><span class="tag" style="font-size:.7em;vertical-align:middle">#메모</span> 를 만나면 벌어지는 일</h2>
+    <ol class="steps" style="margin-top:6px">
+      <li><div><b>받기</b> <span>— 사진은 서버 폴더에 내려받고, 글에서 <span class="tag">#메모</span> 를 떼어낸다.</span></div></li>
+      <li><div><b>제목·분류 자동</b> <span>— 내용을 읽고 간결한 제목을 짓고, 12개 대분류 중 알맞은 곳으로.</span></div></li>
+      <li><div><b>사진 저장·임베드</b> <span>— images 폴더에 넣고 메모 본문에 붙인다(HEIC는 자동 변환).</span></div></li>
+      <li><div><b>검색 등록</b> <span>— 인덱스에 즉시 추가돼 웹앱에서 바로 찾을 수 있다.</span></div></li>
+    </ol>
+  </section>
+
+  <!-- 7. 배운 것 -->
+  <section class="slide">
+    <div class="kicker"><span class="n">06</span> 만들며 배운 것</div>
+    <h2>연결은 쉬웠지만<br><span class="grad">함정도 있었다</span></h2>
+    <div class="cards">
+      <div class="card"><div class="ic">🔑</div><h3>깨진 토큰</h3><p>손으로 옮긴 봇 비밀번호에 특수문자가 섞여 무응답 → 복사로 해결.</p></div>
+      <div class="card"><div class="ic">👥</div><h3>중복 수신</h3><p>노트북·맥미니가 같은 봇을 동시에 들어 사진을 가로챔 → 맥미니 하나로 일원화.</p></div>
+      <div class="card"><div class="ic">🖥️</div><h3>서버로 상주</h3><p>터미널 없는 서버에서 안 죽게 screen+launchd로 24시간 유지.</p></div>
+    </div>
+    <p class="lead" style="margin-top:4px">“된다”와 “계속 된다”는 다르다 — 자동 복구·단일 수신·안전 승인을 챙겨야 진짜 완성.</p>
+  </section>
+
+  <!-- 8. 결과 / v1.1 -->
+  <section class="slide">
+    <div class="kicker"><span class="n">07</span> 결과 · v1.1</div>
+    <div class="split">
+      <div>
+        <h2>이제 폰에서<br><span class="grad">#메모</span> 한 줄이면 끝</h2>
+        <p class="lead" style="margin-top:12px">로고도 새로 — 흩어진 생각이 연결되는 <b>두 번째 뇌</b>. 로고를 누르면 만든이·버전이 나온다.</p>
+      </div>
+      <div class="mock">
+        <svg class="mlogo" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <rect x="1" y="1" width="30" height="30" rx="8.5" fill="url(#lg)"/>
+          <g stroke="#fff" stroke-width="1.5" stroke-linecap="round" opacity=".92">
+            <path d="M16 16 L11 11"/><path d="M16 16 L21.5 10.5"/><path d="M16 16 L22 19.5"/><path d="M16 16 L12 21.5"/><path d="M11 11 L21.5 10.5"/></g>
+          <g fill="#fff"><circle cx="16" cy="16" r="2.8"/><circle cx="11" cy="11" r="2"/><circle cx="21.5" cy="10.5" r="2"/><circle cx="22" cy="19.5" r="2"/><circle cx="12" cy="21.5" r="2"/></g>
+        </svg>
+        <div class="mname">i_Memo</div>
+        <div class="mver">버전 1.1 · 내 손안의 두 번째 뇌</div>
+        <div class="mbox">Apple Notes를 대체하는 개인 메모 웹앱.<br><b>v1.1 새 기능</b> — 텔레그램으로 <span class="tag">#메모</span> 붙여 보내면 자동 저장·분류.</div>
+        <div class="mby">만든이 · 한정재</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. 닫기 -->
+  <section class="slide">
+    <div class="kicker"><span class="n">08</span> 다음</div>
+    <h2>담는 문턱을 <span class="grad">0에 가깝게</span></h2>
+    <p class="lead">메모 앱의 진짜 경쟁자는 다른 앱이 아니라 ‘귀찮음’이다. 문턱이 낮을수록 뇌는 더 많이 채워진다.</p>
+    <div class="cards" style="margin-top:6px">
+      <div class="card"><div class="ic">🎙️</div><h3>음성 메모</h3><p>말로 보내면 받아쓰기+정리.</p></div>
+      <div class="card"><div class="ic">🔗</div><h3>링크 요약</h3><p>URL 보내면 핵심만 저장.</p></div>
+      <div class="card"><div class="ic">📅</div><h3>주간 다이제스트</h3><p>이번 주 담은 것 자동 요약.</p></div>
+    </div>
+    <div class="foot">i_Memo v1.1 · 텔레그램 연동 · 2026</div>
+  </section>
+
+</div>

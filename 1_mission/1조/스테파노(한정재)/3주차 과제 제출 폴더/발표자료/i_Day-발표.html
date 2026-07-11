@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>i_Day — 스폰지클럽 발표</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{
+  --bg:#0c1512; --card:#14211c; --card2:#1a2b25; --line:#283d35;
+  --ink:#eef7f3; --ink2:#96aca4; --mint:#10B981; --cyan:#06B6D4;
+  --red:#ff6b5e; --amber:#f6c026; --blue:#5b8def;
+  --grad:linear-gradient(135deg,var(--mint),var(--cyan));
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Pretendard Variable",Pretendard,"Apple SD Gothic Neo",system-ui,sans-serif}
+html{scroll-snap-type:y mandatory}
+section{min-height:100vh;scroll-snap-align:start;display:flex;flex-direction:column;
+  justify-content:center;padding:56px clamp(20px,6vw,90px);max-width:1080px;margin:0 auto}
+h1{font-size:clamp(2.2rem,6vw,4rem);margin:0 0 10px;letter-spacing:-.02em}
+h2{font-size:clamp(1.5rem,3.6vw,2.3rem);margin:0 0 22px;letter-spacing:-.01em}
+h2 .no{color:var(--mint);font-size:.72em;margin-right:10px;font-weight:800}
+.grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--ink2);font-size:clamp(1rem,2vw,1.2rem);line-height:1.6;margin:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 20px}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+ul{margin:8px 0 0;padding-left:20px;line-height:1.7;color:var(--ink)}
+li{margin-bottom:4px}
+b{color:#fff}
+.tag{display:inline-block;background:var(--card2);border:1px solid var(--line);color:var(--ink2);
+  border-radius:8px;padding:3px 10px;font-size:.8rem;margin:0 6px 6px 0}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--grad);color:#04241a;
+  font-weight:800;border-radius:10px;padding:6px 14px;font-size:.9rem}
+.arrow{color:var(--mint);font-weight:900}
+.kv{display:flex;gap:10px;align-items:baseline}
+.kv .k{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;background:var(--grad);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.kv .v{color:var(--ink2)}
+.foot{position:fixed;bottom:14px;right:20px;color:var(--ink2);font-size:.75rem;opacity:.7}
+/* 구조도 */
+.flow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center}
+.fbox{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:14px 18px;
+  text-align:center;min-width:130px}
+.fbox b{display:block;font-size:1.02rem;margin-bottom:3px}
+.fbox span{color:var(--ink2);font-size:.78rem}
+.fbox.hero{background:var(--grad);color:#04241a}
+.fbox.hero b{color:#04241a}.fbox.hero span{color:#0b4634}
+/* 시간 뱃지 데모 */
+.tb{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;
+  border-radius:10px;font-weight:900;font-size:24px;color:#0c1512;flex:none}
+.tbrow{display:flex;gap:22px;flex-wrap:wrap;margin-top:12px}
+.tbrow figure{margin:0;text-align:center}
+.tbrow figcaption{color:var(--ink2);font-size:.82rem;margin-top:6px}
+/* 파싱 데모 */
+.parse{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:10px}
+.chip{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:9px 14px;font-size:.95rem}
+.chip.in{border-color:var(--mint);font-weight:700}
+.chip .lab{display:block;font-size:.68rem;color:var(--ink2);margin-bottom:2px}
+/* 반복 분할 타임라인 */
+.tl{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:14px}
+.dotv{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:.68rem;font-weight:800;flex:none}
+.dotv.old{background:var(--card2);border:1.5px solid var(--ink2);color:var(--ink2)}
+.dotv.new{background:var(--grad);color:#04241a}
+.tl .cut{color:var(--red);font-weight:900;font-size:1.3rem}
+/* 삽질 카드 */
+.oops{border-left:4px solid var(--red);padding-left:14px}
+.oops h3{margin:0 0 4px;font-size:1.05rem}
+.oops p{margin:2px 0;color:var(--ink2);font-size:.9rem;line-height:1.55}
+.oops .lesson{color:var(--amber)}
+/* 미니 달력 */
+.mini{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;background:var(--line);
+  border-radius:12px;overflow:hidden;border:1px solid var(--line);max-width:460px}
+.mini div{background:var(--card);padding:5px 4px 7px;font-size:.66rem;min-height:52px}
+.mini .d{font-weight:800;font-size:.74rem}
+.mini .red{color:var(--red)} .mini .blue{color:var(--blue)}
+.mini .e{display:flex;align-items:center;gap:2px;margin-top:2px;white-space:nowrap;overflow:hidden}
+.mini .e .b{width:11px;height:11px;border-radius:3px;font-size:8px;display:inline-flex;
+  align-items:center;justify-content:center;font-weight:900;color:#0c1512;flex:none}
+kbd{background:var(--card2);border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-size:.82rem}
+.next li{margin-bottom:8px}
+.next .lv{font-size:.72rem;font-weight:800;border-radius:6px;padding:2px 7px;margin-right:7px}
+.lv1{background:var(--mint);color:#04241a}.lv2{background:var(--amber);color:#3a2c00}.lv3{background:var(--card2);border:1px solid var(--line);color:var(--ink2)}
+</style>
+</head>
+<body>
+
+<!-- 1. 타이틀 -->
+<section>
+  <p class="pill">스폰지클럽 · 클로드코드 프로젝트 발표</p>
+  <h1 style="margin-top:18px">📅 <span class="grad">i_Day</span></h1>
+  <h2 style="font-weight:600;color:var(--ink2)">쓰던 캘린더의 "편함"은 살리고, 구글의 "연동"을 더한<br>나만의 캘린더 웹앱 — 하루 만에</h2>
+  <p class="sub">2026. 07. 11 ~ 07. 12 · 한정재 · Claude Code와 함께</p>
+</section>
+
+<!-- 2. 왜 만들었나 -->
+<section>
+  <h2><span class="no">01</span>왜 만들었나 — 10년 쓴 앱의 한계</h2>
+  <div class="grid g2">
+    <div class="card">
+      <b>😍 마이캘린더(유료앱)의 좋은 점</b>
+      <ul>
+        <li>월간 달력 + 아래 선택일 상세 = <b>직관적</b></li>
+        <li>다가올 일정 D-day 리스트</li>
+        <li>나만의 휴일 지정</li>
+      </ul>
+    </div>
+    <div class="card">
+      <b>😩 불편한 점</b>
+      <ul>
+        <li><b>구글 캘린더와 연동 안 됨</b> · 기기 간 동기화 없음</li>
+        <li>입력이 번거로움 (단계별 폼)</li>
+        <li>디자인 낡음 · 반복/알림 기능 부족</li>
+        <li>월 달력에 일정 2줄만 · 시각 표시 없음</li>
+      </ul>
+    </div>
+  </div>
+  <p class="sub" style="margin-top:18px">→ <b style="color:var(--ink)">"장점은 계승, 단점은 수리, 저장은 구글에"</b> — 그대로 만들어 보자!</p>
+</section>
+
+<!-- 3. 구조 -->
+<section>
+  <h2><span class="no">02</span>구조 — 서버 없이, 전부 무료로</h2>
+  <div class="flow">
+    <div class="fbox hero"><b>📱 i_Day 웹앱</b><span>Vercel 무료 호스팅<br>홈 화면에 추가 = 앱</span></div>
+    <div class="arrow">⇄</div>
+    <div class="fbox"><b>🔑 Supabase</b><span>로그인 + 설정 저장<br>(i_Memo_S와 같은 계정)</span></div>
+    <div class="arrow">⇄</div>
+    <div class="fbox"><b>🌉 Apps Script 브리지</b><span>구글이 무료로 돌려주는<br>나만의 API 서버</span></div>
+    <div class="arrow">⇄</div>
+    <div class="fbox"><b>📆 구글 캘린더</b><span>유일한 저장소<br>= 동기화 문제 원천 차단</span></div>
+  </div>
+  <div class="grid g3" style="margin-top:22px">
+    <div class="card"><b>🔔 아이폰 알림</b><ul><li>애플 캘린더에 구글 계정만 연결하면 iOS가 알림</li></ul></div>
+    <div class="card"><b>🤖 텔레그램</b><ul><li>맥미니의 아침 브리핑·리마인더가 같은 캘린더를 읽음</li></ul></div>
+    <div class="card"><b>💸 비용</b><ul><li>Vercel·Supabase·Apps Script 전부 무료 티어</li></ul></div>
+  </div>
+</section>
+
+<!-- 4. 개발 방식 -->
+<section>
+  <h2><span class="no">03</span>만드는 방법 — Claude Code 총동원</h2>
+  <div class="flow" style="justify-content:flex-start">
+    <div class="fbox"><b>1. 브레인스토밍</b><span>스크린샷 주고<br>질문에 답하기</span></div>
+    <div class="arrow">→</div>
+    <div class="fbox"><b>2. 설계서</b><span>목표·구조·화면<br>문서로 승인</span></div>
+    <div class="arrow">→</div>
+    <div class="fbox"><b>3. 구현 계획</b><span>10개 태스크로<br>잘게 쪼갬</span></div>
+    <div class="arrow">→</div>
+    <div class="fbox"><b>4. 서브에이전트</b><span>태스크마다 AI가<br>구현 + 다른 AI가 리뷰</span></div>
+    <div class="arrow">→</div>
+    <div class="fbox hero"><b>5. 배포</b><span>커밋 38회<br>테스트 38개</span></div>
+  </div>
+  <div class="card" style="margin-top:22px">
+    <b>💬 사람이 한 일</b>
+    <ul>
+      <li>원하는 것 설명 + 스크린샷 몇 장 + 객관식 질문에 답하기</li>
+      <li>Apps Script 배포 버튼 누르기 (브라우저 작업 2번)</li>
+      <li>써보고 "이거 불편해" 피드백 → AI가 원인 찾아 수정·배포 반복</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 5. 시간 뱃지 -->
+<section>
+  <h2><span class="no">04</span>발명품 — 한 글자짜리 시계 뱃지</h2>
+  <p class="sub">월 달력 한 칸은 좁다. "13:30"은 너무 길다 → <b style="color:var(--ink)">숫자 = 시(時), 배경이 시계처럼 찬 만큼 = 분(分)</b></p>
+  <div class="tbrow">
+    <figure><span class="tb" style="background:conic-gradient(var(--mint) 0 2%,#2e3d38 0)">9</span><figcaption>9:00</figcaption></figure>
+    <figure><span class="tb" style="background:conic-gradient(var(--mint) 0 25%,#2e3d38 0)">13</span><figcaption>13:15</figcaption></figure>
+    <figure><span class="tb" style="background:conic-gradient(var(--mint) 0 50%,#2e3d38 0)">13</span><figcaption>13:30</figcaption></figure>
+    <figure><span class="tb" style="background:conic-gradient(var(--mint) 0 75%,#2e3d38 0)">18</span><figcaption>18:45</figcaption></figure>
+    <figure><span class="tb" style="background:var(--blue);color:#fff">A</span><figcaption>종일 (All-day)</figcaption></figure>
+    <figure><span class="tb" style="background:var(--red);color:#fff;font-size:18px">휴</span><figcaption>휴일</figcaption></figure>
+  </div>
+  <div style="margin-top:26px" class="mini">
+    <div><span class="d red">12</span><div class="e"><span class="b" style="background:conic-gradient(var(--mint) 0 50%,#2e3d38 0)">13</span>스폰지클럽</div><div class="e"><span class="b" style="background:var(--blue);color:#fff">A</span>복사·독서</div></div>
+    <div><span class="d">13</span></div>
+    <div><span class="d">14</span><div class="e"><span class="b" style="background:conic-gradient(var(--mint) 0 25%,#2e3d38 0)">11</span>서현역</div></div>
+    <div><span class="d">15</span></div>
+    <div><span class="d">16</span></div>
+    <div><span class="d red">17</span><div class="e" style="color:var(--red);font-weight:800">제헌절</div><div class="e"><span class="b" style="background:conic-gradient(var(--mint) 0 2%,#2e3d38 0)">9</span>드림파크</div></div>
+    <div><span class="d blue">18</span><div class="e" style="color:var(--red);font-weight:800">휴일</div></div>
+  </div>
+  <p class="sub" style="margin-top:14px">이 뱃지가 앱 아이콘까지 이어지는 <b style="color:var(--ink)">i_Day의 시그니처</b>가 됨 🎨</p>
+</section>
+
+<!-- 6. 음성 빠른입력 -->
+<section>
+  <h2><span class="no">05</span>입력 혁명 — 말하면 일정이 된다</h2>
+  <p class="sub">＋ 버튼 <b style="color:var(--ink)">길게 누르고</b> 말하기 → 실시간으로 받아 적고 → 자동 분해</p>
+  <div class="parse">
+    <span class="chip in">🎤 "내일 10시 반에 서현역"</span>
+    <span class="arrow">→</span>
+    <span class="chip"><span class="lab">일자</span>2026. 7. 13.</span>
+    <span class="chip"><span class="lab">시간</span>10:30</span>
+    <span class="chip"><span class="lab">내용</span>서현역</span>
+  </div>
+  <div class="card" style="margin-top:22px">
+    <b>파서가 알아듣는 것들 (테스트 38개로 고정)</b>
+    <ul>
+      <li>날짜: 오늘/내일/모레 · 17일 · 7월 20일 · 7/20 · (다음주) 금요일 — 지난 날짜면 자동으로 다음 달/내년</li>
+      <li>시간: 3시 = 오후 3시 · 10시 반 · 15분/30분/45분 · <b>한글 숫자</b>(열시 십오분) · 24시간(13:30)</li>
+      <li>음성의 함정: <b>붙여쓰기</b>(내일10시에) · <b>공백</b>(15 분) · <b>조사</b>(에/에서/의/부터/쯤) 전부 처리</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 7. 반복 일정 -->
+<section>
+  <h2><span class="no">06</span>반복 일정 — 구글 수준의 3택</h2>
+  <p class="sub">반복 일정을 수정하면 물어봅니다: <b style="color:var(--ink)">이 일정만 / 이 일정 및 이후 전체 / 전체</b></p>
+  <div class="card" style="margin-top:18px">
+    <b>"이후 전체"의 원리 — 시리즈를 그 자리에서 쪼갠다</b>
+    <div class="tl">
+      <span class="dotv old">7/14</span><span class="dotv old">7/21</span>
+      <span class="cut">✂️</span>
+      <span class="dotv new">7/28</span><span class="dotv new">8/4</span><span class="dotv new">8/11</span><span style="color:var(--ink2)">…</span>
+    </div>
+    <p class="sub" style="margin-top:10px">기존 반복은 7/21까지로 종료(UNTIL) + 7/28부터 수정 내용으로 새 반복 생성.<br>실제 구글 캘린더로 왕복 검증 완료 ✅</p>
+  </div>
+  <div style="margin-top:16px">
+    <span class="tag">더블탭 → 날짜 팝업</span><span class="tag">일정 왼쪽 밀기 → 삭제</span>
+    <span class="tag">휴일 지정/해제</span><span class="tag">D-day</span><span class="tag">음력</span>
+    <span class="tag">주간/야간 테마</span><span class="tag">15분 단위 시간</span><span class="tag">일정검색</span><span class="tag">사용 설명서 내장</span>
+  </div>
+</section>
+
+<!-- 8. 삽질 1 -->
+<section>
+  <h2><span class="no">07</span>오늘의 삽질 열전 ①</h2>
+  <div class="grid g2">
+    <div class="card oops">
+      <h3>👻 일정이 유령 캘린더로 사라진 사건</h3>
+      <p>앱은 저장 성공, 구글 캘린더엔 없음. 기존 일정도 앱에 안 보임.</p>
+      <p>🔎 Apps Script 브리지가 <b>다른 구글 계정(naver)</b> 소유였음 — 1년치 일정이 아무도 안 보는 캘린더에!</p>
+      <p class="lesson">💡 교훈: Apps Script는 "만든 계정"의 캘린더를 쓴다. 브리지 문제는 로그인 계정부터 의심.</p>
+    </div>
+    <div class="card oops">
+      <h3>🎤 음성 인식 받아쓰기의 함정 3연속</h3>
+      <p>"십오분"(한글) → "15 분"(공백) → "…분에"(조사). 고칠 때마다 다른 형태로 재발.</p>
+      <p>🔎 결정타는 <b>스크린샷 한 장</b> — 빠른입력 칸의 실제 글자("11시 15 분에")를 보고 즉시 해결.</p>
+      <p class="lesson">💡 교훈: "안 돼요"보다 실제 데이터 한 장이 백 배 빠르다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 9. 삽질 2 -->
+<section>
+  <h2><span class="no">08</span>오늘의 삽질 열전 ②</h2>
+  <div class="grid g2">
+    <div class="card oops">
+      <h3>🎙️ 꺼지지 않는 마이크</h3>
+      <p>저장하고 닫아도 주황 마이크 표시가 계속. iOS 웹킷의 알려진 버그.</p>
+      <p>🔎 부드러운 종료(stop) 대신 <b>강제 중단(abort)</b> + 마이크를 잠깐 잡았다 놓는 우회로 해제.</p>
+      <p class="lesson">💡 교훈: 웹앱에서 하드웨어(마이크)는 OS 버그까지 계산에 넣어야.</p>
+    </div>
+    <div class="card oops">
+      <h3>📦 고쳐도 고쳐지지 않는 폰</h3>
+      <p>서버는 최신인데 폰은 계속 옛날 동작. 범인은 <b>캐시된 옛 파서 파일</b>.</p>
+      <p>🔎 파일 주소에 버전표식(?v=)을 붙여 업데이트가 즉시 반영되게.</p>
+      <p class="lesson">💡 교훈: "배포했는데 안 바뀌어요"의 8할은 캐시.</p>
+    </div>
+  </div>
+  <p class="sub" style="margin-top:16px">공통점: <b style="color:var(--ink)">추측으로 고치지 않고, 증거(실험·스크린샷·캡처)부터 확보</b> → 한 번에 해결</p>
+</section>
+
+<!-- 10. 숫자 -->
+<section>
+  <h2><span class="no">09</span>숫자로 보는 i_Day</h2>
+  <div class="grid g3">
+    <div class="card"><div class="kv"><span class="k">2일</span><span class="v">기획→완성 (7/11~12)</span></div></div>
+    <div class="card"><div class="kv"><span class="k">38</span><span class="v">자동 테스트 (파서·달력 로직)</span></div></div>
+    <div class="card"><div class="kv"><span class="k">70+</span><span class="v">기존 구글 일정 즉시 연동</span></div></div>
+    <div class="card"><div class="kv"><span class="k">3</span><span class="v">무료 서비스 조합 (Vercel·Supabase·GAS)</span></div></div>
+    <div class="card"><div class="kv"><span class="k">0원</span><span class="v">서버 비용</span></div></div>
+    <div class="card"><div class="kv"><span class="k">v1.2</span><span class="v">현재 버전 (설명서 내장)</span></div></div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <b>기존 인프라 재활용이 핵심</b>
+    <ul>
+      <li>로그인·설정: i_Memo_S의 Supabase 그대로</li>
+      <li>구글 연동: 텔레그램 브리핑용 Apps Script 브리지를 v3로 확장 (기존 기능 무중단)</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 11. 다음 할 일 -->
+<section>
+  <h2><span class="no">10</span>앞으로 할 것들</h2>
+  <div class="card">
+    <ul class="next" style="margin-top:0">
+      <li><span class="lv lv1">다음</span><b>i_Memo_S 통합</b> — 캘린더 탭으로 이식 + 일정↔메모 연결 (일정에서 관련 메모 보기)</li>
+      <li><span class="lv lv1">다음</span><b>주간 뷰</b> — 한 주를 시간축으로 보는 화면</li>
+      <li><span class="lv lv2">검토</span><b>알림 기본값</b> — "새 일정은 항상 30분 전 알림" 같은 내 규칙</li>
+      <li><span class="lv lv2">검토</span><b>반복 삭제도 "이후 전체"</b> — 수정처럼 3택으로</li>
+      <li><span class="lv lv2">검토</span><b>음성 파서 확장</b> — "다음달 첫 월요일", "매주 화요일 반복 추가"까지 말로</li>
+      <li><span class="lv lv3">아이디어</span><b>월별 사진 배경</b> · <b>ics 백업/내보내기</b> · <b>가족 공유 캘린더</b></li>
+    </ul>
+  </div>
+  <p class="sub" style="margin-top:18px">최종 그림: <b style="color:var(--ink)">i_Memo(메모) + i_Day(일정) = 나의 개인 OS</b> — 텔레그램·맥미니·구글이 그 뒤를 받친다</p>
+</section>
+
+<!-- 12. 마무리 -->
+<section style="text-align:center;align-items:center">
+  <h1 style="font-size:clamp(1.8rem,4.5vw,3rem)">"쓰던 앱의 불편함이<br><span class="grad">하루짜리 프로젝트</span>가 되는 시대"</h1>
+  <p class="sub" style="margin-top:18px">필요한 것: 불편함 목록 + 스크린샷 + 피드백 루프<br>나머지는 Claude Code가.</p>
+  <p style="margin-top:30px"><span class="pill">📅 imemo-calendar.vercel.app</span></p>
+  <p class="sub" style="margin-top:26px">감사합니다 — 한정재</p>
+</section>
+
+<div class="foot">i_Day v1.2 · 스폰지클럽 · ↕ 스크롤 / ←→ 방향키</div>
+<script>
+document.addEventListener("keydown", e => {
+  const secs = [...document.querySelectorAll("section")];
+  const cur = Math.round(window.scrollY / window.innerHeight);
+  if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === "PageDown") {
+    e.preventDefault(); (secs[cur + 1] || secs[secs.length - 1]).scrollIntoView({ behavior: "smooth" });
+  }
+  if (e.key === "ArrowLeft" || e.key === "ArrowUp" || e.key === "PageUp") {
+    e.preventDefault(); (secs[cur - 1] || secs[0]).scrollIntoView({ behavior: "smooth" });
+  }
+});
+</script>
+</body>
+</html>

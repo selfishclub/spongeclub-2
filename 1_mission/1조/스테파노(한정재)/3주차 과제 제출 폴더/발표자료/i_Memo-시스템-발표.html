@@ -1,0 +1,451 @@
+<title>내 손안의 두 번째 뇌 — i_Memo 시스템</title>
+<style>
+  :root{
+    --bg:#F5F6FB; --surface:#FFFFFF; --surface-2:#EDEEF7; --ink:#171622; --muted:#66647E;
+    --line:#E3E4F0; --line-strong:#CFD0E2;
+    --local-1:#6A5CFF; --local-2:#B94BF0;
+    --cloud-1:#10B981; --cloud-2:#06B6D4;
+    --cal:#E8930C; --cal-soft:#FBEBD0;
+    --tg:#1F97D4;
+    --grad-local:linear-gradient(135deg,var(--local-1),var(--local-2));
+    --grad-cloud:linear-gradient(135deg,var(--cloud-1),var(--cloud-2));
+    --shadow:0 1px 2px rgba(24,22,44,.04),0 8px 24px rgba(24,22,44,.06);
+    --shadow-lg:0 2px 6px rgba(24,22,44,.06),0 24px 60px rgba(24,22,44,.10);
+    --sans:-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Segoe UI",system-ui,sans-serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono","Menlo",monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#0C0B13; --surface:#16151F; --surface-2:#1E1D2A; --ink:#ECEBF6; --muted:#9C99B6;
+      --line:#282636; --line-strong:#38364A; --cal:#F6AE3C; --cal-soft:#3A2A12;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#F5F6FB; --surface:#FFFFFF; --surface-2:#EDEEF7; --ink:#171622; --muted:#66647E;
+    --line:#E3E4F0; --line-strong:#CFD0E2; --cal:#E8930C; --cal-soft:#FBEBD0;
+  }
+  :root[data-theme="dark"]{
+    --bg:#0C0B13; --surface:#16151F; --surface-2:#1E1D2A; --ink:#ECEBF6; --muted:#9C99B6;
+    --line:#282636; --line-strong:#38364A; --cal:#F6AE3C; --cal-soft:#3A2A12;
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    line-height:1.65;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    background-image:radial-gradient(60rem 40rem at 82% -8%,rgba(106,92,255,.10),transparent 60%),
+                     radial-gradient(52rem 34rem at 8% 6%,rgba(16,185,129,.07),transparent 60%);
+    background-attachment:fixed;}
+
+  .wrap{max-width:1120px;margin:0 auto;padding:0 clamp(18px,5vw,40px)}
+  section{padding:clamp(56px,9vw,104px) 0;border-top:1px solid var(--line)}
+  section:first-of-type{border-top:none}
+
+  .eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 14px;display:flex;align-items:center;gap:10px}
+  .eyebrow::before{content:"";width:26px;height:2px;border-radius:2px;background:var(--grad-local)}
+  h1,h2,h3{text-wrap:balance;margin:0;letter-spacing:-.02em;line-height:1.12}
+  h2{font-size:clamp(1.7rem,3.4vw,2.6rem);font-weight:800}
+  .lead{color:var(--muted);font-size:clamp(1rem,1.4vw,1.15rem);max-width:60ch;margin:16px 0 0}
+  p{max-width:64ch}
+  b,strong{font-weight:700;color:var(--ink)}
+
+  /* ── HERO ── */
+  .hero{padding-top:clamp(48px,8vw,92px);position:relative;overflow:hidden}
+  .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(24px,4vw,56px);align-items:center}
+  @media (max-width:820px){.hero-grid{grid-template-columns:1fr}}
+  .kicker{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--muted);display:inline-flex;align-items:center;gap:9px;padding:6px 12px;border:1px solid var(--line);
+    border-radius:999px;background:var(--surface)}
+  .kicker .dot{width:7px;height:7px;border-radius:50%;background:var(--grad-local)}
+  .hero h1{font-size:clamp(2.5rem,6.4vw,4.7rem);font-weight:850;margin:22px 0 0}
+  .hero h1 .g{background:var(--grad-local);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero .sub{font-size:clamp(1.05rem,1.7vw,1.28rem);color:var(--muted);margin:20px 0 0;max-width:52ch}
+  .hero .who{margin-top:26px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:.92rem;color:var(--muted)}
+  .hero .who .chip{font-family:var(--mono);font-size:.76rem;color:var(--ink);background:var(--surface-2);
+    border:1px solid var(--line);border-radius:8px;padding:5px 10px}
+
+  .orb{aspect-ratio:1;width:100%;max-width:380px;margin:0 auto;position:relative}
+  .orb svg{width:100%;height:100%;display:block}
+  .node{transform-box:fill-box;transform-origin:center}
+  @keyframes pulse{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:1;transform:scale(1.14)}}
+  @keyframes dash{to{stroke-dashoffset:0}}
+  .orb .node{animation:pulse 3.6s ease-in-out infinite}
+  .orb .n2{animation-delay:.5s}.orb .n3{animation-delay:1s}.orb .n4{animation-delay:1.5s}.orb .n5{animation-delay:2s}
+  .orb .edge{stroke-dasharray:6 5;stroke-dashoffset:60;animation:dash 3s linear forwards}
+  @media (prefers-reduced-motion:reduce){.orb .node,.orb .edge{animation:none;stroke-dashoffset:0;opacity:.9}}
+
+  /* ── generic cards / grids ── */
+  .grid{display:grid;gap:18px}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  @media (max-width:760px){.g3,.g2{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:var(--shadow)}
+  .card h3{font-size:1.08rem;font-weight:750;margin-bottom:7px}
+  .card p{font-size:.93rem;color:var(--muted);margin:0;max-width:none}
+  .card .ci{font-size:1.5rem;line-height:1;display:inline-flex;width:44px;height:44px;align-items:center;justify-content:center;
+    border-radius:12px;background:var(--surface-2);margin-bottom:14px}
+
+  /* ── architecture ── */
+  .arch{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:34px}
+  .anode{width:100%;max-width:760px;background:var(--surface);border:1px solid var(--line);border-radius:18px;
+    padding:20px 24px;display:flex;gap:18px;align-items:center;box-shadow:var(--shadow);position:relative}
+  .anode .ai{flex:none;width:56px;height:56px;border-radius:14px;display:grid;place-items:center;font-size:1.7rem;
+    background:var(--surface-2)}
+  .anode .at{font-weight:750;font-size:1.12rem;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .anode .ad{color:var(--muted);font-size:.93rem;margin-top:3px}
+  .anode.tg{border-color:color-mix(in srgb,var(--tg) 40%,var(--line))}
+  .anode.tg .ai{background:color-mix(in srgb,var(--tg) 16%,var(--surface));color:var(--tg)}
+  .anode.brain{border-width:1.5px;border-color:transparent;background:
+      linear-gradient(var(--surface),var(--surface)) padding-box,var(--grad-local) border-box;box-shadow:var(--shadow-lg)}
+  .anode.brain .ai{background:var(--grad-local);color:#fff}
+  .aflow{font-family:var(--mono);font-size:.76rem;letter-spacing:.12em;color:var(--muted);
+    display:flex;flex-direction:column;align-items:center;gap:2px}
+  .aflow .arr{font-size:1.15rem;color:var(--line-strong)}
+  .aouts{width:100%;max-width:760px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media (max-width:680px){.aouts{grid-template-columns:1fr}}
+  .aout{border-radius:16px;padding:18px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
+  .aout .tag{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+  .aout .aouti{font-size:1.35rem;width:40px;height:40px;border-radius:11px;display:grid;place-items:center;margin-bottom:11px;color:#fff}
+  .aout h4{margin:0 0 4px;font-size:1.02rem;font-weight:750}
+  .aout p{margin:0;font-size:.86rem;color:var(--muted);max-width:none}
+  .aout.local .aouti{background:var(--grad-local)} .aout.local .tag{color:var(--local-1)} .aout.local{border-color:color-mix(in srgb,var(--local-1) 26%,var(--line))}
+  .aout.cloud .aouti{background:var(--grad-cloud)} .aout.cloud .tag{color:var(--cloud-1)} .aout.cloud{border-color:color-mix(in srgb,var(--cloud-1) 26%,var(--line))}
+  .aout.cal .aouti{background:linear-gradient(135deg,#F6B23C,var(--cal))} .aout.cal .tag{color:var(--cal)} .aout.cal{border-color:color-mix(in srgb,var(--cal) 30%,var(--line))}
+
+  /* ── timeline ── */
+  .tl{margin-top:34px;position:relative;padding-left:30px}
+  .tl::before{content:"";position:absolute;left:9px;top:8px;bottom:8px;width:2px;background:linear-gradient(var(--local-1),var(--cloud-1))}
+  .tl-item{position:relative;padding:0 0 30px 12px}
+  .tl-item:last-child{padding-bottom:0}
+  .tl-item::before{content:"";position:absolute;left:-25px;top:4px;width:14px;height:14px;border-radius:50%;
+    background:var(--surface);border:2.5px solid var(--local-1)}
+  .tl-item.c::before{border-color:var(--cloud-1)} .tl-item.cal::before{border-color:var(--cal)}
+  .tl-ph{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .tl-item h3{font-size:1.12rem;font-weight:750;margin:3px 0 5px}
+  .tl-item p{font-size:.92rem;color:var(--muted);margin:0}
+
+  /* ── calendar synergy ── */
+  .syn{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:34px}
+  @media (max-width:760px){.syn{grid-template-columns:1fr}}
+  .feat{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .feat::after{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:linear-gradient(180deg,#F6B23C,var(--cal))}
+  .feat .num{font-family:var(--mono);font-weight:700;font-size:.8rem;color:var(--cal);letter-spacing:.05em}
+  .feat h3{font-size:1.18rem;font-weight:780;margin:8px 0 8px}
+  .feat p{font-size:.93rem;color:var(--muted);margin:0;max-width:none}
+  .feat .demo{margin-top:14px;background:var(--surface-2);border:1px solid var(--line);border-radius:11px;
+    padding:12px 14px;font-family:var(--mono);font-size:.8rem;color:var(--ink);line-height:1.6;white-space:pre-wrap}
+  .feat .demo .m{color:var(--muted)}
+
+  /* ── comparison ── */
+  .cmp{margin-top:30px;width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border:1px solid var(--line);border-radius:16px;background:var(--surface);box-shadow:var(--shadow)}
+  .cmp-scroll{overflow-x:auto}
+  .cmp th,.cmp td{padding:14px 18px;text-align:left;border-bottom:1px solid var(--line);font-size:.92rem;vertical-align:top}
+  .cmp thead th{font-weight:750;font-size:.95rem;position:sticky;top:0}
+  .cmp thead th.local{color:var(--local-1)} .cmp thead th.cloud{color:var(--cloud-1)}
+  .cmp tbody td:first-child{font-weight:650;color:var(--ink);width:34%;min-width:150px}
+  .cmp td{color:var(--muted)}
+  .cmp tr:last-child td{border-bottom:none}
+  .cmp .yes{color:var(--ink);font-weight:600}
+
+  /* ── stats ── */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:8px}
+  @media (max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .stat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:var(--shadow)}
+  .stat .v{font-size:clamp(1.9rem,4vw,2.6rem);font-weight:820;letter-spacing:-.03em;font-variant-numeric:tabular-nums;
+    background:var(--grad-local);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1}
+  .stat .k{color:var(--muted);font-size:.86rem;margin-top:8px}
+
+  /* ── insight chips ── */
+  .ins{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:30px}
+  @media (max-width:760px){.ins{grid-template-columns:1fr}}
+  .ins .card h3{display:flex;align-items:center;gap:9px}
+  .pill{display:inline-block;font-family:var(--mono);font-size:.68rem;padding:3px 8px;border-radius:6px;
+    background:var(--surface-2);border:1px solid var(--line);color:var(--muted);letter-spacing:.03em}
+
+  /* ── closing ── */
+  .close{text-align:center}
+  .close .big{font-size:clamp(1.6rem,4vw,2.7rem);font-weight:820;letter-spacing:-.025em;line-height:1.2;max-width:20ch;margin:16px auto 0}
+  .close .big .g{background:var(--grad-cloud);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .close .next{margin:34px auto 0;max-width:640px;background:var(--surface);border:1px dashed var(--line-strong);border-radius:16px;padding:22px 24px;text-align:left}
+  .close .next .eyebrow{justify-content:flex-start}
+  .close .next ul{margin:6px 0 0;padding-left:20px;color:var(--muted);font-size:.93rem}
+  .close .next li{margin:5px 0}
+  footer{padding:40px 0 60px;text-align:center;color:var(--muted);font-size:.82rem;font-family:var(--mono);letter-spacing:.04em}
+</style>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <span class="kicker"><span class="dot"></span>스폰지클럽 · 과제 발표</span>
+        <h1>내 손안의<br><span class="g">두 번째 뇌</span></h1>
+        <p class="sub">텔레그램으로 툭 던지면, AI가 알아서 정리하고, 캘린더까지 이어지는 — 나를 위한 개인 지식·일정 OS.</p>
+        <div class="who">
+          <span class="chip">한정재 · 치과의사</span>
+          <span>비개발자가 만든 실사용 시스템</span>
+        </div>
+      </div>
+      <div class="orb" aria-hidden="true">
+        <svg viewBox="0 0 200 200" role="img">
+          <defs>
+            <linearGradient id="gl" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#6A5CFF"/><stop offset="1" stop-color="#B94BF0"/>
+            </linearGradient>
+            <radialGradient id="glow" cx="50%" cy="42%" r="55%">
+              <stop offset="0" stop-color="#6A5CFF" stop-opacity=".22"/><stop offset="1" stop-color="#6A5CFF" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <circle cx="100" cy="92" r="92" fill="url(#glow)"/>
+          <g stroke="url(#gl)" stroke-width="2" fill="none" opacity=".8">
+            <path class="edge" d="M100 96 L58 54"/>
+            <path class="edge" d="M100 96 L150 48"/>
+            <path class="edge" d="M100 96 L156 118"/>
+            <path class="edge" d="M100 96 L64 142"/>
+            <path class="edge" d="M58 54 L150 48"/>
+            <path class="edge" d="M156 118 L64 142"/>
+          </g>
+          <g fill="url(#gl)">
+            <circle class="node" cx="100" cy="96" r="11"/>
+            <circle class="node n2" cx="58" cy="54" r="7.5"/>
+            <circle class="node n3" cx="150" cy="48" r="7.5"/>
+            <circle class="node n4" cx="156" cy="118" r="7.5"/>
+            <circle class="node n5" cx="64" cy="142" r="7.5"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow">왜 만들었나</p>
+    <h2>메모는 늘 흩어지고,<br>일정과 따로 논다</h2>
+    <div class="grid g3" style="margin-top:34px">
+      <div class="card">
+        <span class="ci">🗂️</span>
+        <h3>흩어지는 기록</h3>
+        <p>순간 떠오른 것들이 메모앱·카톡·사진첩으로 뿔뿔이. 나중에 다시 못 찾는다.</p>
+      </div>
+      <div class="card">
+        <span class="ci">🏷️</span>
+        <h3>정리는 늘 귀찮다</h3>
+        <p>폴더를 매번 고르고 제목을 다는 일이 부담. 결국 "받은함"에 쌓이기만.</p>
+      </div>
+      <div class="card">
+        <span class="ci">📅</span>
+        <h3>메모 ≠ 일정</h3>
+        <p>"다음주 세미나"라고 메모해도 캘린더엔 안 들어가 그대로 놓친다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow">한 장 구조도</p>
+    <h2>텔레그램으로 던지면,<br>맥미니 '뇌'가 알아서 정리한다</h2>
+    <p class="lead">저장소는 여러 곳이지만, 판단하는 뇌는 하나 — 24시간 켜진 맥미니의 Claude Code가 내용을 읽고 제목·분류를 스스로 정한다.</p>
+
+    <div class="arch">
+      <div class="anode tg">
+        <div class="ai">📱</div>
+        <div>
+          <div class="at">텔레그램</div>
+          <div class="ad">어디서나 글·사진에 <b>#메모</b> 또는 <b>#메모s</b> 를 붙여 전송</div>
+        </div>
+      </div>
+      <div class="aflow"><span class="arr">↓</span>받아서 읽기</div>
+      <div class="anode brain">
+        <div class="ai">🧠</div>
+        <div>
+          <div class="at">맥미니 · 두 번째 뇌 <span class="pill">24시간 구동</span></div>
+          <div class="ad">Claude Code 받는 창이 내용을 이해해 <b>간결한 제목</b>과 <b>기존 분류 중 최적 폴더</b>를 자동 선택</div>
+        </div>
+      </div>
+      <div class="aflow"><span class="arr">↓</span>저장 · 연동 <span class="arr">↓</span></div>
+      <div class="aouts">
+        <div class="aout local">
+          <div class="aouti">🗒️</div>
+          <div class="tag">로컬</div>
+          <h4>i_Memo</h4>
+          <p>맥미니에 파일로 저장하는 개인 메모앱. 시크릿 잠금·검색·휴지통.</p>
+        </div>
+        <div class="aout cloud">
+          <div class="aouti">☁️</div>
+          <div class="tag">클라우드</div>
+          <h4>i_Memo_S</h4>
+          <p>Supabase+Vercel. 로그인 하나로 어디서나 접속·실시간 동기화.</p>
+        </div>
+        <div class="aout cal">
+          <div class="aouti">📅</div>
+          <div class="tag">시너지</div>
+          <h4>구글 캘린더</h4>
+          <p>메모 속 일정을 자동 등록하고, 일정 전에 관련 메모를 알려준다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow">만들어 온 여정</p>
+    <h2>한 걸음씩 붙여 온 기능들</h2>
+    <div class="tl">
+      <div class="tl-item">
+        <div class="tl-ph">STEP 1 · 연결</div>
+        <h3>텔레그램 ↔ 맥미니 파이프라인</h3>
+        <p>봇을 Claude Code 받는 창에 연결하고, 맥미니에서 24시간 꺼지지 않게 상시 구동(launchd). 휴대폰이 곧 입력창이 됐다.</p>
+      </div>
+      <div class="tl-item">
+        <div class="tl-ph">STEP 2 · 정리</div>
+        <h3>i_Memo — AI 자동 분류 저장</h3>
+        <p>#메모를 보내면 새 폴더를 만들지 않고 <b>기존 8,000여 분류 중 가장 맞는 곳</b>으로 저장. 시크릿 잠금·모바일 내비·주간/월간 요약까지.</p>
+      </div>
+      <div class="tl-item c">
+        <div class="tl-ph">STEP 3 · 확장</div>
+        <h3>i_Memo_S — 클라우드 버전</h3>
+        <p>같은 앱을 Supabase(로그인·저장·실시간)로 옮겨 맥미니 없이도 어디서나 접속. #메모s로 라우팅, 색으로 구분.</p>
+      </div>
+      <div class="tl-item c">
+        <div class="tl-ph">STEP 4 · 다듬기 (v1.2)</div>
+        <h3>아이콘 확대 · 분류 관리 · 전일 요약</h3>
+        <p>두 앱 공통으로 메인 아이콘을 키우고, 분류 이름을 한 번에 바꾸는 <b>일괄 재분류</b>와 <b>전일(어제) 요약 알림</b>을 추가.</p>
+      </div>
+      <div class="tl-item cal">
+        <div class="tl-ph">STEP 5 · 시너지</div>
+        <h3>구글 캘린더 연동 4종</h3>
+        <p>아침 브리핑·일정 자동 등록·수정/삭제·일정 전 관련 메모 리마인더. 메모와 일정이 하나로 이어졌다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow">캘린더 시너지 · 핵심</p>
+    <h2>메모와 일정이<br>서로를 부른다</h2>
+    <p class="lead">구글 계정의 캘린더를 Apps Script 웹앱으로 살짝 열어, 맥미니가 안전하게 읽고 쓴다. 복잡한 설정(OAuth·클라우드 콘솔) 없이 3분 배포.</p>
+
+    <div class="syn">
+      <div class="feat">
+        <div class="num">① 아침 브리핑</div>
+        <h3>어제의 기록 + 오늘의 일정</h3>
+        <p>매일 아침, 전일 요약 알림에 오늘 캘린더 일정을 얹어 하루를 한 화면으로 시작한다.</p>
+        <div class="demo">🧠 i_Memo 전일 요약
+<span class="m">어제 담은 메모 4건 · 분류별 정리</span>
+📅 오늘 일정
+  • 15:00 원장 회의 @원장실</div>
+      </div>
+      <div class="feat">
+        <div class="num">② 자동 등록</div>
+        <h3>메모 속 일정 → 캘린더</h3>
+        <p>"다음주 화요일 3시 세미나"처럼 시점이 담긴 메모는 저장과 동시에 캘린더 일정으로 등록된다.</p>
+        <div class="demo"><span class="m">#메모</span> 다음주 목요일 3시 서울대 세미나
+→ ✅ 저장  <span class="m">+</span>  📅 캘린더 등록
+   (7/16 15:00 자동 변환)</div>
+      </div>
+      <div class="feat">
+        <div class="num">③ 리마인더</div>
+        <h3>일정 전, 관련 메모를 미리</h3>
+        <p>일정 시작 전(30·60·120분) 그 주제와 관련된 내 메모를 찾아 함께 알려준다. 로컬·클라우드 각각 독립 토글.</p>
+        <div class="demo">⏰ 곧 일정: 치과 세미나 @코엑스
+📝 관련 메모 3건
+  • [치과·병원] 임플란트 세미나 정리 …</div>
+      </div>
+      <div class="feat">
+        <div class="num">④ 수정·삭제</div>
+        <h3>말로 일정을 고친다</h3>
+        <p>"내일 3시 세미나 취소", "16일로 옮겨줘" 같은 한마디로 일정을 바꾸거나 지운다. 모호하면 먼저 되묻는다.</p>
+        <div class="demo"><span class="m">텔레그램</span> 치과 예약 16일 2시로 옮겨줘
+→ ✏️ 변경: 치과 예약 → 7/16 14:00</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow">두 버전, 하나의 뇌</p>
+    <h2>로컬과 클라우드를<br>동시에 굴린다</h2>
+    <div class="cmp-scroll">
+    <table class="cmp">
+      <thead>
+        <tr><th>&nbsp;</th><th class="local">🗒️ i_Memo (로컬)</th><th class="cloud">☁️ i_Memo_S (클라우드)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>저장 위치</td><td>맥미니 파일(.md) · 완전 내 소유</td><td>Supabase(Postgres) · 어디서나 접속</td></tr>
+        <tr><td>접속</td><td>집/외부(HTTPS)로 맥미니</td><td class="yes">브라우저 로그인 하나면 끝</td></tr>
+        <tr><td>사진</td><td>맥미니 폴더</td><td>클라우드 비공개 저장 + 서명 URL</td></tr>
+        <tr><td>텔레그램 태그</td><td><b>#메모</b></td><td><b>#메모s</b></td></tr>
+        <tr><td>일정 자동등록·수정·삭제</td><td class="yes">✓ (캘린더는 공용)</td><td class="yes">✓ (캘린더는 공용)</td></tr>
+        <tr><td>일정 리마인더</td><td class="yes">✓ 로컬 메모 검색</td><td class="yes">✓ 클라우드 메모 검색</td></tr>
+        <tr><td>요약 알림 발송</td><td class="yes">✓ 전일·주간·월간</td><td>설정 저장(발송은 다음 단계)</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow">영리했던 선택</p>
+    <h2>비개발자도 넘은 벽들</h2>
+    <div class="ins">
+      <div class="card">
+        <h3>🔌 <span>맥미니가 24시간 '뇌'</span></h3>
+        <p>launchd로 상시 구동해, 휴대폰에서 던진 것을 언제든 받아 처리. TTY가 없는 백그라운드 환경까지 우회해 안정화.</p>
+        <div style="margin-top:12px"><span class="pill">launchd</span> <span class="pill">headless</span></div>
+      </div>
+      <div class="card">
+        <h3>🗝️ <span>OAuth 없이 캘린더 열기</span></h3>
+        <p>구글 클라우드 콘솔·라이브러리 설치 없이, Apps Script 웹앱을 개인 브리지로 띄워 토큰 하나로 안전하게 읽고 쓴다. 3분 배포.</p>
+        <div style="margin-top:12px"><span class="pill">Apps Script</span> <span class="pill">토큰 보호</span></div>
+      </div>
+      <div class="card">
+        <h3>🔒 <span>진짜 잠기는 시크릿 메모</span></h3>
+        <p>브라우저 내 암호화(PBKDF2+AES-GCM). "아이폰에서 안 될 땐 캐시가 아니라 HTTPS부터" — 보안 컨텍스트 교훈을 기록으로 남겼다.</p>
+        <div style="margin-top:12px"><span class="pill">AES-GCM</span> <span class="pill">HTTPS 필수</span></div>
+      </div>
+      <div class="card">
+        <h3>🤖 <span>새 폴더를 안 만드는 AI</span></h3>
+        <p>맘대로 분류를 늘리지 않도록, 기존 분류 목록 안에서만 고르게 규칙화. 8,000여 메모가 어지러워지지 않는다.</p>
+        <div style="margin-top:12px"><span class="pill">기존 분류만</span> <span class="pill">일괄 재분류</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow">숫자로 보면</p>
+    <div class="stats">
+      <div class="stat"><div class="v">8,486</div><div class="k">쌓인 메모(로컬)</div></div>
+      <div class="stat"><div class="v">24h</div><div class="k">맥미니 상시 구동</div></div>
+      <div class="stat"><div class="v">2</div><div class="k">앱 (로컬 · 클라우드)</div></div>
+      <div class="stat"><div class="v">4</div><div class="k">캘린더 연동 기능</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="close">
+  <div class="wrap">
+    <p class="eyebrow" style="justify-content:center">마무리</p>
+    <div class="big">기록하는 순간, <span class="g">삶이 정리된다</span></div>
+    <p class="lead" style="margin:18px auto 0">던지기만 하면 AI가 정리하고, 일정으로 이어지고, 필요할 때 알아서 꺼내주는 — 나를 돕는 개인 OS. 거창한 도구가 아니라, 매일 쓰는 습관이 됐다.</p>
+
+    <div class="next">
+      <p class="eyebrow">다음 단계</p>
+      <ul>
+        <li>클라우드(i_Memo_S)에서도 요약 알림 실제 발송</li>
+        <li>일정 ↔ 메모 양방향 링크 (일정 열면 관련 메모 바로가기)</li>
+        <li>캘린더 전용 뷰(i_Cal)로 한눈에 보는 하루</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>i_Memo SYSTEM · 한정재 · 스폰지클럽 발표자료</footer>
