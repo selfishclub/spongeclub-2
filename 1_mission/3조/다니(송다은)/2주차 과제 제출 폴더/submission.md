@@ -39,4 +39,4 @@ date:
 
 - **참여한 유닛 / 활동:**
 - **무엇을 했나 (경험):**
-- **SNS 인증 링크:**
+- **SNS 인증 링크:** https://www.linkedin.com/posts/dani-%EC%86%A1%EB%8B%A4%EC%9D%80-0795a1394_spuujosvitmmrvp-spuujosvitmmrvp-swmudutfmtmmrvp-activity-7481543520541962240-CMD_
