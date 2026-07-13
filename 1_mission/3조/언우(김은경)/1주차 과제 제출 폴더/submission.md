@@ -49,12 +49,16 @@ date: 2026-07-13
 ## ⚙️ 미션 3. 내 OS 구현
 > 실제로 만들어본 것 (클로드코드 '채널' 기능 활용 OK)
 
-- **결과물:** 클로드 코드 스킬 **`ai-tool-briefing`** 제작 (`.claude/skills/ai-tool-briefing/SKILL.md`)
+- **결과물 (1) — 요약 엔진:** 클로드 코드 스킬 **`ai-tool-briefing`** 제작 (`.claude/skills/ai-tool-briefing/SKILL.md`)
   - 고정 소스(TLDR AI · The Rundown AI · GeekNews · 자주 보던 유튜버 1개)를 넣으면
   - 이번 주 새 AI 툴·솔루션을 **영상 없이 핵심 요약** + **기획·마케팅 활용처 한 줄** + **이번 주의 픽**으로 한 장 정리
   - 실제로 돌려서 검증 완료: 이번 주 소식 5개(Canva Grow 2.0, Runway Agent 2.0, LinkedIn 브랜드 킷, ActiveCampaign 2.8, Claude in Advertising)를 **영상 하나 안 보고** 파악. "이번 주 AI 뭐 나왔지"에 들던 30분+ 이 **한 장 읽기**로 줄었다.
 
-- **링크 / 스크린샷:** 스킬 파일 `.claude/skills/ai-tool-briefing/SKILL.md` · 실제 브리핑 결과 스크린샷은 `이미지첨부/` 폴더에 추가 예정
+- **결과물 (2) — 배달 경로(클로드코드 채널 기능):** 클로드 코드를 **텔레그램 봇("내 클로드 봇")과 연동**해, 모바일에서 바로 대화·지시가 가능하도록 실습했다. (흐민 세션의 채널 연동에서 배운 '엔진과 배달 분리' 개념을 직접 실행) 이 통로 위에 위 요약 엔진을 얹으면 휴대폰으로 브리핑을 받는 구조가 된다.
+
+- **링크 / 스크린샷:**
+  - 스킬 파일: `.claude/skills/ai-tool-briefing/SKILL.md`
+  - 텔레그램 채널 연동 실습: `이미지첨부/텔레그램_채널연동_실습.png`
 
 ## 📱 미션 4. SNS 1주차 소감
 > AI 도움 없이 직접 작성! (인증하면 셀 지급)
