@@ -1,0 +1,31 @@
+<svg viewBox="0 0 1080 1350" width="1080" height="1350" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="정리함 OS 캐러셀 표지">
+<style>
+  .kr{font-family:'Malgun Gothic','Pretendard','Apple SD Gothic Neo',sans-serif;}
+  .ink{fill:#262019;} .muted{fill:#8B8173;} .deep{fill:#B4562A;}
+</style>
+  <rect x="0" y="0" width="1080" height="1350" fill="#F5F1E8"/>
+  <rect x="465" y="118" width="150" height="58" rx="29" fill="#F7E3D8"/>
+  <text x="540" y="157" class="kr deep" font-size="26" font-weight="700" text-anchor="middle">① 소개</text>
+  <text x="540" y="372" class="kr ink" font-size="104" font-weight="800" text-anchor="middle">정리함 OS</text>
+  <text x="540" y="446" class="kr ink" font-size="35" font-weight="500" text-anchor="middle">넣기만 하던 메모가,</text>
+  <text x="540" y="494" class="kr ink" font-size="35" font-weight="500" text-anchor="middle">스스로 정리되기 시작했다</text>
+  <g>
+    <rect x="90" y="610" width="280" height="200" rx="24" fill="#FFFFFF" stroke="#E7DFD0" stroke-width="2"/>
+    <text x="230" y="686" class="kr" font-size="50" text-anchor="middle">📥</text>
+    <text x="230" y="744" class="kr ink" font-size="32" font-weight="700" text-anchor="middle">넣기</text>
+    <text x="230" y="780" class="kr muted" font-size="22" text-anchor="middle">사진·메모를 수집함에</text>
+    <text x="385" y="726" class="kr deep" font-size="42" font-weight="800" text-anchor="middle">→</text>
+    <rect x="400" y="610" width="280" height="200" rx="24" fill="#FFFFFF" stroke="#E7DFD0" stroke-width="2"/>
+    <text x="540" y="686" class="kr" font-size="50" text-anchor="middle">🤖</text>
+    <text x="540" y="744" class="kr ink" font-size="32" font-weight="700" text-anchor="middle">분류</text>
+    <text x="540" y="780" class="kr muted" font-size="22" text-anchor="middle">클로드가 읽고 나눔</text>
+    <text x="695" y="726" class="kr deep" font-size="42" font-weight="800" text-anchor="middle">→</text>
+    <rect x="710" y="610" width="280" height="200" rx="24" fill="#FFFFFF" stroke="#E7DFD0" stroke-width="2"/>
+    <text x="850" y="686" class="kr" font-size="50" text-anchor="middle">📊</text>
+    <text x="850" y="744" class="kr ink" font-size="32" font-weight="700" text-anchor="middle">정리</text>
+    <text x="850" y="780" class="kr muted" font-size="22" text-anchor="middle">표 하나로 자동 정리</text>
+  </g>
+  <text x="540" y="1000" class="kr muted" font-size="30" font-style="italic" text-anchor="middle">“기록된 모든 메모를 넣어라. 그러면 분류될 것이다.”</text>
+  <text x="540" y="1150" class="kr deep" font-size="30" font-weight="700" text-anchor="middle">넘겨서 보기 →</text>
+  <text x="540" y="1250" class="kr muted" font-size="26" font-weight="700" text-anchor="middle">1 / 3</text>
+</svg>
