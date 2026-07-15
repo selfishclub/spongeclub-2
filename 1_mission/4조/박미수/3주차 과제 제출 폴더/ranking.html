@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>랭킹 — Golf Rank</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    main { padding: 16px 20px 20px; }
+
+    /* 상단 뷰 토글 */
+    .view-toggle { display: flex; gap: 8px; margin-bottom: 18px; }
+    .view-toggle button {
+      flex: 1; height: 46px; border: 1.5px solid var(--border); background: var(--card); border-radius: 10px;
+      font-size: 14px; font-weight: 700; color: var(--muted); cursor: pointer; font-family: inherit; transition: all .15s ease;
+    }
+    .view-toggle button.active { border-color: var(--green); background: var(--green); color: #fff; }
+
+    .section-sub { font-size: 12px; color: var(--muted); margin: -6px 0 16px; }
+
+    .round-info { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .round-info .r-date { font-size: 13px; color: var(--muted); }
+    .round-info .r-course { font-size: 15px; font-weight: 700; }
+    .round-info .r-edit { background: #fff; border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 7px 12px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+    .round-info .r-edit:hover { border-color: var(--green); color: var(--green); }
+
+    .rank-toggle { display: flex; gap: 8px; margin-bottom: 20px; }
+    .rank-toggle button { flex: 1; height: 42px; border: 1.5px solid var(--border); background: var(--card); border-radius: 10px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; font-family: inherit; transition: all .15s ease; }
+    .rank-toggle button.active { border-color: var(--green); background: var(--green-tint); color: var(--green); }
+
+    .list-title { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+
+    .rank-list { display: flex; flex-direction: column; gap: 10px; }
+    .rank-row { display: flex; align-items: center; gap: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow-card); animation: cardIn .3s ease both; }
+    .rank-row.top1 { border-color: var(--gold); background: #FFFBF0; }
+    .rank-num { flex: 0 0 40px; text-align: center; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 26px; color: var(--muted); line-height: 1; }
+    .rank-row.top1 .rank-num { color: var(--gold); }
+    .rank-medal { font-size: 22px; }
+    .rank-main { flex: 1; min-width: 0; }
+    .rank-name { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .rank-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .stat-line { display: flex; gap: 10px; flex-wrap: wrap; font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .stat-line b { color: var(--text); font-family: 'Montserrat', sans-serif; font-weight: 700; }
+    .rank-score { text-align: right; flex: 0 0 auto; }
+    .rank-score .score-big { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 26px; line-height: 1; }
+    .rank-score .score-unit { font-size: 12px; color: var(--muted); font-weight: 600; }
+    .rank-score .score-diff { font-size: 12px; font-weight: 600; margin-top: 3px; }
+    .rank-score .points-big { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 24px; color: var(--green); line-height: 1; }
+    .rank-score .points-unit { font-size: 11px; color: var(--muted); font-weight: 600; }
+    .score-diff.under { color: var(--green); }
+    .score-diff.over  { color: #E53935; }
+    .score-diff.even  { color: var(--muted); }
+
+    .handi-perf { font-size: 12px; font-weight: 700; margin-top: 3px; }
+    .handi-perf.good { color: var(--green); }
+    .handi-perf.bad  { color: #E53935; }
+    .handi-perf.none { color: var(--muted); font-weight: 500; }
+
+    /* 이전 라운드 수정 */
+    .prev-section { margin-top: 28px; }
+    .prev-toggle { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; font-size: 14px; font-weight: 600; color: var(--text); cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: space-between; }
+    .prev-toggle:hover { border-color: var(--green); }
+    .prev-toggle .chev { color: var(--muted); transition: transform .2s ease; }
+    .prev-toggle.open .chev { transform: rotate(180deg); }
+    .prev-list { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .round-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+    .round-item .ri-course { font-size: 14px; font-weight: 700; }
+    .round-item .ri-meta { font-size: 12px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 210px; }
+    .round-item .ri-edit { flex: 0 0 auto; background: var(--green); color: #fff; border: none; border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .round-item .ri-edit:hover { background: var(--green-dark); }
+    .round-item.current { border-color: var(--gold); }
+    .round-item .badge-cur { font-size: 10px; font-weight: 700; color: var(--gold); margin-left: 6px; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <button class="icon-btn" id="backBtn" aria-label="뒤로">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="title" id="clubTitle">랭킹<span class="sub" id="clubSub"></span></div>
+    </header>
+
+    <main id="main"></main>
+
+    <nav class="tabbar">
+      <a href="#" id="tabHome"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10" stroke-linecap="round" stroke-linejoin="round"/></svg>홈</a>
+      <a href="#" class="active" id="tabRank"><svg viewBox="0 0 24 24"><path d="M8 21V9M16 21V5M4 21V13M20 21V9" stroke-linecap="round"/></svg>랭킹</a>
+      <a href="#" id="tabGallery"><svg viewBox="0 0 24 24"><path d="M3 8.5A1.5 1.5 0 0 1 4.5 7H7l1.2-2h7.6L17 7h2.5A1.5 1.5 0 0 1 21 8.5v9A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.2"/></svg>갤러리</a>
+      <a href="#" id="tabMember"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5M17 11a3 3 0 0 0 0-6M21 20c0-2.5-2-4-4-4.5" stroke-linecap="round"/></svg>멤버</a>
+    </nav>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./db.js"></script>
+  <script src="./calc.js"></script>
+  <script>
+    const STORAGE_KEY = 'golfrank.clubs';
+    const $ = (id) => document.getElementById(id);
+    const params = new URLSearchParams(location.search);
+    const clubId = params.get('club');
+    let clubs = load();
+    let club = clubs.find((c)=>c.id===clubId);
+    let view = 'season';   // 'season' | 'round'
+
+    function load(){ try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch(e){ return []; } }
+    function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(clubs)); if(club) pushClub(club); }
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function fmtDate(str){ const d=new Date(str); return (d.getMonth()+1)+'월 '+d.getDate()+'일'; }
+    function badgeHtml(role){ return role==='owner'?'<span class="role-emoji" title="모임장">👑</span>':role==='staff'?'<span class="role-emoji" title="운영진">⭐</span>':role==='guest'?'<span class="badge guest">게스트</span>':''; }
+    let toastTimer;
+    function showToast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2200); }
+
+    if (club) { $('clubTitle').childNodes[0].nodeValue = club.name; $('clubSub').textContent = '랭킹'; }
+
+    /* ============================================================
+       계산 로직
+    ============================================================ */
+    const SEASON_YEAR = new Date().getFullYear();
+    function seasonRounds(){ return (club.rounds||[]).filter((r)=> new Date(r.date).getFullYear()===SEASON_YEAR); }
+
+    // 전체 랭킹: 멤버만, 라운드 등수 → 정규화 포인트 평균 + 신뢰 보정 (공용 calc.js)
+    function seasonBoard(){ return computeBoard(seasonRounds()); }
+
+    // 기준 핸디 = 이 라운드 이전, 해당 선수의 최근 3라운드 평균 타수
+    // (기록이 없으면 회원 등록 시 입력한 핸디로 대체)
+    function baselineAvg(name, currentRoundId){
+      const totals = (club.rounds||[])
+        .filter((r)=> r.id !== currentRoundId)
+        .map((r)=>{ const s=r.scores.find((x)=>x.name===name && typeof x.total==='number'); return s ? s.total : null; })
+        .filter((t)=>t!=null).slice(-3);
+      if(totals.length) return totals.reduce((a,b)=>a+b,0)/totals.length;
+      const m=(club.members||[]).find((x)=>x.name===name);
+      return (m && typeof m.handicap==='number') ? m.handicap : null;
+    }
+
+    /* ============================================================
+       렌더
+    ============================================================ */
+    function render(){
+      if(!club){ $('main').innerHTML='<div class="empty"><div class="icon">🤔</div><h3>모임을 찾을 수 없어요</h3><p>대시보드에서 다시 들어와 주세요.</p></div>'; return; }
+      const rounds = club.rounds || [];
+      if(!rounds.length){
+        $('main').innerHTML = `<div class="empty"><div class="icon">🏁</div><h3>아직 기록된 라운드가 없어요</h3><p>첫 라운드를 기록하면<br/>순위가 자동으로 계산돼요.</p>
+          <button class="btn btn-primary" style="margin-top:20px;padding:12px 24px;" onclick="goRecord()">📝 라운드 기록하기</button></div>`;
+        return;
+      }
+
+      const toggle = `<div class="view-toggle" id="viewToggle">
+        <button data-view="season" class="${view==='season'?'active':''}">🏆 전체 랭킹</button>
+        <button data-view="round" class="${view==='round'?'active':''}">📋 라운드별 성적</button>
+      </div>`;
+
+      $('main').innerHTML = toggle + (view==='season' ? seasonHtml() : roundHtml()) + prevHtml(rounds);
+
+      const vt = $('viewToggle');
+      if(vt) vt.addEventListener('click',(e)=>{ const b=e.target.closest('button'); if(!b) return; view=b.dataset.view; render(); });
+      const rt = $('rankToggle');
+      if(rt) rt.addEventListener('click',(e)=>{ const b=e.target.closest('button'); if(!b) return; club.rankingType=b.dataset.type; save(); render(); });
+      const pt = $('prevToggle');
+      if(pt) pt.addEventListener('click',()=>{ const l=$('prevList'); l.hidden=!l.hidden; pt.classList.toggle('open', !l.hidden); });
+    }
+
+    /* ── 전체 랭킹 (시즌 누적) ── */
+    function seasonHtml(){
+      const board = seasonBoard();
+      if(!board.length) return `<div class="section-sub">${SEASON_YEAR}년 시즌</div><div class="empty"><div class="icon">📅</div><h3>${SEASON_YEAR}년 기록이 없어요</h3><p>올해 라운드를 기록하면 시즌 순위가 쌓여요.</p></div>`;
+      const medals=['🥇','🥈','🥉'];
+      const rows = board.map((p,i)=>{
+        const cls = i===0?'top1':'';
+        const num = i<3 ? `<span class="rank-medal">${medals[i]}</span>` : (i+1);
+        return `<div class="rank-row ${cls}" data-report="${escapeHtml(p.name)}" style="cursor:pointer">
+          <div class="rank-num">${num}</div>
+          <div class="rank-main">
+            <div class="rank-name">${escapeHtml(p.name)} ${badgeHtml(p.role)}</div>
+            <div class="stat-line">
+              <span>🏆 <b>${p.firsts}</b>회</span>
+              <span>승률 <b>${Math.round(p.winrate*100)}%</b></span>
+              <span>평균 <b>${p.avg.toFixed(1)}</b>타</span>
+              <span><b>${p.rounds}</b>R</span>
+            </div>
+          </div>
+          <div class="rank-score">
+            <div><span class="points-big">${p.adjPts.toFixed(1)}</span></div>
+            <div class="points-unit">실력포인트</div>
+          </div>
+        </div>`;
+      }).join('');
+      return `<div class="section-sub">${SEASON_YEAR}년 시즌 · <b>평균 등수 포인트</b>(신뢰 보정) 기준 — 출석수와 무관한 멤버 실력 순위예요. (게스트 제외 · 라운드가 쌓일수록 정확)</div>
+        <div class="list-title">🏆 전체 순위</div><div class="rank-list">${rows}</div>`;
+    }
+
+    /* ── 라운드별 성적 (핸디 대비 포함) ── */
+    function roundHtml(){
+      const rounds = club.rounds;
+      const last = rounds[rounds.length-1];
+      const type = club.rankingType || 'score';
+
+      const withCalc = last.scores.filter((s)=>typeof s.total==='number').map((s)=>{
+        const base = baselineAvg(s.name, last.id);              // 기준핸디(직전3R 평균)
+        const perf = base==null ? null : (base - s.total);      // 핸디 대비 성적
+        const idx  = base==null ? 0 : Math.round(base - last.par); // 핸디 인덱스(오버파)
+        const net  = s.total - idx;                             // 네트
+        return { ...s, base, perf, net };
+      });
+      // 정렬: 스코어 기준=그로스, 핸디 기준=네트
+      withCalc.sort((a,b)=> type==='handicap' ? (a.net-b.net) : (a.total-b.total));
+
+      const medals=['🥇','🥈','🥉'];
+      const rows = withCalc.map((s,i)=>{
+        const cls = i===0?'top1':'';
+        const num = i<3 ? `<span class="rank-medal">${medals[i]}</span>` : (i+1);
+        const diff = s.total - last.par;
+        const diffStr = diff===0?'E':(diff>0?'+'+diff:diff);
+        const diffCls = diff<0?'under':diff>0?'over':'even';
+        let perfHtml;
+        if(s.perf==null) perfHtml = `<div class="handi-perf none">핸디 대비 — (첫 기록)</div>`;
+        else { const g=s.perf>0; const z=Math.abs(s.perf)<0.05;
+          perfHtml = `<div class="handi-perf ${z?'none':g?'good':'bad'}">핸디 대비 ${z?'±0':(g?'+':'')+s.perf.toFixed(1)}타</div>`; }
+        const baseStr = s.base==null ? '첫 라운드' : `기준 ${s.base.toFixed(1)}타`;
+        return `<div class="rank-row ${cls}" ${s.role!=='guest'?`data-report="${escapeHtml(s.name)}" style="cursor:pointer"`:''}>
+          <div class="rank-num">${num}</div>
+          <div class="rank-main">
+            <div class="rank-name">${escapeHtml(s.name)} ${badgeHtml(s.role)}</div>
+            <div class="rank-sub">${baseStr}${type==='handicap'?` · 네트 ${s.net}`:''}</div>
+            ${perfHtml}
+          </div>
+          <div class="rank-score">
+            <div><span class="score-big">${s.total}</span><span class="score-unit">타</span></div>
+            <div class="score-diff ${diffCls}">${diffStr}</div>
+          </div>
+        </div>`;
+      }).join('');
+
+      return `<div class="round-info">
+          <div><div class="r-course">⛳ ${escapeHtml(last.course)}</div><div class="r-date">${fmtDate(last.date)} · Par ${last.par} · ${last.scores.length}명</div></div>
+          <button class="r-edit" onclick="editRound('${last.id}')">✏️ 수정</button>
+        </div>
+        <div class="rank-toggle" id="rankToggle">
+          <button data-type="score" class="${type==='score'?'active':''}">실타수 순위</button>
+          <button data-type="handicap" class="${type==='handicap'?'active':''}">핸디 반영(네트)</button>
+        </div>
+        <div class="list-title">📋 이번 라운드 성적</div>
+        <div class="rank-list">${rows}</div>`;
+    }
+
+    /* ── 이전 라운드 수정 목록 ── */
+    function prevHtml(rounds){
+      const lastId = rounds[rounds.length-1].id;
+      const items = rounds.slice().reverse().map((r)=>{
+        const isCur = r.id===lastId;
+        const names = r.scores.map((s)=>s.name).join(', ');
+        return `<div class="round-item ${isCur?'current':''}">
+          <div><div class="ri-course">⛳ ${escapeHtml(r.course)}${isCur?'<span class="badge-cur">최신</span>':''}</div>
+          <div class="ri-meta">${fmtDate(r.date)} · ${r.scores.length}명 · ${escapeHtml(names)}</div></div>
+          <button class="ri-edit" onclick="editRound('${r.id}')">✏️ 수정</button></div>`;
+      }).join('');
+      return `<div class="prev-section">
+        <button class="prev-toggle" id="prevToggle"><span>🕑 이전 라운드 수정하기 <span style="color:var(--muted);font-weight:500;">(${rounds.length})</span></span><span class="chev">▾</span></button>
+        <div class="prev-list" id="prevList" hidden>${items}</div>
+      </div>`;
+    }
+
+    window.goRecord = ()=>{ location.href='round.html?club='+encodeURIComponent(clubId); };
+    window.editRound = (id)=>{ location.href='round.html?club='+encodeURIComponent(clubId)+'&round='+encodeURIComponent(id); };
+
+    $('tabHome').addEventListener('click',(e)=>{ e.preventDefault(); location.href='home.html?club='+encodeURIComponent(clubId); });
+    $('tabRank').addEventListener('click',(e)=>e.preventDefault());
+    $('tabGallery').addEventListener('click',(e)=>{ e.preventDefault(); location.href='gallery.html?club='+encodeURIComponent(clubId); });
+    $('tabMember').addEventListener('click',(e)=>{ e.preventDefault(); location.href='member.html?club='+encodeURIComponent(clubId); });
+    $('backBtn').addEventListener('click',()=>{ location.href='home.html?club='+encodeURIComponent(clubId); });
+
+    // 선수 탭 → 개인 리포트 (한 번만 등록)
+    $('main').addEventListener('click',(e)=>{ const el=e.target.closest('[data-report]'); if(el){ location.href='report.html?club='+encodeURIComponent(clubId)+'&name='+encodeURIComponent(el.dataset.report); } });
+
+    render();
+    (async ()=>{ const p=await pullClubIntoLocal(clubId); if(p){ club=p; render(); } })();
+  </script>
+</body>
+</html>
