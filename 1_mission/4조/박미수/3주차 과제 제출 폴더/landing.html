@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Golf Rank — 우리 골프 모임을 위한 올인원</title>
+  <meta name="description" content="라운드 기록부터 공정한 랭킹, 사진과 일정까지. 골프 모임에 필요한 모든 것을 한 앱에서." />
+  <style>
+    @font-face { font-family: 'Pretendard Variable'; font-weight: 45 920; font-style: normal; font-display: swap; src: url('./fonts/PretendardVariable.woff2') format('woff2-variations'); }
+    @font-face { font-family: 'Montserrat'; font-weight: 100 900; font-style: normal; font-display: swap; src: url('./fonts/Montserrat-VariableFont_wght.ttf') format('truetype-variations'); }
+
+    :root {
+      --green: #1B5E20; --green2: #2E7D32; --green-light: #4CAF50; --tint: #F0F8F0;
+      --gold: #F9A825; --bg: #FFFFFF; --card: #FAFAFA; --text: #1F1F1F; --muted: #6B7280; --border: #E8E8E8;
+      --maxw: 1120px; --shadow: 0 6px 24px rgba(27,94,32,0.10); --shadow-lg: 0 20px 60px rgba(27,94,32,0.18);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Pretendard Variable', -apple-system, system-ui, sans-serif;
+      color: var(--text); background: var(--bg); line-height: 1.6; -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    .mono { font-family: 'Montserrat', sans-serif; }
+    a { text-decoration: none; color: inherit; }
+    .wrap { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+    /* ── 버튼 ── */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; font-weight: 700; font-size: 16px; border: none; border-radius: 14px; padding: 15px 26px; cursor: pointer; transition: transform .12s ease, box-shadow .2s ease, background .2s ease; }
+    .btn-primary { background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%); color: #fff; box-shadow: var(--shadow); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+    .btn-ghost { background: #fff; color: var(--green); border: 1.5px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--green-light); background: var(--tint); }
+    .btn-lg { font-size: 18px; padding: 18px 34px; border-radius: 16px; }
+
+    /* ── 네비 ── */
+    nav { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,0.82); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+    nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 20px; letter-spacing: -0.3px; }
+    .brand .logo { width: 34px; height: 34px; display: grid; place-items: center; background: linear-gradient(135deg, #1B5E20, #2E7D32); border-radius: 10px; font-size: 18px; }
+    .brand .name { font-family: 'Montserrat', sans-serif; }
+    nav .btn { padding: 10px 20px; font-size: 15px; border-radius: 11px; }
+
+    /* ── 히어로 ── */
+    .hero { position: relative; padding: 76px 0 64px; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; top: -220px; right: -160px; width: 620px; height: 620px; background: radial-gradient(circle, rgba(76,175,80,0.16), rgba(76,175,80,0) 70%); z-index: 0; }
+    .hero .wrap { position: relative; z-index: 1; display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 48px; align-items: center; }
+    .pill { display: inline-flex; align-items: center; gap: 7px; background: var(--tint); color: var(--green); font-weight: 700; font-size: 13px; padding: 8px 14px; border-radius: 999px; margin-bottom: 22px; }
+    .hero h1 { font-size: 52px; line-height: 1.16; letter-spacing: -1.4px; font-weight: 800; }
+    .hero h1 .hl { color: var(--green); }
+    .hero p.sub { margin-top: 20px; font-size: 18px; color: var(--muted); max-width: 460px; }
+    .hero .cta { margin-top: 34px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .hero .note { margin-top: 16px; font-size: 13px; color: var(--muted); }
+
+    /* ── 폰 목업 ── */
+    .phone-wrap { display: flex; justify-content: center; }
+    .phone { width: 290px; background: #fff; border-radius: 34px; padding: 12px; box-shadow: var(--shadow-lg); border: 1px solid #EDEDED; animation: floaty 5s ease-in-out infinite; }
+    @keyframes floaty { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-12px); } }
+    .screen { border-radius: 24px; overflow: hidden; background: #fff; border: 1px solid #F0F0F0; }
+    .ph-head { background: linear-gradient(135deg, #1B5E20, #2E7D32); color: #fff; padding: 16px 16px 14px; display: flex; align-items: center; gap: 8px; }
+    .ph-head .t { font-weight: 800; font-size: 15px; }
+    .ph-head .t small { display: block; font-size: 10px; opacity: .8; font-weight: 500; }
+    .ph-body { padding: 14px; }
+    .kpi { display: flex; gap: 8px; margin-bottom: 12px; }
+    .kpi .k { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 10px 8px; text-align: center; }
+    .kpi .k b { font-family: 'Montserrat', sans-serif; font-size: 20px; color: var(--green); display: block; line-height: 1.1; }
+    .kpi .k span { font-size: 10px; color: var(--muted); }
+    .rk-title { font-size: 12px; font-weight: 700; color: var(--muted); margin: 4px 2px 8px; }
+    .rk { display: flex; align-items: center; gap: 10px; padding: 9px 11px; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 7px; background: #fff; }
+    .rk .rank { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 15px; width: 20px; }
+    .rk .who { flex: 1; font-size: 13px; font-weight: 600; }
+    .rk .sc { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 16px; }
+    .rk.top { background: var(--tint); border-color: #CDE6CE; }
+
+    /* ── 통계 스트립 ── */
+    .stats { background: var(--tint); border-top: 1px solid #E3F0E4; border-bottom: 1px solid #E3F0E4; padding: 40px 0; }
+    .stats .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; text-align: center; }
+    .stats .n { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 40px; color: var(--green); line-height: 1; letter-spacing: -1px; }
+    .stats .l { margin-top: 8px; font-size: 14px; color: var(--muted); font-weight: 600; }
+
+    /* ── 섹션 공통 ── */
+    section.blk { padding: 84px 0; }
+    .sec-head { text-align: center; max-width: 640px; margin: 0 auto 52px; }
+    .sec-head .tag { color: var(--green); font-weight: 800; font-size: 14px; letter-spacing: .4px; }
+    .sec-head h2 { font-size: 36px; font-weight: 800; letter-spacing: -0.8px; margin-top: 10px; }
+    .sec-head p { margin-top: 14px; font-size: 17px; color: var(--muted); }
+
+    /* ── 기능 카드 ── */
+    .feat { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 28px 24px; transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease; }
+    .card:hover { transform: translateY(-4px); box-shadow: var(--shadow); border-color: #D5E8D6; }
+    .card .ico { width: 52px; height: 52px; display: grid; place-items: center; font-size: 26px; background: #fff; border: 1px solid var(--border); border-radius: 14px; margin-bottom: 16px; }
+    .card h3 { font-size: 19px; font-weight: 700; letter-spacing: -0.3px; }
+    .card p { margin-top: 8px; font-size: 15px; color: var(--muted); }
+
+    /* ── 기능 자세히 (교차 레이아웃) ── */
+    .details { display: flex; flex-direction: column; gap: 76px; margin-top: 12px; }
+    .drow { display: grid; grid-template-columns: 1fr 1fr; gap: 52px; align-items: center; }
+    .drow:nth-child(even) .dvis { order: 2; }
+    .dtext .k { color: var(--green); font-weight: 800; font-size: 13px; letter-spacing: .5px; }
+    .dtext h3 { font-size: 29px; font-weight: 800; letter-spacing: -0.6px; margin-top: 10px; line-height: 1.28; }
+    .dtext > p { margin-top: 12px; font-size: 16px; color: var(--muted); }
+    .dlist { margin-top: 20px; display: flex; flex-direction: column; gap: 11px; }
+    .dlist li { list-style: none; display: flex; gap: 10px; align-items: flex-start; font-size: 15px; }
+    .dlist li::before { content: '✓'; color: var(--green); font-weight: 800; flex: 0 0 auto; }
+    .dvis { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 30px; box-shadow: var(--shadow); }
+    .mini { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 12px; }
+    .mini + .mini { margin-top: 10px; }
+    .mlabel { font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 8px; }
+    .mchips { display: flex; gap: 6px; margin-bottom: 12px; }
+    .mchip { flex: 1; background: var(--tint); border-radius: 10px; padding: 8px 6px; text-align: center; }
+    .mchip b { display: block; font-family: 'Montserrat',sans-serif; color: var(--green); font-size: 16px; }
+    .mchip span { font-size: 9px; color: var(--muted); }
+    .mcal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+    .mcal .c { aspect-ratio: 1; border-radius: 7px; display: grid; place-items: center; font-family: 'Montserrat',sans-serif; font-size: 11px; color: var(--text); position: relative; background: #fff; border: 1px solid #F1F1F1; }
+    .mcal .c.dot::after { content: ''; position: absolute; bottom: 4px; width: 4px; height: 4px; border-radius: 50%; background: var(--green); }
+    .mcal .c.sel { background: var(--green); color: #fff; border-color: var(--green); }
+    .photo-ph { height: 76px; border-radius: 10px; background: linear-gradient(135deg,#DDEEDD,#EFF7EF); display: grid; place-items: center; font-size: 26px; }
+    .oarrow { text-align: center; color: var(--green); font-weight: 700; font-size: 12px; margin: 9px 0; }
+    .ptable { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .ptable th, .ptable td { padding: 6px 8px; text-align: center; border-bottom: 1px solid #F1F1F1; }
+    .ptable th { color: var(--muted); font-size: 10px; font-weight: 700; }
+    .ptable tr:last-child td { border-bottom: none; }
+    .ptable td.name { text-align: left; font-weight: 600; }
+    .ptable td.sum { font-family: 'Montserrat',sans-serif; font-weight: 800; color: var(--green); }
+    .mrk { display: flex; align-items: center; gap: 10px; padding: 9px 11px; border: 1px solid var(--border); border-radius: 11px; margin-bottom: 7px; background: #fff; }
+    .mrk .r { font-family: 'Montserrat',sans-serif; font-weight: 800; width: 18px; }
+    .mrk .nm { flex: 1; font-size: 13px; font-weight: 600; }
+    .mrk .pt { font-family: 'Montserrat',sans-serif; font-weight: 800; font-size: 14px; color: var(--green); }
+    .mrk.t { background: var(--tint); border-color: #CDE6CE; }
+    .mcap { font-size: 11px; color: var(--muted); margin-top: 8px; text-align: center; }
+    .mmem { display: flex; align-items: center; gap: 11px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; background: #fff; }
+    .mmem:last-child { margin-bottom: 0; }
+    .mav { width: 36px; height: 36px; border-radius: 50%; background: var(--tint); display: grid; place-items: center; font-weight: 700; color: var(--green); font-size: 14px; flex: 0 0 auto; }
+    .mmem .mi { flex: 1; min-width: 0; }
+    .mmem .mn { font-size: 13px; font-weight: 700; }
+    .mmem .ms { font-size: 11px; color: var(--muted); }
+    .tag-mini { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: #FFF3E0; color: #B26A00; border: 1px solid #F0C674; }
+    .btn-mini { font-size: 11px; font-weight: 700; background: var(--green); color: #fff; border: none; border-radius: 8px; padding: 7px 11px; flex: 0 0 auto; }
+
+    /* ── 사용법 ── */
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .step { text-align: center; padding: 0 12px; }
+    .step .num { width: 60px; height: 60px; margin: 0 auto 18px; display: grid; place-items: center; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 24px; color: #fff; background: linear-gradient(135deg, #1B5E20, #2E7D32); border-radius: 50%; box-shadow: var(--shadow); }
+    .step h3 { font-size: 19px; font-weight: 700; }
+    .step p { margin-top: 8px; font-size: 15px; color: var(--muted); }
+
+    /* ── 최종 CTA ── */
+    .cta-band { background: linear-gradient(135deg, #0F3C14 0%, #1B5E20 55%, #2E7D32 100%); color: #fff; border-radius: 28px; padding: 56px 44px; display: grid; grid-template-columns: 1fr auto; gap: 40px; align-items: center; box-shadow: var(--shadow-lg); }
+    .cta-band h2 { font-size: 34px; font-weight: 800; letter-spacing: -0.8px; line-height: 1.25; }
+    .cta-band p { margin-top: 12px; font-size: 17px; opacity: .9; }
+    .cta-band .btn-primary { background: #fff; color: var(--green); margin-top: 26px; }
+    .cta-band .btn-primary:hover { background: #F3FBF3; }
+    .qr { background: #fff; border-radius: 20px; padding: 16px; text-align: center; }
+    .qr img { width: 148px; height: 148px; display: block; }
+    .qr span { display: block; margin-top: 8px; font-size: 12px; color: var(--muted); font-weight: 600; }
+
+    /* ── 푸터 ── */
+    footer { padding: 40px 0 56px; border-top: 1px solid var(--border); margin-top: 84px; }
+    footer .wrap { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; color: var(--muted); font-size: 14px; }
+    footer .brand { font-size: 17px; color: var(--text); }
+
+    /* ── 반응형 ── */
+    @media (max-width: 900px) {
+      .hero { padding: 52px 0 40px; }
+      .hero .wrap { grid-template-columns: 1fr; gap: 40px; }
+      .hero h1 { font-size: 40px; }
+      .phone-wrap { order: 2; }
+      .stats .grid { grid-template-columns: repeat(2, 1fr); gap: 28px 20px; }
+      .feat { grid-template-columns: 1fr 1fr; }
+      .details { gap: 48px; }
+      .drow { grid-template-columns: 1fr; gap: 24px; }
+      .drow .dvis { order: 0 !important; }
+      .dtext h3 { font-size: 24px; }
+      .steps { grid-template-columns: 1fr; gap: 32px; }
+      section.blk { padding: 60px 0; }
+      .sec-head h2 { font-size: 30px; }
+      .cta-band { grid-template-columns: 1fr; text-align: center; padding: 44px 26px; }
+      .cta-band h2 { font-size: 28px; }
+      .qr { justify-self: center; }
+      .cta-band .btn { width: 100%; }
+    }
+    @media (max-width: 560px) {
+      .hero h1 { font-size: 33px; letter-spacing: -1px; }
+      .hero .cta .btn { flex: 1; }
+      .feat { grid-template-columns: 1fr; }
+      .stats .n { font-size: 34px; }
+      .brand .name { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 네비 -->
+  <nav>
+    <div class="wrap">
+      <a class="brand" href="#top"><span class="logo">🏌️</span><span class="name">Golf Rank</span></a>
+      <a class="btn btn-primary" href="./dashboard.html">시작하기</a>
+    </div>
+  </nav>
+
+  <!-- 히어로 -->
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div>
+        <span class="pill">⛳ 골프 모임 올인원 앱</span>
+        <h1>흩어진 스코어를<br/><span class="hl">한 곳에</span> 모으다</h1>
+        <p class="sub">라운드 기록부터 공정한 랭킹, 사진과 일정까지 — 우리 골프 모임에 필요한 모든 것을 한 앱에서.</p>
+        <div class="cta">
+          <a class="btn btn-primary btn-lg" href="./dashboard.html">시작하기 →</a>
+          <a class="btn btn-ghost btn-lg" href="#features">기능 둘러보기</a>
+        </div>
+        <p class="note">설치 없이 웹에서 바로 · 폰·PC 어디서든</p>
+      </div>
+
+      <!-- 폰 목업 -->
+      <div class="phone-wrap">
+        <div class="phone">
+          <div class="screen">
+            <div class="ph-head"><span>🏌️</span><span class="t">우리 골프모임<small>이번 달 랭킹</small></span></div>
+            <div class="ph-body">
+              <div class="kpi">
+                <div class="k"><b>12</b><span>올해 라운드</span></div>
+                <div class="k"><b>3</b><span>이번 달</span></div>
+                <div class="k"><b>로리</b><span>이번 달 MVP</span></div>
+              </div>
+              <div class="rk-title">시즌 실력 랭킹</div>
+              <div class="rk top"><span class="rank">🥇</span><span class="who">로리</span><span class="sc" style="color:var(--green)">72</span></div>
+              <div class="rk"><span class="rank">🥈</span><span class="who">미수</span><span class="sc">75</span></div>
+              <div class="rk"><span class="rank">🥉</span><span class="who">준호</span><span class="sc">78</span></div>
+              <div class="rk"><span class="rank" style="color:var(--muted)">4</span><span class="who">지훈</span><span class="sc">81</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 통계 -->
+  <div class="stats">
+    <div class="wrap">
+      <div class="grid">
+        <div><div class="n mono">3</div><div class="l">가지 스코어 입력 방식</div></div>
+        <div><div class="n mono">1</div><div class="l">장의 사진으로 자동 인식</div></div>
+        <div><div class="n mono">∞</div><div class="l">함께하는 멤버 실시간 공유</div></div>
+        <div><div class="n mono">0</div><div class="l">설치 없이 웹에서 바로</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 기능 -->
+  <section class="blk" id="features">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="tag">FEATURES</span>
+        <h2>모임 하나에 필요한 모든 것</h2>
+        <p>기록·랭킹·추억·소통까지, 골프 모임 운영을 한 앱에서 끝냅니다.</p>
+      </div>
+      <div class="feat">
+        <div class="card"><div class="ico">📅</div><h3>캘린더 대시보드</h3><p>라운드와 예정 일정을 달력에서 한눈에. 올해 라운드·이번 달 MVP까지 자동 요약.</p></div>
+        <div class="card"><div class="ico">📸</div><h3>사진으로 스코어 입력</h3><p>스코어 사진을 찍으면 이름·전반·후반·합계를 자동 인식(OCR). 손으로 하나씩 안 넣어도 돼요.</p></div>
+        <div class="card"><div class="ico">🏆</div><h3>공정한 랭킹</h3><p>순위를 점수로 환산하고 평균+보정 적용. 자주 나온다고 유리하지 않게, 진짜 실력으로.</p></div>
+        <div class="card"><div class="ico">👥</div><h3>멤버·게스트 관리</h3><p>핸디·구력·라베·티박스·프로필까지. 모임장👑·운영진⭐ 권한도 한눈에.</p></div>
+        <div class="card"><div class="ico">🖼️</div><h3>갤러리</h3><p>라운드마다 남긴 사진·짧은 영상을 날짜·코스 워터마크와 함께 모아봐요.</p></div>
+        <div class="card"><div class="ico">💬</div><h3>공지 · 댓글</h3><p>공지를 올리고 댓글로 소통하는, 혼자가 아니라 함께 쓰는 모임 공간.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 기능 자세히 -->
+  <section class="blk" style="padding-top:0;">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="tag">IN DETAIL</span>
+        <h2>하나씩 자세히 보기</h2>
+        <p>핵심 기능이 실제로 어떻게 동작하는지 살펴보세요.</p>
+      </div>
+
+      <div class="details">
+
+        <!-- 1. 캘린더 -->
+        <div class="drow">
+          <div class="dvis">
+            <div class="mchips">
+              <div class="mchip"><b>12</b><span>올해 라운드</span></div>
+              <div class="mchip"><b>3</b><span>이번 달</span></div>
+              <div class="mchip"><b>로리</b><span>이번 달 MVP</span></div>
+            </div>
+            <div class="mini">
+              <div class="mlabel">2026년 7월</div>
+              <div class="mcal">
+                <div class="c dot">1</div><div class="c">2</div><div class="c dot">3</div><div class="c">4</div><div class="c">5</div><div class="c">6</div><div class="c">7</div>
+                <div class="c">8</div><div class="c">9</div><div class="c dot">10</div><div class="c">11</div><div class="c">12</div><div class="c dot">13</div><div class="c">14</div>
+                <div class="c">15</div><div class="c sel">16</div><div class="c">17</div><div class="c">18</div><div class="c">19</div><div class="c">20</div><div class="c">21</div>
+              </div>
+            </div>
+          </div>
+          <div class="dtext">
+            <div class="k mono">CALENDAR</div>
+            <h3>이번 달 우리 모임,<br/>달력 하나로 한눈에</h3>
+            <p>라운드가 있던 날도, 다가올 일정도 달력에서 바로 보여요.</p>
+            <ul class="dlist">
+              <li>라운드가 있는 날은 초록 점, 예정 일정은 테두리 점으로 표시</li>
+              <li>올해 총 라운드 · 이번 달 라운드 · 이번 달 MVP 자동 요약</li>
+              <li>골프장(CC)별로 필터해서 원하는 코스 기록만 모아보기</li>
+              <li>날짜를 누르면 그날의 라운드로 바로 이동</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 2. 사진 스코어(OCR) -->
+        <div class="drow">
+          <div class="dvis">
+            <div class="mini">
+              <div class="mlabel">스코어 사진</div>
+              <div class="photo-ph">📷</div>
+            </div>
+            <div class="oarrow">↓ 자동 인식</div>
+            <div class="mini">
+              <div class="mlabel">인식 결과</div>
+              <table class="ptable">
+                <tr><th>이름</th><th>전반</th><th>후반</th><th>합계</th></tr>
+                <tr><td class="name">양창무</td><td>41</td><td>39</td><td class="sum">80</td></tr>
+                <tr><td class="name">유진현</td><td>44</td><td>42</td><td class="sum">86</td></tr>
+                <tr><td class="name">정민수</td><td>38</td><td>40</td><td class="sum">78</td></tr>
+              </table>
+            </div>
+          </div>
+          <div class="dtext">
+            <div class="k mono">SCORE INPUT</div>
+            <h3>찍으면 끝나는<br/>스코어 등록</h3>
+            <p>스코어 사진 한 장이면 손으로 하나씩 넣을 필요가 없어요.</p>
+            <ul class="dlist">
+              <li>사진 속 이름·전반·후반·합계를 자동으로 인식(OCR)</li>
+              <li>총타수만 빠르게, 또는 홀별로 꼼꼼하게 — 3가지 입력 방식</li>
+              <li>참가자만 골라서 기록, 지난 라운드도 언제든 수정</li>
+              <li>게스트도 함께 기록 (랭킹에는 반영되지 않아요)</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 3. 랭킹 -->
+        <div class="drow">
+          <div class="dvis">
+            <div class="mini">
+              <div class="mlabel">시즌 실력 랭킹</div>
+              <div class="mrk t"><span class="r">1</span><span class="nm">로리</span><span class="pt">92.4</span></div>
+              <div class="mrk"><span class="r">2</span><span class="nm">미수</span><span class="pt">88.1</span></div>
+              <div class="mrk"><span class="r">3</span><span class="nm">준호</span><span class="pt">85.7</span></div>
+              <div class="mcap">순위 → 점수 환산 · 평균 기반 + 출석 보정</div>
+            </div>
+          </div>
+          <div class="dtext">
+            <div class="k mono">RANKING</div>
+            <h3>많이 나온 사람이 아니라,<br/>잘 치는 사람</h3>
+            <p>자주 참석한다고 순위가 올라가지 않아요. 실력이 드러나게 설계했어요.</p>
+            <ul class="dlist">
+              <li>매 라운드 순위를 점수로 환산해 시즌 누적</li>
+              <li>평균 기반 + 보정으로 적게 친 사람의 '운 1등' 방지</li>
+              <li>이번 달 MVP는 월간 평균 스코어로 별도 선정</li>
+              <li>핸디캡 자동 계산(최근 3라운드) + 핸디 대비 성적</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 4. 멤버 -->
+        <div class="drow">
+          <div class="dvis">
+            <div class="mmem"><div class="mav">로</div><div class="mi"><div class="mn">로리 👑</div><div class="ms">핸디 8 · 구력 6년 · 라베 74</div></div></div>
+            <div class="mmem"><div class="mav">미</div><div class="mi"><div class="mn">미수 ⭐</div><div class="ms">핸디 12 · 구력 4년</div></div></div>
+            <div class="mmem"><div class="mav">준</div><div class="mi"><div class="mn">준호 <span class="tag-mini">미가입</span></div><div class="ms">핸디 15</div></div><button class="btn-mini">📨 초대</button></div>
+          </div>
+          <div class="dtext">
+            <div class="k mono">MEMBERS</div>
+            <h3>우리 모임원,<br/>제대로 기록하고 초대까지</h3>
+            <p>프로필부터 권한, 초대까지 모임 관리를 한 곳에서.</p>
+            <ul class="dlist">
+              <li>닉네임·핸디·구력·라베·티박스·목표 스코어·프로필 사진</li>
+              <li>권한 이모지 — 👑 모임장 · ⭐ 운영진</li>
+              <li>아직 가입 안 한 멤버는 '미가입' 표시 + 개인 초대 링크</li>
+              <li>한 사람 = 한 명, 중복 없이 자동 연결</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 사용법 -->
+  <section class="blk" style="background:var(--card);">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="tag">HOW IT WORKS</span>
+        <h2>3단계면 시작</h2>
+        <p>가입부터 첫 라운드 기록까지, 어렵지 않아요.</p>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="num mono">1</div><h3>접속 &amp; 가입</h3><p>초대 링크로 들어와 이메일로 로그인하면 끝.</p></div>
+        <div class="step"><div class="num mono">2</div><h3>모임 자동 참여</h3><p>미리 등록된 내 자리에 자동 연결. 중복 걱정 없이.</p></div>
+        <div class="step"><div class="num mono">3</div><h3>라운드 기록</h3><p>스코어를 올리면 랭킹·갤러리에 자동 반영돼요.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 최종 CTA -->
+  <section class="blk" style="padding-top:0;">
+    <div class="wrap">
+      <div class="cta-band">
+        <div>
+          <h2>오늘 라운드부터,<br/>골프랭크와 함께해요</h2>
+          <p>지금 우리 모임을 만들고 친구들을 초대해보세요.</p>
+          <a class="btn btn-primary btn-lg" href="./dashboard.html">지금 시작하기 →</a>
+        </div>
+        <div class="qr">
+          <img src="./golf-rank-qr.png" alt="Golf Rank QR" />
+          <span>폰으로 열기</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 푸터 -->
+  <footer>
+    <div class="wrap">
+      <a class="brand" href="#top"><span class="logo" style="width:28px;height:28px;font-size:15px;">🏌️</span><span class="name mono">Golf Rank</span></a>
+      <span>스폰지클럽 4조 · 박미수 · 2026</span>
+    </div>
+  </footer>
+
+</body>
+</html>
