@@ -4,9 +4,13 @@
 # 에디터
 .vscode/
 .idea/
+.obsidian/
 
 # Claude Code 로컬 설정 (로컬 전용 설정 및 스킬 모두 무시)
 .claude/
+
+# oh-my-claudecode 로컬 상태 (로컬 전용)
+.omc/
 
 # 개인 노트 폴더(로컬 전용) — 서버로 푸시하지 않기 위해 무시
 1_mission/5조/최강훈/notes/
@@ -14,3 +18,8 @@
 # API 키·시크릿
 .env
 node_modules/
+
+# 로컬 전용 폴더 (푸시하지 않음)
+presentation-timer/
+10_원본/
+20_변환/

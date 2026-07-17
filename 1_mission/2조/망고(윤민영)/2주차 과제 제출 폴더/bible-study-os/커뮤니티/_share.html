@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>묵상 공유</title>
+<style>
+  body { font-family: -apple-system, sans-serif; max-width: 480px; margin: 60px auto; padding: 0 24px; background: #fafaf8; color: #1a1a1a; }
+  h2 { font-size: 18px; font-weight: 600; margin-bottom: 24px; }
+  .card { background: white; border-radius: 16px; padding: 24px; white-space: pre-wrap; line-height: 1.8; font-size: 15px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border: 1px solid #ebebeb; }
+  button { margin-top: 20px; width: 100%; padding: 16px; background: #FEE500; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; color: #1a1a1a; }
+  button:active { opacity: 0.8; }
+  .done { background: #e8f5e9; color: #2e7d32; }
+  .date { font-size: 12px; color: #888; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<div class="date">2026-07-12</div>
+<h2>오늘의 묵상</h2>
+<div class="card" id="msg">🙏 오늘의 묵상
+
+📖 요한복음 3:16
+💬 탭 없이 묵상에 집중한 첫 날 — 하나님의 사랑이 선택이었음을 새롭게 봤다
+✍️ 액션 플랜: 오늘 마주치는 사람에게 먼저 말 걸기
+🔑 오늘의 단어: agapaō · monogenē · aiōnios
+
+#20260712 #묵상</div>
+<button id="btn" onclick="copy()">카카오톡에 복사하기</button>
+<script>
+function copy() {
+  const text = document.getElementById('msg').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('btn');
+    btn.textContent = '✅ 복사됐어요! 카톡에 붙여넣기 하세요.';
+    btn.classList.add('done');
+  });
+}
+</script>
+</body>
+</html>
