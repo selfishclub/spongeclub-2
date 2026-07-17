@@ -4,6 +4,7 @@
 # 에디터
 .vscode/
 .idea/
+.obsidian/
 
 # Claude Code 로컬 설정 (로컬 전용 설정 및 스킬 모두 무시)
 .claude/
