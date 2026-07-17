@@ -21,3 +21,5 @@ node_modules/
 
 # 로컬 전용 폴더 (푸시하지 않음)
 presentation-timer/
+10_원본/
+20_변환/
