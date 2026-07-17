@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>지식 위키</title>
+<style>
+  :root {
+    --bg:          #090c14;
+    --surface:     #10151f;
+    --surface-2:   #161c28;
+    --surface-3:   #1c2433;
+    --border:      rgba(148,163,184,.14);
+    --border-str:  rgba(148,163,184,.24);
+    --text:        #e7ecf6;
+    --text-dim:    #9aa5bd;
+    --text-faint:  #6a7488;
+    --accent:      #60a5fa;
+    --accent-2:    #93c5fd;
+    --accent-soft: rgba(96,165,250,.14);
+    --ok:          #34d399;
+    --warn:        #fbbf24;
+    --danger:      #fb7185;
+    --radius:      12px;
+    --radius-sm:   8px;
+    --shadow:      0 10px 34px rgba(0,0,0,.42);
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", ui-sans-serif,
+            "Segoe UI", system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Menlo", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; font-family: var(--font); }
+  body {
+    display: flex; flex-direction: column; height: 100vh; color: var(--text);
+    background: var(--bg);
+    background-image:
+      radial-gradient(1100px 620px at 78% -12%, rgba(96,165,250,.10), transparent 60%),
+      radial-gradient(900px 560px at 8% 108%, rgba(167,139,250,.08), transparent 60%);
+    font-size: 14px; -webkit-font-smoothing: antialiased; letter-spacing: .1px;
+  }
+
+  /* ---------- Top bar ---------- */
+  #topbar {
+    display: flex; align-items: center; gap: 16px; padding: 11px 18px;
+    background: rgba(16,21,31,.82); backdrop-filter: blur(14px) saturate(140%);
+    border-bottom: 1px solid var(--border); flex-wrap: wrap; z-index: 30; position: relative;
+  }
+  .brand { display: inline-flex; align-items: center; gap: 9px; margin-right: 4px; }
+  .brand .glyph {
+    width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center;
+    background: linear-gradient(150deg, var(--accent), #a78bfa);
+    box-shadow: 0 4px 14px rgba(96,165,250,.35); color: #071018; flex: none;
+  }
+  .brand h1 { font-size: 15px; margin: 0; font-weight: 700; letter-spacing: -.2px; color: #f4f7fc; }
+
+  .search-wrap { position: relative; flex: 0 1 300px; min-width: 190px; }
+  .search-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+    width: 15px; height: 15px; color: var(--text-faint); pointer-events: none; }
+  #search {
+    width: 100%; padding: 9px 12px 9px 33px; border: 1px solid var(--border-str);
+    border-radius: 9px; font-size: 13px; background: var(--surface-2); color: var(--text);
+    outline: none; transition: border-color .18s, box-shadow .18s, background .18s;
+  }
+  #search::placeholder { color: var(--text-faint); }
+  #search:focus { border-color: var(--accent); background: var(--surface-3);
+    box-shadow: 0 0 0 3px var(--accent-soft); }
+
+  .legend-label { font-size: 11px; text-transform: uppercase; letter-spacing: .8px;
+    color: var(--text-faint); font-weight: 600; }
+  #layers { display: flex; gap: 7px; flex-wrap: wrap; }
+  #layers label {
+    display: inline-flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;
+    font-size: 12px; padding: 5px 10px; border-radius: 999px; color: var(--text-dim);
+    background: var(--surface-2); border: 1px solid var(--border);
+    transition: color .16s, background .16s, border-color .16s, opacity .16s;
+  }
+  #layers label:hover { color: var(--text); border-color: var(--border-str); background: var(--surface-3); }
+  #layers label:has(input:not(:checked)) { opacity: .42; }
+  #layers label:has(input:not(:checked)) .swatch { box-shadow: none; }
+  #layers input { position: absolute; opacity: 0; width: 0; height: 0; }
+  #layers label:has(input:focus-visible) { box-shadow: 0 0 0 3px var(--accent-soft); }
+  #layers .swatch { width: 9px; height: 9px; border-radius: 50%; display: inline-block;
+    box-shadow: 0 0 8px 0 currentColor; }
+
+  #stats { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; }
+  #stats .stat { display: inline-flex; align-items: baseline; gap: 5px; font-size: 12px;
+    padding: 5px 10px; border-radius: 8px; background: var(--surface-2);
+    border: 1px solid var(--border); color: var(--text-dim); }
+  #stats .stat b { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  /* ---------- Main split ---------- */
+  #main { flex: 1; display: flex; min-height: 0; gap: 14px; padding: 14px; }
+  #left { flex: 0 0 60%; position: relative; min-width: 0; border-radius: var(--radius);
+    overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow);
+    background: var(--surface); }
+  #cy { position: absolute; inset: 0;
+    background:
+      radial-gradient(900px 700px at 50% 42%, rgba(96,165,250,.05), transparent 70%),
+      #0b0f18; }
+  .graph-tag { position: absolute; left: 12px; bottom: 11px; z-index: 4; font-size: 11px;
+    color: var(--text-faint); background: rgba(11,15,24,.72); border: 1px solid var(--border);
+    padding: 4px 9px; border-radius: 7px; letter-spacing: .3px; pointer-events: none; }
+
+  #results {
+    position: absolute; top: 12px; left: 12px; width: 262px; max-height: 62%; overflow: auto;
+    background: rgba(20,26,38,.94); backdrop-filter: blur(10px);
+    border: 1px solid var(--border-str); border-radius: var(--radius); display: none;
+    box-shadow: var(--shadow); font-size: 13px; z-index: 5;
+  }
+  #results .r { padding: 9px 12px; cursor: pointer; border-bottom: 1px solid var(--border);
+    color: var(--text); transition: background .14s, color .14s; }
+  #results .r:last-child { border-bottom: 0; }
+  #results .r:hover { background: var(--accent-soft); }
+  #results .r small { color: var(--text-faint); display: block; margin-top: 2px;
+    text-transform: uppercase; letter-spacing: .5px; font-size: 10px; }
+
+  /* ---------- Right panel ---------- */
+  #right { flex: 1; overflow: hidden; min-width: 0; display: flex; flex-direction: column;
+    border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow);
+    background: var(--surface); }
+  .tabbar { display: flex; gap: 4px; padding: 8px 8px 0; border-bottom: 1px solid var(--border);
+    background: var(--surface-2); }
+  .tab {
+    appearance: none; border: 0; background: transparent; color: var(--text-dim);
+    font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+    padding: 9px 14px; border-radius: 9px 9px 0 0; display: inline-flex; align-items: center;
+    gap: 7px; position: relative; transition: color .16s, background .16s;
+  }
+  .tab svg { width: 15px; height: 15px; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: #fff; background: var(--surface); }
+  .tab.active::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: -1px;
+    height: 2px; border-radius: 2px; background: var(--accent); }
+  .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .scroll { flex: 1; overflow: auto; }
+  .tabpanel { display: none; padding: 22px 26px; }
+  .tabpanel.active { display: block; }
+
+  #ptitle { margin: 0 0 10px; font-size: 21px; font-weight: 700; letter-spacing: -.3px;
+    color: #f4f7fc; line-height: 1.3; }
+  #ptitle::before { content: ""; display: inline-block; width: 4px; height: 18px;
+    border-radius: 3px; background: var(--accent); margin-right: 10px; vertical-align: -2px; }
+  #meta { font-size: 12px; color: var(--text-faint); margin-bottom: 18px;
+    text-transform: uppercase; letter-spacing: .5px; }
+  #page { line-height: 1.72; word-break: break-word; color: #ccd4e4; font-size: 14.5px; }
+  #page h1, #page h2, #page h3 { color: #eef2fa; line-height: 1.35; }
+  #page a { color: var(--accent-2); }
+  #page a[data-goto] { cursor: pointer; }
+  #page img { max-width: 100%; border-radius: 8px; }
+  #page pre { background: #0c1017; border: 1px solid var(--border); padding: 13px;
+    overflow: auto; border-radius: 10px; font-family: var(--mono); font-size: 12.5px; }
+  #page code { background: var(--surface-3); padding: 1.5px 5px; border-radius: 5px;
+    font-family: var(--mono); font-size: 12.5px; color: #d9e2f2; }
+  #page pre code { background: none; padding: 0; }
+  #page table { border-collapse: collapse; width: 100%; }
+  #page th, #page td { border: 1px solid var(--border-str); padding: 7px 11px; }
+  #page th { background: var(--surface-2); }
+  #page blockquote { border-left: 3px solid var(--accent); margin: 12px 0; padding: 2px 16px;
+    color: var(--text-dim); background: var(--accent-soft); border-radius: 0 8px 8px 0; }
+
+  .linklist { margin: 18px 0 4px; }
+  .linklist h4 { margin: 0 0 9px; font-size: 12px; color: var(--text-dim); font-weight: 600;
+    text-transform: uppercase; letter-spacing: .6px; }
+  .chip, .linklist a {
+    display: inline-flex; align-items: center; margin: 0 7px 7px 0; padding: 6px 12px;
+    background: var(--surface-2); border: 1px solid var(--border-str); border-radius: 999px;
+    font-size: 12.5px; color: var(--text); text-decoration: none; cursor: pointer;
+    transition: background .16s, border-color .16s, color .16s, transform .12s;
+  }
+  .chip:hover, .linklist a:hover { background: var(--accent-soft); border-color: var(--accent);
+    color: #fff; }
+  .chip:active, .linklist a:active { transform: translateY(1px); }
+  .linklist .empty { font-size: 12.5px; color: var(--text-faint); }
+
+  .hint { color: var(--text-faint); font-size: 13.5px; line-height: 1.65; }
+  .empty-state { text-align: center; padding: 46px 20px; color: var(--text-faint); }
+  .empty-state .ic { width: 46px; height: 46px; margin: 0 auto 16px; opacity: .5;
+    display: grid; place-items: center; }
+  .empty-state .ic svg { width: 46px; height: 46px; }
+  .empty-state .k { color: var(--text-dim); font-weight: 600; }
+
+  /* ---------- Chat panel ---------- */
+  #tab-chat { display: none; flex-direction: column; height: 100%; padding: 0; }
+  #tab-chat.active { display: flex; }
+  .chat-head { padding: 18px 24px 4px; }
+  .chat-head h3 { margin: 0 0 4px; font-size: 15px; color: #f4f7fc; display: flex;
+    align-items: center; gap: 8px; font-weight: 700; }
+  .chat-head h3 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok);
+    box-shadow: 0 0 8px var(--ok); display: inline-block; }
+  .chat-head p { margin: 0; font-size: 12.5px; color: var(--text-faint); }
+  #chat { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  .chat-stream { flex: 1; overflow: auto; padding: 16px 24px 8px; }
+
+  #chat-answer { line-height: 1.72; font-size: 14.5px; word-break: break-word; color: #d3dbec;
+    background: var(--surface-2); border: 1px solid var(--border); border-left: 3px solid var(--accent);
+    border-radius: 12px; padding: 16px 18px; position: relative; }
+  #chat-answer:empty { display: none; }
+  #chat-answer::before { content: "답변"; position: absolute; top: -9px; left: 14px;
+    font-size: 10px; letter-spacing: 1px; text-transform: uppercase; font-weight: 700;
+    color: var(--accent-2); background: var(--surface); padding: 1px 8px; border-radius: 6px;
+    border: 1px solid var(--border); }
+  #chat-answer pre { background: #0c1017; border: 1px solid var(--border); padding: 12px;
+    overflow: auto; border-radius: 9px; font-family: var(--mono); font-size: 12.5px; }
+  #chat-answer code { background: var(--surface-3); padding: 1.5px 5px; border-radius: 5px;
+    font-family: var(--mono); font-size: 12.5px; }
+  #chat-answer .chat-loading { color: var(--text-dim); font-size: 13.5px; display: inline-flex;
+    align-items: center; gap: 9px; }
+  #chat-answer .chat-loading::before { content: ""; width: 15px; height: 15px; border-radius: 50%;
+    border: 2px solid var(--border-str); border-top-color: var(--accent);
+    animation: spin .7s linear infinite; }
+  #chat-answer .chat-error { color: var(--danger); font-size: 13.5px; }
+
+  #chat-sources { padding: 12px 24px 0; }
+  #chat-sources:empty { display: none; }
+  #chat-sources::before { content: "출처"; display: block; font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .6px; color: var(--text-faint); margin-bottom: 8px; }
+
+  #chat-note { margin: 8px 24px 0; font-size: 12.5px; color: var(--warn);
+    padding: 8px 12px; background: rgba(251,191,36,.10); border: 1px solid rgba(251,191,36,.28);
+    border-radius: 8px; }
+  #chat-note:empty { display: none; }
+
+  .chat-input-bar { padding: 14px 24px 18px; border-top: 1px solid var(--border);
+    background: var(--surface-2); }
+  #chat-input-row { display: flex; gap: 10px; align-items: center;
+    background: var(--surface-3); border: 1px solid var(--border-str); border-radius: 12px;
+    padding: 5px 5px 5px 6px; transition: border-color .18s, box-shadow .18s; }
+  #chat-input-row:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  #chat-q { flex: 1; padding: 9px 8px; border: 0; background: transparent; font-size: 14px;
+    color: var(--text); outline: none; }
+  #chat-q::placeholder { color: var(--text-faint); }
+  #chat-q:disabled { color: var(--text-faint); cursor: not-allowed; }
+  #chat-send {
+    display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border: none;
+    border-radius: 9px; background: linear-gradient(150deg, var(--accent), #7c93ff); color: #06101f;
+    font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; flex: none;
+    transition: filter .16s, transform .12s, opacity .16s;
+  }
+  #chat-send svg { width: 15px; height: 15px; }
+  #chat-send:hover { filter: brightness(1.08); }
+  #chat-send:active { transform: translateY(1px); }
+  #chat-send:disabled { background: var(--surface-3); color: var(--text-faint); cursor: not-allowed;
+    filter: none; }
+
+  /* ---------- Node cleanup actions ---------- */
+  #node-actions:empty { display: none; }
+  .node-action-btn {
+    display: inline-flex; align-items: center; gap: 6px; margin: 10px 0 4px;
+    padding: 7px 14px; border: 1px solid var(--border-str); border-radius: var(--radius-sm);
+    background: var(--surface-3); color: var(--text-dim); font-family: inherit;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    transition: filter .16s, border-color .16s, color .16s;
+  }
+  .node-action-btn:hover { border-color: var(--accent); color: var(--text); }
+  .node-action-btn.danger { border-color: var(--danger); color: var(--danger); }
+  .node-action-btn.danger:hover { filter: brightness(1.15); }
+
+  /* ---------- Scrollbars ---------- */
+  .scroll::-webkit-scrollbar, .chat-stream::-webkit-scrollbar, #results::-webkit-scrollbar,
+  #page pre::-webkit-scrollbar, #chat-answer pre::-webkit-scrollbar { width: 10px; height: 10px; }
+  .scroll::-webkit-scrollbar-thumb, .chat-stream::-webkit-scrollbar-thumb,
+  #results::-webkit-scrollbar-thumb, #page pre::-webkit-scrollbar-thumb,
+  #chat-answer pre::-webkit-scrollbar-thumb {
+    background: var(--surface-3); border-radius: 8px; border: 2px solid transparent;
+    background-clip: padding-box; }
+  .scroll::-webkit-scrollbar-thumb:hover, .chat-stream::-webkit-scrollbar-thumb:hover {
+    background: #2b3547; background-clip: padding-box; }
+  .scroll::-webkit-scrollbar-track { background: transparent; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 900px) {
+    #main { flex-direction: column; }
+    #left { flex: 0 0 46%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+  }
+</style>
+</head>
+<body>
+  <div id="topbar">
+    <div class="brand">
+      <span class="glyph" aria-hidden="true">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="6" r="2.4"/><circle cx="18" cy="7" r="2.4"/><circle cx="12" cy="18" r="2.4"/><path d="M6.9 7.2l3.5 8M16.6 8.8l-3.3 7M7 6.6l8.8.6"/></svg>
+      </span>
+      <h1>지식 위키</h1>
+    </div>
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="search" type="search" placeholder="제목·본문 검색…" autocomplete="off" aria-label="문서 검색">
+    </div>
+    <span class="legend-label">도메인</span>
+    <div id="layers"></div>
+    <div id="stats"></div>
+  </div>
+  <div id="main">
+    <div id="left">
+      <div id="cy"></div>
+      <div class="graph-tag">노드 클릭 = 문서 열기 · 스크롤 = 확대</div>
+      <div id="results"></div>
+    </div>
+    <div id="right">
+      <div class="tabbar" role="tablist">
+        <button class="tab active" id="tab-btn-page" data-tab="page" role="tab" aria-selected="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5h5"/><path d="M8 13h8M8 17h6M8 9h2"/><path d="M6 3h8l5 5v11a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/></svg>
+          문서
+        </button>
+        <button class="tab" id="tab-btn-chat" data-tab="chat" role="tab" aria-selected="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>
+          질문하기
+        </button>
+      </div>
+
+      <div class="scroll">
+        <div class="tabpanel active" id="tab-page" role="tabpanel">
+          <h2 id="ptitle">문서를 선택하세요</h2>
+          <div id="meta"></div>
+          <div id="node-actions"></div>
+          <div class="empty-state" id="page-empty">
+            <div class="ic" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="7" r="2"/><circle cx="12" cy="18" r="2"/><path d="M6.7 7.1l3.7 8.5M17.3 8.6l-3.5 7.3M7 6.5l10 .8"/></svg>
+            </div>
+            <div class="hint"><span class="k">왼쪽 그래프에서 노드를 클릭</span>하면 이 자리에 문서가 열립니다.<br>빨간 노드는 끊긴 링크(존재하지 않는 대상)입니다.</div>
+          </div>
+          <div id="page"></div>
+          <div id="backlinks" class="linklist"></div>
+          <div id="outgoing" class="linklist"></div>
+        </div>
+
+        <div class="tabpanel" id="tab-chat" role="tabpanel">
+          <div id="chat">
+            <div class="chat-head">
+              <h3><span class="dot"></span>지식 베이스에 질문</h3>
+              <p>질문하면 관련 문서를 찾아 요약하고 출처를 함께 보여줍니다.</p>
+            </div>
+            <div class="chat-stream">
+              <div id="chat-answer"></div>
+              <div id="chat-sources"></div>
+              <div id="chat-note"></div>
+            </div>
+            <div class="chat-input-bar">
+              <div id="chat-input-row">
+                <input id="chat-q" type="text" placeholder="예: 우리 가격 정책 정리해줘" autocomplete="off" aria-label="질문 입력">
+                <button id="chat-send" aria-label="질문 전송">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l16-8-6 16-2.5-6L4 12z"/></svg>
+                  전송
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>/*CYTOSCAPE_LIB*/</script>
+<script>
+var GRAPH = /*GRAPH_DATA*/;
+
+// 1차 그룹핑 = 사업 도메인(bucket). 기술 소스(layer)는 문서 헤더에 부가 표기.
+var BUCKET_COLORS = {
+  "대행사업":     "#34d399",
+  "자체제품":     "#38bdf8",
+  "퍼스널브랜딩": "#fbbf24",
+  "그외":         "#94a3b8",
+  "dangling":     "#fb7185"
+};
+var BUCKET_ORDER = ["대행사업", "자체제품", "퍼스널브랜딩", "그외", "dangling"];
+
+var nodesById = {};
+GRAPH.nodes.forEach(function (n) { nodesById[n.id] = n; });
+
+// outgoing adjacency from edges
+var outgoing = {};
+GRAPH.edges.forEach(function (e) {
+  (outgoing[e.source] = outgoing[e.source] || []).push(e.target);
+});
+
+function wc(n) { return (n.wordcount || 0); }
+
+var cyNodes = GRAPH.nodes.map(function (n) {
+  return { data: { id: n.id, label: n.title || n.id,
+                   short_title: n.short_title || n.title || n.id, layer: n.layer || "misc",
+                   bucket: n.bucket || "그외",
+                   dangling: !!n.dangling, size: 14 + Math.min(46, Math.sqrt(wc(n)) * 3) } };
+});
+var cyEdges = GRAPH.edges.filter(function (e) {
+  return nodesById[e.source] && nodesById[e.target];
+}).map(function (e, i) {
+  return { data: { id: "e" + i, source: e.source, target: e.target, kind: e.kind } };
+});
+
+var cy = cytoscape({
+  container: document.getElementById("cy"),
+  elements: { nodes: cyNodes, edges: cyEdges },
+  wheelSensitivity: 0.25,
+  style: [
+    { selector: "node", style: {
+        "background-color": function (ele) { return BUCKET_COLORS[ele.data("bucket")] || "#7a869c"; },
+        "width": "data(size)", "height": "data(size)",
+        "label": "data(short_title)", "font-size": 9, "color": "#6a7488",
+        "text-opacity": 1, "min-zoomed-font-size": 8,
+        "text-wrap": "ellipsis", "text-max-width": 90, "text-valign": "bottom",
+        "text-margin-y": 4, "border-width": 0,
+        "text-outline-width": 2, "text-outline-color": "#0b0f18" } },
+    { selector: "node[?dangling]", style: {
+        "background-color": BUCKET_COLORS.dangling, "shape": "diamond",
+        "border-width": 1, "border-color": "#7f1d1d" } },
+    { selector: "edge", style: {
+        "width": 1, "line-color": "#2b3446", "curve-style": "haystack",
+        "target-arrow-color": "#2b3446", "opacity": 0.55 } },
+    { selector: ".dim", style: { "opacity": 0.06, "text-opacity": 0 } },
+    { selector: "node.hl", style: {
+        "border-width": 3, "border-color": "#60a5fa", "text-opacity": 1 } },
+    { selector: "node.sel", style: {
+        "border-width": 4, "border-color": "#bcd4ff", "text-opacity": 1 } }
+  ],
+  layout: { name: "cose", animate: false, nodeRepulsion: 8000,
+            idealEdgeLength: 90, padding: 30 }
+});
+
+function clearHL() { cy.elements().removeClass("dim hl sel"); }
+
+// ---- Right-panel tabs ----
+function activateTab(name) {
+  var tabs = document.querySelectorAll(".tab");
+  for (var i = 0; i < tabs.length; i++) {
+    var on = tabs[i].getAttribute("data-tab") === name;
+    tabs[i].classList.toggle("active", on);
+    tabs[i].setAttribute("aria-selected", on ? "true" : "false");
+  }
+  var page = document.getElementById("tab-page");
+  var chat = document.getElementById("tab-chat");
+  page.classList.toggle("active", name === "page");
+  chat.classList.toggle("active", name === "chat");
+}
+document.querySelector(".tabbar").addEventListener("click", function (ev) {
+  var b = ev.target.closest(".tab");
+  if (b) activateTab(b.getAttribute("data-tab"));
+});
+
+function renderPage(id) {
+  var n = nodesById[id];
+  if (!n) return;
+  activateTab("page");
+  var empty = document.getElementById("page-empty");
+  if (empty) empty.style.display = "none";
+  document.getElementById("ptitle").textContent = n.title || id;
+  document.getElementById("meta").textContent =
+    [n.bucket, n.layer, n.category, n.type].filter(Boolean).join(" · ") +
+    (n.dangling ? "  (끊긴 링크 — 존재하지 않는 대상)" : "");
+  document.getElementById("page").innerHTML = n.html || "<p class='hint'>내용 없음</p>";
+  renderNodeActions(n, id);
+
+  var bl = (n.backlinks || []);
+  var blHtml = '<h4>← 백링크 (' + bl.length + ')</h4>';
+  blHtml += bl.length ? bl.map(linkChip).join("") : '<span class="empty">없음</span>';
+  document.getElementById("backlinks").innerHTML = blHtml;
+
+  var out = (outgoing[id] || []);
+  var seen = {}, uniq = [];
+  out.forEach(function (t) { if (!seen[t]) { seen[t] = 1; uniq.push(t); } });
+  var outHtml = '<h4>→ 나가는 링크 (' + uniq.length + ')</h4>';
+  outHtml += uniq.length ? uniq.map(linkChip).join("") : '<span class="empty">없음</span>';
+  document.getElementById("outgoing").innerHTML = outHtml;
+
+  clearHL();
+  var node = cy.getElementById(id);
+  if (node.nonempty()) {
+    var hood = node.closedNeighborhood();
+    cy.elements().addClass("dim");
+    hood.removeClass("dim").addClass("hl");
+    node.removeClass("hl").addClass("sel");
+    cy.animate({ center: { eles: node }, duration: 200 });
+  }
+}
+
+function nodeSlug(n) {
+  var base = (n.path || "").split("/").pop() || "";
+  return base.replace(/\.md$/i, "");
+}
+
+function renderNodeActions(n, id) {
+  var box = document.getElementById("node-actions");
+  if (!n.path) { box.innerHTML = ""; return; }
+  if (n.layer === "recording") {
+    // 삭제는 recordings/*.md 실제 파일명(해시 포함이라 유일) 기준 — 파일명 stem 유지
+    var slug = nodeSlug(n);
+    box.innerHTML = '<button type="button" class="node-action-btn danger" id="btn-cleanup">🗑 이 녹음 삭제</button>';
+    box.querySelector("#btn-cleanup").onclick = function () {
+      if (confirm("이 녹음 노드를 삭제할까요? 파일이 삭제됩니다.")) {
+        cleanupRequest("/delete-recording", slug, id);
+      }
+    };
+  } else {
+    // 숨기기는 노드 고유 id 기준 — basename(파일명 stem)은 동명 파일이 많아 오제거 위험
+    box.innerHTML = '<button type="button" class="node-action-btn" id="btn-cleanup">🙈 이 노드 숨기기</button>';
+    box.querySelector("#btn-cleanup").onclick = function () {
+      cleanupRequest("/hide-node", n.id || id, id);
+    };
+  }
+}
+
+function cleanupRequest(path, slug, id) {
+  fetch(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ slug: slug })
+  }).then(function (r) { return r.json(); }).then(function (out) {
+    if (!out || !out.ok) { alert("처리에 실패했습니다."); return; }
+    var node = cy.getElementById(id);
+    if (node.nonempty()) cy.remove(node);
+    delete nodesById[id];
+    resetPanel();
+    if (out.rebuilt === false) {
+      alert("반영되었지만 그래프 재생성에 실패했습니다. 새로고침 시 다시 보일 수 있어요 — 서버 로그를 확인하세요.");
+    } else {
+      console.log("반영 완료(그래프 재생성됨)");
+    }
+  }).catch(function () {
+    alert("serve.py로 띄운 상태에서만 동작합니다");
+  });
+}
+
+function resetPanel() {
+  document.getElementById("ptitle").textContent = "문서를 선택하세요";
+  document.getElementById("meta").textContent = "";
+  document.getElementById("node-actions").innerHTML = "";
+  document.getElementById("page").innerHTML = "";
+  document.getElementById("backlinks").innerHTML = "";
+  document.getElementById("outgoing").innerHTML = "";
+  var empty = document.getElementById("page-empty");
+  if (empty) empty.style.display = "";
+  clearHL();
+}
+
+function linkChip(id) {
+  var n = nodesById[id];
+  var label = n ? (n.title || id) : id;
+  return '<a data-goto="' + encodeURIComponent(id) + '">' + escapeHtml(label) + '</a>';
+}
+function escapeHtml(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+document.getElementById("right").addEventListener("click", function (ev) {
+  var a = ev.target.closest("a[data-goto]");
+  if (a) { ev.preventDefault(); renderPage(decodeURIComponent(a.getAttribute("data-goto"))); }
+});
+
+cy.on("tap", "node", function (ev) { renderPage(ev.target.id()); });
+
+// ---- Search ----
+var searchBox = document.getElementById("search");
+var resultsBox = document.getElementById("results");
+searchBox.addEventListener("input", function () {
+  var q = searchBox.value.trim().toLowerCase();
+  if (!q) { resultsBox.style.display = "none"; clearHL(); return; }
+  var hits = GRAPH.nodes.filter(function (n) {
+    return (n.title || "").toLowerCase().indexOf(q) >= 0 ||
+           (n.search_text || "").indexOf(q) >= 0;
+  }).slice(0, 60);
+  resultsBox.innerHTML = hits.length
+    ? hits.map(function (n) {
+        return '<div class="r" data-goto="' + encodeURIComponent(n.id) + '">' +
+               escapeHtml(n.title || n.id) + '<small>' + (n.layer || "") + '</small></div>';
+      }).join("")
+    : '<div class="r">결과 없음</div>';
+  resultsBox.style.display = "block";
+  // highlight hits in graph
+  clearHL();
+  var ids = {};
+  hits.forEach(function (n) { ids[n.id] = 1; });
+  cy.nodes().forEach(function (nd) {
+    if (ids[nd.id()]) nd.addClass("hl"); else nd.addClass("dim");
+  });
+});
+resultsBox.addEventListener("click", function (ev) {
+  var r = ev.target.closest(".r[data-goto]");
+  if (r) renderPage(decodeURIComponent(r.getAttribute("data-goto")));
+});
+
+// ---- Bucket(도메인) toggles ----
+var layerBox = document.getElementById("layers");
+var presentBuckets = {};
+GRAPH.nodes.forEach(function (n) { presentBuckets[n.bucket || "그외"] = 1; });
+BUCKET_ORDER.forEach(function (bucket) {
+  if (!presentBuckets[bucket]) return;
+  var lbl = document.createElement("label");
+  lbl.innerHTML = '<input type="checkbox" checked data-bucket="' + bucket + '">' +
+                  '<span class="swatch" style="background:' + BUCKET_COLORS[bucket] +
+                  ';color:' + BUCKET_COLORS[bucket] + '"></span>' + bucket;
+  layerBox.appendChild(lbl);
+});
+layerBox.addEventListener("change", function (ev) {
+  var cb = ev.target;
+  if (!cb.dataset.bucket) return;
+  cy.nodes('[bucket = "' + cb.dataset.bucket + '"]').style("display", cb.checked ? "element" : "none");
+});
+
+// ---- Stats ----
+var s = GRAPH.stats || {};
+document.getElementById("stats").innerHTML =
+  '<span class="stat"><b>' + (s.nodes || 0) + '</b> 노드</span>' +
+  '<span class="stat"><b>' + (s.edges || 0) + '</b> 엣지</span>' +
+  '<span class="stat"><b>' + (s.dangling || 0) + '</b> 끊긴링크</span>' +
+  '<span class="stat"><b>' + (s.isolated || 0) + '</b> 고립</span>';
+
+// ---- Chat (RAG) ----
+// 소스 칩은 #right 안의 a[data-goto] 이므로, 위쪽 #right 클릭 위임
+// 핸들러(renderPage 호출)가 칩 클릭 → 노드 하이라이트+페이지 열기를 그대로 재사용한다.
+var chatQ = document.getElementById("chat-q");
+var chatSend = document.getElementById("chat-send");
+var chatAnswer = document.getElementById("chat-answer");
+var chatSources = document.getElementById("chat-sources");
+var chatNote = document.getElementById("chat-note");
+
+if (location.protocol === "file:") {
+  chatQ.disabled = true;
+  chatSend.disabled = true;
+  chatQ.placeholder = "서버로 열어야 챗 작동";
+  chatNote.textContent = "서버로 열어야 챗 작동: python3 serve.py";
+}
+
+function askChat() {
+  var q = (chatQ.value || "").trim();
+  if (!q || chatQ.disabled) return;
+  chatSend.disabled = true;
+  chatSources.innerHTML = "";
+  chatAnswer.innerHTML = '<span class="chat-loading">답변 생성 중…</span>';
+  fetch("/ask", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question: q })
+  })
+    .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+    .then(function (res) {
+      if (!res.ok || (res.j && res.j.error)) {
+        chatAnswer.innerHTML = '<span class="chat-error">' +
+          escapeHtml((res.j && res.j.error) || "오류가 발생했습니다") + '</span>';
+        return;
+      }
+      chatAnswer.innerHTML = res.j.answer_html || "";
+      var srcs = res.j.sources || [];
+      chatSources.innerHTML = srcs.map(function (sc) {
+        return '<a class="chip" data-goto="' + encodeURIComponent(sc.id) + '">' +
+               escapeHtml(sc.title || sc.id) + '</a>';
+      }).join("");
+    })
+    .catch(function (e) {
+      chatAnswer.innerHTML = '<span class="chat-error">요청 실패: ' +
+        escapeHtml(String(e && e.message || e)) + '</span>';
+    })
+    .then(function () { chatSend.disabled = (location.protocol === "file:"); });
+}
+
+chatSend.addEventListener("click", askChat);
+chatQ.addEventListener("keydown", function (e) { if (e.key === "Enter") askChat(); });
+</script>
+</body>
+</html>

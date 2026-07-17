@@ -1,0 +1,27 @@
+<svg viewBox="0 0 1080 1350" width="1080" height="1350" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="정리함 OS 폴더 구조">
+<style>
+  .kr{font-family:'Malgun Gothic','Pretendard','Apple SD Gothic Neo',sans-serif;}
+  .mono{font-family:'Consolas','D2Coding',monospace;}
+  .ink{fill:#262019;} .muted{fill:#8B8173;} .deep{fill:#B4562A;}
+</style>
+  <rect x="0" y="0" width="1080" height="1350" fill="#F5F1E8"/>
+  <rect x="60" y="96" width="240" height="52" rx="26" fill="#F7E3D8"/>
+  <text x="180" y="131" class="kr deep" font-size="25" font-weight="700" text-anchor="middle">② 폴더 구조</text>
+  <text x="60" y="222" class="kr ink" font-size="58" font-weight="800">폴더 하나에 다 담았다</text>
+  <text x="60" y="278" class="kr muted" font-size="30" font-weight="500">넣는 곳 · 규칙 · 결과 DB가 한 폴더에</text>
+  <rect x="60" y="320" width="960" height="770" rx="26" fill="#FFFFFF" stroke="#E7DFD0" stroke-width="2"/>
+  <text x="96" y="398" class="kr ink" font-size="34" font-weight="800">📁 KANG_PJT — 정리함 OS</text>
+  <g class="mono ink" font-size="33">
+    <text x="96" y="482">KANG_PJT/</text>
+    <text x="96" y="544">├─ CLAUDE.md          <tspan class="muted">· 처리 규칙</tspan></text>
+    <text x="96" y="606">├─ config/분류기준.md  <tspan class="muted">· 분류 규칙</tspan></text>
+    <text x="96" y="668">├─ 정리함/</text>
+    <text x="96" y="730">│   ├─ 1_수집함/  <tspan class="deep">📥 넣는 곳</tspan></text>
+    <text x="96" y="792">│   └─ 2_보관/    <tspan class="muted">📦 원본 보관</tspan></text>
+    <text x="96" y="854">├─ db/</text>
+    <text x="96" y="916">│   ├─ 정리결과.csv <tspan class="muted">· 엑셀용</tspan></text>
+    <text x="96" y="978">│   └─ 정리결과.md  <tspan class="muted">· 보기용</tspan></text>
+    <text x="96" y="1040">└─ docs/              <tspan class="muted">· 설계 기록</tspan></text>
+  </g>
+  <text x="540" y="1250" class="kr muted" font-size="26" font-weight="700" text-anchor="middle">2 / 3</text>
+</svg>
