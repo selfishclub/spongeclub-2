@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WeatherClothe — 여행 옷차림 추천</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <h1>WeatherClothe</h1>
+      <p class="tagline">그 도시, 그 날짜의 날씨와 옷차림을 미리 확인하세요</p>
+      <p class="phase-note">Phase 1 프로토타입 — 날씨는 Open-Meteo 실제 데이터, 옷차림 레퍼런스는 검색 링크로 대체, 코디 추천은 규칙 기반입니다.</p>
+    </header>
+
+    <section class="input-card">
+      <div class="field">
+        <label for="city-input">여행지</label>
+        <input id="city-input" type="text" placeholder="예: 파리, 그랜드캐년, 도쿄" autocomplete="off" />
+        <div id="city-suggestions" class="suggestions hidden"></div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="start-date">출발일</label>
+          <input id="start-date" type="date" />
+        </div>
+        <div class="field">
+          <label for="end-date">도착일(귀국일)</label>
+          <input id="end-date" type="date" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>목적지 유형</label>
+        <div class="type-toggle" id="type-toggle">
+          <button type="button" class="type-btn" data-type="city">도시형</button>
+          <button type="button" class="type-btn" data-type="activity">자연·액티비티형</button>
+          <button type="button" class="type-btn" data-type="mixed">혼합형</button>
+        </div>
+        <p class="hint" id="type-hint"></p>
+      </div>
+
+      <div class="field">
+        <label>내 스타일</label>
+        <input type="file" id="photo-input" accept="image/*" multiple hidden />
+        <button type="button" id="upload-btn" class="upload-btn">📷 내 사진 업로드로 스타일 분석</button>
+        <p class="hint">Phase 1은 사진의 색감·톤 기반 간단 분석이에요. Phase 2에서 AI 비전 분석으로 업그레이드됩니다.</p>
+        <div id="photo-preview" class="photo-preview hidden"></div>
+        <div id="style-analysis" class="style-analysis hidden"></div>
+        <select id="style-pref">
+          <option value="minimal">미니멀 · 뉴트럴 톤</option>
+          <option value="casual">캐주얼 · 편안함 우선</option>
+          <option value="classic">클래식 · 단정함</option>
+          <option value="street">스트릿 · 개성 있는 룩</option>
+        </select>
+      </div>
+
+      <button id="submit-btn" class="submit-btn">옷차림 추천 받기</button>
+      <p id="error-msg" class="error hidden"></p>
+    </section>
+
+    <section id="results" class="results hidden">
+      <nav class="tabs">
+        <button class="tab-btn active" data-tab="weather">날씨</button>
+        <button class="tab-btn" data-tab="reference">여행객 룩</button>
+        <button class="tab-btn" data-tab="outfit">내 코디</button>
+        <button class="tab-btn" data-tab="tips">팁</button>
+      </nav>
+
+      <div id="tab-weather" class="tab-panel active">
+        <div id="weather-summary" class="card"></div>
+      </div>
+
+      <div id="tab-reference" class="tab-panel">
+        <div id="reference-content" class="card"></div>
+      </div>
+
+      <div id="tab-outfit" class="tab-panel">
+        <div id="outfit-list"></div>
+      </div>
+
+      <div id="tab-tips" class="tab-panel">
+        <div id="tips-content" class="card"></div>
+      </div>
+    </section>
+
+    <div id="loading" class="loading hidden">
+      <div class="spinner"></div>
+      <p id="loading-text">최근 10년 날씨 데이터를 불러오는 중...</p>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
