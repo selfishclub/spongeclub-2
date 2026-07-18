@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>개인 리포트 — Golf Rank</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    main { padding: 18px 20px 24px; }
+    .kpi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; box-shadow: var(--shadow-card); }
+    .kpi .k-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .kpi .k-val { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 26px; line-height: 1; }
+    .kpi .k-val .u { font-size: 12px; font-weight: 600; color: var(--muted); margin-left: 2px; }
+    .kpi .k-val.good { color: var(--green); } .kpi .k-val.bad { color: #E53935; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; box-shadow: var(--shadow-card); margin-bottom: 16px; }
+    .card h3 { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+    .spark-wrap { position: relative; }
+    .spark-cap { font-size: 11px; color: var(--muted); margin-top: 8px; text-align: center; }
+    .hl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+    .hl { display: flex; flex-direction: column; }
+    .hl .l { font-size: 11px; color: var(--muted); }
+    .hl .v { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 18px; }
+    .seg { display: flex; gap: 8px; margin-bottom: 12px; }
+    .seg button { flex: 1; height: 40px; border: 1.5px solid var(--border); background: var(--card); border-radius: 9px; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; font-family: inherit; }
+    .seg button.active { border-color: var(--green); background: var(--green-tint); color: var(--green); }
+    .course-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .course-row:last-child { border-bottom: none; }
+    .course-row .c-name { font-size: 14px; font-weight: 600; }
+    .course-row .c-stat { font-family: 'Montserrat', sans-serif; font-size: 13px; color: var(--muted); }
+    .course-row .c-stat b { color: var(--text); }
+    .empty-mini { text-align: center; padding: 24px; color: var(--muted); font-size: 14px; }
+    .badges-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px 8px; }
+    .badge-item { text-align: center; }
+    .badge-item .b-emoji { width: 100%; aspect-ratio: 1; border-radius: 16px; display: grid; place-items: center; font-size: 26px; background: var(--green-tint); }
+    .badge-item.locked .b-emoji { background: #F1F1F1; filter: grayscale(1); opacity: 0.45; }
+    .badge-item .b-name { font-size: 10px; font-weight: 700; margin-top: 5px; line-height: 1.2; }
+    .badge-item.locked .b-name { color: var(--muted); font-weight: 500; }
+    .card h3 .cnt { font-size: 12px; font-weight: 600; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <button class="icon-btn" id="backBtn" aria-label="뒤로"><svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="title" id="who">개인 리포트<span class="sub" id="sub"></span></div>
+    </header>
+    <main id="main"></main>
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./db.js"></script>
+  <script src="./calc.js"></script>
+  <script>
+    const STORAGE_KEY='golfrank.clubs';
+    const $=(id)=>document.getElementById(id);
+    const params=new URLSearchParams(location.search);
+    const clubId=params.get('club'), name=params.get('name');
+    let clubs=load(); let club=clubs.find((c)=>c.id===clubId);
+    function load(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY))||[]; }catch(e){ return []; } }
+    function esc(s){ return String(s).replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function badge(role){ return role==='owner'?'<span class="role-emoji" title="모임장">👑</span>':role==='staff'?'<span class="role-emoji" title="운영진">⭐</span>':''; }
+    const today=new Date(), CUR_Y=today.getFullYear(), CUR_M=today.getMonth();
+    const MON=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+    let hlView='year';
+
+    const roleOf=(()=>{ const m=(club&&club.members||[]).find((x)=>x.name===name); return m?m.role:'member'; })();
+    if(club){ $('who').childNodes[0].nodeValue=esc(name); $('sub').textContent=club.name; }
+
+    function entries(){
+      return (club.rounds||[]).map((r)=>{ const s=r.scores.find((x)=>x.name===name && typeof x.total==='number'); return s?{date:r.date,course:r.course,total:s.total,par:r.par,id:r.id}:null; })
+        .filter(Boolean).sort((a,b)=> a.date<b.date?-1:a.date>b.date?1:0);
+    }
+    function firstsIn(rounds){ let c=0; rounds.forEach((r)=>{ const parts=r.scores.filter((s)=>s.role!=='guest'&&typeof s.total==='number'); if(!parts.length) return; const m=Math.min(...parts.map((s)=>s.total)); const me=r.scores.find((s)=>s.name===name&&typeof s.total==='number'); if(me&&me.total===m) c++; }); return c; }
+    const avg=(a)=> a.length? a.reduce((x,y)=>x+y,0)/a.length : null;
+
+    function render(){
+      if(!club){ $('main').innerHTML='<div class="empty"><div class="icon">🤔</div><h3>모임을 찾을 수 없어요</h3></div>'; return; }
+      const es=entries();
+      if(!es.length){ $('main').innerHTML=`<div class="empty"><div class="icon">📊</div><h3>${esc(name)}님의 기록이 없어요</h3><p>라운드가 기록되면 리포트가 생겨요.</p></div>`; return; }
+      const totals=es.map((e)=>e.total);
+      const best=Math.min(...totals);           // 라이프 베스트(라베)
+      const yearEs=es.filter((e)=>new Date(e.date).getFullYear()===CUR_Y);
+      const yearAvg=avg(yearEs.map((e)=>e.total));
+      // 최근 폼: 최근3 평균 vs 그 이전3 평균
+      const last3=totals.slice(-3), prev3=totals.slice(-6,-3);
+      const form = (last3.length&&prev3.length) ? (avg(prev3)-avg(last3)) : null;  // +면 좋아짐(타수↓)
+
+      $('main').innerHTML =
+        kpi(es.length, yearAvg, best, form) +
+        badgesCard(es, best, form) +
+        sparkCard(es) +
+        hlCard() +
+        courseCard(es);
+      bind(es);
+    }
+
+    function kpi(n, yAvg, best, form){
+      const formHtml = form==null ? `<div class="k-val">–</div>`
+        : `<div class="k-val ${form>0?'good':form<0?'bad':''}">${form>0?'▲':form<0?'▼':''}${Math.abs(form).toFixed(1)}<span class="u">타</span></div>`;
+      return `<div class="kpi-row">
+        <div class="kpi"><div class="k-label">총 라운드</div><div class="k-val">${n}<span class="u">R</span></div></div>
+        <div class="kpi"><div class="k-label">올해 평균</div><div class="k-val">${yAvg!=null?yAvg.toFixed(1):'–'}<span class="u">타</span></div></div>
+        <div class="kpi"><div class="k-label">🏅 라이프 베스트</div><div class="k-val good">${best}<span class="u">타</span></div></div>
+        <div class="kpi"><div class="k-label">최근 폼 (직전 대비)</div>${formHtml}</div>
+      </div>`;
+    }
+
+    function badgesCard(es, best, form){
+      const rounds = club.rounds || [];
+      const attend = es.length;
+      // 클럽 최저타 & 개근왕 계산
+      let clubBest = Infinity; const attendMap = {};
+      rounds.forEach((r)=> r.scores.filter((s)=>s.role!=='guest'&&typeof s.total==='number').forEach((s)=>{
+        clubBest = Math.min(clubBest, s.total); attendMap[s.name] = (attendMap[s.name]||0)+1;
+      }));
+      const maxAttend = Math.max(0, ...Object.values(attendMap));
+      // 시즌/월간 1위
+      const yearRounds = rounds.filter((r)=> new Date(r.date).getFullYear()===CUR_Y);
+      const seasonTop = computeBoard(yearRounds)[0];
+      const monthTop = avgScoreBoard(roundsInMonth(club, CUR_Y, CUR_M))[0];
+
+      const badges = [
+        { e:'🎉', n:'첫 라운드', on: attend>=1 },
+        { e:'🖐️', n:'5라운드', on: attend>=5 },
+        { e:'🏌️', n:'10라운드', on: attend>=10 },
+        { e:'🔥', n:'30라운드', on: attend>=30 },
+        { e:'👑', n:'개근왕', on: maxAttend>1 && attendMap[name]===maxAttend },
+        { e:'🏆', n:`${MON[CUR_M]} MVP`, on: monthTop && monthTop.name===name },
+        { e:'🥇', n:'시즌 챔피언', on: seasonTop && seasonTop.name===name },
+        { e:'🎯', n:'클럽 최저타', on: isFinite(clubBest) && best===clubBest },
+        { e:'⛳', n:'이븐파 돌파', on: es.some((x)=> x.total <= x.par) },
+        { e:'📈', n:'상승세', on: form!=null && form>0 },
+      ];
+      const earned = badges.filter((b)=>b.on).length;
+      const sorted = badges.slice().sort((a,b)=> (b.on?1:0)-(a.on?1:0));
+      const grid = sorted.map((b)=>`<div class="badge-item ${b.on?'':'locked'}"><div class="b-emoji">${b.on?b.e:'🔒'}</div><div class="b-name">${b.n}</div></div>`).join('');
+      return `<div class="card"><h3>🏅 뱃지 <span class="cnt">${earned}/${badges.length} 획득</span></h3><div class="badges-grid">${grid}</div></div>`;
+    }
+
+    function sparkCard(es){
+      const pts=es.slice(-8); const totals=pts.map((e)=>e.total);
+      const W=300,H=70,pad=8; const mn=Math.min(...totals), mx=Math.max(...totals), rng=(mx-mn)||1;
+      const step = pts.length>1 ? (W-2*pad)/(pts.length-1) : 0;
+      const xy = pts.map((e,i)=>{ const x=pad+step*i; const y=pad+(e.total-mn)/rng*(H-2*pad); return [x,y]; });
+      const line = xy.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+      const dots = xy.map((p,i)=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3" fill="${i===xy.length-1?'#1B5E20':'#4CAF50'}"/>`).join('');
+      const labels = xy.map((p,i)=>`<text x="${p[0].toFixed(1)}" y="${(p[1]-7).toFixed(1)}" font-size="9" fill="#757575" text-anchor="middle" font-family="Montserrat">${pts[i].total}</text>`).join('');
+      return `<div class="card"><h3>📈 최근 ${pts.length}라운드 흐름 <span style="font-size:11px;font-weight:500;color:var(--muted);">(선이 내려갈수록 좋아지는 거예요)</span></h3>
+        <div class="spark-wrap"><svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="none" style="display:block">
+          <path d="${line}" fill="none" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>${dots}${labels}
+        </svg></div>
+        <div class="spark-cap">${pts.map((e)=>e.course).slice(-3).join(' · ')} …</div></div>`;
+    }
+
+    function hlCard(){
+      const es=entries();
+      const y=es.filter((e)=>new Date(e.date).getFullYear()===CUR_Y);
+      const m=es.filter((e)=>{const d=new Date(e.date); return d.getFullYear()===CUR_Y&&d.getMonth()===CUR_M;});
+      const cur = hlView==='year'?y:m;
+      const roundsForFirsts = (club.rounds||[]).filter((r)=>{ const d=new Date(r.date); return hlView==='year' ? d.getFullYear()===CUR_Y : (d.getFullYear()===CUR_Y&&d.getMonth()===CUR_M); });
+      const a=avg(cur.map((e)=>e.total)); const bst=cur.length?Math.min(...cur.map((e)=>e.total)):null; const wst=cur.length?Math.max(...cur.map((e)=>e.total)):null;
+      const body = cur.length ? `<div class="hl-grid">
+          <div class="hl"><span class="l">라운드</span><span class="v">${cur.length}회</span></div>
+          <div class="hl"><span class="l">평균 타수</span><span class="v">${a.toFixed(1)}</span></div>
+          <div class="hl"><span class="l">🏆 1등</span><span class="v">${firstsIn(roundsForFirsts)}회</span></div>
+          <div class="hl"><span class="l">베스트 / 워스트</span><span class="v">${bst} / ${wst}</span></div>
+        </div>` : `<div class="empty-mini">${hlView==='year'?'올해':'이번 달'} 기록이 없어요.</div>`;
+      return `<div class="card"><h3>✨ 하이라이트</h3>
+        <div class="seg" id="hlSeg"><button data-v="year" class="${hlView==='year'?'active':''}">연간 (${CUR_Y})</button><button data-v="month" class="${hlView==='month'?'active':''}">월간 (${MON[CUR_M]})</button></div>
+        ${body}</div>`;
+    }
+
+    function courseCard(es){
+      const g={}; es.forEach((e)=>{ const a=g[e.course]||(g[e.course]={course:e.course,sum:0,n:0,best:Infinity}); a.sum+=e.total; a.n++; a.best=Math.min(a.best,e.total); });
+      const rows=Object.values(g).map((a)=>({...a,avg:a.sum/a.n})).sort((x,y)=>y.n-x.n)
+        .map((a)=>`<div class="course-row"><span class="c-name">⛳ ${esc(a.course)}</span><span class="c-stat">평균 <b>${a.avg.toFixed(1)}</b> · 베스트 <b>${a.best}</b> · <b>${a.n}</b>R</span></div>`).join('');
+      return `<div class="card"><h3>🏌️ 골프장별 통계</h3>${rows||'<div class="empty-mini">기록 없음</div>'}</div>`;
+    }
+
+    function bind(es){
+      const seg=$('hlSeg'); if(seg) seg.addEventListener('click',(e)=>{ const b=e.target.closest('button'); if(!b) return; hlView=b.dataset.v; render(); });
+    }
+
+    $('backBtn').addEventListener('click',()=>{ history.length>1?history.back():(location.href='home.html?club='+encodeURIComponent(clubId)); });
+    render();
+    (async ()=>{ const p=await pullClubIntoLocal(clubId); if(p){ club=p; render(); } })();
+  </script>
+</body>
+</html>

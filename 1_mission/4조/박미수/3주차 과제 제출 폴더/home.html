@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>모임 홈 — Golf Rank</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    main { padding: 16px 20px 20px; }
+
+    /* KPI */
+    .kpi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; box-shadow: var(--shadow-card); }
+    .kpi .k-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .kpi .k-val { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 28px; line-height: 1; color: var(--text); }
+    .kpi .k-val .k-unit { font-size: 13px; font-weight: 600; color: var(--muted); margin-left: 2px; }
+    .kpi.mvp { grid-column: 1 / -1; background: linear-gradient(100deg, #FFFDF5, #FFF6E0); border-color: var(--gold); display: flex; align-items: center; gap: 14px; }
+    .kpi.mvp .mvp-ico { font-size: 32px; }
+    .kpi.mvp .mvp-body { flex: 1; min-width: 0; }
+    .kpi.mvp .k-label { color: #8A5A00; }
+    .kpi.mvp .mvp-name { font-size: 20px; font-weight: 800; letter-spacing: -0.3px; }
+    .kpi.mvp .mvp-sub { font-size: 12px; color: #8A5A00; margin-top: 2px; }
+    .kpi.mvp .mvp-none { font-size: 14px; font-weight: 600; color: #8A5A00; }
+    .kpi.mvp .mvp-body[data-report] { cursor: pointer; }
+
+    /* 달력 */
+    .cal-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px 12px; box-shadow: var(--shadow-card); margin-bottom: 18px; }
+    .cal-head { display: flex; align-items: center; justify-content: space-between; padding: 2px 6px 12px; }
+    .cal-title { font-size: 16px; font-weight: 700; font-family: 'Montserrat', 'Pretendard Variable', sans-serif; }
+    .cal-nav { width: 34px; height: 34px; border: 1px solid var(--border); background: #fff; border-radius: 9px; cursor: pointer; display: grid; place-items: center; color: var(--green); font-size: 16px; }
+    .cal-nav:hover { background: var(--green-tint); }
+    .cal-weekdays { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; margin-bottom: 2px; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-auto-rows: 46px; gap: 3px; }
+    .cal-wd { text-align: center; font-size: 11px; font-weight: 700; color: var(--muted); padding: 4px 0 8px; min-width: 0; }
+    .cal-wd.sun { color: #E53935; }
+    .cal-wd.sat { color: #1565C0; }
+    .cal-cell { min-width: 0; min-height: 0; overflow: hidden; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 13px; font-family: 'Montserrat', sans-serif; color: var(--text); position: relative; }
+    .cal-cell.empty { visibility: hidden; }
+    .cal-cell.has { cursor: pointer; background: #fff; border: 1px solid var(--border); }
+    .cal-cell.has:hover { border-color: var(--green); }
+    .cal-cell.today { outline: 2px solid var(--green-light); outline-offset: -2px; }
+    .cal-cell.sel { background: var(--green); color: #fff; border-color: var(--green); }
+    .cal-dots { display: flex; gap: 2px; height: 6px; align-items: center; }
+    .cal-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); }
+    .cal-dot.sched { background: transparent; border: 1.5px solid #9E9E9E; box-sizing: border-box; }
+    .cal-cell.sel .cal-dot { background: #fff; }
+    .cal-cell.sel .cal-dot.sched { border-color: #fff; }
+
+    /* 다가오는 라운드 */
+    .up-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px; box-shadow: var(--shadow-card); margin-bottom: 18px; }
+    .up-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .up-head h3 { font-size: 15px; font-weight: 700; }
+    .up-head button { background: none; border: none; color: var(--green); font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .up-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); cursor: pointer; }
+    .up-item:first-of-type { border-top: none; }
+    .up-dday { flex: 0 0 auto; min-width: 48px; text-align: center; }
+    .up-dday .dd { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 16px; color: var(--green); line-height: 1; }
+    .up-dday .dd.today { color: #E53935; }
+    .up-body { flex: 1; min-width: 0; }
+    .up-course { font-size: 15px; font-weight: 700; }
+    .up-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .up-empty { font-size: 13px; color: var(--muted); text-align: center; padding: 8px 0 4px; }
+
+    .gallery-link { width: 100%; display: flex; align-items: center; justify-content: space-between; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 15px 16px; margin-bottom: 18px; font-size: 15px; font-weight: 700; color: var(--text); cursor: pointer; font-family: inherit; box-shadow: var(--shadow-card); }
+    .gallery-link:hover { border-color: var(--green); }
+    .gallery-link .gl-right { font-size: 13px; font-weight: 600; color: var(--muted); }
+
+    .invite-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--green-tint); border: 1.5px dashed var(--green); color: var(--green); border-radius: 12px; padding: 13px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; margin-bottom: 16px; }
+    .invite-btn:active { transform: scale(0.99); }
+    .login-gate { width: 100%; background: linear-gradient(135deg,#1B5E20,#2E7D32); color: #fff; border: none; border-radius: 12px; padding: 15px; font-size: 15px; font-weight: 800; cursor: pointer; font-family: inherit; margin-bottom: 16px; box-shadow: var(--shadow-lift); }
+
+    .login-overlay { position: fixed; inset: 0; background: rgba(31,31,31,0.45); z-index: 200; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+    .login-overlay.open { opacity: 1; pointer-events: auto; }
+    .login-sheet { width: 100%; max-width: var(--maxw); background: var(--bg); border-radius: 24px 24px 0 0; padding: 8px 24px calc(24px + env(safe-area-inset-bottom)); transform: translateY(100%); transition: transform .3s cubic-bezier(.22,.61,.36,1); }
+    .login-overlay.open .login-sheet { transform: translateY(0); }
+    .lg-grab { width: 40px; height: 4px; background: var(--border); border-radius: 99px; margin: 12px auto 16px; }
+    .login-sheet h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .lg-sub { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+    .lg-input { width: 100%; height: 46px; border: 1.5px solid var(--border); border-radius: 10px; padding: 0 14px; font-size: 15px; font-family: inherit; color: var(--text); margin-bottom: 8px; }
+    .lg-input:focus { outline: none; border-color: var(--green); }
+    .lg-closebtn { width: 100%; height: 44px; border: none; background: transparent; color: var(--muted); font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; margin-top: 6px; }
+
+    /* 공지사항 */
+    .notice-card { background: #FFFDF5; border: 1px solid var(--gold); border-radius: 14px; padding: 14px 16px; margin-bottom: 18px; box-shadow: var(--shadow-card); }
+    .n-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .n-head b { font-size: 14px; color: #8A5A00; }
+    .n-write { background: #fff; border: 1px solid var(--gold); color: #8A5A00; border-radius: 8px; padding: 6px 10px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .n-empty { font-size: 13px; color: var(--muted); padding: 4px 0; }
+    .n-item { padding: 8px 0; border-top: 1px dashed #EADFB8; }
+    .n-item:first-of-type { border-top: none; }
+    .n-text { font-size: 14px; color: var(--text); line-height: 1.5; white-space: pre-wrap; }
+    .n-meta { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .n-meta .n-del { color: #C0392B; margin-left: 8px; cursor: pointer; }
+    .n-more { background: none; border: none; color: #8A5A00; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 6px; padding: 4px 0; }
+    .n-compose { margin-top: 10px; }
+    .n-compose textarea { width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: 10px; font-size: 14px; font-family: inherit; resize: none; }
+    .n-compose textarea:focus { outline: none; border-color: var(--green); }
+    .n-cbtns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+    .n-cbtns button { border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; background: var(--grey-btn); color: var(--text); }
+    .n-cbtns button.prim { background: var(--green); color: #fff; }
+    .cal-more { font-size: 8px; color: var(--green); }
+
+    /* 필터 */
+    .filter-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    .filter-chip { flex: 0 0 auto; padding: 9px 14px; border: 1.5px solid var(--border); background: var(--card); border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; font-family: inherit; }
+    .filter-chip.active { border-color: var(--green); background: var(--green-tint); color: var(--green); }
+    .course-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+    .course-chip { padding: 8px 12px; border: 1.5px solid var(--border); background: var(--card); border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer; font-family: inherit; }
+    .course-chip.active { border-color: var(--green); background: var(--green); color: #fff; }
+    .filter-caption { font-size: 13px; font-weight: 700; margin: 6px 0 12px; }
+    .filter-caption span { color: var(--muted); font-weight: 500; }
+
+    /* 라운드 목록 */
+    .round-list { display: flex; flex-direction: column; gap: 10px; }
+    .round-item { display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow-card); cursor: pointer; }
+    .round-item:hover { border-color: var(--green); }
+    .round-item .ri-date { flex: 0 0 auto; width: 46px; text-align: center; }
+    .round-item .ri-d { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; line-height: 1; }
+    .round-item .ri-mon { font-size: 11px; color: var(--muted); }
+    .round-item .ri-body { flex: 1; min-width: 0; }
+    .round-item .ri-course { font-size: 15px; font-weight: 700; }
+    .round-item .ri-meta { font-size: 12px; color: var(--muted); margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .round-item .ri-top { flex: 0 0 auto; text-align: right; }
+    .round-item .ri-top .t-name { font-size: 13px; font-weight: 700; }
+    .round-item .ri-top .t-score { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 13px; color: var(--green); }
+    .empty-mini { text-align: center; padding: 30px 16px; color: var(--muted); font-size: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; }
+
+    .fab-record { position: absolute; right: 20px; bottom: calc(64px + 16px + env(safe-area-inset-bottom)); z-index: 95; }
+    @media (max-width: 520px) { .fab-record { right: 20px; } }
+    .fab-record button { height: 52px; padding: 0 20px; border-radius: 999px; background: var(--green); color: #fff; border: none; font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer; box-shadow: var(--shadow-lift); display: flex; align-items: center; gap: 8px; }
+    .fab-record button:hover { background: var(--green-dark); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <button class="icon-btn" id="backBtn" aria-label="뒤로">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="title" id="clubTitle">모임 홈<span class="sub" id="clubSub"></span></div>
+    </header>
+
+    <main id="main"></main>
+
+    <div class="fab-record" id="fabRecord"><button>＋ 라운드 기록</button></div>
+
+    <nav class="tabbar">
+      <a href="#" class="active" id="tabHome"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10" stroke-linecap="round" stroke-linejoin="round"/></svg>홈</a>
+      <a href="#" id="tabRank"><svg viewBox="0 0 24 24"><path d="M8 21V9M16 21V5M4 21V13M20 21V9" stroke-linecap="round"/></svg>랭킹</a>
+      <a href="#" id="tabGallery"><svg viewBox="0 0 24 24"><path d="M3 8.5A1.5 1.5 0 0 1 4.5 7H7l1.2-2h7.6L17 7h2.5A1.5 1.5 0 0 1 21 8.5v9A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.2"/></svg>갤러리</a>
+      <a href="#" id="tabMember"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5M17 11a3 3 0 0 0 0-6M21 20c0-2.5-2-4-4-4.5" stroke-linecap="round"/></svg>멤버</a>
+    </nav>
+
+    <!-- 로그인 시트 -->
+    <div class="login-overlay" id="loginOverlay">
+      <div class="login-sheet">
+        <div class="lg-grab"></div>
+        <h2>로그인 / 가입</h2>
+        <p class="lg-sub">멤버는 자기 이메일로 로그인해야 모임이 계속 공유돼요.</p>
+        <input class="lg-input" id="lgName" placeholder="이름/닉네임 (처음 가입 시)" maxlength="12" />
+        <input class="lg-input" id="lgEmail" type="email" placeholder="이메일" autocomplete="username" />
+        <input class="lg-input" id="lgPw" type="password" placeholder="비밀번호 (6자 이상)" autocomplete="current-password" />
+        <button class="btn btn-primary btn-block" id="lgBtn" style="margin-top:4px;">이메일로 로그인 / 가입</button>
+        <button class="lg-closebtn" id="lgClose">닫기</button>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./db.js"></script>
+  <script src="./calc.js"></script>
+  <script>
+    const STORAGE_KEY = 'golfrank.clubs';
+    const $ = (id) => document.getElementById(id);
+    const params = new URLSearchParams(location.search);
+    const clubId = params.get('club');
+    let clubs = load();
+    let club = clubs.find((c)=>c.id===clubId);
+
+    function load(){ try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch(e){ return []; } }
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function pad(n){ return String(n).padStart(2,'0'); }
+    let toastTimer;
+    function showToast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2200); }
+
+    const WD = ['일','월','화','수','목','금','토'];
+    const MON = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+    const today = new Date();
+    const CUR_Y = today.getFullYear(), CUR_M = today.getMonth(), CUR_D = today.getDate();
+    let cursor = { y: CUR_Y, m: CUR_M };
+    let filter = { type: 'month' };   // 'month' | {type:'day',date} | {type:'course',course}
+    let courseOpen = false;
+    let noticesCache = null, composeOpen = false, noticesOpen = false;   // 공지 상태 (init 전에 선언)
+    let LOGGED_IN = false, MY_NAME_H = '';   // 로그인 상태
+
+    if (!club) {
+      document.querySelector('main').innerHTML = '<div class="empty"><div class="icon">🤔</div><h3>모임을 찾을 수 없어요</h3><p>대시보드에서 다시 들어와 주세요.</p></div>';
+      $('clubTitle').textContent = '모임 홈';
+    } else {
+      $('clubTitle').childNodes[0].nodeValue = club.name;
+      $('clubSub').textContent = '홈';
+      render();
+      loadNotices();   // 공지 불러오기 (Supabase)
+      refreshFromCloud();
+      bootAuth();
+    }
+    async function refreshFromCloud(){
+      const p = await pullClubIntoLocal(clubId);
+      if (p) { club = p; $('clubTitle').childNodes[0].nodeValue = club.name; render(); }
+      else if (club) { try { await pushClub(club); } catch(e){} }   // 아직 클라우드에 없으면 올리기(마이그레이션)
+    }
+    async function bootAuth(){
+      let u = null; try { u = await currentUser(); } catch(e){}
+      LOGGED_IN = !!u;
+      if (u) { MY_NAME_H = userDisplayName(u); setMyName(MY_NAME_H); try { await linkMe(u); const p=await pullClubIntoLocal(clubId); if(p) club=p; } catch(e){} }
+      render();
+    }
+    /* 로그인한 나를 이 모임의 멤버로 연결 (중복 방지: 슬롯 이어받기 → 이름매칭 → 새 멤버) */
+    async function linkMe(u){
+      const uid=u.id, disp=userDisplayName(u);
+      const fresh = await pullClub(clubId); if(fresh) club=fresh;
+      const members = club.members || [];
+      if (members.some((m)=>m.userId===uid)) return;                 // 이미 내 슬롯 있음
+      const joinId = new URLSearchParams(location.search).get('join');
+      if (joinId && members.some((m)=>m.id===joinId && !m.userId)) {  // 개인 링크
+        if (await claimMemberSlot(clubId, joinId)) { showToast('멤버로 연결됐어요 👤'); return; }
+      }
+      const match = members.find((m)=>!m.userId && m.name===disp);    // 이름 자동 매칭
+      if (match) {
+        if (confirm(`이 모임에 '${match.name}' 멤버가 있어요. 본인이 맞으면 연결할까요?\n(아니면 새 멤버로 추가됩니다)`)) {
+          if (await claimMemberSlot(clubId, match.id)) { showToast(`'${match.name}' 슬롯에 연결됐어요 👤`); return; }
+        }
+      }
+      await addSelfAsMember(clubId, disp);                            // 매칭 없음 → 새 멤버
+      showToast('이 모임의 멤버로 참여했어요 🙌');
+    }
+    /* ── 로그인 시트 ── */
+    function openLogin(){ $('loginOverlay').classList.add('open'); setTimeout(()=>{ const el=$('lgEmail'); if(el) el.focus(); }, 300); }
+    function closeLogin(){ $('loginOverlay').classList.remove('open'); }
+    $('lgClose').addEventListener('click', closeLogin);
+    $('loginOverlay').addEventListener('click',(e)=>{ if(e.target===$('loginOverlay')) closeLogin(); });
+    $('lgPw').addEventListener('keydown',(e)=>{ if(e.key==='Enter') doHomeAuth(); });
+    $('lgBtn').addEventListener('click', doHomeAuth);
+    async function doHomeAuth(){
+      const email=($('lgEmail').value||'').trim(), pw=$('lgPw').value, name=($('lgName').value||'').trim();
+      if(!email||!pw){ showToast('이메일과 비밀번호를 입력하세요'); return; }
+      const btn=$('lgBtn'); btn.disabled=true;
+      try{
+        await signInEmail(email,pw); await afterLogin(); showToast('로그인했어요 👋');
+      }catch(e){
+        try{ const r=await signUpEmail(email,pw,name);
+          if(r&&r.session){ await afterLogin(); showToast('가입 + 로그인 완료 🎉'); }
+          else{ showToast('가입됐어요! 이메일 확인 링크를 눌러주세요'); btn.disabled=false; }
+        }catch(e2){ showToast('실패: '+(e2.message||e2)); btn.disabled=false; }
+      }
+    }
+    async function afterLogin(){
+      closeLogin();
+      let u=null; try{ u=await currentUser(); }catch(e){}
+      LOGGED_IN=!!u;
+      if(u){ MY_NAME_H=userDisplayName(u); setMyName(MY_NAME_H); try{ await linkMe(u); const p=await pullClubIntoLocal(clubId); if(p) club=p; }catch(e){} }
+      render();
+    }
+
+    /* ── 데이터 헬퍼 ── */
+    function roundsOn(dateStr){ return (club.rounds||[]).filter((r)=>r.date===dateStr); }
+    function schedulesOn(dateStr){ return (club.schedules||[]).filter((s)=>s.date===dateStr); }
+    function distinctCourses(){ return [...new Set((club.rounds||[]).map((r)=>r.course).filter(Boolean))]; }
+    function todayStr(){ return `${CUR_Y}-${pad(CUR_M+1)}-${pad(CUR_D)}`; }
+    function upcoming(){ const t=todayStr(); return (club.schedules||[]).filter((s)=>s.date>=t).sort((a,b)=> a.date<b.date?-1:a.date>b.date?1:0); }
+    function dday(dateStr){ const d=new Date(dateStr+'T00:00:00'); const t=new Date(CUR_Y,CUR_M,CUR_D); return Math.round((d-t)/86400000); }
+    function topOf(r){
+      const parts=r.scores.filter((s)=>typeof s.total==='number');
+      if(!parts.length) return null;
+      return parts.reduce((a,b)=>b.total<a.total?b:a);
+    }
+
+    /* ── 공지사항 (Supabase) ── */
+    async function loadNotices(){ noticesCache = await fetchAnnouncements(clubId); render(); }
+    function noticeHtml(){
+      let body;
+      if (noticesCache === null) body = '<div class="n-empty">불러오는 중…</div>';
+      else if (!noticesCache.length) body = '<div class="n-empty">아직 공지가 없어요.</div>';
+      else {
+        const list = noticesOpen ? noticesCache : noticesCache.slice(0,1);
+        body = list.map((a)=>`<div class="n-item"><div class="n-text">${escapeHtml(a.body)}</div><div class="n-meta">${escapeHtml(a.author||'익명')} · ${timeAgo(a.created_at)}<span class="n-del" data-del="${a.id}">삭제</span></div></div>`).join('');
+        if (noticesCache.length>1) body += `<button class="n-more" id="noticeMore">${noticesOpen?'접기':('지난 공지 '+(noticesCache.length-1)+'개 더보기')}</button>`;
+      }
+      const compose = composeOpen
+        ? `<div class="n-compose"><textarea id="noticeInput" rows="2" placeholder="공지 내용을 입력하세요"></textarea><div class="n-cbtns"><button id="noticeCancel">취소</button><button id="noticePost" class="prim">등록</button></div></div>`
+        : '';
+      return `<div class="notice-card"><div class="n-head"><b>📢 공지</b><button class="n-write" id="noticeWrite">✏️ 공지 쓰기</button></div>${body}${compose}</div>`;
+    }
+    function bindNotice(){
+      const w=$('noticeWrite'); if(w) w.addEventListener('click', ()=>{ composeOpen=true; render(); const el=$('noticeInput'); if(el) el.focus(); });
+      const cc=$('noticeCancel'); if(cc) cc.addEventListener('click', ()=>{ composeOpen=false; render(); });
+      const mo=$('noticeMore'); if(mo) mo.addEventListener('click', ()=>{ noticesOpen=!noticesOpen; render(); });
+      const pp=$('noticePost'); if(pp) pp.addEventListener('click', async ()=>{
+        const v=($('noticeInput').value||'').trim(); if(!v){ showToast('내용을 입력하세요'); return; }
+        const name=ensureMyName(); if(!name){ showToast('이름을 입력해야 등록돼요'); return; }
+        pp.disabled=true;
+        try{ await upsertClub(club); await postAnnouncement(clubId, name, null, v); composeOpen=false; await loadNotices(); showToast('공지를 등록했어요 📢'); }
+        catch(e){ showToast('등록 실패: '+(e.message||e)); pp.disabled=false; }
+      });
+      $('main').querySelectorAll('[data-del]').forEach((el)=> el.addEventListener('click', async ()=>{
+        if(!confirm('이 공지를 삭제할까요?')) return;
+        await deleteAnnouncement(el.dataset.del); await loadNotices();
+      }));
+    }
+
+    /* ── 렌더 ── */
+    function render(){
+      const gate = LOGGED_IN ? '' : `<button class="login-gate" id="loginGate">🔑 로그인 / 가입하고 이 모임에 참여하기</button>`;
+      $('main').innerHTML = gate + `<button class="invite-btn" id="inviteBtn">🔗 친구 초대 · 공유 링크 복사</button>` + noticeHtml() + kpiHtml() + upcomingHtml() + calHtml() + filterHtml() + listHtml();
+      bind(); bindNotice();
+      const lg=$('loginGate'); if(lg) lg.addEventListener('click', openLogin);
+      const ib=$('inviteBtn'); if(ib) ib.addEventListener('click', async ()=>{
+        const link = APP_BASE + '/home.html?club=' + encodeURIComponent(clubId);
+        try{ await navigator.clipboard.writeText(link); showToast('초대 링크 복사됨! 친구에게 보내세요 🔗'); }
+        catch(e){ prompt('이 링크를 복사해서 친구에게 보내세요', link); }
+      });
+    }
+
+    function upcomingHtml(){
+      const ups = upcoming();
+      const items = ups.slice(0,3).map((s)=>{
+        const dd = dday(s.date);
+        const lbl = dd===0 ? 'D-DAY' : `D-${dd}`;
+        const d = new Date(s.date);
+        const meta = [`${d.getMonth()+1}/${d.getDate()}(${WD[d.getDay()]})`, s.time||null, s.memo||null].filter(Boolean).join(' · ');
+        return `<div class="up-item" data-sched="1"><div class="up-dday"><div class="dd ${dd===0?'today':''}">${lbl}</div></div>
+          <div class="up-body"><div class="up-course">⛳ ${escapeHtml(s.course||'미정')}</div><div class="up-meta">${escapeHtml(meta)}</div></div></div>`;
+      }).join('');
+      return `<div class="up-card">
+        <div class="up-head"><h3>📅 다가오는 라운드</h3><button id="schedAll">일정 관리 ›</button></div>
+        ${ups.length ? items : '<div class="up-empty">예정된 라운드가 없어요. 일정을 추가해보세요!</div>'}
+      </div>`;
+    }
+
+    function kpiHtml(){
+      const yearN = roundsInYear(club, CUR_Y).length;
+      const monN  = roundsInMonth(club, CUR_Y, CUR_M).length;
+      // 월간 MVP = 보정 없는 평균 스코어 1위 (멤버만)
+      const mvp = avgScoreBoard(roundsInMonth(club, CUR_Y, CUR_M))[0];
+      const mvpHtml = mvp
+        ? `<div class="mvp-body" data-report="${escapeHtml(mvp.name)}"><div class="k-label">👑 ${MON[CUR_M]} 챔피언 <span style="opacity:.7">· 평균 스코어 1위</span></div><div class="mvp-name">${escapeHtml(mvp.name)} ›</div><div class="mvp-sub">평균 ${mvp.avg.toFixed(1)}타 · 베스트 ${mvp.best}타 · ${mvp.rounds}R</div></div>`
+        : `<div class="mvp-body"><div class="k-label">👑 ${MON[CUR_M]} 챔피언</div><div class="mvp-none">이번 달 첫 라운드의 주인공을 기다려요!</div></div>`;
+      return `<div class="kpi-row">
+        <div class="kpi"><div class="k-label">올해 총 라운드</div><div class="k-val">${yearN}<span class="k-unit">회</span></div></div>
+        <div class="kpi"><div class="k-label">이번 달 라운드</div><div class="k-val">${monN}<span class="k-unit">회</span></div></div>
+        <div class="kpi mvp"><span class="mvp-ico">👑</span>${mvpHtml}</div>
+      </div>`;
+    }
+
+    function calHtml(){
+      const first = new Date(cursor.y, cursor.m, 1);
+      const startWd = first.getDay();
+      const daysIn = new Date(cursor.y, cursor.m + 1, 0).getDate();
+      let wds = '';
+      WD.forEach((w,i)=> wds += `<div class="cal-wd ${i===0?'sun':i===6?'sat':''}">${w}</div>`);
+      let cells = '';
+      for(let i=0;i<startWd;i++) cells += `<div class="cal-cell empty"></div>`;
+      for(let d=1; d<=daysIn; d++){
+        const ds = `${cursor.y}-${pad(cursor.m+1)}-${pad(d)}`;
+        const cnt = roundsOn(ds).length;
+        const scnt = schedulesOn(ds).length;
+        const isToday = (cursor.y===CUR_Y && cursor.m===CUR_M && d===CUR_D);
+        const isSel = (filter.type==='day' && filter.date===ds);
+        let dots='';
+        if(cnt>0){ const show=Math.min(cnt,4); for(let k=0;k<show;k++) dots+='<span class="cal-dot"></span>'; if(cnt>4) dots+='<span class="cal-more">+</span>'; }
+        if(scnt>0 && cnt===0){ const show=Math.min(scnt,3); for(let k=0;k<show;k++) dots+='<span class="cal-dot sched"></span>'; }
+        cells += `<div class="cal-cell ${cnt?'has':''} ${isToday?'today':''} ${isSel?'sel':''}" ${cnt?`data-day="${ds}"`:''}>
+          <span>${d}</span><span class="cal-dots">${dots}</span></div>`;
+      }
+      return `<div class="cal-card">
+        <div class="cal-head">
+          <button class="cal-nav" id="prevMon">‹</button>
+          <div class="cal-title">${cursor.y}년 ${MON[cursor.m]}</div>
+          <button class="cal-nav" id="nextMon">›</button>
+        </div>
+        <div class="cal-weekdays">${wds}</div>
+        <div class="cal-grid">${cells}</div>
+      </div>`;
+    }
+
+    function filterHtml(){
+      const courses = distinctCourses();
+      const courseListHtml = courseOpen && courses.length
+        ? `<div class="course-list">${courses.map((c)=>`<button class="course-chip ${filter.type==='course'&&filter.course===c?'active':''}" data-course="${escapeHtml(c)}">🏌️ ${escapeHtml(c)}</button>`).join('')}</div>`
+        : (courseOpen ? `<div class="course-list"><span style="font-size:13px;color:var(--muted);">등록된 골프장이 없어요</span></div>` : '');
+      return `<div class="filter-row">
+        <button class="filter-chip ${filter.type==='month'?'active':''}" data-f="month">📅 이번 달력</button>
+        <button class="filter-chip ${(filter.type==='course'||courseOpen)?'active':''}" id="courseBtn">🏌️ 골프장별 ▾</button>
+      </div>${courseListHtml}`;
+    }
+
+    function listHtml(){
+      let rounds, caption;
+      if(filter.type==='day'){
+        rounds = roundsOn(filter.date);
+        const d=new Date(filter.date);
+        caption = `${d.getMonth()+1}월 ${d.getDate()}일 <span>· ${rounds.length}개 라운드</span>`;
+      } else if(filter.type==='course'){
+        rounds = (club.rounds||[]).filter((r)=>r.course===filter.course);
+        caption = `🏌️ ${escapeHtml(filter.course)} <span>· ${rounds.length}개 라운드</span>`;
+      } else {
+        rounds = roundsInMonth(club, cursor.y, cursor.m);
+        caption = `${cursor.y}년 ${MON[cursor.m]} <span>· ${rounds.length}개 라운드</span>`;
+      }
+      rounds = rounds.slice().sort((a,b)=> (b.date<a.date?-1:b.date>a.date?1:0));
+      const items = rounds.length ? rounds.map((r)=>{
+        const d=new Date(r.date); const top=topOf(r);
+        const topHtml = top ? `<div class="ri-top"><div class="t-name">🥇 ${escapeHtml(top.name)}</div><div class="t-score">${top.total}타</div></div>` : '';
+        return `<div class="round-item" data-round="${r.id}">
+          <div class="ri-date"><div class="ri-d">${d.getDate()}</div><div class="ri-mon">${MON[d.getMonth()]}</div></div>
+          <div class="ri-body"><div class="ri-course">⛳ ${escapeHtml(r.course)}</div><div class="ri-meta">${r.scores.length}명 · ${escapeHtml(r.scores.map((s)=>s.name).join(', '))}</div></div>
+          ${topHtml}
+        </div>`;
+      }).join('') : `<div class="empty-mini">해당 기록이 없어요.</div>`;
+      return `<div class="filter-caption">${caption}</div><div class="round-list">${items}</div>`;
+    }
+
+    /* ── 이벤트 ── */
+    function bind(){
+      $('prevMon').addEventListener('click', ()=>{ cursor.m--; if(cursor.m<0){ cursor.m=11; cursor.y--; } if(filter.type==='day') filter={type:'month'}; render(); });
+      $('nextMon').addEventListener('click', ()=>{ cursor.m++; if(cursor.m>11){ cursor.m=0; cursor.y++; } if(filter.type==='day') filter={type:'month'}; render(); });
+      $('main').querySelectorAll('[data-day]').forEach((el)=> el.addEventListener('click', ()=>{ filter={type:'day', date:el.dataset.day}; courseOpen=false; render(); }));
+      const cb=$('courseBtn'); if(cb) cb.addEventListener('click', ()=>{ courseOpen=!courseOpen; if(!courseOpen && filter.type==='course') filter={type:'month'}; render(); });
+      $('main').querySelectorAll('[data-course]').forEach((el)=> el.addEventListener('click', ()=>{ filter={type:'course', course:el.dataset.course}; render(); }));
+      const mf=$('main').querySelector('[data-f="month"]'); if(mf) mf.addEventListener('click', ()=>{ filter={type:'month'}; courseOpen=false; render(); });
+      $('main').querySelectorAll('[data-round]').forEach((el)=> el.addEventListener('click', ()=>{ location.href='round-detail.html?club='+encodeURIComponent(clubId)+'&round='+encodeURIComponent(el.dataset.round); }));
+      const mv=$('main').querySelector('[data-report]'); if(mv) mv.addEventListener('click', ()=>{ location.href='report.html?club='+encodeURIComponent(clubId)+'&name='+encodeURIComponent(mv.dataset.report); });
+      const sa=$('schedAll'); if(sa) sa.addEventListener('click', ()=>{ location.href='schedule.html?club='+encodeURIComponent(clubId); });
+      $('main').querySelectorAll('[data-sched]').forEach((el)=> el.addEventListener('click', ()=>{ location.href='schedule.html?club='+encodeURIComponent(clubId); }));
+    }
+
+    /* ── 네비게이션 ── */
+    $('backBtn').addEventListener('click', ()=>{ location.href='dashboard.html'; });
+    $('fabRecord').addEventListener('click', ()=>{ location.href='round.html?club='+encodeURIComponent(clubId); });
+    $('tabHome').addEventListener('click', (e)=>e.preventDefault());
+    $('tabRank').addEventListener('click', (e)=>{ e.preventDefault(); location.href='ranking.html?club='+encodeURIComponent(clubId); });
+    $('tabGallery').addEventListener('click', (e)=>{ e.preventDefault(); location.href='gallery.html?club='+encodeURIComponent(clubId); });
+    $('tabMember').addEventListener('click', (e)=>{ e.preventDefault(); location.href='member.html?club='+encodeURIComponent(clubId); });
+  </script>
+</body>
+</html>
