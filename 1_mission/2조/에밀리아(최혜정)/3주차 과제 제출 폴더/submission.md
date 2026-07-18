@@ -57,5 +57,5 @@ date: 2026-07-18
 
 ## 📣 미션 2. 스폰지 토크데이 SNS 후기
 > 오늘 토크데이 후기를 SNS에 올리기 (**#스폰지클럽 필수 · 셀 3개 지급!**)
-- **후기 내용:**
-- **SNS 인증 링크:**
+- **후기 내용:** 비행기 결항으로 참석 못해서 아쉬웠어요.
+- **SNS 인증 링크:** https://www.instagram.com/p/DarExu_hZ6g/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==
