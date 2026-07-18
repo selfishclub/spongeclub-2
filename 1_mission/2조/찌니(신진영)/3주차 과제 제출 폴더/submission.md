@@ -32,7 +32,9 @@ https://checkwall.vercel.app/
 이외에 사주스킬 기반으로 사주엔진 만들었고, 
 글로벌 사주서비스 "Mr.Kim's SAJU" 디벨롭 중임. 
 
-![alt text](image.png)
+![결과물](이미지첨부/결과물.png)
+
+
 
 
 
