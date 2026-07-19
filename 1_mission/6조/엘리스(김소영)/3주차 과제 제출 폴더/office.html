@@ -102,16 +102,25 @@
   .bd .dot{width:8px; height:8px; border-radius:50%; display:inline-block; flex:none}
   .bd .item{display:flex; gap:8px; padding:6px 8px 6px 18px; align-items:center; border-radius:8px; transition:background .12s}
   .bd .item:hover{background:var(--bg)}
-  .bd label.item{cursor:pointer}
+  .bd label.item, .bd .taskrow{cursor:pointer}
   .bd .item input[type=checkbox]{width:15px; height:15px; accent-color:var(--primary); cursor:pointer; flex:none; margin-right:2px}
   .bd .item .tt{font-weight:600; color:var(--fg); font-size:14px}
   .bd .item .who{background:var(--accent); color:var(--accent-fg); font-size:11.5px; font-weight:700; padding:3px 9px; border-radius:999px; margin-left:auto; white-space:nowrap}
   .bd .empty{color:var(--muted); font-size:12.5px; padding:8px 2px 8px 18px}
   .bd .skrow{display:flex; flex-wrap:wrap; gap:6px; padding:2px 2px 4px 18px}
   .bd .skpill{font-size:11.5px; font-weight:700; color:var(--primary); background:var(--accent); border:1px solid var(--border); border-radius:999px; padding:4px 10px; white-space:nowrap}
+  .bd .doclink{color:var(--primary); text-decoration:underline; font-weight:700; cursor:pointer}
+  .chat{display:flex; flex-direction:column; gap:8px; max-height:44vh; overflow-y:auto; padding:2px 2px 4px}
+  .chat .cmsg{max-width:88%; padding:9px 13px; border-radius:14px; font-size:14px; line-height:1.5; word-break:break-word}
+  .chat .cmsg.me{align-self:flex-end; background:var(--primary); color:#fff; border-bottom-right-radius:4px}
+  .chat .cmsg.ai{align-self:flex-start; background:var(--bg); color:var(--fg); border:1px solid var(--border); border-bottom-left-radius:4px}
+  .chat .cmsg.ai b{color:var(--primary)}
+  .chat .qrow{display:flex; flex-wrap:wrap; gap:6px; margin-top:4px}
+  .chat .qchip{font-size:12px; font-weight:700; color:var(--primary); background:var(--accent); border:1px solid var(--border); border-radius:999px; padding:6px 11px; cursor:pointer}
   .bd .msg{padding:7px 2px; border-top:1px solid var(--border)}
   .bd .msg:first-of-type{border-top:none}
   .bd .msg .hdr{font-weight:700; font-size:12.5px; color:var(--primary)}
+  .bd .msg .mtag{font-size:11px; font-weight:800; padding:2px 8px; border-radius:999px; margin:0 2px}
   .bd .msg .body{color:var(--fg2); font-size:13px; margin-top:2px; line-height:1.45}
   @media (max-width:720px){ .toolbar{flex-wrap:wrap} .tcard{flex:1 1 calc(50% - 5px); min-width:140px} .hud{flex-wrap:wrap; row-gap:8px} .hud h1{font-size:18px} .hud h1 small{display:block; margin-left:0; margin-top:2px} .counts{width:100%; margin-left:0; justify-content:flex-start} .avg{margin-left:0} .panel{padding:16px 14px} }
   @media (max-width:1000px){ .app{flex-direction:column} .side{width:100%; position:static} .panel{max-height:none} }
@@ -283,6 +292,9 @@ const SEED_SHELF=[
   {skill:"queue-monitor",        by:"S3 파트장"},   // 처리량/적체 일별 모니터링
   {skill:"data-integrity-check", by:"데이터 담당"},  // 쿼리 오류·데이터 정합성 점검
   {skill:"deploy-notice-format", by:"운영 담당"},    // 신규 배포 공지 정리·체계화
+  {skill:"auto-install-helper",  by:"로나"},         // 동료 PC 자동화 설치 도우미
+  {skill:"voc-review-report",    by:"로나"},         // VOC 리뷰·리포트
+  {skill:"card-news-maker",      by:"로나"},         // 카드뉴스(캐러셀) 제작
 ];
 const shelf=[]; SEED_SHELF.forEach(s=>shelf.push({...s,_t:1}));
 
@@ -472,10 +484,10 @@ const CATS=[
   {key:'ops',    label:'운영기획',    color:'#e0913c'},
   {key:'auto',   label:'자동화·실행', color:'#8b6fe0'},
 ];
-const SKILL_CAT={ 'weekly-report-write':'report','report-layout-tidy':'report','report-deck-build':'report','qc-weekly':'report',
+const SKILL_CAT={ 'weekly-report-write':'report','report-layout-tidy':'report','report-deck-build':'report','qc-weekly':'report','voc-review-report':'report','card-news-maker':'report',
   'sql-helper':'data','weekly-data-digest':'data','data-integrity-check':'data','metric-brief-merge':'data',
   'ops-check':'ops','co-work-note':'ops','queue-monitor':'ops','deploy-notice-format':'ops','ivr-script-check':'ops','guide-tidy':'ops',
-  'daily-brief-auto':'auto','unread-nudge':'auto','morning-brainstorm':'auto','personal-activity-collect':'auto','part-activity-collect':'auto' };
+  'daily-brief-auto':'auto','unread-nudge':'auto','morning-brainstorm':'auto','personal-activity-collect':'auto','part-activity-collect':'auto','auto-install-helper':'auto' };
 const catOf=s=>SKILL_CAT[s]||'ops';
 // 스킬 상세(발표용 제네릭): 핵심기능요약 · 재활용가능성 · (함정)
 const SKILL_META={
@@ -498,6 +510,9 @@ const SKILL_META={
   'morning-brainstorm': {sum:'아침에 오늘 할 일·우선순위를 함께 정리',              reuse:'개인·파트 어디든 시작 루틴'},
   'personal-activity-collect':{sum:'내 AI 대화·로컬 활동을 매일 수집·구조화',        reuse:'누구나 설치 — 개인 활동 캡처의 기본', trap:'로컬 우선 · PII 제외'},
   'part-activity-collect':{sum:'파트 공통 활동(게시판·메신저·캘린더)을 주간 취합',    reuse:'어느 파트든 소스만 연결해 공통/개인 리포트 생성'},
+  'auto-install-helper':{sum:'비개발자 동료 PC에 다운로드·정기 실행 자동화를 대화형으로 설치',  reuse:'반복 다운로드·정기 실행이 필요한 어느 파트든 동료에게 그대로 배포', trap:'인증·비밀키는 각자 PC에만(공유 금지)'},
+  'voc-review-report':  {sum:'들어온 VOC를 모아 리뷰 포인트와 리포트로 정리',          reuse:'문의·피드백을 다루는 파트 공통'},
+  'card-news-maker':    {sum:'주제·데이터로 카드뉴스(캐러셀) 슬라이드와 캡션을 자동 제작',  reuse:'사내 공지·교육 콘텐츠를 만드는 누구든', trap:'이미지·문구 최종 검수는 사람이'},
 };
 function skillMeta(k){ return SKILL_META[k]||{sum:'반복하던 일을 정해진 방법으로 정리한 도구예요', reuse:'비슷한 일을 하는 다른 파트가 조금만 바꿔서 그대로 쓸 수 있어요'}; }
 // 스킬 식별자 → 사람이 읽는 이름(자연어)
@@ -506,6 +521,7 @@ const SKILL_NAME={
   'sql-helper':'반복 쿼리 도우미', 'weekly-data-digest':'주간 데이터 요약', 'data-integrity-check':'데이터 정합성 점검', 'metric-brief-merge':'지표 브리핑 통합',
   'ops-check':'운영 점검', 'co-work-note':'협업 기록', 'queue-monitor':'처리량 모니터링', 'deploy-notice-format':'배포 공지 정리', 'ivr-script-check':'안내멘트 점검', 'guide-tidy':'응대 가이드 정비',
   'daily-brief-auto':'데일리 브리핑 자동화', 'unread-nudge':'미확인 건 알림', 'morning-brainstorm':'아침 브레인스토밍', 'personal-activity-collect':'개인 활동 수집', 'part-activity-collect':'파트 활동 수집',
+  'auto-install-helper':'자동화 도구 설치 도우미', 'voc-review-report':'VOC 리뷰 리포트', 'card-news-maker':'카드뉴스 제작',
 };
 function sname(k){ return SKILL_NAME[k]||k; }
 // 받침 유무에 따라 조사 선택 (a=받침o, b=받침x)
@@ -581,11 +597,36 @@ const PROPOSALS=[
   {skill:'ivr-script-check', by:'엘리스', risk:'저위험'},
   {skill:'metric-brief-merge', by:'S2 파트장', risk:'고위험'},
 ];
+// 회의록: 미팅 종류 구분 (파트 주간 / 팀장-파트 / 프로젝트 / 서비스-사업·개발)
+const MTG_TYPE={
+  weekly:  {label:'CS 파트 주간미팅',      ic:'📅', c:'#2c6edb'},
+  lead:    {label:'팀장–파트 미팅',        ic:'⭐', c:'#c8960c'},
+  project: {label:'프로젝트 미팅',         ic:'🧩', c:'#8b6fe0'},
+  cross:   {label:'서비스–사업·개발 미팅', ic:'🤝', c:'#1f8a4c'},
+};
 const MINUTES=[
-  {wk:'2026-W29', t:'반복 업무 도구 공유 승인 · 데이터 정합성 주의점 전 파트 공유 · 지표 정의 통일 1건은 사람이 최종 확인 대기'},
-  {wk:'2026-W28', t:'주간 리포트 작성 도구를 서비스별로 나누기로 결정 · 공공 자료실 버전 관리 시작'},
+  {wk:'2026-W29', type:'weekly',  t:'반복 업무 도구 공유 승인 · 데이터 정합성 주의점 전 파트 공유 · 지표 정의 통일 1건은 사람이 최종 확인 대기'},
+  {wk:'2026-W29', type:'cross',   t:'안내멘트 개편 — 각 서비스 의견 취합 결과 공유 · 다음주 목까지 미제출 파트(서비스3) 리마인드'},
+  {wk:'2026-W28', type:'lead',    t:'팀장 검토: 주간 리포트 작성 도구를 서비스별로 나누기로 결정 · 공공 자료실 버전 관리 시작'},
+  {wk:'2026-W28', type:'project', t:'상담그룹 재편 TF — 그룹 명칭·롤 정의 초안 · 운영 플랫폼 백데이터 교체 일정 논의'},
 ];
 // ☀️ 오늘 브리핑(아침 데일리 리딩) — 라우팅: auto=스킬자동 / collab=함께작업 / list=리스트업
+// 공통 업무: CS운영파트가 오너지만 여러 서비스 의견이 취합되어야 하는 일 — 파트별 상태 한눈에
+const PART_LABEL={S1:'서비스1파트', S2:'서비스2파트', S3:'서비스3파트', S4:'서비스4파트'};
+const COMMON_WORK=[
+  {t:'안내멘트 점검·수정', owner:'CS운영파트', due:'다음주 목(7/24)', parts:{
+     S1:{st:'의견제출완료'}, S2:{st:'논의중', doc:'2파트 논의 문서'}, S3:{st:'진행사항없음'}, S4:{st:'의견제출완료'} }},
+  {t:'상담그룹 재편', owner:'CS운영파트', due:'이번주 금(7/18)', parts:{
+     S1:{st:'의견제출완료'}, S2:{st:'의견제출완료'}, S3:{st:'논의중', doc:'3파트 논의 문서'}, S4:{st:'진행사항없음'} }},
+];
+// 활동 동기화 소스 — 각각 수동 동기화 + 출근/퇴근 시 일괄
+const SYNC_N={slack:14, agit:6, sheet:3, ai:31};
+const SOURCES=[
+  {k:'slack', ic:'💬', label:'슬랙',        synced:false, n:0},
+  {k:'agit',  ic:'📝', label:'아지트',      synced:false, n:0},
+  {k:'sheet', ic:'📊', label:'구글시트',    synced:false, n:0},
+  {k:'ai',    ic:'🤖', label:'AI 로컬활동', synced:false, n:0},
+];
 // 오늘 일정: kind=auto(기존 스킬 자동) / manual(직접). manual 중 rec=true는 스킬 추천(반복 빈도 포함)
 const TODAY_PLAN=[
   {t:'데일리 브리핑 정리', kind:'auto',   skill:'daily-brief-auto', why:'매일 자동'},
@@ -709,18 +750,24 @@ function selectBot(b){ if(running||busy) return; selected=b;
     `<div class="grp"><div class="glabel">🧰 가진 도구 <span class="cnt">${skills.length}개</span></div>${skHtml}</div>`+
     `<div class="grp"><div class="glabel">📋 담당 업무 <span class="cnt">${mine.length}</span></div>${tlHtml}</div></div>`;
   ctrlEl.innerHTML='';
-  const inp=document.createElement('input'); inp.className='cmd'; inp.placeholder=`${nameOf(b)}에게 시킬 일을 입력…`;
+  const isBoss = b.role==='실장'||b.role==='팀장';
+  const inp=document.createElement('input'); inp.className='cmd';
+  inp.placeholder = isBoss ? `${nameOf(b)}에게 컨펌받을 내용 입력…` : `${nameOf(b)}에게 요청할 내용 입력…`;
   inp.addEventListener('keydown',e=>{ if(e.key==='Enter') doInstruct(b,inp); });
   ctrlEl.appendChild(inp);
-  btn('시키기 ▶', ()=>doInstruct(b,inp));
+  btn(isBoss?'컨펌 요청하기 ✅':'요청하기 ▶', ()=>doInstruct(b,inp));
   btn('함께 일하기 🤝', ()=>collab(b));
   if(b.skills&&b.skills.length) btn('파트에 공유하기 ⬆️', ()=>shareUp(b));
   btn('닫기', ()=>clearSelection(), true);
 }
 function doInstruct(b,inp){ const v=(inp.value||'').trim(); if(!v) return;
+  const isBoss = b.role==='실장'||b.role==='팀장';
+  if(isBoss){ bubble(b,'검토할게요 👀',1600); b.flash=1; inp.value='';
+    say(nameOf(b), `<b>${v}</b> — <b>컨펌 요청</b> 드렸어요. ${nameOf(b)}님 검토 후 회신 예정. (지시가 아니라 승인·검토를 받는 자리예요)`); return; }
   TASKS.unshift({who:whoOf(b), t:v, st:'진행'}); bubble(b,'접수! 진행할게요',1600); b.flash=1;
   inp.value=''; updateCounts();
-  say(nameOf(b), `말씀하신 <b>${v}</b> → <b>진행 중</b>으로 등록했어요. (📋 스케줄 보드에서 확인)`); }
+  const rel=relatedSkill(v);
+  say(nameOf(b), `요청 접수: <b>${v}</b> → <b>진행 중</b> 등록. 📋 <b>스케줄 보드에서 이 항목을 클릭</b>하면 ${rel?`<b>「${sname(rel)}」 공유</b>·완료로 `:'완료·취소로 '}처리할 수 있어요.`); }
 async function collab(b){ if(busy) return; busy=true; bubble(me,'같이 하자!',1200); bubble(b,'좋아요!',1200); me.flash=1; b.flash=1;
   say(nameOf(b), `엘리스와 <b>${nameOf(b)}</b>가 함께 일했어요 — 결과를 <b>방법</b>으로 정리했어요. (자료실에 올리려면 팀장 승인)`);
   if(!b.skills.includes('co-work-note')){ b.skills.push('co-work-note'); await levelUp(b); } busy=false; }
@@ -768,9 +815,23 @@ const STC={진행:'#2c6edb',미해결:'#c0392b',대기:'#9a7b12',완료:'#1f8a4c
 function openSchedule(){ if(running||busy) return; selected=null;
   const groups=['진행','미해결','대기','완료'].map(st=>{ const a=TASKS.filter(t=>t.st===st); if(!a.length) return '';
     return `<div class="grp"><div class="glabel"><span class="dot" style="background:${STC[st]}"></span>${st} <span class="cnt">${a.length}</span></div>`+
-      a.map(t=>`<div class="item"><span class="tt">${t.t}</span><span class="who">${t.who}</span></div>`).join('')+`</div>`; }).join('');
-  sayEl.innerHTML=`<div class="bd"><span class="bh">📋 스케줄 보드 <small>전체 현황</small></span>${groups}</div>`;
+      a.map(t=>`<div class="item taskrow" onclick="openTask(${TASKS.indexOf(t)})"><span class="tt">${t.t}</span><span class="who">${t.who}</span></div>`).join('')+`</div>`; }).join('');
+  sayEl.innerHTML=`<div class="bd"><span class="bh">📋 스케줄 보드 <small>항목을 클릭해 처리</small></span>${groups}</div>`;
   ctrlEl.innerHTML=''; btn('닫기',()=>clearSelection(),true); }
+function relatedSkill(text){ const t=text.replace(/\s/g,''); return Object.keys(SKILL_NAME).find(k=> t.includes(sname(k).replace(/\s/g,''))); }
+function openTask(i){ if(running||busy) return; const t=TASKS[i]; if(!t) return; selected=null;
+  const rel=relatedSkill(t.t), stc=STC[t.st]||'#808080';
+  sayEl.innerHTML=`<div class="bd"><span class="bh">📌 업무 처리 <small>담당 ${t.who}</small></span>`+
+    `<div class="grp"><div class="item"><span class="tt">${t.t}</span><span class="who" style="background:${stc}22;color:${stc}">${t.st}</span></div>`+
+    (rel?`<div class="item"><span class="tt" style="font-weight:500;color:var(--fg2)">🧰 관련 도구: <b>${sname(rel)}</b></span></div>`:'')+`</div></div>`;
+  ctrlEl.innerHTML='';
+  if(rel){ const meHas=me.skills.includes(rel), inShelf=shelf.some(s=>s.skill===rel), cat=CATS.find(c=>c.key===catOf(rel));
+    if(meHas) btn(`📤 「${sname(rel)}」 파트에 공유하기`, ()=>{ if(!shelf.find(s=>s.skill===rel)) shelf.push({skill:rel,by:'엘리스',_t:0}); t.st='완료'; updateCounts(); say('스택이',`<b>${sname(rel)}</b>${josa(sname(rel),'을','를')} 공공 자료실에 공유했어요 — 이제 누구나 가져다 쓸 수 있어요. (요청 완료 처리)`); setTimeout(openSchedule,900); });
+    else if(inShelf) btn(`📥 「${sname(rel)}」 자료실에서 가져오기`, ()=>{ if(cat) openSkill(rel,cat); });
+    else btn(`📚 관련 도구 자료실에서 찾기`, ()=>{ if(cat) openCategory(cat); }); }
+  if(t.st!=='완료') btn('✅ 완료로 표시', ()=>{ t.st='완료'; updateCounts(); say('스택이',`<b>${t.t}</b> — 완료 처리했어요. 👍`); setTimeout(openSchedule,700); });
+  btn('🗑 취소(삭제)', ()=>{ const j=TASKS.indexOf(t); if(j>=0)TASKS.splice(j,1); updateCounts(); say('스택이','이 업무를 취소했어요.'); setTimeout(openSchedule,600); }, true);
+  btn('◂ 보드로', ()=>openSchedule(), true); }
 function openInbox(){ if(running||busy) return; selected=null;
   const l=INBOX.map(m=>`<div class="msg"><div class="hdr">✉️ ${m.from} → ${m.to}</div><div class="body">${m.t}</div></div>`).join('');
   sayEl.innerHTML=`<div class="bd"><span class="bh">📨 전달함 <small>${INBOX.length}건 · 동료들의 메시지</small></span>${l}</div>`;
@@ -782,8 +843,56 @@ function openProposals(){ if(running||busy) return; selected=null;
   PROPOSALS.slice().forEach(p=> btn(`${sname(p.skill)} 공유 승인 ✅`, ()=>{ if(busy)return; if(!shelf.find(s=>s.skill===p.skill)) shelf.push({skill:p.skill,by:p.by,_t:0}); const i=PROPOSALS.indexOf(p); if(i>=0)PROPOSALS.splice(i,1); boss.flash=1; updateCounts(); openProposals(); }));
   btn('닫기',()=>clearSelection(),true); }
 function openMinutes(){ if(running||busy) return; selected=null;
-  const l=MINUTES.map(m=>`<div class="msg"><div class="hdr">🗓️ ${m.wk}</div><div class="body">${m.t}</div></div>`).join('');
-  sayEl.innerHTML=`<div class="bd"><span class="bh">🗨️ 회의록 <small>주간 회의·공유 결정</small></span>${l}</div>`;
+  const l=MINUTES.map(m=>{ const t=MTG_TYPE[m.type]||{label:'회의',ic:'🗓️',c:'#808080'};
+    return `<div class="msg"><div class="hdr">${t.ic} <span class="mtag" style="background:${t.c}22;color:${t.c}">${t.label}</span> <span style="color:var(--muted);font-weight:600">${m.wk}</span></div><div class="body">${m.t}</div></div>`;
+  }).join('');
+  sayEl.innerHTML=`<div class="bd"><span class="bh">🗨️ 회의록 <small>미팅 종류별</small></span>${l}</div>`;
+  ctrlEl.innerHTML=''; btn('닫기',()=>clearSelection(),true); }
+// ---------- 스택이 대화(AI 비서) — 자연어 → 트래킹/뷰 라우팅 ----------
+const CHAT=[];
+function openChat(){ if(running||busy) return; selected=null;
+  if(!CHAT.length) CHAT.push({who:'ai', text:'안녕하세요, 저는 <b>스택이</b>예요. 무엇을 도와드릴까요? 아래 예시처럼 편하게 말해보세요.'});
+  renderChat(); }
+function renderChat(lastAct){
+  const log=CHAT.map(m=>`<div class="cmsg ${m.who}">${m.text}</div>`).join('');
+  const quick = CHAT.length<=1 ? `<div class="qrow">${['상담그룹 개편 파트별 취합 보여줘','루나 요청 아지트에 글 썼어, 답변 오면 알려줘','오늘 할 일 브리핑'].map(q=>`<span class="qchip" onclick="chatSend('${q}')">${q}</span>`).join('')}</div>` : '';
+  sayEl.innerHTML=`<div class="bd"><span class="bh">🤖 스택이 대화 <small>AI 비서에게 말하기</small></span><div class="chat">${log}${quick}</div></div>`;
+  ctrlEl.innerHTML='';
+  const inp=document.createElement('input'); inp.className='cmd'; inp.id='chatInp'; inp.placeholder='스택이에게 말하기…';
+  inp.addEventListener('keydown',e=>{ if(e.key==='Enter'&&inp.value.trim()) chatSend(inp.value.trim()); });
+  ctrlEl.appendChild(inp);
+  btn('보내기 ▶', ()=>{ const v=(document.getElementById('chatInp')?.value||'').trim(); if(v) chatSend(v); });
+  if(lastAct) btn(lastAct.label, lastAct.fn);
+  btn('닫기', ()=>clearSelection(), true);
+  const c=document.querySelector('.chat'); if(c) c.scrollTop=c.scrollHeight;
+  const ci=document.getElementById('chatInp'); if(ci) ci.focus(); }
+function chatSend(text){ if(running||busy) return; CHAT.push({who:'me', text});
+  const r=chatReply(text); CHAT.push({who:'ai', text:r.text}); renderChat(r.act); }
+function chatReply(t){
+  if(/답변|회신|알려줘|기다|대기|글.?썼|올렸|남겼|물어/.test(t)){
+    const label=t.length>26? t.slice(0,24)+'…':t; TASKS.unshift({who:'엘리스', t:'⏳ '+label, st:'대기'}); updateCounts();
+    return {text:'네, <b>트래킹</b>해둘게요. 답변이 오면 알려드릴게요. 📋 스케줄 보드 <b>대기</b>에 넣었어요.', act:{label:'📋 스케줄 보드 보기', fn:openSchedule}}; }
+  if(/취합|파트별|그룹.?개편|공통.?업무|함께.?살펴|의견.?현황|상담.?그룹|현재까지/.test(t)){
+    return {text:'네, 지금까지 <b>파트별로 취합된 내용</b>을 함께 볼게요. (서비스1~4파트 의견 현황)', act:{label:'🤝 공통 업무 취합 열기', fn:openCommon}}; }
+  if(/오늘|할.?일|일정|브리핑/.test(t)){
+    return {text:'오늘 할 일을 브리핑할게요 — 자동 처리 중인 일과 직접 할 일로 나눠서요.', act:{label:'🌞 오늘 브리핑 열기', fn:openToday}}; }
+  if(/회의|미팅|회의록/.test(t)){
+    return {text:'회의록을 볼게요 — 미팅 종류별로 정리돼 있어요.', act:{label:'🗨️ 회의록 열기', fn:openMinutes}}; }
+  if(/스킬|도구|자료실|가져|공유받|배우/.test(t)){
+    return {text:'공공 자료실을 볼게요. 필요한 도구를 가져다 쓸 수 있어요.', act:{label:'📚 자료실 열기', fn:()=>openCategory(CATS[0])}}; }
+  TASKS.unshift({who:'엘리스', t, st:'진행'}); updateCounts();
+  return {text:'<b>요청</b>으로 등록해뒀어요. 스케줄 보드에서 완료·처리할 수 있어요.', act:{label:'📋 스케줄 보드 보기', fn:openSchedule}}; }
+function openCommon(){ if(running||busy) return; selected=null;
+  const SC={의견제출완료:{ic:'✅',c:'#1f8a4c'}, 논의중:{ic:'💬',c:'#9a7b12'}, 진행사항없음:{ic:'⚪',c:'#9aa0aa'}};
+  const groups=COMMON_WORK.map(w=>{
+    const done=Object.values(w.parts).filter(p=>p.st==='의견제출완료').length, total=Object.keys(w.parts).length;
+    const rows=Object.entries(w.parts).map(([k,p])=>{ const s=SC[p.st]||SC['진행사항없음'];
+      const doc=p.doc?` · <span class="doclink">📄 ${p.doc} →</span>`:'';
+      return `<div class="item"><span class="dot" style="background:${s.c}"></span><span class="tt">${PART_LABEL[k]}</span><span class="who" style="background:transparent;color:${s.c};padding:0">${s.ic} ${p.st}${doc}</span></div>`;
+    }).join('');
+    return `<div class="grp"><div class="glabel">🤝 ${w.t} <span class="cnt">${w.owner} 오너 · ~${w.due} · 취합 ${done}/${total}</span></div>${rows}</div>`;
+  }).join('');
+  sayEl.innerHTML=`<div class="bd"><span class="bh">🤝 공통 업무 취합 <small>여러 파트 의견이 필요한 CS 오너 업무</small></span>${groups}</div>`;
   ctrlEl.innerHTML=''; btn('닫기',()=>clearSelection(),true); }
 function openToday(){ if(running||busy) return; selected=null;
   const autos=TODAY_PLAN.filter(p=>p.kind==='auto'), mans=TODAY_PLAN.filter(p=>p.kind==='manual');
@@ -809,8 +918,22 @@ async function makeSkillFlow(p){ if(busy||running) return; busy=true; selected=n
   if(team){ if(!shelf.find(s=>s.skill===p.skill)) shelf.push({skill:p.skill,by:'CS 파트장',_t:0}); await levelUp(lead); say('스택이',`<b>팀 전체 공유!</b> <b>${sname(p.skill)}</b>${josa(sname(p.skill),'이','가')} 📚 공공 자료실에 올라가 <b>누구나 가져다</b> 쓸 수 있어요.`); }
   else { await levelUp(lead); say('스택이','<b>우리 파트 안에서만</b> 공유했어요. (팀 전체엔 비공개 · 나중에 올릴 수 있어요)'); }
   busy=false; idleControls(); }
+// ---------- 활동 동기화 ----------
+function srcSummary(){ return SOURCES.map(s=>`${s.ic} ${s.label} ${s.synced?s.n+'건':'—'}`).join(' · '); }
+function syncOne(k){ const s=SOURCES.find(x=>x.k===k); if(!s) return; s.synced=true; s.n=SYNC_N[k]; bubble(me, s.label+' 동기화 ✅',1500); me.flash=1; if(typeof refreshToolbar==='function') refreshToolbar(); }
+function syncAllSilent(){ SOURCES.forEach(s=>{ s.synced=true; s.n=SYNC_N[s.k]; }); if(typeof refreshToolbar==='function') refreshToolbar(); }
+function openSync(){ if(running||busy) return; selected=null;
+  const rows=SOURCES.map(s=>`<div class="item"><span class="dot" style="background:${s.synced?'#1f8a4c':'#9aa0aa'}"></span><span class="tt">${s.ic} ${s.label}</span><span class="who" style="background:transparent;color:${s.synced?'#1f8a4c':'var(--muted)'};padding:0">${s.synced?'✅ 동기화됨 · '+s.n+'건':'⚪ 동기화 안 됨'}</span></div>`).join('');
+  const total=SOURCES.reduce((a,s)=>a+(s.synced?s.n:0),0);
+  sayEl.innerHTML=`<div class="bd"><span class="bh">🔄 활동 동기화 <small>수동 · 출근/퇴근 시 자동 일괄</small></span>${rows}<div class="glabel" style="margin-top:10px">오늘 취합 <span class="cnt">총 ${total}건</span></div></div>`;
+  ctrlEl.innerHTML='';
+  SOURCES.forEach(s=> btn(`${s.ic} ${s.label} 동기화`, ()=>{ syncOne(s.k); openSync(); }));
+  btn('🔄 전체 동기화', ()=>{ syncAllSilent(); openSync(); });
+  btn('닫기', ()=>clearSelection(), true); }
+
 // ---------- 엘리스 상태바 (ZEP식: 상태 변경 → 해당 공간으로 이동) ----------
 const STATUS=[
+  {k:'출근',   ic:'🌅', t:()=>me.home},
   {k:'자리',   ic:'🪑', t:()=>me.home},
   {k:'식사',   ic:'🍚', t:()=>[318,196]},
   {k:'휴식',   ic:'🛋️', t:()=>[915,700]},
@@ -821,19 +944,33 @@ function statusMsg(k){ return {자리:'자리로 복귀 💺', 식사:'식사하
 function buildStatusbar(){ const el=document.getElementById('statusbar'); if(!el) return;
   el.innerHTML='<span class="lab">🐹 엘리스 상태</span>';
   STATUS.forEach(s=>{ const b=document.createElement('button'); b.className='sbtn'+(me.status===s.k?' on':''); b.textContent=s.ic+' '+s.k;
-    b.onclick=()=>setStatus(s.k); el.appendChild(b); }); }
+    b.onclick=()=>setStatus(s.k); el.appendChild(b); });
+  const sep=document.createElement('span'); sep.className='lab'; sep.textContent='·'; el.appendChild(sep);
+  const sb=document.createElement('button'); sb.className='sbtn'; sb.textContent='🔄 동기화'; sb.onclick=()=>openSync(); el.appendChild(sb); }
 function setStatus(k){ if(running||busy) return; const s=STATUS.find(x=>x.k===k); if(!s) return;
-  if(k==='퇴근'){ openLeaveBriefing(); return; }   // 퇴근 전엔 꼭 하루 브리핑 + 내일 체크
+  if(k==='출근'){ openArrival(); return; }          // 출근 = 일괄 동기화 + 오늘 브리핑
+  if(k==='퇴근'){ openLeaveBriefing(); return; }    // 퇴근 = 일괄 동기화 + 하루 브리핑 + 내일 체크
   me.status=k; me.away=false; selected=null; buildStatusbar();
   const [tx,ty]=s.t();
   walkTo(me,tx,ty).then(()=>{ if(me.status===k) bubble(me, statusMsg(k), 2600); }); }
+function openArrival(){ if(running||busy) return; selected=null;
+  syncAllSilent(); me.status='자리'; me.away=false; buildStatusbar();
+  walkTo(me, me.home[0], me.home[1]).then(()=>{ if(me.status==='자리') bubble(me,'좋은 아침이에요 🌅',2200); });
+  const total=SOURCES.reduce((a,s)=>a+s.n,0);
+  sayEl.innerHTML=`<div class="bd"><span class="bh">🌅 출근 <small>오늘 시작</small></span>`+
+    `<div class="grp"><div class="glabel">🔄 밤사이 활동 동기화 <span class="cnt">총 ${total}건</span></div><div class="item"><span class="tt" style="font-weight:500;color:var(--fg2)">${srcSummary()}</span></div></div>`+
+    `<div class="grp"><div class="item"><span class="tt">동기화 완료 — 오늘 할 일을 브리핑할까요?</span></div></div></div>`;
+  ctrlEl.innerHTML=''; btn('🌞 오늘 브리핑 열기', ()=>openToday()); btn('🔄 동기화 현황', ()=>openSync(), true); btn('닫기', ()=>clearSelection(), true); }
 function openLeaveBriefing(){ if(running||busy) return; selected=null;
+  syncAllSilent();  // 퇴근 시 오늘 활동 일괄 취합
+  const total=SOURCES.reduce((a,s)=>a+s.n,0);
   const done=TASKS.filter(t=>t.who==='엘리스'&&t.st==='완료');
   const carry=TASKS.filter(t=>t.who==='엘리스'&&t.st!=='완료');
   const tmr = carry.length? carry.map(t=>t.t) : ['주간 리포트 작성','안내멘트 점검 이어가기'];
   const doneHtml = done.length? done.map(t=>`<div class="item"><span class="tt">✅ ${t.t}</span></div>`).join('') : '<div class="empty">오늘 완료로 기록된 일은 없어요 — 진행 중인 일을 내일 이어가요.</div>';
   const tmrHtml = tmr.map(t=>`<label class="item"><input type="checkbox" class="tmrchk"><span class="tt">${t}</span></label>`).join('');
   sayEl.innerHTML=`<div class="bd"><span class="bh">🌙 오늘 하루 브리핑 <small>퇴근 전 점검</small></span>`+
+    `<div class="grp"><div class="glabel">🔄 오늘 활동 일괄 동기화 <span class="cnt">총 ${total}건</span></div><div class="item"><span class="tt" style="font-weight:500;color:var(--fg2)">${srcSummary()}</span></div></div>`+
     `<div class="grp"><div class="glabel">✅ 오늘 한 일 <span class="cnt">${done.length}</span></div>${doneHtml}</div>`+
     `<div class="grp"><div class="glabel">⏭️ 내일 할 일 체크 <span class="cnt">${tmr.length}</span></div>${tmrHtml}</div></div>`;
   ctrlEl.innerHTML='';
@@ -847,10 +984,12 @@ function confirmLeave(doneCount){ const chks=[...document.querySelectorAll('.tmr
   say('스택이',`오늘 <b>${doneCount}건</b> 마무리 · 내일 할 일 <b>${ck}/${total}</b> 체크 완료. <b>오늘도 수고하셨어요!</b> 👋`);
   idleControls(); }
 function buildToolbar(){ toolbarEl.innerHTML='';
-  [{ic:'☀️',tt:'오늘 브리핑',sub:'아침 리딩',fn:openToday,badge:()=>TODAY_PLAN.length},
+  [{ic:'🤖',tt:'스택이 대화',sub:'AI 비서',fn:openChat,badge:()=>TASKS.filter(t=>t.t&&t.t.startsWith('⏳')).length},
+   {ic:'☀️',tt:'오늘 브리핑',sub:'아침 리딩',fn:openToday,badge:()=>TODAY_PLAN.length},
    {ic:'📋',tt:'스케줄 보드',sub:'전체 현황',fn:openSchedule,badge:()=>{const c=taskCounts();return c.진행+c.미해결;}},
    {ic:'📨',tt:'전달함',sub:'동료 메시지',fn:openInbox,badge:()=>INBOX.length},
-   {ic:'📌',tt:'팀 제안',sub:'공유 승인 대기',fn:openProposals,badge:()=>PROPOSALS.length,urgent:true}
+   {ic:'📌',tt:'팀 제안',sub:'공유 승인 대기',fn:openProposals,badge:()=>PROPOSALS.length,urgent:true},
+   {ic:'🤝',tt:'공통 업무',sub:'파트 의견 취합',fn:openCommon,badge:()=>COMMON_WORK.length}
   ].forEach(c=>{ const el=document.createElement('div'); el.className='tcard'; el.tabIndex=0; el.setAttribute('role','button');
     const bcls=(c.urgent&&c.badge()>0)?'badge urgent':'badge';
     el.innerHTML=`<span class="ic">${c.ic}</span><span><div class="tt">${c.tt}</div><div class="sub">${c.sub}</div></span><span class="${bcls}">${c.badge()}</span>`;
