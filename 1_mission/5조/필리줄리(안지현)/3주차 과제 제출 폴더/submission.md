@@ -24,7 +24,7 @@ date: 2026-07-19
 
 | OS 모듈 | 실데이터 통과 | 버린 캐릭터 이름 | 전면 재기획 | 축적한 제작 규칙 | 발행 |
 |---|---|---|---|---|---|
-| 8개 | 고객 1명 · 계정 1개 | **5개** | **2회** | **33조** | 인스타 3건 |
+| 8개 | 고객 1명 · 계정 1개 | **5개** | **2회** | **33조** | 인스타 **5건** (2계정) |
 
 ### ✅ 완성한 것
 
@@ -56,7 +56,10 @@ date: 2026-07-19
 → 그다음에만 이미지 생성 → 검수 → 걸린 실수를 규칙 파일에 축적
 ```
 
-필라델피아 로컬 캐릭터 계정을, 캐릭터 시트 → 1080×1350 카루셀 6장 → **로컬 카루셀 스튜디오**(문구·색·포즈를 고쳐 PNG로 뽑는 도구)까지 만들어 실제 발행했습니다.
+필라델피아 로컬 캐릭터 계정을, 캐릭터 시트 → 1080×1350 카루셀 6장 → **로컬 카루셀 스튜디오**(문구·색·포즈를 고쳐 PNG로 뽑는 도구)까지 만들어 **[@newquirrel](https://www.instagram.com/newquirrel/) 계정으로 실제 발행했습니다.**
+
+- 1편 — [Hi, I'm Newquirrel — a new squirrel in Philly.](https://www.instagram.com/p/Da79y8kCYYi/) (계정 첫 게시물)
+- 2편 — [You know the Philly landmark. But can you name the neighborhood?](https://www.instagram.com/p/Da7-PcECYCD/) (EP.01 카루셀 6장)
 
 ![카루셀 스튜디오 — 문구·색·포즈 편집 후 1080×1350 PNG 출력](이미지첨부/OS-01-carousel-studio.jpg)
 
@@ -134,7 +137,9 @@ date: 2026-07-19
 
 - **인스타 발행 (OS 결과물):** [JULIE OS, 이제 실제 일을 통과하기 시작했습니다](https://www.instagram.com/p/Da9F0HIEzWm/) — @ansafety_design · #스폰지클럽
 - **Week 1 기록:** [필라델피아 리얼터, AI로 '삶의 OS'를 짓기 시작했습니다](https://www.instagram.com/p/Da9FdDNk_e9/)
-- **콘텐츠 모듈 산출 계정:** [@newquirrel](https://www.instagram.com/newquirrel/) (Newquirrel Philly)
+- **OS 콘텐츠 모듈이 실제로 낳은 계정:** [@newquirrel](https://www.instagram.com/newquirrel/) (Newquirrel Philly) — 발행 2건
+  - [Meet Newquirrel (첫 게시물)](https://www.instagram.com/p/Da79y8kCYYi/)
+  - [EP.01 — 랜드마크로 동네 맞히기 (카루셀 6장)](https://www.instagram.com/p/Da7-PcECYCD/)
 - **OS 여정 카루셀 7장:** `이미지첨부/ANSAFETY-2026-07-14-01~07.png`
 - **스폰지 인증 카루셀 7장:** `이미지첨부/SPONGE-2026-07-14-01~07.png`
 
