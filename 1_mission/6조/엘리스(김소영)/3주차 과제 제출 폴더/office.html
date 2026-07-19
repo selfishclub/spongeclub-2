@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WeStack — 팀 AI 공동자산 사무실</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/wanted-sans@1.0.3/fonts/webfonts/variable/split/WantedSansVariable.css">
+<style>
+  /* MODI 디자인 토큰 + Wanted Sans */
+  :root{
+    --font:"Wanted Sans Variable","Wanted Sans",-apple-system,"Apple SD Gothic Neo",system-ui,sans-serif;
+    --bg:#f4f5f7; --card:#ffffff; --fg:#111114; --fg2:#4b4d55; --muted:#6B6D74;
+    --border:#D9D9D9; --primary:#2c6edb; --primary-fg:#ffffff;
+    --accent:#EBF1FB; --accent-fg:#202237; --green:#34A853; --amber:#e0913c; --violet:#8b6fe0;
+    --r-s:8px; --r-m:12px; --r-l:16px;
+    --shadow:0 1px 3px rgba(16,18,30,.08),0 1px 2px rgba(16,18,30,.04);
+    --shadow-md:0 4px 16px rgba(16,18,30,.10);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#121212; --card:#1E1E1E; --fg:#F5F5F5; --fg2:#C9CACF; --muted:#999;
+      --border:#3A3A3A; --primary:#4a85e3; --accent:#202237; --accent-fg:#F5F5F5; --amber:#f0a458; --violet:#a48ef0; }
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:var(--font); background:var(--bg); color:var(--fg); -webkit-font-smoothing:antialiased;
+    min-height:100%; padding:20px 16px;
+  }
+  .app{ display:flex; gap:16px; align-items:flex-start; max-width:1640px; margin:0 auto; }
+  .main{ flex:1; min-width:0; display:flex; flex-direction:column; gap:14px; }
+  .side{ width:400px; flex:none; position:sticky; top:20px; }
+  .hud{ width:100%; display:flex; align-items:center; gap:16px;
+    background:var(--card); border:1px solid var(--border); border-radius:var(--r-l);
+    padding:14px 20px; box-shadow:var(--shadow); }
+  .hud h1{font-size:22px; font-weight:800; letter-spacing:-.4px; color:var(--fg)}
+  .hud h1 small{color:var(--muted); font-weight:500; font-size:12px; margin-left:8px; white-space:nowrap}
+  .avg{margin-left:auto; display:flex; align-items:center; gap:10px}
+  .avg .lab{font-size:13px; color:var(--muted); white-space:nowrap}
+  .avg .bar{width:150px; height:10px; background:#eceef1; border-radius:999px; overflow:hidden}
+  .avg .fill{height:100%; width:40%; background:linear-gradient(90deg,var(--green),var(--primary)); transition:width .6s ease}
+  .avg .num{font-weight:800; color:var(--primary); font-variant-numeric:tabular-nums; min-width:60px; text-align:right; font-size:16px}
+  .avg .bar{background:var(--accent)}
+  .stage{position:relative; width:100%}
+  canvas{width:100%; height:auto; display:block; border-radius:var(--r-l);
+    border:1px solid var(--border); box-shadow:var(--shadow-md); background:#eadfca; cursor:pointer}
+  .panel{ width:100%; background:var(--card); border:1px solid var(--border);
+    border-radius:var(--r-l); padding:16px 20px; box-shadow:var(--shadow-md); min-height:72px;
+    max-height:calc(100vh - 40px); overflow-y:auto; display:flex; flex-direction:column; gap:12px; position:relative; }
+  .say{font-size:15px; line-height:1.55; color:var(--fg); position:sticky; top:0; background:var(--card); z-index:2; padding-bottom:6px}
+  .say b{color:var(--primary); font-weight:700}
+  .say .who{display:inline-block; font-size:12px; font-weight:700; color:var(--primary);
+    background:var(--accent); padding:3px 10px; border-radius:999px; margin-right:8px; vertical-align:2px}
+  .row{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+  button{ font-family:inherit; font-size:15px; font-weight:700; cursor:pointer;
+    border:1px solid transparent; border-radius:var(--r-m); padding:10px 18px; color:var(--primary-fg);
+    background:var(--primary); transition:filter .12s, transform .04s; }
+  button:hover{filter:brightness(1.06)}
+  button:active{transform:translateY(1px)}
+  button.ghost{background:var(--card); color:var(--fg); border:1px solid var(--border)}
+  button.ghost:hover{background:var(--bg)}
+  .hint{font-size:13px; color:var(--muted); line-height:1.5}
+  .hint code{background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:1px 5px; font-size:12px}
+  .counts{margin-left:auto; display:flex; align-items:center; gap:7px; flex-wrap:wrap}
+  .chip{display:flex; align-items:center; gap:5px; font-size:11px; font-weight:700; padding:6px 11px; border-radius:999px; background:#f1f3f6; color:var(--fg2); border:1px solid var(--border)}
+  .chip b{font-size:15px}
+  .chip.done{background:#eaf7ee;color:#1f8a4c;border-color:#c9e8d3}
+  .chip.prog{background:#eaf1fc;color:#2c6edb;border-color:#cfe0f7}
+  .chip.open{background:#fdeceb;color:#c0392b;border-color:#f3c9c5}
+  .chip.wait{background:#fdf5e2;color:#7A5E0A;border-color:#eddca0}
+  @media (prefers-color-scheme: dark){ .chip.wait{color:#E0B84A} .chip.open{color:#E8776A} .chip.done{color:#4CC98A} .chip.prog{color:#6FA3E8} }
+  .banner{width:100%; background:#fff8e6; border:1px solid #f0e2b8; color:#6b5a1f; border-radius:var(--r-m); padding:12px 16px; box-shadow:var(--shadow); display:flex; gap:10px; align-items:flex-start}
+  .banner .bicon{flex:none; width:26px; height:26px; border-radius:50%; background:#f5dea0; display:flex; align-items:center; justify-content:center; font-size:13px}
+  .banner .btitle{font-size:13.5px; font-weight:700; color:#6b5a1f; line-height:1.4}
+  .banner .bsub{font-size:11.5px; color:#9a8650; margin-top:2px}
+  .banner b{color:#8a6a12} .banner code{background:#fff2cf; border-radius:4px; padding:1px 5px; font-size:11.5px}
+  @media (prefers-color-scheme: dark){ .banner{background:#2a2410; border-color:#4a3f1a; color:#e6d8a8} .banner code{background:#3a3216} .chip{background:#2a2a2e} }
+  .toolbar{width:100%; display:flex; gap:10px}
+  .tcard{flex:1; display:flex; align-items:center; gap:10px; background:var(--card); border:1px solid var(--border); border-radius:var(--r-m); padding:10px 14px; cursor:pointer; box-shadow:var(--shadow); transition:box-shadow .16s ease, transform .14s ease, border-color .16s}
+  .tcard:hover{border-color:var(--primary); box-shadow:0 4px 12px rgba(44,110,219,.14); transform:translateY(-2px)}
+  .tcard:active{transform:translateY(0)}
+  .tcard:focus-visible{outline:2px solid var(--primary); outline-offset:2px}
+  .tcard .ic{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--accent);border-radius:9px;font-size:16px;flex:none}
+  .tcard .tt{font-weight:800; font-size:13px; color:var(--fg)} .tcard .sub{font-size:10.5px; color:var(--muted)}
+  .tcard .badge{margin-left:auto; font-size:12px; font-weight:800; color:var(--primary); background:var(--accent); border-radius:999px; padding:2px 9px}
+  .tcard .badge.urgent{background:#fdeceb;color:#c0392b}
+  @media(prefers-color-scheme:dark){ .tcard:hover{border-color:#3D5A8F} }
+  .statusbar{width:100%; display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:var(--card); border:1px solid var(--border); border-radius:var(--r-m); padding:8px 12px; box-shadow:var(--shadow)}
+  .statusbar .lab{font-size:12px; color:var(--muted); font-weight:800; margin-right:2px; white-space:nowrap}
+  .sbtn{font-family:inherit; font-size:12.5px; font-weight:700; padding:6px 12px; border-radius:999px; border:1px solid var(--border); background:var(--bg); color:var(--fg2); cursor:pointer; transition:all .12s}
+  .sbtn:hover{border-color:var(--primary)}
+  .sbtn.on{background:var(--primary); color:#fff; border-color:transparent}
+  input.cmd{flex:1; min-width:180px; font-family:inherit; font-size:14px; padding:9px 12px; border:1px solid var(--border); border-radius:var(--r-m); background:var(--card); color:var(--fg)}
+  input.cmd:focus{outline:2px solid var(--accent); border-color:var(--primary)}
+  .bd{font-size:14px; line-height:1.45}
+  .bd .bh{display:inline-flex; align-items:center; gap:6px; font-weight:800; font-size:14.5px; color:var(--accent-fg); background:var(--accent); padding:5px 13px; border-radius:999px; margin-bottom:4px}
+  .bd .bh small{font-weight:600; color:var(--muted); font-size:11.5px}
+  .bd .grp{margin-top:14px}
+  .bd .grp+.grp{border-top:1px dashed var(--border); padding-top:10px}
+  .bd .glabel{display:flex; align-items:center; gap:6px; font-weight:700; font-size:12px; letter-spacing:.2px; color:var(--fg2); margin:12px 0 5px}
+  .bd .cnt{font-size:11px; color:var(--muted); font-weight:700}
+  .bd .dot{width:8px; height:8px; border-radius:50%; display:inline-block; flex:none}
+  .bd .item{display:flex; gap:8px; padding:6px 8px 6px 18px; align-items:center; border-radius:8px; transition:background .12s}
+  .bd .item:hover{background:var(--bg)}
+  .bd label.item{cursor:pointer}
+  .bd .item input[type=checkbox]{width:15px; height:15px; accent-color:var(--primary); cursor:pointer; flex:none; margin-right:2px}
+  .bd .item .tt{font-weight:600; color:var(--fg); font-size:14px}
+  .bd .item .who{background:var(--accent); color:var(--accent-fg); font-size:11.5px; font-weight:700; padding:3px 9px; border-radius:999px; margin-left:auto; white-space:nowrap}
+  .bd .empty{color:var(--muted); font-size:12.5px; padding:8px 2px 8px 18px}
+  .bd .skrow{display:flex; flex-wrap:wrap; gap:6px; padding:2px 2px 4px 18px}
+  .bd .skpill{font-size:11.5px; font-weight:700; color:var(--primary); background:var(--accent); border:1px solid var(--border); border-radius:999px; padding:4px 10px; white-space:nowrap}
+  .bd .msg{padding:7px 2px; border-top:1px solid var(--border)}
+  .bd .msg:first-of-type{border-top:none}
+  .bd .msg .hdr{font-weight:700; font-size:12.5px; color:var(--primary)}
+  .bd .msg .body{color:var(--fg2); font-size:13px; margin-top:2px; line-height:1.45}
+  @media (max-width:720px){ .toolbar{flex-wrap:wrap} .tcard{flex:1 1 calc(50% - 5px); min-width:140px} .hud{flex-wrap:wrap; row-gap:8px} .hud h1{font-size:18px} .hud h1 small{display:block; margin-left:0; margin-top:2px} .counts{width:100%; margin-left:0; justify-content:flex-start} .avg{margin-left:0} .panel{padding:16px 14px} }
+  @media (max-width:1000px){ .app{flex-direction:column} .side{width:100%; position:static} .panel{max-height:none} }
+</style>
+</head>
+<body>
+ <div class="app">
+  <div class="main">
+   <div class="hud">
+    <h1>🤝 WeStack <small>각자 일 → 서로 열람 → 같이 성장</small></h1>
+    <div class="counts" id="counts"></div>
+    <div class="avg" id="avgWrap"><span class="lab">팀 성장</span><div class="bar"><div class="fill" id="avgFill"></div></div><span class="num" id="avgNum">Lv 1.2</span></div>
+   </div>
+   <div class="banner" id="banner"><span class="bicon">🎯</span><div><div class="btitle">WeStack 오피스 · 엘리스의 반복 업무 발견은 실제 활동 기록을 바탕으로 했어요</div><div class="bsub">공공 자료실에 좋은 방법을 올리고, 필요한 사람이 가져다 자기 업무에 맞게 바꿔 씁니다</div></div></div>
+   <div class="toolbar" id="toolbar"></div>
+   <div class="statusbar" id="statusbar"></div>
+   <div class="stage"><canvas id="cv" width="1180" height="820"></canvas></div>
+  </div>
+  <div class="side">
+   <div class="panel">
+    <div class="say" id="say"><span class="who">스택이</span>준비됐어요. <b>[데모 재생 ▶]</b>으로 전체 흐름(반복 업무 발견 → 도구로 만들기 → 팀에 공유 → 공공 자료실 → 필요한 사람이 가져다 쓰기)을 보거나, <b>동물을 클릭</b>해 말을 걸고 함께 일하거나, <b>자료실</b>에서 필요한 걸 가져가세요.</div>
+    <div class="row" id="controls"></div>
+    <div class="hint" id="hint">엘리스의 반복 업무 발견은 실제 활동 기록을 바탕으로 했고, 조직·서비스 이름은 발표용 예시예요 (실제 회사 내용 없음)</div>
+   </div>
+  </div>
+ </div>
+
+<script>
+/*SEED_START*/
+const SEED = {
+  "detected": [
+    {
+      "label": "주간리포트 작성 (데이터 정리·분석)",
+      "days": 13,
+      "type": "작업형",
+      "skill": "weekly-report-write"
+    },
+    {
+      "label": "리포트 화면 정리",
+      "days": 10,
+      "type": "작업형",
+      "skill": "report-layout-tidy"
+    },
+    {
+      "label": "활동 브리핑 실행",
+      "days": 15,
+      "type": "실행형",
+      "skill": "daily-brief-auto"
+    }
+  ]
+};
+/*SEED_END*/
+
+const cv=document.getElementById('cv'); const W=1180,H=858;
+const DARK=matchMedia('(prefers-color-scheme: dark)').matches;
+const DPR=Math.min(3, window.devicePixelRatio||1);
+cv.width=W*DPR; cv.height=H*DPR;
+const ctx=cv.getContext('2d'); ctx.scale(DPR,DPR);
+ctx.imageSmoothingEnabled=true;
+const FONT='"Wanted Sans Variable","Apple SD Gothic Neo",sans-serif';
+
+// ---------- 공간(zone) ----------
+const Z={
+  meeting:[20,58,206,150],  cafe:[252,58,188,150],  analysis:[466,58,216,150],
+  boss1:[708,58,132,150],   boss2:[866,58,142,150],
+  s4:[20,524,330,276],  tf1:[376,524,199,276],  tf2:[601,524,199,276],  lounge:[826,524,182,276],
+};
+const SHELF=[1034,58,136,744];
+
+// 파트 pod
+const PODS={
+  CS:{label:"CS운영파트",     rect:[20,224,330,284], n:6},
+  S1:{label:"서비스운영1파트", rect:[376,224,199,284], n:3},
+  S2:{label:"서비스운영2파트", rect:[601,224,199,284], n:3},
+  S3:{label:"서비스운영3파트", rect:[826,224,182,284], n:3},
+  S4:{label:"서비스운영4파트", rect:[20,524,330,276], n:3},
+};
+
+// ---------- 로스터 + 좌석 ----------
+function seats(rect,n){ const [x,y,w,h]=rect;
+  const per = n<=1?1 : n<=4?2 : 3;
+  const out=[];
+  for(let i=0;i<n;i++){
+    const r=Math.floor(i/per);
+    const inRow=Math.min(per, n-r*per);
+    const c=i%per;
+    out.push([ x + w*(c+1)/(inRow+1), y + 108 + r*104 ]);
+  }
+  return out; }
+function mkBot(o){ return {...o, px:o.x, py:o.y, tx:o.x, ty:o.y, walking:false, bubble:null, flash:0, ring:0,
+  skills:[...(o.skills||[])], _arrive:null}; }
+
+const allBots=[]; let me=null; const partLead={}; const csMembers=[];
+let sidx=0;
+for(const [key,p] of Object.entries(PODS)){
+  const sl=seats(p.rect,p.n);
+  for(let i=0;i<p.n;i++){
+    const isLead=(i===0), isMe=(key==="CS"&&i===1);
+    const b=mkBot({ part:key, name:isMe?"엘리스":isLead?"파트장":null, role:isLead?"파트장":"member",
+      x:sl[i][0], y:sl[i][1], home:[sl[i][0],sl[i][1]], pod:p.rect, pidx:i, wanderAt:1000+Math.random()*5000,
+      seed:(sidx++)*2654435761>>>0,
+      level:isLead?2:1, crown:isLead, me:isMe, tagged:(isLead||isMe),
+      hairFix:isMe?"#ff2e88":null, skills:isMe?["qc-weekly","personal-activity-collect","part-activity-collect"]:[] });
+    allBots.push(b); if(isMe)me=b; if(isLead)partLead[key]=b; if(key==="CS"&&!isMe)csMembers.push(b);
+  }
+}
+const boss=mkBot({ part:"팀장", name:"팀장", role:"팀장", x:772, y:150, seed:(sidx++)*40503>>>0,
+  level:3, crown:true, gold:true, big:true, tagged:true, hairFix:"#3a3340", outfitFix:"#2f3340" });
+const exec=mkBot({ part:"실장", name:"실장", role:"실장", x:933, y:150, seed:(sidx++)*40503>>>0,
+  level:4, crown:true, gold:true, big:true, tagged:true, hairFix:"#4a4048", outfitFix:"#26262e" });
+allBots.push(boss,exec);
+
+// 제미나이 전신 스프라이트(20종, 투명) 프리로드 + 1:1 배정
+const IMG20=[]; for(let i=1;i<=20;i++){ const im=new Image(); im.src='assets/animals/g'+i+'.png?v=1'; IMG20[i-1]=im; }
+// 20종 동물 1:1 무중복 배정 (allBots 위치별). CS파트장=물개·엘리스=햄스터·팀장=올빼미·실장=곰
+// 위치: 0 CS파트장,1 엘리스,2~5 CS원,6 S1파트장,7~8 S1,9 S2파트장,10~11 S2,12 S3파트장,13~14 S3,15 S4파트장,16~17 S4,18 팀장,19 실장
+const IMG_MAP=[17,14,1,2,15,4, 3,8,11, 6,13,16, 9,10,12, 19,7,18, 5,0];
+allBots.forEach((b,i)=>{ b.img20 = (IMG_MAP[i]!==undefined?IMG_MAP[i]:i%20); });
+
+// 캐릭터별 페르소나(전문 분야·소개) + 특화 도구 부여 — 발표용 제네릭
+const PERSONA={
+  CS:[
+    {focus:'CS 파트 총괄', desc:'파트 업무를 배분하고 품질을 총괄해요', skills:['qc-weekly','ops-check']},
+    null, // 엘리스(i=1)는 아래에서 별도 지정
+    {focus:'생산성 지표 분석', desc:'팀 생산성 지표를 뜯어보고 병목을 찾아요', skills:['metric-brief-merge','weekly-data-digest']},
+    {focus:'응대 품질 관리', desc:'상담 응대 스크립트와 가이드를 다듬어요', skills:['guide-tidy','ivr-script-check']},
+    {focus:'주간 리포트 취합', desc:'파트 주간 리포트를 모아 작성해요', skills:['weekly-report-write']},
+    {focus:'대외 민원 관리', desc:'기한 임박한 대외 민원을 놓치지 않게 챙겨요', skills:['unread-nudge']},
+  ],
+  S1:[
+    {focus:'1서비스 개선 분석', desc:'상반기 지표로 1서비스 개선 포인트를 분석해요', skills:['sql-helper','metric-brief-merge']},
+    {focus:'1서비스 처리량', desc:'1서비스 처리량·적체를 매일 모니터링해요', skills:['queue-monitor']},
+    {focus:'1서비스 운영', desc:'1서비스 배포 공지와 운영 점검을 맡아요', skills:['deploy-notice-format']},
+  ],
+  S2:[
+    {focus:'2서비스 지표 분석', desc:'2서비스 이슈 원인을 지표로 파고들어요', skills:['metric-brief-merge']},
+    {focus:'데이터 정합성', desc:'집계·쿼리 결과의 오류와 이상값을 잡아내요', skills:['data-integrity-check','sql-helper']},
+    {focus:'2서비스 운영', desc:'2서비스 이슈 대응과 운영을 맡아요', skills:['ops-check']},
+  ],
+  S3:[
+    {focus:'3서비스 지표', desc:'3서비스 지표를 추적하고 개선을 제안해요', skills:['metric-brief-merge']},
+    {focus:'리포트 마스터', desc:'보기 좋은 리포트·장표를 정말 잘 만들어요', skills:['report-deck-build','report-layout-tidy','weekly-report-write']},
+    {focus:'3서비스 운영', desc:'3서비스 배포·공지를 정리해요', skills:['deploy-notice-format']},
+  ],
+  S4:[
+    {focus:'4서비스 개선', desc:'4서비스 알림·템플릿을 정비해요', skills:['guide-tidy']},
+    {focus:'4서비스 처리량', desc:'4서비스 처리량을 모니터링해요', skills:['queue-monitor']},
+    {focus:'4서비스 운영', desc:'4서비스 운영 점검을 맡아요', skills:['ops-check']},
+  ],
+};
+allBots.forEach(b=>{
+  if(b.role==='팀장'){ b.focus='팀 운영 총괄'; b.desc='파트 간 조율과 공유 승인을 결정해요'; if(!b.skills.length) b.skills=['qc-weekly']; return; }
+  if(b.role==='실장'){ b.focus='실 전체 방향'; b.desc='실 전체 전략과 우선순위를 정해요'; return; }
+  if(b.me){ b.focus='VOC 분석'; b.desc='들어온 VOC를 분석해 반복 문의를 도구로 자동화해요'; return; } // 도구는 이미 보유
+  const arr=PERSONA[b.part], p=arr&&arr[b.pidx];
+  if(p){ b.focus=p.focus; b.desc=p.desc; if(!b.skills.length) b.skills=[...p.skills]; }
+});
+
+// 일상 업무/새 분석 상태칩
+csMembers[0].work="📊 지표 보는 중"; csMembers[1].work="📝 리포트 쓰는 중";
+partLead.S2 && (allBots.find(b=>b.part==="S2"&&!b.crown).work="🔬 분석 중");
+allBots.find(b=>b.part==="S3"&&!b.crown).work="📊 지표 보는 중";
+allBots.find(b=>b.part==="S4"&&!b.crown).work="📝 리포트 쓰는 중";
+me.status='자리'; me.away=false;
+
+// 자료실에 이미 올라온 다른 사람들의 방법(공동자산) — "다른 사람이 했던 일"
+// (발표용 제네릭: 실제 CS운영파트 반복업무 유형을 마스킹해 심음 · 회사내용 0%)
+const SEED_SHELF=[
+  {skill:"queue-monitor",        by:"S3 파트장"},   // 처리량/적체 일별 모니터링
+  {skill:"data-integrity-check", by:"데이터 담당"},  // 쿼리 오류·데이터 정합성 점검
+  {skill:"deploy-notice-format", by:"운영 담당"},    // 신규 배포 공지 정리·체계화
+];
+const shelf=[]; SEED_SHELF.forEach(s=>shelf.push({...s,_t:1}));
+
+// ---------- 아바타 외형 (시드 랜덤) ----------
+const SKINS=["#ffe0c2","#f4c9a0","#e6b088","#cf9468"];
+const HAIRS=["#2b2b2f","#43301c","#6b4a2a","#94662f","#c28a3a","#3a4664","#7a3a56","#a8455f","#d98b2b","#5b6472","#8a5a2a","#c94f7c"];
+const OUTFITS=["#3a5a8f","#8f3a4a","#2f7a55","#8a6f2f","#5a3a8f","#4b4d55","#2c6edb","#b0562f","#3a7a8f","#7a4a8f","#455a64","#9c3f6d"];
+function mulberry(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function feat(b){ if(b._f) return b._f;
+  const r=mulberry(b.seed||1);
+  const EYES=["#3a2a1e","#4a3324","#2f3d5a","#5b3a22"];
+  const f={ skin:SKINS[(r()*SKINS.length)|0], hair:b.hairFix||HAIRS[(r()*HAIRS.length)|0],
+    outfit:b.outfitFix||OUTFITS[(r()*OUTFITS.length)|0], style:(r()*6)|0,
+    eyes:EYES[(r()*EYES.length)|0], blush:r()<0.5 };
+  const a=r(); f.acc = a<0.2?'glasses' : a<0.36?'headset' : a<0.48?'headband' : 'none';
+  b._f=f; return f; }
+
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+function drawHair2(x,hy,R,f,S){
+  const H=f.hair; ctx.fillStyle=H;
+  ctx.beginPath(); ctx.arc(x,hy-0.5*S,R+0.6*S,Math.PI*0.98,Math.PI*2.02); ctx.fill();
+  ctx.fillRect(x-R-0.6*S,hy-1.5*S,2.6*S,6.5*S); ctx.fillRect(x+R-2*S,hy-1.5*S,2.6*S,6.5*S);
+  ctx.beginPath();
+  ctx.moveTo(x-R+0.5*S,hy-R+3*S); ctx.lineTo(x-2.5*S,hy+1*S); ctx.lineTo(x-0.5*S,hy-R+2.2*S);
+  ctx.lineTo(x+2.5*S,hy+0.5*S); ctx.lineTo(x+4.5*S,hy-R+2.6*S); ctx.lineTo(x+R-1*S,hy-1.5*S);
+  ctx.lineTo(x+R-1*S,hy-R+3*S); ctx.lineTo(x-R+0.5*S,hy-R+3*S); ctx.closePath(); ctx.fill();
+  if(f.style===1||f.style===2){ const L=(f.style===2?15:9); rr(x-R-0.8*S,hy-1*S,3*S,L*S,1.5*S); ctx.fill(); rr(x+R-2.2*S,hy-1*S,3*S,L*S,1.5*S); ctx.fill(); }
+  if(f.style===3){ ctx.beginPath(); ctx.arc(x+R+1*S,hy-2.5*S,3.2*S,0,7); ctx.fill(); rr(x+R,hy-2.5*S,3.2*S,11*S,2*S); ctx.fill(); }
+  if(f.style===4){ ctx.beginPath(); ctx.arc(x,hy-R-1.5*S,3.6*S,0,7); ctx.fill(); }
+  if(f.style===5){ for(let i=-2;i<=2;i++){ ctx.beginPath(); ctx.moveTo(x+i*3.4*S,hy-R+2*S); ctx.lineTo(x+i*3.4*S-2.2*S,hy-R-4.5*S); ctx.lineTo(x+i*3.4*S+2.2*S,hy-R-2.5*S); ctx.closePath(); ctx.fill(); } }
+  ctx.strokeStyle=shade(H,45); ctx.lineWidth=1.6; ctx.beginPath(); ctx.arc(x-1.5*S,hy-R+4*S,R*0.55,Math.PI*1.15,Math.PI*1.62); ctx.stroke();
+}
+function drawChibi(b,x,y,s){
+  const f=feat(b), S=s*1.34;
+  const hy=y-16*S, R=11*S, by=y-5*S;
+  ctx.fillStyle="rgba(0,0,0,.15)"; ctx.beginPath(); ctx.ellipse(x,y+15*S,13*S,4*S,0,0,7); ctx.fill();
+  ctx.fillStyle=shade(f.hair,-16); ctx.beginPath(); ctx.arc(x,hy+1*S,R+2.2*S,Math.PI*0.9,Math.PI*2.1); ctx.fill();
+  ctx.fillStyle=f.outfit; rr(x-12*S,by,24*S,19*S,8*S); ctx.fill();
+  ctx.fillStyle=shade(f.outfit,-14); rr(x-14*S,by+2*S,6*S,14*S,4*S); ctx.fill(); rr(x+8*S,by+2*S,6*S,14*S,4*S); ctx.fill();
+  ctx.fillStyle=shade(f.outfit,-24); rr(x-9*S,by-1.5*S,18*S,6*S,4*S); ctx.fill();
+  ctx.strokeStyle="rgba(255,255,255,.55)"; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(x-2.6*S,by+3*S); ctx.lineTo(x-3.1*S,by+11*S); ctx.moveTo(x+2.6*S,by+3*S); ctx.lineTo(x+3.1*S,by+11*S); ctx.stroke();
+  ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(x-3.1*S,by+11*S,1.2*S,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(x+3.1*S,by+11*S,1.2*S,0,7); ctx.fill();
+  ctx.strokeStyle=shade(f.outfit,-26); ctx.lineWidth=1.3; rr(x-6*S,by+9*S,12*S,6*S,3*S); ctx.stroke();
+  ctx.fillStyle=shade(f.skin,-10); rr(x-3*S,hy+R-3.5*S,6*S,5*S,2); ctx.fill();
+  ctx.fillStyle=f.skin; ctx.beginPath(); ctx.arc(x,hy,R,0,7); ctx.fill();
+  ctx.fillStyle=f.skin; ctx.beginPath(); ctx.arc(x-R+0.6*S,hy+1.5*S,2*S,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(x+R-0.6*S,hy+1.5*S,2*S,0,7); ctx.fill();
+  drawHair2(x,hy,R,f,S);
+  const ex=4.3*S, ey=hy+1*S;
+  ctx.fillStyle="#fff"; ctx.beginPath(); ctx.ellipse(x-ex,ey,2.3*S,3*S,0,0,7); ctx.fill(); ctx.beginPath(); ctx.ellipse(x+ex,ey,2.3*S,3*S,0,0,7); ctx.fill();
+  ctx.fillStyle=f.eyes; ctx.beginPath(); ctx.ellipse(x-ex,ey+0.5*S,1.7*S,2.4*S,0,0,7); ctx.fill(); ctx.beginPath(); ctx.ellipse(x+ex,ey+0.5*S,1.7*S,2.4*S,0,0,7); ctx.fill();
+  ctx.fillStyle="#140f16"; ctx.beginPath(); ctx.arc(x-ex,ey+0.8*S,1*S,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(x+ex,ey+0.8*S,1*S,0,7); ctx.fill();
+  ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(x-ex-0.9*S,ey-0.9*S,1*S,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(x+ex-0.9*S,ey-0.9*S,1*S,0,7); ctx.fill();
+  ctx.strokeStyle=shade(f.hair,-4); ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(x-ex-2*S,ey-3.4*S); ctx.lineTo(x-ex+1.6*S,ey-3.9*S); ctx.moveTo(x+ex-1.6*S,ey-3.9*S); ctx.lineTo(x+ex+2*S,ey-3.4*S); ctx.stroke();
+  if(f.blush){ ctx.fillStyle="rgba(255,150,160,.55)"; ctx.beginPath(); ctx.ellipse(x-6.2*S,ey+2.6*S,2*S,1.3*S,0,0,7); ctx.fill(); ctx.beginPath(); ctx.ellipse(x+6.2*S,ey+2.6*S,2*S,1.3*S,0,0,7); ctx.fill(); }
+  ctx.strokeStyle="#a3574a"; ctx.lineWidth=1.4; ctx.beginPath(); ctx.arc(x,ey+4.3*S,1.8*S,0.15*Math.PI,0.85*Math.PI); ctx.stroke();
+  if(f.acc==='glasses'){ ctx.strokeStyle="#2f2f38"; ctx.lineWidth=1.6; ctx.beginPath(); ctx.arc(x-ex,ey,2.7*S,0,7); ctx.stroke(); ctx.beginPath(); ctx.arc(x+ex,ey,2.7*S,0,7); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x-1.6*S,ey); ctx.lineTo(x+1.6*S,ey); ctx.stroke(); }
+  else if(f.acc==='headset'){ ctx.strokeStyle="#2b2b33"; ctx.lineWidth=2.4; ctx.beginPath(); ctx.arc(x,hy-0.5*S,R+1.6*S,Math.PI*1.08,Math.PI*1.92); ctx.stroke();
+    ctx.fillStyle="#2b2b33"; rr(x-R-3*S,hy+0.5*S,3.6*S,5.5*S,1.6*S); ctx.fill(); rr(x+R-0.6*S,hy+0.5*S,3.6*S,5.5*S,1.6*S); ctx.fill();
+    ctx.fillStyle="#4a85e3"; rr(x-R-2.2*S,hy+1.6*S,2*S,3.3*S,1); ctx.fill(); rr(x+R+0.2*S,hy+1.6*S,2*S,3.3*S,1); ctx.fill(); }
+  else if(f.acc==='headband'){ ctx.fillStyle=f.eyes; rr(x-R+1*S,hy-R+2.2*S,2*R-2*S,2.6*S,1.2*S); ctx.fill(); }
+}
+function drawSprite(b,x,y,s){
+  const im=IMG20[b.img20];
+  if(!(im&&im.complete&&im.naturalWidth)){ drawChibi(b,x,y,s); return; }
+  const Hs=(b.big?44:40)*s, w=Hs*im.naturalWidth/im.naturalHeight, foot=y+14*s;
+  ctx.fillStyle="rgba(0,0,0,.15)"; ctx.beginPath(); ctx.ellipse(x,foot-1,w*0.4,4*s,0,0,7); ctx.fill();
+  if(b.walking){ const sway=Math.sin(performance.now()/70)*0.06;
+    ctx.save(); ctx.translate(x,foot); ctx.rotate(sway); ctx.imageSmoothingEnabled=false;
+    ctx.drawImage(im,-w/2,-Hs,w,Hs); ctx.imageSmoothingEnabled=true; ctx.restore();
+  } else {
+    ctx.imageSmoothingEnabled=false; ctx.drawImage(im,x-w/2,foot-Hs,w,Hs); ctx.imageSmoothingEnabled=true;
+  }
+}
+function drawAvatar(b){
+  const s=(b.big?1.15:1)*1.12;
+  const bob=b.walking?Math.sin(performance.now()/90)*2:0;
+  const x=b.px, y=b.py+bob;
+  if(b===selected){ const p=0.5+0.5*Math.sin(performance.now()/280); ctx.save(); ctx.globalAlpha=0.5+p*0.4; ctx.strokeStyle="#2c6edb"; ctx.lineWidth=2+p*1.6; ctx.beginPath(); ctx.ellipse(x,y+13*s,15*s+p*2.5,4.5*s+p*0.8,0,0,7); ctx.stroke(); ctx.restore(); }
+  drawSprite(b,x,y,s);
+  if(b.crown){ ctx.font=(14*s)+"px "+FONT; ctx.textAlign="center"; ctx.fillText("👑",x,y-33*s); }
+  if(b.ring>0){ ctx.save(); ctx.globalAlpha=b.ring; ctx.strokeStyle="#ffcd00"; ctx.lineWidth=2.5; ctx.beginPath(); ctx.arc(x,y+2*s,10*s+(1-b.ring)*22*s,0,7); ctx.stroke(); ctx.restore(); }
+  if(b.flash>0){ ctx.globalAlpha=b.flash; ctx.fillStyle="#ffcd00"; ctx.font="17px "+FONT;
+    ctx.textAlign="center"; ctx.fillText("✨",x,y-36*s-(1-b.flash)*12); ctx.globalAlpha=1; }
+  // 상태칩(일상 업무 / 새 분석)
+  if(b.work && !b.walking && !(b===me && me.status && me.status!=='자리')){ const wc=b.work.includes('지표')?'#2c6edb':b.work.includes('분석')?'#8b6fe0':(DARK?'#8A93A3':'#5A6472');
+    const txt=b.work.replace(/^\S+\s/,''); ctx.font="bold 9px "+FONT; ctx.textAlign="center"; const tw=ctx.measureText(txt).width;
+    ctx.fillStyle=wc; rr(x-tw/2-6,y+18*s,tw+12,13,6.5); ctx.fill(); ctx.fillStyle="#fff"; ctx.fillText(txt,x,y+27*s); }
+  // 이름표 (hover 시에도 노출)
+  if(b.tagged||b===hoverBot){ if(!b.tagged) ctx.globalAlpha=0.85;
+    ctx.font="bold 9px "+FONT; ctx.textAlign="center"; const nm=b.name||nameOf(b), tw=ctx.measureText(nm).width;
+    ctx.fillStyle=b.gold?"#8a6a12":"#fff"; rr(x-tw/2-3,y-42*s,tw+6,15,6); ctx.fill();
+    if(!b.gold){ ctx.strokeStyle="#e0e0e0"; ctx.lineWidth=1; rr(x-tw/2-3,y-42*s,tw+6,15,6); ctx.stroke(); }
+    ctx.fillStyle=b.gold?"#fff":(b.me?"#e0398b":"#3a3546"); ctx.fillText(nm,x,y-31*s);
+    ctx.font="bold 8px "+FONT; ctx.fillStyle=b.me?"#ff2e88":(b.gold?"#c8960c":"#2c6edb"); rr(x+tw/2+2,y-42*s,18,15,6); ctx.fill();
+    ctx.fillStyle="#fff"; ctx.fillText("Lv"+b.level,x+tw/2+11,y-31*s); ctx.globalAlpha=1; }
+  if(b.bubble) drawBubble(x,y-42*s,b.bubble, b.gold?'#c8960c':(b.me?'#ff2e88':'#2c6edb'));
+}
+function shade(hex,d){ const n=parseInt(hex.slice(1),16); let r=(n>>16)+d,g=((n>>8)&255)+d,b=(n&255)+d;
+  r=Math.max(0,Math.min(255,r)); g=Math.max(0,Math.min(255,g)); b=Math.max(0,Math.min(255,b));
+  return "#"+(1<<24|r<<16|g<<8|b).toString(16).slice(1); }
+
+// ---------- 공간 렌더 ----------
+function drawFloor(){ const t1=DARK?"#242428":"#e6dac2", t2=DARK?"#28282D":"#e0d3b8";
+  for(let y=0;y<H;y+=40) for(let x=0;x<W;x+=40){
+  ctx.fillStyle=((x/40+y/40)%2===0)?t1:t2; ctx.fillRect(x,y,40,40);
+  ctx.strokeStyle=DARK?"rgba(255,255,255,.03)":"rgba(120,90,60,.06)"; ctx.strokeRect(x+.5,y+.5,40,40); } }
+function room(rect,label,hue,lc){ const [x,y,w,h]=rect;
+  const fill = DARK? `hsl(${hue},22%,16%)` : `hsl(${hue},30%,92%)`;
+  const border = DARK? `hsl(${hue},22%,28%)` : `hsl(${hue},26%,64%)`;
+  ctx.fillStyle=fill; rr(x,y,w,h,10); ctx.fill();
+  ctx.strokeStyle=border; ctx.lineWidth=2; rr(x,y,w,h,10); ctx.stroke();
+  ctx.fillStyle=lc||(DARK?'#C9CACF':'#4b4d55'); ctx.font="bold 12px "+FONT; ctx.textAlign="left"; ctx.fillText(label,x+10,y+18); }
+function table(cx,cy,w,h){ ctx.fillStyle="rgba(0,0,0,.10)"; ctx.beginPath(); ctx.ellipse(cx,cy+h/2+3,w*0.42,5,0,0,7); ctx.fill();
+  ctx.fillStyle="#caa06a"; rr(cx-w/2,cy-h/2,w,h,8); ctx.fill();
+  ctx.strokeStyle="#a97f4a"; ctx.lineWidth=2; rr(cx-w/2,cy-h/2,w,h,8); ctx.stroke(); }
+function chair(x,y,col){ col=col||"#9aa4b2"; ctx.fillStyle=shade(col,-16); rr(x-6,y-7,12,5,3); ctx.fill(); ctx.fillStyle=col; rr(x-6,y-3,12,10,4); ctx.fill(); }
+
+const POD_COLOR={CS:'#2c6edb',S1:'#4a85e3',S2:'#2ea86a',S3:'#e0913c',S4:'#8b6fe0'};
+function drawPods(){
+  for(const [key,p] of Object.entries(PODS)){
+    const [x,y,w,h]=p.rect;
+    ctx.fillStyle=DARK?"rgba(255,255,255,.06)":"rgba(255,255,255,.55)"; rr(x,y,w,h,10); ctx.fill();
+    ctx.strokeStyle=DARK?"#3A3A3A":"#D9D9D9"; ctx.lineWidth=1.5; rr(x,y,w,h,10); ctx.stroke();
+    ctx.fillStyle=POD_COLOR[key]; rr(x,y,w,4,2); ctx.fill();
+    ctx.fillStyle=POD_COLOR[key]; ctx.font="bold 12px "+FONT; ctx.textAlign="left"; ctx.fillText(p.label,x+10,y+18);
+    // 책상은 각 캐릭터가 drawSprite에서 앞에 그림(앉은 모습)
+  }
+}
+function plant(x,y,s){ s=s||1; ctx.fillStyle="#b9743f"; rr(x-6*s,y,12*s,9*s,2); ctx.fill();
+  ctx.fillStyle="#3f9d5f"; ctx.beginPath(); ctx.ellipse(x,y-4*s,6*s,8*s,0,0,7); ctx.fill();
+  ctx.fillStyle="#4fb56f"; ctx.beginPath(); ctx.ellipse(x-4*s,y-2*s,4*s,6*s,-.5,0,7); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x+4*s,y-2*s,4*s,6*s,.5,0,7); ctx.fill(); }
+function sofa(x,y,w,col){ col=col||"#8fa4bb"; ctx.fillStyle="rgba(0,0,0,.10)"; ctx.beginPath(); ctx.ellipse(x+w/2,y+30,w*0.46,6,0,0,7); ctx.fill();
+  ctx.fillStyle=shade(col,-16); rr(x,y,w,10,5); ctx.fill();
+  ctx.fillStyle=col; rr(x,y+8,w,16,6); ctx.fill();
+  ctx.fillStyle=shade(col,-10); rr(x-6,y+8,8,18,5); ctx.fill(); rr(x+w-2,y+8,8,18,5); ctx.fill(); }
+function drawZones(){
+  // 회의실: 원목 라운드 테이블 + 색 의자 + 화이트보드 + 식물
+  room(Z.meeting,"🗨️ 회의실",255);
+  ctx.fillStyle="#c9a06a"; rr(59,122,127,56,16); ctx.fill(); ctx.fillStyle="#dab98a"; rr(68,128,108,9,5); ctx.fill();
+  [80,122,164].forEach(cx=>{ chair(cx,106,"#8fa4bb"); chair(cx,196,"#8fa4bb"); });
+  ctx.fillStyle="#fff"; rr(26,86,42,30,4); ctx.fill(); ctx.strokeStyle="#c3cad6"; ctx.lineWidth=1.5; rr(26,86,42,30,4); ctx.stroke();
+  ctx.strokeStyle="#2c6edb"; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(32,96); ctx.lineTo(46,94); ctx.lineTo(60,100); ctx.stroke();
+  plant(205,90,0.9);
+  // 사내카페: 카운터 + 에스프레소 머신 + 컵 + 비스트로 테이블 + 식물
+  room(Z.cafe,"☕ 사내카페",28);
+  ctx.fillStyle="#8a5a36"; rr(264,150,165,11,3); ctx.fill(); ctx.fillStyle="#bd8d5c"; rr(264,146,165,6,3); ctx.fill();
+  ctx.fillStyle="#3a3f47"; rr(352,114,35,32,5); ctx.fill(); ctx.fillStyle="#1f232b"; rr(357,119,25,11,2); ctx.fill();
+  ctx.fillStyle="#e0913c"; ctx.fillRect(364,133,12,2); ctx.fillStyle="#cdd2d8"; ctx.fillRect(357,142,25,3);
+  ctx.fillStyle="#fff"; rr(300,133,10,11,3); ctx.fill(); rr(319,135,9,9,3); ctx.fill();
+  ctx.fillStyle="#c9a06a"; ctx.beginPath(); ctx.arc(300,192,15,0,7); ctx.fill(); ctx.fillStyle="#dab98a"; ctx.beginPath(); ctx.arc(300,190,10,0,7); ctx.fill();
+  chair(280,192,"#bd8d5c"); chair(320,192,"#bd8d5c");
+  plant(411,120,1.05);
+  // 분석실: 대시보드 모니터(도넛+막대+라인) + 데스크
+  room(Z.analysis,"🔬 분석실 (새 분석)",205);
+  ctx.fillStyle="#2a2f3a"; rr(520,90,110,60,6); ctx.fill(); ctx.fillStyle="#0e1524"; rr(526,96,98,48,3); ctx.fill();
+  ctx.fillStyle="#3a4150"; rr(568,150,12,7,2); ctx.fill(); ctx.fillStyle="#2a2f3a"; rr(557,157,34,4,2); ctx.fill();
+  ctx.strokeStyle="#28324a"; ctx.lineWidth=5; ctx.beginPath(); ctx.arc(546,120,11,0,7); ctx.stroke();
+  ctx.strokeStyle="#2ea86a"; ctx.lineWidth=5; ctx.beginPath(); ctx.arc(546,120,11,-1.6,1.3); ctx.stroke();
+  ["#4a85e3","#e0913c","#8b6fe0","#2ea86a"].forEach((c,i)=>{ const bh=8+i*7; ctx.fillStyle=c; rr(570+i*13,138-bh,8,bh,2.5); ctx.fill(); });
+  ctx.strokeStyle="#ffcd00"; ctx.lineWidth=1.6; ctx.beginPath(); ctx.moveTo(570,107); ctx.lineTo(585,101); ctx.lineTo(600,105); ctx.lineTo(616,98); ctx.stroke();
+  ctx.fillStyle="#8a6a44"; rr(530,156,124,10,3); ctx.fill(); ctx.fillStyle="#bd8d5c"; rr(530,153,124,4,2); ctx.fill();
+  plant(662,120,1);
+  // 팀장실 + 데스크
+  room(Z.boss1,"⭐ 팀장",45);
+  ctx.fillStyle="#c9a06a"; rr(737,150,70,26,6); ctx.fill(); ctx.fillStyle="#dab98a"; rr(742,152,60,6,3); ctx.fill();
+  // 실장실 + 데스크 + 창문
+  room(Z.boss2,"🏢 실장실",35);
+  ctx.fillStyle="#c9a06a"; rr(898,150,70,26,6); ctx.fill(); ctx.fillStyle="#dab98a"; rr(903,152,60,6,3); ctx.fill();
+  ctx.fillStyle="#cfe0f0"; rr(962,98,26,32,3); ctx.fill(); ctx.strokeStyle="#9bb6d4"; ctx.lineWidth=1; ctx.strokeRect(962,98,26,32); ctx.beginPath(); ctx.moveTo(975,98); ctx.lineTo(975,130); ctx.stroke();
+  // TF 회의실 ①② (상·하 6인 테이블)
+  room(Z.tf1,"🧩 TF 회의실 ①",190); table(476,662,116,52); [448,476,503].forEach(cx=>chair(cx,626)); [448,476,503].forEach(cx=>chair(cx,698));
+  room(Z.tf2,"🧩 TF 회의실 ②",190); table(700,662,116,52); [673,700,728].forEach(cx=>chair(cx,626)); [673,700,728].forEach(cx=>chair(cx,698));
+  // 라운지: 러그 + 소파 + 커피테이블 + 식물
+  room(Z.lounge,"🌿 라운지",110);
+  ctx.fillStyle="#e0e8da"; rr(853,650,128,100,14); ctx.fill();
+  sofa(867,598,101,"#8fa4bb"); sofa(867,708,101,"#9db0c6");
+  ctx.fillStyle="#c79f68"; rr(894,670,47,26,6); ctx.fill(); ctx.fillStyle="#b98f58"; rr(894,666,47,5,2); ctx.fill();
+  plant(840,688,1); plant(994,688,1);
+  drawPods();
+}
+const CATS=[
+  {key:'report', label:'리포트작성',  color:'#2c6edb'},
+  {key:'data',   label:'데이터분석',  color:'#34A853'},
+  {key:'ops',    label:'운영기획',    color:'#e0913c'},
+  {key:'auto',   label:'자동화·실행', color:'#8b6fe0'},
+];
+const SKILL_CAT={ 'weekly-report-write':'report','report-layout-tidy':'report','report-deck-build':'report','qc-weekly':'report',
+  'sql-helper':'data','weekly-data-digest':'data','data-integrity-check':'data','metric-brief-merge':'data',
+  'ops-check':'ops','co-work-note':'ops','queue-monitor':'ops','deploy-notice-format':'ops','ivr-script-check':'ops','guide-tidy':'ops',
+  'daily-brief-auto':'auto','unread-nudge':'auto','morning-brainstorm':'auto','personal-activity-collect':'auto','part-activity-collect':'auto' };
+const catOf=s=>SKILL_CAT[s]||'ops';
+// 스킬 상세(발표용 제네릭): 핵심기능요약 · 재활용가능성 · (함정)
+const SKILL_META={
+  'weekly-report-write':{sum:'주간 활동·지표를 모아 리포트 초안을 자동 생성',        reuse:'모든 파트의 주간 보고에 공통 적용 — 데이터 소스만 교체', trap:'지표 정의가 바뀌면 재검증 필요'},
+  'report-layout-tidy': {sum:'리포트 화면 구성·서식을 일관된 템플릿으로 정리',        reuse:'보고 장표를 쓰는 어느 파트든 그대로 적용'},
+  'report-deck-build':  {sum:'핵심 지표를 발표용 장표로 구조화',                    reuse:'월간·분기 보고에도 슬라이드 틀 재사용'},
+  'qc-weekly':          {sum:'QC 관점 주간 리포트 — 품질 지표·이슈를 취합',          reuse:'CS·QC 파트 공통, 지표 축만 교체', trap:'샘플 기준이 파트마다 달라 정의 합의 필요'},
+  'sql-helper':         {sum:'반복 쿼리를 파라미터화해 즉시 실행',                   reuse:'지표를 뽑는 모든 분석에 재사용'},
+  'weekly-data-digest': {sum:'주간 데이터를 요약하고 이상치 하이라이트',              reuse:'어느 서비스든 데이터셋만 바꿔 적용'},
+  'data-integrity-check':{sum:'집계 결과의 정합성·이상값을 자동 점검',               reuse:'지표를 다루는 전 파트 공통 안전장치', trap:'음수·널 등 경계값 규칙을 파트별로 확인'},
+  'metric-brief-merge': {sum:'흩어진 지표 보고를 하나의 브리핑으로 통합',            reuse:'분산 채널을 쓰는 어느 팀이든 통합 대시로', trap:'정의 표준화는 고위험 → 사람 ratify'},
+  'ops-check':          {sum:'운영 상태·체크리스트를 정해진 순서로 점검',            reuse:'운영 파트 공통 점검 루틴'},
+  'co-work-note':       {sum:'협업 결과를 방법·함정으로 구조화해 기록',              reuse:'함께 작업한 어떤 건이든 자산화'},
+  'queue-monitor':      {sum:'처리량·적체를 일별 모니터링하고 임계 알림',            reuse:'접수/처리 큐가 있는 모든 파트에 적용'},
+  'deploy-notice-format':{sum:'신규 배포 공지를 표준 양식으로 정리·발송',            reuse:'배포·릴리즈가 있는 어느 파트든 공통'},
+  'ivr-script-check':   {sum:'안내멘트 현황 점검 + 유입 빈도 기반 수정안 도출',      reuse:'안내멘트·응대 스크립트를 쓰는 채널 공통'},
+  'guide-tidy':         {sum:'응대 가이드를 최신 정책 기준으로 정비',                reuse:'가이드 문서를 운영하는 모든 파트'},
+  'daily-brief-auto':   {sum:'어제까지 수집을 모아 오늘 브리핑을 자동 구성',          reuse:'데일리 리딩을 하는 어느 파트든'},
+  'unread-nudge':       {sum:'미확인·기한 임박 건을 골라 넛지',                     reuse:'대외민원·티켓을 다루는 파트 공통'},
+  'morning-brainstorm': {sum:'아침에 오늘 할 일·우선순위를 함께 정리',              reuse:'개인·파트 어디든 시작 루틴'},
+  'personal-activity-collect':{sum:'내 AI 대화·로컬 활동을 매일 수집·구조화',        reuse:'누구나 설치 — 개인 활동 캡처의 기본', trap:'로컬 우선 · PII 제외'},
+  'part-activity-collect':{sum:'파트 공통 활동(게시판·메신저·캘린더)을 주간 취합',    reuse:'어느 파트든 소스만 연결해 공통/개인 리포트 생성'},
+};
+function skillMeta(k){ return SKILL_META[k]||{sum:'반복하던 일을 정해진 방법으로 정리한 도구예요', reuse:'비슷한 일을 하는 다른 파트가 조금만 바꿔서 그대로 쓸 수 있어요'}; }
+// 스킬 식별자 → 사람이 읽는 이름(자연어)
+const SKILL_NAME={
+  'weekly-report-write':'주간 리포트 자동 작성', 'report-layout-tidy':'리포트 화면 정리', 'report-deck-build':'보고 장표 만들기', 'qc-weekly':'QC 주간 리포트',
+  'sql-helper':'반복 쿼리 도우미', 'weekly-data-digest':'주간 데이터 요약', 'data-integrity-check':'데이터 정합성 점검', 'metric-brief-merge':'지표 브리핑 통합',
+  'ops-check':'운영 점검', 'co-work-note':'협업 기록', 'queue-monitor':'처리량 모니터링', 'deploy-notice-format':'배포 공지 정리', 'ivr-script-check':'안내멘트 점검', 'guide-tidy':'응대 가이드 정비',
+  'daily-brief-auto':'데일리 브리핑 자동화', 'unread-nudge':'미확인 건 알림', 'morning-brainstorm':'아침 브레인스토밍', 'personal-activity-collect':'개인 활동 수집', 'part-activity-collect':'파트 활동 수집',
+};
+function sname(k){ return SKILL_NAME[k]||k; }
+// 받침 유무에 따라 조사 선택 (a=받침o, b=받침x)
+function josa(word,a,b){ const ch=word.charCodeAt(word.length-1); const has=(ch>=0xAC00&&ch<=0xD7A3)&&((ch-0xAC00)%28!==0); return has?a:b; }
+function drawShelf(){ const [x,y,w,h]=SHELF;
+  ctx.fillStyle=DARK?"#4a3320":"#6f4d30"; rr(x,y,w,h,12); ctx.fill();
+  ctx.fillStyle=DARK?"#5c4028":"#8a6238"; rr(x+5,y+24,w-10,h-30,8); ctx.fill();
+  ctx.fillStyle=DARK?"#2a1c10":"#3f2a15"; rr(x+w/2-52,y+2,104,20,8); ctx.fill();
+  ctx.fillStyle="#fff"; ctx.font="bold 13px "+FONT; ctx.textAlign="center"; ctx.fillText("📚 공공 자료실",x+w/2,y+16);
+  const secH=(h-40)/CATS.length, top=y+30;
+  CATS.forEach((c,i)=>{ const sy=top+i*secH;
+    if(i>0){ ctx.strokeStyle="rgba(255,255,255,.10)"; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(x+8,sy); ctx.lineTo(x+w-8,sy); ctx.stroke(); }
+    ctx.fillStyle="#5c3f26"; ctx.fillRect(x+8, sy+secH-8, w-16, 5);
+    ctx.fillStyle=c.color; rr(x+10,sy+6,3,11,1.5); ctx.fill();
+    ctx.fillStyle="#fbe6cf"; ctx.font="bold 9px "+FONT; ctx.textAlign="left"; ctx.fillText(c.label,x+18,sy+15);
+    const items=shelf.filter(s=>catOf(s.skill)===c.key);
+    ctx.fillStyle="rgba(255,255,255,.45)"; ctx.font="8px "+FONT; ctx.textAlign="right"; ctx.fillText(items.length? items.length+'권':'비어있음', x+w-8, sy+15);
+    if(!items.length){ ctx.save(); ctx.setLineDash([3,3]); ctx.strokeStyle="rgba(255,255,255,.28)"; ctx.lineWidth=1; rr(x+12,sy+8,w-24,secH-26,3); ctx.stroke(); ctx.restore(); }
+    items.forEach((sk,j)=>{ const bx=x+12+j*19, by=sy+secH-10, bh=(secH-34)*Math.min(1,sk._t||1);
+      ctx.fillStyle=shade(c.color, j%3===0?0:(j%3===1?-16:14)); rr(bx,by-bh,14,bh,2); ctx.fill();
+      ctx.fillStyle="rgba(255,255,255,.85)"; ctx.fillRect(bx+2,by-bh+3,10,1.5);
+      ctx.save(); ctx.translate(bx+7,by-5); ctx.rotate(-Math.PI/2); ctx.fillStyle="#fff"; ctx.font="6.5px "+FONT; ctx.textAlign="left"; ctx.fillText(sname(sk.skill).slice(0,7),0,2.5); ctx.restore(); });
+  });
+}
+function drawBubble(x,y,text,col){ ctx.font="12px "+FONT; ctx.textAlign="left";
+  const w=Math.min(210,ctx.measureText(text).width+18), bx=Math.max(6,Math.min(W-w-6,x-w/2)), by=y-30;
+  ctx.fillStyle=col||"#2c6edb"; rr(bx,by,w,26,13); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(x-5,by+25); ctx.lineTo(x+5,by+25); ctx.lineTo(x,by+33); ctx.closePath(); ctx.fill();
+  ctx.fillStyle="#fff"; ctx.fillText(text,bx+9,by+17,w-14); }
+
+function spotTile(x,y,w,h,hue,ic,label){
+  ctx.fillStyle=DARK?`hsl(${hue},20%,17%)`:`hsl(${hue},34%,90%)`; rr(x,y,w,h,8); ctx.fill();
+  ctx.strokeStyle=DARK?`hsl(${hue},20%,30%)`:`hsl(${hue},26%,66%)`; ctx.lineWidth=1.5; rr(x,y,w,h,8); ctx.stroke();
+  ctx.textAlign="center"; ctx.font="15px "+FONT; ctx.fillText(ic,x+w/2,y+20);
+  ctx.fillStyle=DARK?'#C9CACF':'#4b4d55'; ctx.font="bold 9px "+FONT; ctx.fillText(label,x+w/2,y+35); }
+function drawSpots(){ spotTile(430,806,64,44,210,'🚻','화장실'); spotTile(540,806,64,44,110,'🚪','출입구'); }
+function render(){ ctx.clearRect(0,0,W,H); drawFloor(); drawZones(); drawShelf(); drawSpots();
+  [...allBots].sort((a,b)=>a.py-b.py).forEach(drawAvatar); requestAnimationFrame(render); }
+function tick(){ const now=performance.now(); allBots.forEach(b=>{
+    if(b.walking){ const dx=b.tx-b.px,dy=b.ty-b.py,d=Math.hypot(dx,dy),sp=b.spd||3.8;
+      if(d<sp){ b.px=b.tx; b.py=b.ty; b.walking=false; const f=b._arrive; b._arrive=null; f&&f(); }
+      else { b.px+=dx/d*sp; b.py+=dy/d*sp; } }
+    else if(!running && !busy && !b.big && b!==selected && b.pod && !(b===me && me.status!=='자리') && now>(b.wanderAt||0)){
+      const [rx,ry,rw,rh]=b.pod, R=32;
+      let nx=b.home[0]+(Math.random()*2-1)*R, ny=b.home[1]+(Math.random()*2-1)*R;
+      nx=Math.max(rx+18,Math.min(rx+rw-18,nx)); ny=Math.max(ry+42,Math.min(ry+rh-16,ny));
+      b.tx=nx; b.ty=ny; b.walking=true; b.spd=1.05; b.wanderAt=now+2600+Math.random()*4200; }
+    if(b.flash>0) b.flash=Math.max(0,b.flash-0.02);
+    if(b.ring>0) b.ring=Math.max(0,b.ring-0.025); });
+  shelf.forEach(s=>{ if(s._t<1) s._t=Math.min(1,s._t+0.06); }); setTimeout(tick,16); }
+
+// ---------- 운영 데이터(콕핏) ----------
+// 발표용: 실제 서비스명 비노출(제네릭). 실제 업무 적용 시 아래 맵에 실제 서비스명을 채워 치환하는 "배선"만 남겨둠.
+//   (공개 데모본에는 실제 서비스명·지표를 넣지 않는다)
+const SERVICE_MAP={ '서비스1':'', '서비스2':'', '서비스3':'', '서비스4':'' };
+const TASKS=[
+  {who:'CS 파트장', t:'주간 응대율 리포트 취합', st:'완료'},
+  {who:'엘리스', t:'안내멘트 유입 빈도 분석·수정안', st:'진행'},
+  {who:'엘리스', t:'보고 장표 작성', st:'대기'},
+  {who:'S1 파트장', t:'서비스1 처리량 적체 모니터링', st:'진행'},
+  {who:'S2 파트장', t:'데이터 정합성 점검 (쿼리 오류)', st:'미해결'},
+  {who:'S1 담당', t:'인입 지표 쿼리 자동화', st:'완료'},
+  {who:'S3 파트장', t:'신규 배포 공지 프로세스 정리', st:'대기'},
+  {who:'팀장', t:'승격 심사 대기 처리', st:'미해결'},
+  {who:'S4 파트장', t:'응대 가이드 정비', st:'대기'},
+];
+const INBOX=[
+  {from:'S1 파트장', to:'엘리스', t:'안내멘트 점검 방법 공유 감사합니다 — 서비스1에도 적용해볼게요'},
+  {from:'팀장', to:'전체', t:'이번 주 회의: 목요일 16시. 공유할 만한 것만 자료실에 올려주세요'},
+  {from:'S2 담당', to:'엘리스', t:'데이터 정합성 점검 때 주의할 점을 공공 자료실에 올렸어요'},
+];
+const PROPOSALS=[
+  {skill:'ivr-script-check', by:'엘리스', risk:'저위험'},
+  {skill:'metric-brief-merge', by:'S2 파트장', risk:'고위험'},
+];
+const MINUTES=[
+  {wk:'2026-W29', t:'반복 업무 도구 공유 승인 · 데이터 정합성 주의점 전 파트 공유 · 지표 정의 통일 1건은 사람이 최종 확인 대기'},
+  {wk:'2026-W28', t:'주간 리포트 작성 도구를 서비스별로 나누기로 결정 · 공공 자료실 버전 관리 시작'},
+];
+// ☀️ 오늘 브리핑(아침 데일리 리딩) — 라우팅: auto=스킬자동 / collab=함께작업 / list=리스트업
+// 오늘 일정: kind=auto(기존 스킬 자동) / manual(직접). manual 중 rec=true는 스킬 추천(반복 빈도 포함)
+const TODAY_PLAN=[
+  {t:'데일리 브리핑 정리', kind:'auto',   skill:'daily-brief-auto', why:'매일 자동'},
+  {t:'주간 리포트 취합',   kind:'auto',   skill:'qc-weekly',        why:'매주 목요일 자동'},
+  {t:'안내멘트 점검·수정', kind:'manual', rec:true, week:2, month:5, skill:'ivr-script-check', why:'직접 · 반복 감지됨'},
+  {t:'대외민원 회신',      kind:'manual', rec:false, why:'직접 처리'},
+];
+
+// ---------- 시네마틱 ----------
+const sayEl=document.getElementById('say'), ctrlEl=document.getElementById('controls');
+const countsEl=document.getElementById('counts'), toolbarEl=document.getElementById('toolbar');
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function walkTo(b,x,y){ return new Promise(res=>{ b.tx=x; b.ty=y; b.walking=true; b.spd=3.8; b._arrive=res; }); }
+function say(who,html){ sayEl.innerHTML=`<span class="who">${who}</span>`+html; }
+function bubble(b,t,ms=1700){ b.bubble=t; if(ms) setTimeout(()=>{ if(b.bubble===t) b.bubble=null; },ms); }
+async function levelUp(b){ b.level++; b.flash=1; b.ring=1; updateAvg(); await wait(340); }
+function choice(opts){ return new Promise(res=>{ ctrlEl.innerHTML="";
+  opts.forEach(o=>{ const btn=document.createElement('button'); btn.textContent=o.t; if(o.ghost)btn.className="ghost";
+    btn.onclick=()=>{ ctrlEl.innerHTML=""; res(o.v); }; ctrlEl.appendChild(btn); }); }); }
+function taskCounts(){ const c={완료:0,진행:0,미해결:0,대기:0}; TASKS.forEach(t=>{ if(c[t.st]!==undefined)c[t.st]++; }); return c; }
+function updateCounts(){ const a=allBots.reduce((s,b)=>s+b.level,0)/allBots.length; const c=taskCounts();
+  countsEl.innerHTML=
+    `<span class="chip done">완료 <b>${c.완료}</b></span>`+
+    `<span class="chip prog">진행 <b>${c.진행}</b></span>`+
+    `<span class="chip open">미해결 <b>${c.미해결}</b></span>`+
+    `<span class="chip wait">대기 <b>${c.대기}</b></span>`;
+  const af=document.getElementById('avgFill'), an=document.getElementById('avgNum');
+  if(af) af.style.width=Math.min(100,(a/4)*100)+'%'; if(an) an.textContent='Lv '+a.toFixed(1);
+  if(typeof refreshToolbar==='function') refreshToolbar();
+  return a; }
+function updateAvg(){ return updateCounts(); }
+const SHELF_STAND=[SHELF[0]-42,420];
+async function copyFromShelf(b,skill,station){ const ox=b.x,oy=b.y; station=station||SHELF_STAND;
+  await walkTo(b,station[0],station[1]); bubble(b,"가져오는 중📖",1100); await wait(600);
+  b.skills.push(skill); bubble(b,"내 업무에 맞게 변환",1400); await walkTo(b,ox,oy); await levelUp(b); }
+
+let running=false;
+async function runDemo(){ if(running) return; running=true;
+  shelf.length=0; SEED_SHELF.forEach(s=>shelf.push({...s,_t:1})); selected=null;
+  allBots.forEach(b=>{ b.px=b.x; b.py=b.y; b.tx=b.x; b.ty=b.y; b.bubble=null;
+    b.level=b.role==="실장"?4:b.role==="팀장"?3:b.role==="파트장"?2:1; });
+  me.skills=["qc-weekly","personal-activity-collect","part-activity-collect"]; me.status='자리'; me.away=false; buildStatusbar();
+  const startAvg=updateAvg(); const lead=partLead.CS; const skill='ivr-script-check';
+
+  // 1) 오늘 하루 브리핑 — 자동/직접 구분
+  say("스택이","☀️ <b>엘리스</b>, 좋은 아침이에요. 오늘 할 일을 브리핑할게요."); await wait(1600);
+  say("스택이","🤖 <b>기존 스킬로 자동 처리 중</b> — <b>데일리 브리핑 정리·주간 리포트 취합</b>은 이미 만든 스킬이 알아서 해뒀어요 ✅");
+  bubble(me,"자동 처리 확인 🤖",1800); await wait(2400);
+  say("스택이","🙋 <b>직접 해야 할 일</b> — <b>안내멘트 점검·수정</b>, 대외민원 회신. 그중 <b>안내멘트 점검</b>엔 ✨<b>스킬 추천</b>이 붙어 있어요."); await wait(2600);
+
+  // 2) 직접 작업 → 반복 빈도 안내 → 스킬로?
+  bubble(me,"안내멘트 점검 시작 🙋",1800); me.flash=1;
+  say("스택이","엘리스가 <b>안내멘트 점검</b>을 직접 하기 시작해요…"); await wait(1800);
+  say("스택이","어? 이 일 <b>이번 주 2번, 이번 달 5번째</b>네요 — <b>작업하면서 스킬로도 만들까요?</b>");
+  if(!await choice([{t:"스킬로 만들기 ✨",v:1},{t:"이번만 하기",v:0,ghost:true}])){ say("스택이","좋아요, 이번엔 그냥 처리할게요. 다음에 또 반복되면 알려드릴게요."); return finish(); }
+  bubble(me,`⚙️ ${sname(skill)} 만드는 중`,1900);
+  say("스택이",`<b>${sname(skill)}</b> 완성! 엘리스 레벨업.`); me.skills.push(skill); await levelUp(me); await wait(900);
+
+  // 3) 나만 / 파트 공유
+  say("스택이","이 스킬 <b>나만 쓸까요</b>, <b>파트에 공유할까요?</b> (공유하면 CS 파트장이 검토해요)");
+  if(!await choice([{t:"파트에 공유하기 ⬆️",v:1},{t:"나만 쓰기",v:0,ghost:true}])){ say("스택이","좋아요 — <b>나만</b> 쓸게요. 내 도구함에 저장했어요. (언제든 파트에 공유할 수 있어요)"); return finish(); }
+
+  // 4) 파트장에게 올라감 → 파트장이 팀/파트 결정
+  await walkTo(me, lead.px+22, lead.py+6); bubble(me,"파트장님, 공유 검토 부탁해요 🙏",1900); await wait(1300);
+  await walkTo(me, me.x, me.y);
+  bubble(lead,"검토 중…",1400); await wait(1300); lead.skills.push(skill);
+  say("스택이","<b>CS 파트장</b>이 받았어요 — <b>우리 파트만 쓸까요</b>, <b>팀 전체에 공유할까요?</b>");
+  const team = await choice([{t:"팀 전체에 공유 🌐",v:1},{t:"우리 파트만 쓰기",v:0,ghost:true}]);
+
+  if(!team){
+    // 파트만: CS 파트원이 파트장에게서 받아 씀 (팀엔 비공개)
+    bubble(lead,"우리 파트에 공유 ✅",1700); await levelUp(lead); await wait(500);
+    say("스택이","CS 파트원들이 <b>파트 안에서</b> 이 방법을 나눠 씁니다. (팀 전체엔 아직 비공개)");
+    for(const m of csMembers){ if(m===me||m===lead) continue; await copyFromShelf(m, skill, [lead.x, lead.y+26]); }
+    say("스택이","우리 파트가 <b>같이</b> 레벨업했어요. 나중에 팀 전체로도 올릴 수 있어요.");
+  } else {
+    // 팀 전체: 공공 자료실 등록 → 타 파트장 pull
+    bubble(lead,"팀 전체에 공유 🌐",1700);
+    say("스택이",`팀 전체 공유 결정! <b>${sname(skill)}</b>${josa(sname(skill),'이','가')} <b>📚 공공 자료실</b>에 올라갑니다.`);
+    await walkTo(lead, SHELF_STAND[0], SHELF_STAND[1]); bubble(lead,"자료실에 올리는 중📚",1600); shelf.push({skill, by:'CS 파트장', _t:0}); await wait(800);
+    await walkTo(lead, lead.x, lead.y); await levelUp(lead);
+    say("스택이","이제 <b>다른 파트장들이 필요한 것만</b> 자료실에서 가져다 써요.");
+    await copyFromShelf(partLead.S1,skill); await copyFromShelf(partLead.S2,skill); await copyFromShelf(partLead.S3,skill);
+  }
+  const endAvg=updateAvg();
+  say("스택이",`끝! <b>발견 → 스킬화 → 나만/파트/팀 선택 → 함께 성장.</b> 팀 평균 레벨 <b>Lv ${startAvg.toFixed(1)} → Lv ${endAvg.toFixed(1)}</b> 📈`);
+  allBots.forEach(b=>b.flash=1); finish();
+}
+function finish(){ running=false; ctrlEl.innerHTML="";
+  const b=document.createElement('button'); b.textContent="↻ 다시 재생"; b.onclick=runDemo; ctrlEl.appendChild(b); }
+
+// ---------- 인터랙션: 에이전트에 말 걸기 · 자료실 열람/pull ----------
+let selected=null, busy=false, hoverBot=null;
+function idleControls(){ ctrlEl.innerHTML=''; const b=document.createElement('button'); b.textContent='데모 재생 ▶'; b.onclick=runDemo; ctrlEl.appendChild(b); }
+function revealPanel(){ const p=document.querySelector('.panel'); if(p) p.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+function toLogical(e){ const r=cv.getBoundingClientRect(); return [ (e.clientX-r.left)/(r.width/W), (e.clientY-r.top)/(r.height/H) ]; }
+function botAt(x,y){ let best=null,bd=26*Math.max(1,W/cv.getBoundingClientRect().width); for(const b of allBots){ const d=Math.hypot(b.px-x,(b.py-14)-y); if(d<bd){bd=d;best=b;} } return best; }
+function categoryAt(x,y){ const [X,Y,w,h]=SHELF; if(x<X-2||x>X+w+2) return null;
+  const top=Y+30, secH=(h-40)/CATS.length; const i=Math.floor((y-top)/secH);
+  return (i<0||i>=CATS.length)?null:CATS[i]; }
+function bookAt(x,y){ const [X,Y,w,h]=SHELF; if(x<X||x>X+w) return null;
+  const secH=(h-40)/CATS.length, top=Y+30;
+  for(let i=0;i<CATS.length;i++){ const c=CATS[i], sy=top+i*secH;
+    const items=shelf.filter(s=>catOf(s.skill)===c.key);
+    for(let j=0;j<items.length;j++){ const bx=X+12+j*19;
+      if(x>=bx-2 && x<=bx+16 && y>=sy+6 && y<=sy+secH-6) return {skill:items[j].skill, cat:c}; } }
+  return null; }
+function roleOf(b){ return b.role==='실장'?'실장':b.role==='팀장'?'팀장':b.role==='파트장'?`${b.part} 파트장`:`${b.part} 담당`; }
+function nameOf(b){ return b.name || `${b.part} 담당`; }
+function btn(t,fn,g){ const el=document.createElement('button'); el.textContent=t; if(g)el.className='ghost'; el.onclick=fn; ctrlEl.appendChild(el); return el; }
+function whoOf(b){ return b.me?'엘리스':roleOf(b); }
+function stIcon(st){ return st==='완료'?'✅':st==='진행'?'🔵':st==='미해결'?'🔴':'🕒'; }
+function selectBot(b){ if(running||busy) return; selected=b;
+  const skills=b.skills||[];
+  const skHtml = skills.length? `<div class="skrow">${skills.map(s=>`<span class="skpill">${sname(s)}</span>`).join('')}</div>` : '<div class="empty">아직 가진 도구가 없어요</div>';
+  const mine=TASKS.filter(t=>t.who===whoOf(b));
+  const tlHtml = mine.length? mine.map(t=>`<div class="item"><span class="tt">${stIcon(t.st)} ${t.t}</span></div>`).join('') : '<div class="empty">담당 업무 없음</div>';
+  sayEl.innerHTML=`<div class="bd"><span class="bh">${nameOf(b)} <small>${roleOf(b)} · 지금 ${b.work||'대기 중'}</small></span>`+
+    `<div class="grp"><div class="glabel">🎯 전문 분야</div><div class="item"><span class="tt">${b.focus||'—'}</span></div>`+
+      (b.desc?`<div class="item"><span class="tt" style="font-weight:500; color:var(--fg2)">${b.desc}</span></div>`:'')+`</div>`+
+    `<div class="grp"><div class="glabel">🧰 가진 도구 <span class="cnt">${skills.length}개</span></div>${skHtml}</div>`+
+    `<div class="grp"><div class="glabel">📋 담당 업무 <span class="cnt">${mine.length}</span></div>${tlHtml}</div></div>`;
+  ctrlEl.innerHTML='';
+  const inp=document.createElement('input'); inp.className='cmd'; inp.placeholder=`${nameOf(b)}에게 시킬 일을 입력…`;
+  inp.addEventListener('keydown',e=>{ if(e.key==='Enter') doInstruct(b,inp); });
+  ctrlEl.appendChild(inp);
+  btn('시키기 ▶', ()=>doInstruct(b,inp));
+  btn('함께 일하기 🤝', ()=>collab(b));
+  if(b.skills&&b.skills.length) btn('파트에 공유하기 ⬆️', ()=>shareUp(b));
+  btn('닫기', ()=>clearSelection(), true);
+}
+function doInstruct(b,inp){ const v=(inp.value||'').trim(); if(!v) return;
+  TASKS.unshift({who:whoOf(b), t:v, st:'진행'}); bubble(b,'접수! 진행할게요',1600); b.flash=1;
+  inp.value=''; updateCounts();
+  say(nameOf(b), `말씀하신 <b>${v}</b> → <b>진행 중</b>으로 등록했어요. (📋 스케줄 보드에서 확인)`); }
+async function collab(b){ if(busy) return; busy=true; bubble(me,'같이 하자!',1200); bubble(b,'좋아요!',1200); me.flash=1; b.flash=1;
+  say(nameOf(b), `엘리스와 <b>${nameOf(b)}</b>가 함께 일했어요 — 결과를 <b>방법</b>으로 정리했어요. (자료실에 올리려면 팀장 승인)`);
+  if(!b.skills.includes('co-work-note')){ b.skills.push('co-work-note'); await levelUp(b); } busy=false; }
+async function shareUp(b){ if(busy) return; busy=true; const skill=b.skills[b.skills.length-1];
+  bubble(boss,'검토 중…',1000); await wait(700); bubble(boss,'✅ 승인',1300);
+  if(!shelf.find(s=>s.skill===skill)) shelf.push({skill, by:nameOf(b), _t:0});
+  say(nameOf(b), `<b>${sname(skill)}</b> 방법을 공공 자료실에 올렸어요(팀장 승인). 이제 누구나 가져다 쓸 수 있어요.`); busy=false; }
+function openCategory(c){ if(running||busy) return; selected=null;
+  const items=shelf.filter(s=>catOf(s.skill)===c.key);
+  sayEl.innerHTML=`<div class="bd"><span class="bh">📚 ${c.label} 칸 <small>${items.length}권 · 방법만 공유(실제 수치·개인정보 제외)</small></span>`+
+    (items.length? items.map(s=>`<div class="item"><span class="dot" style="background:${c.color}"></span><span class="tt">${sname(s.skill)}</span><span class="who">${s.by||'엘리스'}</span></div>`).join('') : '<div class="empty">아직 올라온 자료가 없어요 — 이 칸은 비어있어요.</div>')+`</div>`;
+  ctrlEl.innerHTML='';
+  items.forEach(s=> btn(`📄 「${sname(s.skill)}」 살펴보기`, ()=>openSkill(s.skill,c), true));
+  btn('닫기', ()=>clearSelection(), true);
+}
+function openSkill(skill,c){ if(running||busy) return; selected=null;
+  const m=skillMeta(skill), owner=(shelf.find(s=>s.skill===skill)||{}).by||'엘리스', has=me.skills.includes(skill);
+  sayEl.innerHTML=`<div class="bd"><span class="bh">📄 ${sname(skill)} <small>${c.label} · ${owner}${has?' · 보유중':''}</small></span>`+
+    `<div class="grp"><div class="glabel">🎯 이 도구가 하는 일</div><div class="item"><span class="tt" style="font-weight:500">${m.sum}</span></div></div>`+
+    `<div class="grp"><div class="glabel">♻️ 이렇게 재활용할 수 있어요</div><div class="item"><span class="tt" style="font-weight:500">${m.reuse}</span></div></div>`+
+    (m.trap?`<div class="grp"><div class="glabel">⚠️ 이것만 주의하세요</div><div class="item"><span class="tt" style="font-weight:500">${m.trap}</span></div></div>`:'')+
+    `</div>`;
+  ctrlEl.innerHTML='';
+  if(has){ const b0=document.createElement('button'); b0.textContent='이미 내 도구예요 ✓'; b0.className='ghost'; b0.disabled=true; b0.style.opacity=.6; b0.style.cursor='default'; ctrlEl.appendChild(b0); }
+  else btn('나에게 적용해보기 📥', async()=>{ if(busy)return; busy=true; await copyFromShelf(me,skill); say('스택이',`엘리스가 <b>${sname(skill)}</b>을(를) 살펴보고, 내 업무에 맞게 바꿔서 가져왔어요. Lv↑`); busy=false; setTimeout(()=>{ if(!running&&!busy) openSkill(skill,c); },200); });
+  btn('◂ 목록으로', ()=>openCategory(c), true);
+  btn('닫기', ()=>clearSelection(), true);
+}
+function clearSelection(){ if(running) return; selected=null;
+  say('스택이','동물을 클릭해 <b>말 걸기·함께 일하기</b>, 자료실의 <b>책</b>을 클릭해 자세히 보고 <b>가져다 쓰기</b> 하세요. 또는 [데모 재생 ▶].');
+  idleControls();
+}
+function meetingAt(x,y){ const [X,Y,w,h]=Z.meeting; return x>=X&&x<=X+w&&y>=Y&&y<=Y+h; }
+cv.addEventListener('click', e=>{ if(running||busy) return; const [x,y]=toLogical(e);
+  const bk=bookAt(x,y); if(bk){ openSkill(bk.skill,bk.cat); revealPanel(); return; }
+  const c=categoryAt(x,y); if(c){ openCategory(c); revealPanel(); return; }
+  if(meetingAt(x,y)){ openMinutes(); revealPanel(); return; }
+  const b=botAt(x,y); if(b){ selectBot(b); revealPanel(); return; }
+  clearSelection(); });
+cv.addEventListener('mousemove', e=>{ if(running||busy){ hoverBot=null; return; } const [x,y]=toLogical(e);
+  hoverBot=botAt(x,y); cv.style.cursor=(hoverBot||categoryAt(x,y)||meetingAt(x,y))?'pointer':'default'; });
+
+// ---------- 툴바·보드·회의록 패널 ----------
+const STC={진행:'#2c6edb',미해결:'#c0392b',대기:'#9a7b12',완료:'#1f8a4c'};
+function openSchedule(){ if(running||busy) return; selected=null;
+  const groups=['진행','미해결','대기','완료'].map(st=>{ const a=TASKS.filter(t=>t.st===st); if(!a.length) return '';
+    return `<div class="grp"><div class="glabel"><span class="dot" style="background:${STC[st]}"></span>${st} <span class="cnt">${a.length}</span></div>`+
+      a.map(t=>`<div class="item"><span class="tt">${t.t}</span><span class="who">${t.who}</span></div>`).join('')+`</div>`; }).join('');
+  sayEl.innerHTML=`<div class="bd"><span class="bh">📋 스케줄 보드 <small>전체 현황</small></span>${groups}</div>`;
+  ctrlEl.innerHTML=''; btn('닫기',()=>clearSelection(),true); }
+function openInbox(){ if(running||busy) return; selected=null;
+  const l=INBOX.map(m=>`<div class="msg"><div class="hdr">✉️ ${m.from} → ${m.to}</div><div class="body">${m.t}</div></div>`).join('');
+  sayEl.innerHTML=`<div class="bd"><span class="bh">📨 전달함 <small>${INBOX.length}건 · 동료들의 메시지</small></span>${l}</div>`;
+  ctrlEl.innerHTML=''; btn('닫기',()=>clearSelection(),true); }
+function openProposals(){ if(running||busy) return; selected=null;
+  const l=PROPOSALS.length? PROPOSALS.map(p=>`<div class="item"><span class="dot" style="background:#8b6fe0"></span><span class="tt">${sname(p.skill)}</span><span class="who">${p.by} · ${p.risk}</span></div>`).join('') : '<div class="empty">공유 승인을 기다리는 제안이 없어요.</div>';
+  sayEl.innerHTML=`<div class="bd"><span class="bh">📌 팀 제안 <small>공유 승인 대기 ${PROPOSALS.length}건</small></span>${l}</div>`;
+  ctrlEl.innerHTML='';
+  PROPOSALS.slice().forEach(p=> btn(`${sname(p.skill)} 공유 승인 ✅`, ()=>{ if(busy)return; if(!shelf.find(s=>s.skill===p.skill)) shelf.push({skill:p.skill,by:p.by,_t:0}); const i=PROPOSALS.indexOf(p); if(i>=0)PROPOSALS.splice(i,1); boss.flash=1; updateCounts(); openProposals(); }));
+  btn('닫기',()=>clearSelection(),true); }
+function openMinutes(){ if(running||busy) return; selected=null;
+  const l=MINUTES.map(m=>`<div class="msg"><div class="hdr">🗓️ ${m.wk}</div><div class="body">${m.t}</div></div>`).join('');
+  sayEl.innerHTML=`<div class="bd"><span class="bh">🗨️ 회의록 <small>주간 회의·공유 결정</small></span>${l}</div>`;
+  ctrlEl.innerHTML=''; btn('닫기',()=>clearSelection(),true); }
+function openToday(){ if(running||busy) return; selected=null;
+  const autos=TODAY_PLAN.filter(p=>p.kind==='auto'), mans=TODAY_PLAN.filter(p=>p.kind==='manual');
+  const autoHtml=autos.map(p=>`<div class="item"><span class="dot" style="background:#1f8a4c"></span><span class="tt">${p.t}</span><span class="who">자동 처리됨 ✅</span></div>`).join('');
+  const manHtml=mans.map(p=>`<div class="item"><span class="dot" style="background:${p.rec?'#8b6fe0':'#9a7b12'}"></span><span class="tt">${p.t}${p.rec?' <span style="color:#8b6fe0;font-weight:800">✨ 스킬 추천</span>':''}</span><span class="who">${p.why}</span></div>`).join('');
+  sayEl.innerHTML=`<div class="bd"><span class="bh">☀️ 오늘 브리핑 <small>어제까지 수집 기반</small></span>`+
+    `<div class="grp"><div class="glabel">🤖 기존 스킬로 자동 처리 중 <span class="cnt">${autos.length}</span></div>${autoHtml}</div>`+
+    `<div class="grp"><div class="glabel">🙋 직접 해야 할 일 <span class="cnt">${mans.length}</span></div>${manHtml}</div></div>`;
+  ctrlEl.innerHTML='';
+  mans.forEach(p=> btn(p.rec?`✨ ${p.t} — 스킬로 만들기`:`${p.t} 처리하기`, ()=> p.rec? makeSkillFlow(p) : justDo(p)));
+  btn('닫기',()=>clearSelection(),true); }
+function justDo(p){ if(busy||running) return; bubble(me,p.t+' 처리 🙋',1500); me.flash=1; TASKS.unshift({who:'엘리스',t:p.t,st:'진행'}); updateCounts(); say('스택이',`<b>${p.t}</b> — 직접 처리 시작. 진행 중으로 등록했어요.`); }
+async function makeSkillFlow(p){ if(busy||running) return; busy=true; selected=null;
+  bubble(me, p.t+' 시작 🙋', 1600); me.flash=1;
+  say('스택이', `<b>${p.t}</b> — 이 일 <b>이번 주 ${p.week}번, 이번 달 ${p.month}번째</b>네요. 작업하면서 <b>스킬로도 만들까요?</b>`);
+  if(!await choice([{t:'스킬로 만들기 ✨',v:1},{t:'이번만 하기',v:0,ghost:true}])){ say('스택이','좋아요, 이번엔 그냥 처리할게요. 다음에 또 반복되면 알려드릴게요.'); busy=false; return idleControls(); }
+  bubble(me,`⚙️ ${sname(p.skill)} 만드는 중`,1700); me.skills.push(p.skill); await levelUp(me);
+  say('스택이', `<b>${sname(p.skill)}</b> 완성! <b>나만 쓸까요</b>, <b>파트에 공유할까요?</b>`);
+  if(!await choice([{t:'파트에 공유하기 ⬆️',v:1},{t:'나만 쓰기',v:0,ghost:true}])){ say('스택이','내 도구함에만 저장했어요. (언제든 파트에 공유할 수 있어요)'); busy=false; return idleControls(); }
+  const lead=partLead.CS; bubble(lead,'검토 중…',1400); await wait(1000); if(!lead.skills.includes(p.skill)) lead.skills.push(p.skill);
+  say('스택이','CS 파트장이 받았어요 — <b>우리 파트만 쓸까요</b>, <b>팀 전체에 공유할까요?</b>');
+  const team=await choice([{t:'팀 전체에 공유 🌐',v:1},{t:'우리 파트만',v:0,ghost:true}]);
+  if(team){ if(!shelf.find(s=>s.skill===p.skill)) shelf.push({skill:p.skill,by:'CS 파트장',_t:0}); await levelUp(lead); say('스택이',`<b>팀 전체 공유!</b> <b>${sname(p.skill)}</b>${josa(sname(p.skill),'이','가')} 📚 공공 자료실에 올라가 <b>누구나 가져다</b> 쓸 수 있어요.`); }
+  else { await levelUp(lead); say('스택이','<b>우리 파트 안에서만</b> 공유했어요. (팀 전체엔 비공개 · 나중에 올릴 수 있어요)'); }
+  busy=false; idleControls(); }
+// ---------- 엘리스 상태바 (ZEP식: 상태 변경 → 해당 공간으로 이동) ----------
+const STATUS=[
+  {k:'자리',   ic:'🪑', t:()=>me.home},
+  {k:'식사',   ic:'🍚', t:()=>[318,196]},
+  {k:'휴식',   ic:'🛋️', t:()=>[915,700]},
+  {k:'화장실', ic:'🚻', t:()=>[462,834]},
+  {k:'퇴근',   ic:'🚪', t:()=>[572,842]},
+];
+function statusMsg(k){ return {자리:'자리로 복귀 💺', 식사:'식사하러 가요 🍚', 휴식:'잠깐 휴식 ☕', 화장실:'금방 올게요 🚻', 퇴근:'오늘도 수고했어요 👋'}[k]; }
+function buildStatusbar(){ const el=document.getElementById('statusbar'); if(!el) return;
+  el.innerHTML='<span class="lab">🐹 엘리스 상태</span>';
+  STATUS.forEach(s=>{ const b=document.createElement('button'); b.className='sbtn'+(me.status===s.k?' on':''); b.textContent=s.ic+' '+s.k;
+    b.onclick=()=>setStatus(s.k); el.appendChild(b); }); }
+function setStatus(k){ if(running||busy) return; const s=STATUS.find(x=>x.k===k); if(!s) return;
+  if(k==='퇴근'){ openLeaveBriefing(); return; }   // 퇴근 전엔 꼭 하루 브리핑 + 내일 체크
+  me.status=k; me.away=false; selected=null; buildStatusbar();
+  const [tx,ty]=s.t();
+  walkTo(me,tx,ty).then(()=>{ if(me.status===k) bubble(me, statusMsg(k), 2600); }); }
+function openLeaveBriefing(){ if(running||busy) return; selected=null;
+  const done=TASKS.filter(t=>t.who==='엘리스'&&t.st==='완료');
+  const carry=TASKS.filter(t=>t.who==='엘리스'&&t.st!=='완료');
+  const tmr = carry.length? carry.map(t=>t.t) : ['주간 리포트 작성','안내멘트 점검 이어가기'];
+  const doneHtml = done.length? done.map(t=>`<div class="item"><span class="tt">✅ ${t.t}</span></div>`).join('') : '<div class="empty">오늘 완료로 기록된 일은 없어요 — 진행 중인 일을 내일 이어가요.</div>';
+  const tmrHtml = tmr.map(t=>`<label class="item"><input type="checkbox" class="tmrchk"><span class="tt">${t}</span></label>`).join('');
+  sayEl.innerHTML=`<div class="bd"><span class="bh">🌙 오늘 하루 브리핑 <small>퇴근 전 점검</small></span>`+
+    `<div class="grp"><div class="glabel">✅ 오늘 한 일 <span class="cnt">${done.length}</span></div>${doneHtml}</div>`+
+    `<div class="grp"><div class="glabel">⏭️ 내일 할 일 체크 <span class="cnt">${tmr.length}</span></div>${tmrHtml}</div></div>`;
+  ctrlEl.innerHTML='';
+  btn('오늘도 수고했어요, 퇴근 👋', ()=>confirmLeave(done.length));
+  btn('아직 안 갈래 (자리로)', ()=>setStatus('자리'), true);
+  revealPanel(); }
+function confirmLeave(doneCount){ const chks=[...document.querySelectorAll('.tmrchk')]; const total=chks.length, ck=chks.filter(c=>c.checked).length;
+  me.status='퇴근'; me.away=true; selected=null; buildStatusbar();
+  const [tx,ty]=STATUS.find(s=>s.k==='퇴근').t();
+  walkTo(me,tx,ty).then(()=>{ if(me.status==='퇴근') bubble(me,'오늘도 수고했어요 👋',3000); });
+  say('스택이',`오늘 <b>${doneCount}건</b> 마무리 · 내일 할 일 <b>${ck}/${total}</b> 체크 완료. <b>오늘도 수고하셨어요!</b> 👋`);
+  idleControls(); }
+function buildToolbar(){ toolbarEl.innerHTML='';
+  [{ic:'☀️',tt:'오늘 브리핑',sub:'아침 리딩',fn:openToday,badge:()=>TODAY_PLAN.length},
+   {ic:'📋',tt:'스케줄 보드',sub:'전체 현황',fn:openSchedule,badge:()=>{const c=taskCounts();return c.진행+c.미해결;}},
+   {ic:'📨',tt:'전달함',sub:'동료 메시지',fn:openInbox,badge:()=>INBOX.length},
+   {ic:'📌',tt:'팀 제안',sub:'공유 승인 대기',fn:openProposals,badge:()=>PROPOSALS.length,urgent:true}
+  ].forEach(c=>{ const el=document.createElement('div'); el.className='tcard'; el.tabIndex=0; el.setAttribute('role','button');
+    const bcls=(c.urgent&&c.badge()>0)?'badge urgent':'badge';
+    el.innerHTML=`<span class="ic">${c.ic}</span><span><div class="tt">${c.tt}</div><div class="sub">${c.sub}</div></span><span class="${bcls}">${c.badge()}</span>`;
+    const act=()=>{ if(!running&&!busy){ c.fn(); revealPanel(); } };
+    el.onclick=act; el.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); act(); } });
+    el._badge=c.badge; el._urgent=c.urgent; toolbarEl.appendChild(el); }); }
+function refreshToolbar(){ if(!toolbarEl) return; [...toolbarEl.children].forEach(el=>{ if(el._badge){ const bd=el.querySelector('.badge'); if(bd){ bd.textContent=el._badge(); if(el._urgent) bd.classList.toggle('urgent', el._badge()>0); } } }); }
+
+buildToolbar(); buildStatusbar(); updateCounts(); tick(); render(); idleControls();
+</script>
+</body>
+</html>
