@@ -9,3 +9,7 @@ __pycache__/
 .env
 *.token
 secrets.*
+
+collector_seen.json
+collector.log
+_*.png

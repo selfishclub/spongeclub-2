@@ -49,17 +49,19 @@ def count_confirms(page):
 def clear_composer(page, box):
     """입력창에 남아있는 draft(임시저장 글)를 완전히 비웁니다.
     이걸 안 하면 예전 글자 위에 덧붙여져 명령이 깨집니다."""
-    page.keyboard.press("Escape")   # 자동완성 팝업이 클릭을 가로막는 것 방지
-    page.wait_for_timeout(300)
-    box.click()
-    page.wait_for_timeout(300)
-    for _ in range(3):
+    # 자동완성 팝업이 클릭을 가로막을 수 있으므로 click 대신 locator.press로 포커스+입력
+    for _ in range(4):
         if box.inner_text().strip() == "":
             return True
-        page.keyboard.press("Control+A")
-        page.wait_for_timeout(200)
-        page.keyboard.press("Delete")
-        page.wait_for_timeout(500)
+        try:
+            box.press("Escape")          # 열려있는 자동완성/명령 팝업 닫기
+            page.wait_for_timeout(250)
+            box.press("Control+a")
+            page.wait_for_timeout(200)
+            box.press("Delete")
+            page.wait_for_timeout(400)
+        except Exception:
+            page.wait_for_timeout(400)
     return box.inner_text().strip() == ""
 
 
