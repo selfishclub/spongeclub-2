@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>갤러리 — Golf Rank</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    main { padding: 16px 16px 20px; }
+    .g-sub { font-size: 13px; color: var(--muted); margin: 0 4px 16px; }
+    .g-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .g-tile { position: relative; aspect-ratio: 1 / 1; border-radius: 14px; overflow: hidden; background: #111; border: 1px solid var(--border); cursor: pointer; }
+    .g-tile img, .g-tile video { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .g-mark { position: absolute; left: 0; right: 0; bottom: 0; padding: 18px 10px 8px; background: linear-gradient(to top, rgba(0,0,0,0.72), rgba(0,0,0,0)); color: #fff; }
+    .g-mark .m-date { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: .3px; }
+    .g-mark .m-course { font-size: 11px; opacity: 0.92; margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .g-vtag { position: absolute; top: 8px; right: 8px; font-size: 10px; background: rgba(0,0,0,0.55); color: #fff; padding: 2px 6px; border-radius: 6px; }
+
+    /* 라이트박스 */
+    .lb { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 300; display: none; align-items: center; justify-content: center; flex-direction: column; padding: 20px; }
+    .lb.open { display: flex; }
+    .lb .lb-media { max-width: 100%; max-height: 78vh; border-radius: 12px; }
+    .lb .lb-mark { color: #fff; text-align: center; margin-top: 16px; }
+    .lb .lb-mark .d { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 15px; }
+    .lb .lb-mark .c { font-size: 13px; opacity: 0.85; margin-top: 2px; }
+    .lb .lb-close { position: absolute; top: 16px; right: 16px; width: 40px; height: 40px; border-radius: 50%; border: none; background: rgba(255,255,255,0.15); color: #fff; font-size: 22px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <button class="icon-btn" id="backBtn" aria-label="뒤로"><svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="title" id="clubTitle">갤러리<span class="sub" id="clubSub"></span></div>
+    </header>
+    <main id="main"></main>
+
+    <nav class="tabbar">
+      <a href="#" id="tabHome"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10" stroke-linecap="round" stroke-linejoin="round"/></svg>홈</a>
+      <a href="#" id="tabRank"><svg viewBox="0 0 24 24"><path d="M8 21V9M16 21V5M4 21V13M20 21V9" stroke-linecap="round"/></svg>랭킹</a>
+      <a href="#" class="active" id="tabGallery"><svg viewBox="0 0 24 24"><path d="M3 8.5A1.5 1.5 0 0 1 4.5 7H7l1.2-2h7.6L17 7h2.5A1.5 1.5 0 0 1 21 8.5v9A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.2"/></svg>갤러리</a>
+      <a href="#" id="tabMember"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5M17 11a3 3 0 0 0 0-6M21 20c0-2.5-2-4-4-4.5" stroke-linecap="round"/></svg>멤버</a>
+    </nav>
+
+    <div class="lb" id="lb"><button class="lb-close" id="lbClose">×</button><div id="lbBody"></div></div>
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./db.js"></script>
+  <script src="./media.js"></script>
+  <script>
+    const STORAGE_KEY='golfrank.clubs';
+    const $=(id)=>document.getElementById(id);
+    const params=new URLSearchParams(location.search);
+    const clubId=params.get('club');
+    let clubs=load(); let club=clubs.find((c)=>c.id===clubId);
+    function load(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY))||[]; }catch(e){ return []; } }
+    function esc(s){ return String(s).replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function fmtFull(str){ const d=new Date(str); return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`; }
+    let items=[];   // {id,type,mime,date,course}
+
+    if(club){ $('clubTitle').childNodes[0].nodeValue=club.name; $('clubSub').textContent='갤러리'; }
+
+    function collect(){
+      const arr=[];
+      (club.rounds||[]).forEach((r)=>{ (r.media||[]).forEach((m)=> arr.push({ ...m, date:r.date, course:r.course })); });
+      arr.sort((a,b)=> a.date<b.date?1:a.date>b.date?-1:0);   // 최신순
+      return arr;
+    }
+
+    async function render(){
+      if(!club){ $('main').innerHTML='<div class="empty"><div class="icon">🤔</div><h3>모임을 찾을 수 없어요</h3></div>'; return; }
+      items = collect();
+      if(!items.length){
+        $('main').innerHTML='<div class="empty"><div class="icon">📸</div><h3>아직 사진·영상이 없어요</h3><p>라운드를 기록할 때 사진이나 짧은 영상을 추가하면<br/>여기에 모여요.</p></div>';
+        return;
+      }
+      const tiles = items.map((it,i)=>{
+        const media = it.type==='video'
+          ? `<video data-i="${i}" muted loop playsinline autoplay preload="metadata"></video><span class="g-vtag">▶</span>`
+          : `<img data-i="${i}" alt="" />`;
+        return `<div class="g-tile" data-open="${i}">${media}
+          <div class="g-mark"><div class="m-date">${fmtFull(it.date)}</div><div class="m-course">⛳ ${esc(it.course||'')}</div></div></div>`;
+      }).join('');
+      $('main').innerHTML = `<div class="g-sub">라운드마다 남긴 순간들 · 총 ${items.length}장</div><div class="g-grid">${tiles}</div>`;
+      // 블롭 로드해서 src 채우기
+      for(let i=0;i<items.length;i++){
+        const blob=await mediaGet(items[i].id); if(!blob) continue;
+        const url=URL.createObjectURL(blob);
+        const el=$('main').querySelector(`[data-i="${i}"]`); if(el) el.src=url;
+        items[i]._url=url;
+      }
+    }
+
+    // 라이트박스
+    $('main').addEventListener('click',(e)=>{ const t=e.target.closest('[data-open]'); if(t) openLb(+t.dataset.open); });
+    function openLb(i){
+      const it=items[i]; if(!it) return;
+      const media = it.type==='video'
+        ? `<video class="lb-media" src="${it._url||''}" controls autoplay loop playsinline></video>`
+        : `<img class="lb-media" src="${it._url||''}" alt="" />`;
+      $('lbBody').innerHTML = `${media}<div class="lb-mark"><div class="d">${fmtFull(it.date)}</div><div class="c">⛳ ${esc(it.course||'')}</div></div>`;
+      $('lb').classList.add('open');
+    }
+    $('lbClose').addEventListener('click',()=>{ $('lb').classList.remove('open'); $('lbBody').innerHTML=''; });
+    $('lb').addEventListener('click',(e)=>{ if(e.target===$('lb')){ $('lb').classList.remove('open'); $('lbBody').innerHTML=''; } });
+
+    $('backBtn').addEventListener('click',()=>{ location.href='home.html?club='+encodeURIComponent(clubId); });
+    $('tabHome').addEventListener('click',(e)=>{ e.preventDefault(); location.href='home.html?club='+encodeURIComponent(clubId); });
+    $('tabRank').addEventListener('click',(e)=>{ e.preventDefault(); location.href='ranking.html?club='+encodeURIComponent(clubId); });
+    $('tabGallery').addEventListener('click',(e)=>e.preventDefault());
+    $('tabMember').addEventListener('click',(e)=>{ e.preventDefault(); location.href='member.html?club='+encodeURIComponent(clubId); });
+
+    render();
+    (async ()=>{ const p=await pullClubIntoLocal(clubId); if(p){ club=p; render(); } })();
+  </script>
+</body>
+</html>

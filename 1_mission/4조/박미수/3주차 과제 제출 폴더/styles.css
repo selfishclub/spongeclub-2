@@ -1,0 +1,178 @@
+/* ============================================================
+   Golf Ranking Platform — 공통 스타일 (Design Tokens)
+   DESIGN-TECH-FINAL.md 기준 · 모든 페이지 공유
+============================================================ */
+
+/* ── 로컬 폰트 (다운로드한 파일, 오프라인 OK) ── */
+@font-face {
+  font-family: 'Pretendard Variable';
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: swap;
+  src: url('./fonts/PretendardVariable.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  src: url('./fonts/Montserrat-VariableFont_wght.ttf') format('truetype-variations');
+}
+
+:root {
+  --green:        #1B5E20;
+  --green-dark:   #0F3C14;
+  --green-light:  #4CAF50;
+  --green-tint:   #F0F8F0;
+  --gold:         #F9A825;
+  --bg:           #FFFFFF;
+  --card:         #FAFAFA;
+  --text:         #1F1F1F;
+  --muted:        #757575;
+  --border:       #E0E0E0;
+  --grey-btn:     #F0F0F0;
+  --grey-btn-h:   #E0E0E0;
+
+  --header-h:     56px;
+  --footer-h:     84px;
+  --maxw:         480px;
+  --shadow-card:  0 1px 3px rgba(0,0,0,0.08);
+  --shadow-lift:  0 4px 16px rgba(27,94,32,0.12);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  font-family: 'Pretendard Variable', Pretendard, -apple-system, system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;        /* body는 스크롤 안 함 → 본문(main)만 스크롤 */
+}
+.mono { font-family: 'Montserrat', sans-serif; }
+
+.app {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  height: 100vh;            /* 폴백 */
+  height: 100dvh;          /* 모바일 주소창 변화 대응 */
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  position: relative;
+  box-shadow: 0 0 0 1px var(--border);
+  overflow: hidden;        /* 본문(main)만 스크롤 → 헤더·하단바 절대 안 흔들림 */
+}
+/* 본문만 세로 스크롤 */
+main { flex: 1 1 auto; overflow-y: auto; min-height: 0; -webkit-overflow-scrolling: touch; }
+
+/* ── 헤더 (상단 고정, 56px) ── */
+header.topbar {
+  position: relative;
+  flex: 0 0 var(--header-h);
+  height: var(--header-h);
+  background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px 0 8px;
+  z-index: 100;
+}
+.topbar .icon-btn {
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  background: transparent; border: none; cursor: pointer;
+  border-radius: 8px; color: #fff; flex: 0 0 auto;
+}
+.topbar .icon-btn:hover { background: rgba(255,255,255,0.12); }
+.topbar .icon-btn svg { width: 24px; height: 24px; stroke: #fff; stroke-width: 1.8; }
+.topbar .title {
+  color: #fff;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.3px;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.topbar .title .sub { display: block; font-size: 11px; font-weight: 500; opacity: 0.85; letter-spacing: 0; }
+
+/* ── 배지 ── */
+.badge {
+  display: inline-flex; align-items: center;
+  font-weight: 700; font-size: 11px; letter-spacing: 0;
+  padding: 3px 8px; border-radius: 6px; white-space: nowrap;
+}
+.badge.guest  { background: var(--border); color: var(--muted); }     /* 게스트 */
+/* 모임장/운영진은 이모지로 표기 (멤버는 표기 없음) */
+.role-emoji { font-size: 14px; line-height: 1; vertical-align: middle; }
+
+/* ── 버튼 ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border: none; cursor: pointer; font-family: inherit; font-weight: 700;
+  border-radius: 12px; transition: background .15s ease, transform .1s ease;
+}
+.btn:active { transform: scale(0.96); }
+.btn-primary { background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%); color: #fff; }
+.btn-primary:hover { background: linear-gradient(135deg, #0F3C14 0%, #1B5E20 100%); }
+.btn-primary:disabled { background: #A5C5A7; cursor: not-allowed; }
+.btn-secondary { background: var(--grey-btn); color: var(--text); }
+.btn-secondary:hover { background: var(--grey-btn-h); }
+.btn-block { width: 100%; height: 52px; font-size: 16px; }
+
+/* ── 하단 고정 바 ── */
+.footer-bar {
+  position: relative;
+  flex: 0 0 auto;
+  padding: 14px 20px calc(14px + env(safe-area-inset-bottom));
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  z-index: 90;
+}
+.footer-bar .btn-block { box-shadow: var(--shadow-lift); border-radius: 14px; }
+
+/* ── 하단 탭 네비게이션 ── */
+.tabbar {
+  position: relative;
+  flex: 0 0 auto;
+  height: calc(64px + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  display: flex; z-index: 90;
+}
+.tabbar a {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; text-decoration: none; color: var(--muted); font-size: 11px; font-weight: 600;
+}
+.tabbar a svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 1.8; fill: none; }
+.tabbar a { transition: color .15s ease; }
+.tabbar a svg { transition: transform .15s ease; }
+.tabbar a.active { color: var(--green); }
+.tabbar a.active svg { transform: scale(1.15) translateY(-1px); }
+
+/* ── 빈 상태 ── */
+.empty { text-align: center; padding: 56px 24px; }
+.empty .icon { font-size: 52px; margin-bottom: 16px; opacity: 0.9; }
+.empty h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.empty p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+/* ── 토스트 ── */
+.toast {
+  position: fixed; bottom: calc(var(--footer-h) + 16px); left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--text); color: #fff; padding: 12px 20px; border-radius: 12px;
+  font-size: 14px; font-weight: 600; z-index: 300;
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2); white-space: nowrap; max-width: 90vw;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

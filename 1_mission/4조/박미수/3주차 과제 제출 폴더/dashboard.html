@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Golf Rank — 내 모임</title>
+
+  <style>
+    /* ── 로컬 폰트 (다운로드한 파일 사용, 오프라인 OK) ── */
+    /* Pretendard — 한글 본문 */
+    @font-face {
+      font-family: 'Pretendard Variable';
+      font-weight: 45 920;
+      font-style: normal;
+      font-display: swap;
+      src: url('./fonts/PretendardVariable.woff2') format('woff2-variations');
+    }
+    /* Montserrat — 숫자/영문 강조 */
+    @font-face {
+      font-family: 'Montserrat';
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+      src: url('./fonts/Montserrat-VariableFont_wght.ttf') format('truetype-variations');
+    }
+
+    /* ============================================================
+       Golf Ranking Platform — Design Tokens
+       (DESIGN-TECH-FINAL.md 기준)
+    ============================================================ */
+    :root {
+      --green:        #1B5E20;  /* Primary — 헤더, 버튼, 강조 */
+      --green-dark:   #0F3C14;  /* 버튼 호버 */
+      --green-light:  #4CAF50;  /* 보조 그린 */
+      --green-tint:   #F0F8F0;  /* 텍스트 버튼 호버 */
+      --gold:         #F9A825;  /* 순위 1위, 강조 */
+      --bg:           #FFFFFF;  /* 메인 배경 */
+      --card:         #FAFAFA;  /* 카드 배경 */
+      --text:         #1F1F1F;  /* 본문 */
+      --muted:        #757575;  /* 보조 텍스트 */
+      --border:       #E0E0E0;  /* 라인 */
+      --grey-btn:     #F0F0F0;  /* 보조 버튼 */
+      --grey-btn-h:   #E0E0E0;
+
+      --header-h:     56px;
+      --footer-h:     84px;
+      --maxw:         480px;
+      --shadow-card:  0 1px 3px rgba(0,0,0,0.08);
+      --shadow-lift:  0 4px 16px rgba(27,94,32,0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: 'Pretendard Variable', Pretendard, -apple-system, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+    }
+
+    /* 폰 프레임처럼 가운데 정렬 */
+    .app {
+      max-width: var(--maxw);
+      margin: 0 auto;
+      height: 100vh;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+      position: relative;
+      box-shadow: 0 0 0 1px var(--border);
+      overflow: hidden;
+    }
+
+    /* ============================================================
+       1. 헤더 (고정, 56px)
+    ============================================================ */
+    header.topbar {
+      position: relative;
+      flex: 0 0 var(--header-h);
+      height: var(--header-h);
+      background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 100;
+    }
+    .topbar .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #fff;
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: -0.2px;
+    }
+    .topbar .brand .logo {
+      font-size: 22px;
+      line-height: 1;
+    }
+    .topbar .brand .name {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 19px;
+    }
+    .topbar .menu-btn {
+      width: 40px; height: 40px;
+      display: grid; place-items: center;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      border-radius: 8px;
+      color: #fff;
+    }
+    .topbar .menu-btn:hover { background: rgba(255,255,255,0.12); }
+    .topbar .menu-btn svg { width: 24px; height: 24px; stroke: #fff; stroke-width: 1.5; }
+
+    /* ============================================================
+       본문 컨테이너
+    ============================================================ */
+    main {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      min-height: 0;
+      -webkit-overflow-scrolling: touch;
+      padding: 24px 20px 20px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+    .section-head h2 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+    }
+    .section-head .count {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    /* ============================================================
+       2. 모임 카드
+    ============================================================ */
+    .club-list { display: flex; flex-direction: column; gap: 14px; }
+
+    .club-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;              /* 스펙: 12px */
+      min-height: 140px;                /* 스펙: 카드 높이 140px */
+      padding: 16px 18px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      transition: transform .15s ease, box-shadow .15s ease;
+      animation: cardIn .35s ease both;
+    }
+    .club-card { transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+    .club-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(27,94,32,0.12); border-color: var(--green-light); }
+    .club-card:active { transform: scale(0.99); }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 헤더: 모임명 + 배지 */
+    .club-card .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .club-card .club-name {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    /* 멤버 수 줄 */
+    .club-card .members-line {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+    .club-card .members-line .members {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* 배지 */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      font-family: 'Pretendard Variable', Pretendard, sans-serif;
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      padding: 4px 8px;
+      border-radius: 5px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .badge.member { background: var(--green); color: #fff; }
+    .badge.guest  { background: var(--border); color: var(--muted); }
+    .badge.owner  { background: var(--gold); color: #1F1F1F; }
+    .role-emoji { font-size: 15px; line-height: 1; vertical-align: middle; }
+
+    /* 정보 줄 (순위 / 핸디 / 최신) — 세로 나열 */
+    .info-lines {
+      margin: 14px 0 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .info-line {
+      display: flex;
+      align-items: baseline;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .info-line .lbl { width: 62px; flex: 0 0 auto; }
+    .info-line .val {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      color: var(--text);
+    }
+    /* 순위 줄만 큰 숫자 강조 (스펙: Montserrat Bold 24px) */
+    .info-line.rank .val {
+      font-weight: 700;
+      font-size: 24px;
+      line-height: 1;
+    }
+    .info-line.rank .val.rank-1 { color: var(--gold); }
+    .info-line.rank .paren {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-left: 4px;
+    }
+    .info-line .val .unit {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-left: 1px;
+    }
+
+    /* 카드 버튼 행 */
+    .card-actions { display: flex; gap: 8px; margin-top: auto; }
+    .card-actions button {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 44px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      /* 스펙: 주 버튼 Montserrat — 한글은 Pretendard로 자동 폴백 */
+      font-family: 'Montserrat', 'Pretendard Variable', Pretendard, sans-serif;
+      font-weight: 700;
+      transition: background .15s ease;
+    }
+    .card-actions .btn-primary { background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%); color: #fff; }
+    .card-actions .btn-primary:hover { background: var(--green-dark); }
+    .card-actions .btn-secondary {
+      background: var(--grey-btn);
+      color: var(--text);
+      font-weight: 600;
+    }
+    .card-actions .btn-secondary:hover { background: var(--grey-btn-h); }
+    .card-actions svg { width: 18px; height: 18px; stroke-width: 1.7; }
+
+    /* ============================================================
+       빈 상태 (Empty State)
+    ============================================================ */
+    .empty {
+      text-align: center;
+      padding: 56px 24px;
+      animation: cardIn .35s ease both;
+    }
+    .empty .icon {
+      font-size: 52px;
+      margin-bottom: 16px;
+      opacity: 0.9;
+    }
+    .empty h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .empty p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ============================================================
+       3. 하단 고정 버튼
+    ============================================================ */
+    .footer-bar {
+      position: relative;
+      flex: 0 0 auto;
+      padding: 14px 20px calc(14px + env(safe-area-inset-bottom));
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      z-index: 90;
+    }
+    .btn-fab {
+      width: 100%;
+      height: 52px;
+      background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      /* 스펙: 주 버튼 Montserrat Bold — 한글은 Pretendard로 자동 폴백 */
+      font-family: 'Montserrat', 'Pretendard Variable', Pretendard, sans-serif;
+      box-shadow: var(--shadow-lift);
+      transition: background .15s ease, transform .1s ease;
+    }
+    .btn-fab:hover { background: var(--green-dark); }
+    .btn-fab:active { transform: scale(0.98); }
+    .btn-fab svg { width: 22px; height: 22px; stroke: #fff; stroke-width: 2; }
+
+    /* ============================================================
+       4. 모임 생성 모달
+    ============================================================ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(31,31,31,0.45);
+      z-index: 200;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+
+    .modal {
+      width: 100%;
+      max-width: var(--maxw);
+      background: var(--bg);
+      border-radius: 24px 24px 0 0;
+      padding: 8px 24px calc(28px + env(safe-area-inset-bottom));
+      transform: translateY(100%);
+      transition: transform .3s cubic-bezier(.22,.61,.36,1);
+      max-height: 92vh;
+      overflow-y: auto;
+    }
+    .modal-overlay.open .modal { transform: translateY(0); }
+
+    .modal .grab {
+      width: 40px; height: 4px;
+      background: var(--border);
+      border-radius: 99px;
+      margin: 12px auto 20px;
+    }
+    .modal h2 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+      margin-bottom: 4px;
+    }
+    .modal .modal-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 26px;
+    }
+
+    /* 입력 필드 (하단 보더 스타일) */
+    .field { margin-bottom: 24px; }
+    .field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .field input[type="text"],
+    .field textarea {
+      width: 100%;
+      background: #F9F9F9;
+      border: none;
+      border-bottom: 1.5px solid var(--border);
+      border-radius: 8px 8px 0 0;
+      padding: 14px 14px;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--text);
+      transition: border-color .15s ease, background .15s ease;
+      resize: none;
+    }
+    .field input::placeholder,
+    .field textarea::placeholder { color: #AAAAAA; }
+    .field input:focus,
+    .field textarea:focus {
+      outline: none;
+      border-bottom-color: var(--green);
+      background: #F4F9F4;
+    }
+    .field .hint {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* 멤버/핸디 등록 */
+    .handi-block { margin-top: 10px; }
+    .handi-seg { display: flex; gap: 6px; }
+    .handi-seg button {
+      flex: 1; height: 38px; border: 1.5px solid var(--border); background: var(--card); border-radius: 8px;
+      font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; font-family: inherit; transition: all .15s ease;
+    }
+    .handi-seg button.on { border-color: var(--green); background: var(--green-tint); color: var(--green); }
+    .handi-inputs:not(:empty) { margin-top: 10px; }
+    .handi-num {
+      width: 100%; background: #F9F9F9; border: none; border-bottom: 1.5px solid var(--border);
+      border-radius: 8px 8px 0 0; padding: 11px 12px; font-size: 15px; font-family: 'Montserrat', 'Pretendard Variable', sans-serif; color: var(--text);
+    }
+    .handi-num:focus { outline: none; border-bottom-color: var(--green); background: #F4F9F4; }
+    .handi-rounds { display: flex; gap: 8px; }
+    .handi-rounds input {
+      flex: 1; min-width: 0; text-align: center; background: #F9F9F9; border: none; border-bottom: 1.5px solid var(--border);
+      border-radius: 8px 8px 0 0; padding: 11px 6px; font-size: 15px; font-family: 'Montserrat', sans-serif; color: var(--text);
+    }
+    .handi-rounds input:focus { outline: none; border-bottom-color: var(--green); background: #F4F9F4; }
+    .handi-hint { font-size: 11px; color: var(--muted); margin-top: 6px; }
+    .member-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .member-chips:empty { margin-top: 0; }
+    .mchip {
+      display: inline-flex; align-items: center; gap: 6px; padding: 7px 10px 7px 12px;
+      border-radius: 999px; background: var(--green-tint); border: 1px solid var(--green-light);
+      font-size: 13px; font-weight: 600; color: var(--green);
+    }
+    .mchip .mh { font-family: 'Montserrat', sans-serif; font-size: 11px; opacity: 0.8; }
+    .mchip .mrm { cursor: pointer; color: currentColor; opacity: 0.55; font-size: 15px; line-height: 1; }
+    .mchip .mrm:hover { opacity: 1; }
+
+    /* 랭킹 기준 토글 */
+    .segmented {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .segmented button {
+      height: 52px;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      transition: all .15s ease;
+    }
+    .segmented button .seg-sub { font-size: 11px; font-weight: 500; }
+    .segmented button.active {
+      border-color: var(--green);
+      background: var(--green-tint);
+      color: var(--green);
+    }
+
+    /* 멤버 수 스텝퍼 */
+    .stepper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #F9F9F9;
+      border-radius: 10px;
+      padding: 8px 10px;
+    }
+    .stepper button {
+      width: 40px; height: 40px;
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 10px;
+      font-size: 22px;
+      color: var(--green);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-family: 'Montserrat', sans-serif;
+      transition: background .15s ease;
+    }
+    .stepper button:hover { background: var(--green-tint); }
+    .stepper button:disabled { color: #CCC; cursor: not-allowed; background: #fff; }
+    .stepper .stepper-val {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 24px;
+    }
+    .stepper .stepper-val small { font-size: 13px; color: var(--muted); font-weight: 600; }
+
+    /* 모달 하단 버튼 */
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .modal-actions button {
+      height: 52px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+      transition: background .15s ease;
+    }
+    .modal-actions .cancel {
+      flex: 0 0 40%;
+      background: var(--grey-btn);
+      color: var(--text);
+    }
+    .modal-actions .cancel:hover { background: var(--grey-btn-h); }
+    .modal-actions .submit {
+      flex: 1;
+      background: var(--green);
+      color: #fff;
+    }
+    .modal-actions .submit:hover { background: var(--green-dark); }
+    .modal-actions .submit:disabled { background: #A5C5A7; cursor: not-allowed; }
+
+    /* 설정 시트 */
+    .set-overlay { position: fixed; inset: 0; background: rgba(31,31,31,0.45); z-index: 200; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+    .set-overlay.open { opacity: 1; pointer-events: auto; }
+    .set-sheet { width: 100%; max-width: var(--maxw); background: var(--bg); border-radius: 24px 24px 0 0; padding: 8px 24px calc(24px + env(safe-area-inset-bottom)); transform: translateY(100%); transition: transform .3s cubic-bezier(.22,.61,.36,1); }
+    .set-overlay.open .set-sheet { transform: translateY(0); }
+    .set-sheet .grab { width: 40px; height: 4px; background: var(--border); border-radius: 99px; margin: 12px auto 16px; }
+    .set-sheet h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .set-sub { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+    .set-section { font-size: 12px; font-weight: 700; color: var(--muted); margin: 18px 2px 8px; }
+    .set-section:first-of-type { margin-top: 4px; }
+    .set-section .ss-tag { font-weight: 600; color: #B0B0B0; }
+    .set-warn { font-size: 12px; line-height: 1.6; color: #8A5A00; background: #FFF6E0; border: 1px solid var(--gold); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; }
+    .set-btn { width: 100%; height: 52px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; border: 1.5px solid var(--border); background: var(--card); color: var(--text); margin-bottom: 10px; }
+    .set-btn.primary { background: var(--green); color: #fff; border-color: var(--green); }
+    .set-btn.primary:hover { background: var(--green-dark); }
+    .set-btn:hover { border-color: var(--green); }
+    .set-close { width: 100%; height: 46px; border: none; background: transparent; color: var(--muted); font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; margin-top: 4px; }
+    .set-input { width: 100%; height: 46px; border: 1.5px solid var(--border); border-radius: 10px; padding: 0 14px; font-size: 15px; font-family: inherit; color: var(--text); margin-bottom: 8px; }
+    .set-input:focus { outline: none; border-color: var(--green); }
+    .auth-hint { font-size: 12px; color: var(--muted); margin-top: 6px; text-align: center; }
+    .auth-divider { text-align: center; font-size: 12px; color: var(--muted); margin: 12px 0; }
+    .set-btn.kakao { background: #FEE500; color: #3C1E1E; border-color: #FEE500; }
+
+    /* 토스트 */
+    .toast {
+      position: fixed;
+      bottom: calc(var(--footer-h) + 16px);
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--text);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 300;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s ease, transform .25s ease;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- ========== 1. 헤더 (고정) ========== -->
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo">🏌️</span>
+        <span class="name">Golf Rank</span>
+      </div>
+      <button class="menu-btn" id="menuBtn" aria-label="설정">
+        <svg viewBox="0 0 24 24" fill="none">
+          <line x1="4" y1="7" x2="20" y2="7" stroke-linecap="round"/>
+          <line x1="4" y1="12" x2="20" y2="12" stroke-linecap="round"/>
+          <line x1="4" y1="17" x2="20" y2="17" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- ========== 본문 ========== -->
+    <main>
+      <div class="section-head">
+        <h2>내 모임</h2>
+        <span class="count" id="clubCount">0개</span>
+      </div>
+
+      <!-- 모임 카드 리스트 (JS 렌더) -->
+      <div class="club-list" id="clubList"></div>
+    </main>
+
+    <!-- ========== 3. 하단 고정 버튼 ========== -->
+    <div class="footer-bar">
+      <button class="btn-fab" id="openModalBtn">
+        <svg viewBox="0 0 24 24" fill="none">
+          <line x1="12" y1="5" x2="12" y2="19" stroke-linecap="round"/>
+          <line x1="5" y1="12" x2="19" y2="12" stroke-linecap="round"/>
+        </svg>
+        새 모임 만들기
+      </button>
+    </div>
+
+    <!-- ========== 4. 모임 생성 모달 ========== -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="grab"></div>
+        <h2 id="modalTitle">새 모임 만들기</h2>
+        <p class="modal-sub">당신의 골프 모임, 더 스마트하게 관리해보세요.</p>
+
+        <form id="clubForm">
+          <div class="field">
+            <label for="clubName">모임명</label>
+            <input type="text" id="clubName" placeholder="예: 강남 목요 클럽" maxlength="20" autocomplete="off" required />
+          </div>
+
+          <div class="field">
+            <label for="clubDesc">모임 설명 <span style="color:var(--muted);font-weight:400;">(선택)</span></label>
+            <textarea id="clubDesc" rows="2" placeholder="예: 매주 목요일 오전 라운딩" maxlength="60"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="ownerName">내 이름 (모임장 👑)</label>
+            <input type="text" id="ownerName" placeholder="예: 박미수" maxlength="10" autocomplete="off" />
+            <div class="handi-block">
+              <div class="handi-seg" id="ownerHandiSeg">
+                <button type="button" data-h="none" class="on">핸디 생략</button>
+                <button type="button" data-h="direct">직접 입력</button>
+                <button type="button" data-h="rounds">최근 3R</button>
+              </div>
+              <div class="handi-inputs" id="ownerHandiInputs"></div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>멤버 추가 <span style="color:var(--muted);font-weight:400;">(선택 · 핸디도 함께 등록)</span></label>
+            <input type="text" id="memberName" placeholder="멤버 이름" maxlength="10" autocomplete="off" />
+            <div class="handi-block">
+              <div class="handi-seg" id="newHandiSeg">
+                <button type="button" data-h="none" class="on">핸디 생략</button>
+                <button type="button" data-h="direct">직접 입력</button>
+                <button type="button" data-h="rounds">최근 3R</button>
+              </div>
+              <div class="handi-inputs" id="newHandiInputs"></div>
+            </div>
+            <button type="button" class="btn btn-primary" id="memberAdd" style="width:100%;height:46px;border-radius:8px;margin-top:8px;">+ 멤버 추가</button>
+            <div class="member-chips" id="memberChips"></div>
+          </div>
+
+          <div class="field">
+            <label>랭킹 기준</label>
+            <div class="segmented" id="rankSeg">
+              <button type="button" data-rank="score" class="active">
+                스코어 기준
+                <span class="seg-sub">총 타수 낮은 순</span>
+              </button>
+              <button type="button" data-rank="handicap">
+                핸디 기준
+                <span class="seg-sub">스코어 − 핸디 순</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>최대 멤버 수</label>
+            <div class="stepper">
+              <button type="button" id="stepDown" aria-label="줄이기">−</button>
+              <div class="stepper-val"><span id="maxMembers">20</span><small>명</small></div>
+              <button type="button" id="stepUp" aria-label="늘리기">+</button>
+            </div>
+            <p class="hint">멤버는 영구 등록되며, 게스트는 라운드별로 무제한 참여할 수 있어요.</p>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="cancel" id="cancelBtn">취소</button>
+            <button type="submit" class="submit" id="submitBtn">모임 만들기</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 설정 시트 -->
+    <div class="set-overlay" id="setOverlay">
+      <div class="set-sheet">
+        <div class="grab"></div>
+        <h2>설정</h2>
+        <p class="set-sub" id="setInfo"></p>
+
+        <div class="set-section">계정</div>
+        <div id="accountBox"></div>
+
+        <div class="set-section">내 기록</div>
+        <button class="set-btn" id="myRecordBtn">📊 내 라운드 기록 보기</button>
+
+        <div class="set-section">데이터 관리 <span class="ss-tag">백업용</span></div>
+        <div class="set-warn">⚠️ 기록은 지금 <b>이 브라우저에만</b> 저장돼요. 가끔 <b>내보내기</b>로 백업해두세요. (로그인 연동 후엔 자동으로 클라우드 보관돼요)</div>
+        <button class="set-btn" id="exportBtn">📤 데이터 내보내기 (백업 파일 저장)</button>
+        <button class="set-btn" id="importBtn">📥 데이터 불러오기 (백업 파일 복원)</button>
+        <input type="file" id="importFile" accept="application/json,.json" hidden />
+
+        <button class="set-close" id="setClose">닫기</button>
+      </div>
+    </div>
+
+    <!-- 토스트 -->
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./db.js"></script>
+  <script>
+    /* ============================================================
+       Golf Ranking Platform — Dashboard Logic
+       localStorage 임시 저장 (Supabase는 나중에)
+    ============================================================ */
+    const STORAGE_KEY = 'golfrank.clubs';
+
+    /* ---------- 상태 ---------- */
+    let clubs = loadClubs();
+    let form = { rankingType: 'score', maxMembers: 20 };
+    let newMembers = [];   // [{ name, handicap:number|null, seed:[3]|null }]
+    let ownerHandi = { mode: 'none', value: '', r: ['', '', ''] };
+    let newHandi   = { mode: 'none', value: '', r: ['', '', ''] };
+    let MY_UID = null, MY_NAME = '';   // 로그인한 계정 정보
+
+    /* ---------- DOM ---------- */
+    const $ = (id) => document.getElementById(id);
+    const clubList   = $('clubList');
+    const clubCount  = $('clubCount');
+    const overlay    = $('modalOverlay');
+    const openBtn    = $('openModalBtn');
+    const cancelBtn  = $('cancelBtn');
+    const clubForm   = $('clubForm');
+    const rankSeg    = $('rankSeg');
+    const maxMembersEl = $('maxMembers');
+    const toastEl    = $('toast');
+
+    /* ---------- localStorage ---------- */
+    function loadClubs() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      } catch (e) {
+        return [];
+      }
+    }
+    function saveClubs() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(clubs));
+    }
+
+    /* ---------- 유틸 ---------- */
+    function clubCode() {
+      const s = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let out = '';
+      for (let i = 0; i < 6; i++) out += s[Math.floor(Math.random() * s.length)];
+      return 'CLUB-' + out;
+    }
+    function fmtDate(ts) {
+      const d = new Date(ts);
+      return (d.getMonth() + 1) + '월 ' + d.getDate() + '일';
+    }
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, (c) => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      }[c]));
+    }
+
+    /* ---------- 렌더 ---------- */
+    function render() {
+      clubCount.textContent = clubs.length + '개';
+
+      if (clubs.length === 0) {
+        clubList.innerHTML = `
+          <div class="empty">
+            <div class="icon">⛳️</div>
+            <h3>아직 모임이 없어요</h3>
+            <p>첫 골프 모임을 만들고<br/>멤버들과 순위를 관리해보세요.</p>
+          </div>`;
+        return;
+      }
+
+      clubList.innerHTML = clubs.map((c, i) => {
+        const rankStr = c.myRank ? c.myRank : '—';
+        const isFirst = c.myRank === 1;
+        const scoreStr = c.myScore ? c.myScore : '—';
+        const handi = (c.myHandicap === undefined || c.myHandicap === null)
+          ? '—'
+          : (c.myHandicap > 0 ? '+' + c.myHandicap : c.myHandicap);
+        const latest = c.latestRound ? fmtDate(c.latestRound) : '기록 없음';
+
+        const rankVal = c.myRank
+          ? `<span class="val ${isFirst ? 'rank-1' : ''}">${rankStr}<span class="unit">위</span></span>` +
+            (c.myScore ? `<span class="paren">(${scoreStr}타)</span>` : '')
+          : `<span class="val">—</span>`;
+
+        return `
+        <div class="club-card" style="animation-delay:${i * 0.05}s;cursor:pointer;" onclick="openClubHome('${c.id}')">
+          <div class="card-top">
+            <div>
+              <div class="club-name">${escapeHtml(c.name)} ⛳</div>
+              <div class="members-line">멤버 <span class="members">${c.currentMembers}/${c.maxMembers}</span></div>
+            </div>
+            <span class="role-emoji" title="모임장">👑</span>
+          </div>
+
+          <div class="info-lines">
+            <div class="info-line rank">
+              <span class="lbl">🏆 순위</span>${rankVal}
+            </div>
+            <div class="info-line">
+              <span class="lbl">📊 핸디</span><span class="val">${handi}</span>
+            </div>
+            <div class="info-line">
+              <span class="lbl">📅 최신</span><span class="val">${latest}</span>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <button class="btn-primary" onclick="event.stopPropagation(); viewRanking('${c.id}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M8 21V9M16 21V5M4 21V13M20 21V9" stroke-linecap="round"/></svg>
+              순위 보기
+            </button>
+            <button class="btn-secondary" onclick="event.stopPropagation(); recordRound('${c.id}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              기록하기
+            </button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    /* ---------- 카드 → 페이지 이동 ---------- */
+    window.openClubHome = (id) => { location.href = 'home.html?club=' + encodeURIComponent(id); };
+    window.viewRanking = (id) => { location.href = 'ranking.html?club=' + encodeURIComponent(id); };
+    window.recordRound = (id) => { location.href = 'round.html?club=' + encodeURIComponent(id); };
+
+    /* ---------- 토스트 ---------- */
+    let toastTimer;
+    function showToast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
+    }
+
+    /* ---------- 모달 열기/닫기 ---------- */
+    function openModal() {
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      syncHandiSeg('owner'); syncHandiSeg('new');
+      renderHandiInputs('owner'); renderHandiInputs('new');
+      renderMemberChips();
+      setTimeout(() => $('clubName').focus(), 300);
+    }
+    function closeModal() {
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+      resetForm();
+    }
+    function resetForm() {
+      clubForm.reset();
+      form = { rankingType: 'score', maxMembers: 20 };
+      newMembers = [];
+      ownerHandi = { mode: 'none', value: '', r: ['', '', ''] };
+      newHandi   = { mode: 'none', value: '', r: ['', '', ''] };
+      syncHandiSeg('owner'); syncHandiSeg('new');
+      renderHandiInputs('owner'); renderHandiInputs('new');
+      renderMemberChips();
+      maxMembersEl.textContent = '20';
+      [...rankSeg.children].forEach((b) =>
+        b.classList.toggle('active', b.dataset.rank === 'score'));
+      updateStepperButtons();
+    }
+
+    /* ---------- 핸디 입력기 (운영자 / 새 멤버 공통) ---------- */
+    function handiState(prefix) { return prefix === 'owner' ? ownerHandi : newHandi; }
+    function syncHandiSeg(prefix) {
+      [...$(prefix + 'HandiSeg').children].forEach((b) => b.classList.toggle('on', b.dataset.h === handiState(prefix).mode));
+    }
+    function renderHandiInputs(prefix) {
+      const st = handiState(prefix), c = $(prefix + 'HandiInputs');
+      if (st.mode === 'direct') {
+        c.innerHTML = `<input class="handi-num" data-hp="${prefix}" data-k="value" inputmode="decimal" placeholder="기준 타수 (예: 90.3)" value="${escapeHtml(st.value)}" />`;
+      } else if (st.mode === 'rounds') {
+        c.innerHTML = `<div class="handi-rounds">
+          <input data-hp="${prefix}" data-k="0" inputmode="numeric" placeholder="최근 1R" value="${escapeHtml(st.r[0])}" />
+          <input data-hp="${prefix}" data-k="1" inputmode="numeric" placeholder="2R" value="${escapeHtml(st.r[1])}" />
+          <input data-hp="${prefix}" data-k="2" inputmode="numeric" placeholder="3R" value="${escapeHtml(st.r[2])}" />
+        </div><div class="handi-hint">세 라운드 평균이 기준 핸디가 돼요 (예: 90·91·90 → 90.3)</div>`;
+      } else { c.innerHTML = ''; }
+    }
+    function computeHandi(st) {
+      if (st.mode === 'direct') { const v = parseFloat(st.value); return isNaN(v) ? null : Math.round(v * 10) / 10; }
+      if (st.mode === 'rounds') { const ns = st.r.map((x) => parseFloat(x)).filter((n) => !isNaN(n)); return ns.length ? Math.round(ns.reduce((a, b) => a + b, 0) / ns.length * 10) / 10 : null; }
+      return null;
+    }
+    ['owner', 'new'].forEach((prefix) => {
+      $(prefix + 'HandiSeg').addEventListener('click', (e) => {
+        const b = e.target.closest('button'); if (!b) return;
+        handiState(prefix).mode = b.dataset.h; syncHandiSeg(prefix); renderHandiInputs(prefix);
+      });
+      $(prefix + 'HandiInputs').addEventListener('input', (e) => {
+        const el = e.target, st = handiState(prefix), k = el.dataset.k;
+        if (k === 'value') st.value = el.value; else if (k != null) st.r[+k] = el.value;
+      });
+    });
+
+    /* ---------- 멤버 추가 (개설 모달) ---------- */
+    function renderMemberChips() {
+      $('memberChips').innerHTML = newMembers.map((m, i) => {
+        const h = (m.handicap != null) ? `<span class="mh">핸디 ${m.handicap}</span>` : `<span class="mh">핸디 미설정</span>`;
+        return `<span class="mchip">${escapeHtml(m.name)} ${h}<span class="mrm" data-mrm="${i}">×</span></span>`;
+      }).join('');
+    }
+    function addMember() {
+      const v = $('memberName').value.trim();
+      if (!v) { showToast('멤버 이름을 입력해주세요'); return; }
+      const ownerName = ($('ownerName').value.trim() || '나');
+      if (v === ownerName || newMembers.some((m) => m.name === v)) { showToast('이미 있는 이름이에요'); $('memberName').value = ''; return; }
+      if (1 + newMembers.length >= form.maxMembers) { showToast('최대 멤버 수를 초과했어요'); return; }
+      newMembers.push({ name: v, handicap: computeHandi(newHandi), seed: newHandi.mode === 'rounds' ? newHandi.r.slice() : null });
+      $('memberName').value = '';
+      newHandi = { mode: 'none', value: '', r: ['', '', ''] };
+      syncHandiSeg('new'); renderHandiInputs('new');
+      renderMemberChips();
+      $('memberName').focus();
+    }
+    $('memberAdd').addEventListener('click', addMember);
+    $('memberName').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addMember(); } });
+    $('memberChips').addEventListener('click', (e) => {
+      const rm = e.target.closest('[data-mrm]');
+      if (rm) { newMembers.splice(+rm.dataset.mrm, 1); renderMemberChips(); }
+    });
+
+    openBtn.addEventListener('click', openModal);
+    cancelBtn.addEventListener('click', closeModal);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal();
+    });
+
+    /* ---------- 랭킹 기준 세그먼트 ---------- */
+    rankSeg.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      form.rankingType = btn.dataset.rank;
+      [...rankSeg.children].forEach((b) => b.classList.toggle('active', b === btn));
+    });
+
+    /* ---------- 멤버 수 스텝퍼 ---------- */
+    const MIN_M = 2, MAX_M = 20;
+    function updateStepperButtons() {
+      $('stepDown').disabled = form.maxMembers <= MIN_M;
+      $('stepUp').disabled = form.maxMembers >= MAX_M;
+    }
+    $('stepDown').addEventListener('click', () => {
+      if (form.maxMembers > MIN_M) { form.maxMembers--; maxMembersEl.textContent = form.maxMembers; updateStepperButtons(); }
+    });
+    $('stepUp').addEventListener('click', () => {
+      if (form.maxMembers < MAX_M) { form.maxMembers++; maxMembersEl.textContent = form.maxMembers; updateStepperButtons(); }
+    });
+
+    /* ---------- 폼 제출 → 모임 생성 ---------- */
+    clubForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = $('clubName').value.trim();
+      const desc = $('clubDesc').value.trim();
+      if (!name) { showToast('모임명을 입력해주세요'); return; }
+
+      const now = Date.now();
+      const ownerName = $('ownerName').value.trim() || '나';
+      // 로스터: 운영자(내 이름) + 추가 멤버 (각자 핸디 포함)
+      const members = [{ id: 'me', name: ownerName, role: 'owner', handicap: computeHandi(ownerHandi), userId: MY_UID }].concat(
+        newMembers.map((m, i) => ({ id: 'm_' + now + '_' + i, name: m.name, role: 'member', handicap: m.handicap, seed: m.seed, userId: null }))
+      );
+      const newClub = {
+        id: 'club_' + now,
+        name,
+        description: desc,
+        rankingType: form.rankingType,
+        maxMembers: form.maxMembers,
+        members,                        // 멤버 로스터
+        currentMembers: members.length,
+        clubCode: clubCode(),
+        createdBy: MY_UID,              // 만든 계정
+        createdAt: now,
+        rounds: [],
+        // 대시보드 표시용 (라운드 전이라 비어있음)
+        myRank: null,
+        myScore: null,
+        myHandicap: null,
+        latestRound: null,
+      };
+
+      clubs.unshift(newClub);
+      saveClubs();
+      (async ()=>{ await pushClub(newClub); })();   // 공유 서버에 올리기 (owner 슬롯에 내 계정 연결됨)
+      render();
+      closeModal();
+      showToast('“' + name + '” 모임이 만들어졌어요! 🎉');
+    });
+
+    /* ---------- 설정 · 데이터 백업/복원 ---------- */
+    function pad2(n){ return String(n).padStart(2,'0'); }
+    function openSettings(){
+      const n = clubs.length;
+      const rounds = clubs.reduce((a,c)=> a + ((c.rounds&&c.rounds.length)||0), 0);
+      $('setInfo').textContent = `모임 ${n}개 · 라운드 기록 ${rounds}개 저장됨`;
+      $('setOverlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+      renderAccount();
+    }
+    function closeSettings(){ $('setOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+    $('menuBtn').addEventListener('click', openSettings);
+    $('setClose').addEventListener('click', closeSettings);
+    $('myRecordBtn').addEventListener('click', ()=> showToast('로그인하면 내 라운드 기록이 여기 바로 떠요 📊'));
+
+    /* ---------- 카카오 로그인 ---------- */
+    async function renderAccount(){
+      const box = $('accountBox'); if(!box) return;
+      let u = null;
+      try { u = await currentUser(); } catch(e){}
+      if (u) {
+        const nm = userDisplayName(u);
+        setMyName(nm); MY_UID = u.id; MY_NAME = nm;
+        box.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <span style="font-size:15px;font-weight:700;">👤 ${escapeHtml(nm)}님</span>
+          <button class="set-btn" id="logoutBtn" style="width:auto;height:40px;padding:0 16px;margin:0;">로그아웃</button></div>`;
+        const lo = $('logoutBtn'); if(lo) lo.addEventListener('click', async ()=>{ await signOut(); MY_UID=null; renderAccount(); showToast('로그아웃했어요'); });
+        try { await pullMyClubs(); clubs = loadClubs(); render(); } catch(e){}   // 내 모임 클라우드에서 불러오기
+      } else {
+        box.innerHTML = `
+          <input class="set-input" id="authName" placeholder="이름/닉네임 (처음 가입 시)" maxlength="12" />
+          <input class="set-input" id="authEmail" type="email" placeholder="이메일" autocomplete="username" />
+          <input class="set-input" id="authPw" type="password" placeholder="비밀번호 (6자 이상)" autocomplete="current-password" />
+          <button class="set-btn primary" id="authBtn">이메일로 로그인 / 가입</button>
+          <div class="auth-divider">또는</div>
+          <button class="set-btn kakao" id="kakaoBtn">💬 카카오로 로그인</button>
+          <div class="auth-hint">이메일은 지금 바로 · 카카오는 배포 주소에서 동작해요.</div>`;
+        const ab = $('authBtn'); if(ab) ab.addEventListener('click', doAuth);
+        const pw = $('authPw'); if(pw) pw.addEventListener('keydown',(e)=>{ if(e.key==='Enter') doAuth(); });
+        const kb = $('kakaoBtn'); if(kb) kb.addEventListener('click', async ()=>{
+          if (location.protocol === 'file:') { showToast('카카오는 배포 주소(golf-rank-beta.vercel.app)에서 로그인하세요'); return; }
+          try { await signInKakao(location.href); } catch(e){ showToast('카카오 로그인 실패: '+(e.message||e)); }
+        });
+      }
+    }
+    async function doAuth(){
+      const email=($('authEmail').value||'').trim(), pw=$('authPw').value, name=($('authName').value||'').trim();
+      if(!email||!pw){ showToast('이메일과 비밀번호를 입력하세요'); return; }
+      const btn=$('authBtn'); btn.disabled=true;
+      try{
+        await signInEmail(email, pw);
+        await renderAccount(); showToast('로그인했어요 👋');
+      }catch(e){
+        try{
+          const r = await signUpEmail(email, pw, name);
+          if(r && r.session){ await renderAccount(); showToast('가입 + 로그인 완료 🎉'); }
+          else { showToast('가입됐어요! 이메일 확인이 필요하면 Supabase 설정에서 꺼주세요'); if($('authBtn')) $('authBtn').disabled=false; }
+        }catch(e2){ showToast('실패: '+(e2.message||e2)); if($('authBtn')) $('authBtn').disabled=false; }
+      }
+    }
+    renderAccount();   // 로그인 리다이렉트 복귀 시 세션 반영
+    $('setOverlay').addEventListener('click', (e)=>{ if(e.target===$('setOverlay')) closeSettings(); });
+
+    // 내보내기 → JSON 파일 다운로드
+    $('exportBtn').addEventListener('click', ()=>{
+      const payload = { app:'golfrank', version:1, exportedAt:new Date().toISOString(), clubs };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
+      const url = URL.createObjectURL(blob);
+      const d = new Date();
+      const stamp = `${d.getFullYear()}${pad2(d.getMonth()+1)}${pad2(d.getDate())}-${pad2(d.getHours())}${pad2(d.getMinutes())}`;
+      const a = document.createElement('a');
+      a.href = url; a.download = `golfrank-backup-${stamp}.json`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 1000);
+      showToast('백업 파일을 저장했어요 📤');
+    });
+
+    // 불러오기 → 파일 선택 → 검증 → 덮어쓰기
+    $('importBtn').addEventListener('click', ()=> $('importFile').click());
+    $('importFile').addEventListener('change', (e)=>{
+      const file = e.target.files[0]; if(!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          const list = Array.isArray(parsed) ? parsed : parsed.clubs;
+          if(!Array.isArray(list)) throw new Error('형식이 올바르지 않아요');
+          const cnt = list.length;
+          const rnd = list.reduce((a,c)=> a + ((c.rounds&&c.rounds.length)||0), 0);
+          if(!confirm(`백업을 불러오면 지금 데이터를 덮어써요.\n\n불러올 데이터: 모임 ${cnt}개 · 라운드 ${rnd}개\n계속할까요?`)) { $('importFile').value=''; return; }
+          clubs = list;
+          saveClubs();
+          render();
+          closeSettings();
+          showToast('백업을 불러왔어요 ✅');
+        } catch(err) {
+          showToast('불러오기 실패: ' + (err.message||'파일을 확인하세요'));
+        }
+        $('importFile').value = '';
+      };
+      reader.readAsText(file);
+    });
+
+    /* ---------- 초기 렌더 ---------- */
+    updateStepperButtons();
+    render();
+  </script>
+</body>
+</html>
