@@ -160,6 +160,7 @@ HTML = r"""<!DOCTYPE html>
 <title>아침 묵상 OS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 /* ════════════════════════════════════════
    PALETTE — Parisian Antique
@@ -393,6 +394,69 @@ textarea:focus{border-color:var(--sky);box-shadow:0 0 0 3px rgba(141,180,200,.15
 .cal-cell:not(.has-entry) .cal-preview{display:none}
 .cal-popup{background:var(--cream);border:1px solid var(--line);border-left:3px solid var(--ora);padding:16px;margin-top:10px;box-shadow:2px 3px 12px rgba(42,32,22,.1);display:none}
 .cal-popup.show{display:block}
+.del-btn{
+  background:none;border:1px solid var(--line);
+  color:var(--ink2);font-size:14px;cursor:pointer;line-height:1;
+  width:24px;height:24px;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;opacity:.45;padding:0;
+}
+.del-btn:hover{background:var(--ora);border-color:var(--ora);color:white;opacity:1;}
+.edit-btn{
+  background:none;border:1px solid var(--line);
+  color:var(--sky-d);font-size:11px;cursor:pointer;
+  padding:2px 8px;font-family:'Lato',sans-serif;font-weight:700;
+  letter-spacing:.4px;opacity:.6;
+}
+.edit-btn:hover{background:var(--sky-l);border-color:var(--sky);opacity:1;}
+
+/* 편집 모달 */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(38,24,12,.45);z-index:100;align-items:center;justify-content:center;padding:20px}
+.modal-backdrop.show{display:flex}
+.modal{background:var(--cream);border:1px solid var(--line);max-width:520px;width:100%;padding:24px;box-shadow:0 8px 32px rgba(38,24,12,.2)}
+.modal-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--sky-d);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--line-l)}
+.modal-field{margin-bottom:14px}
+.modal-label{font-size:11px;font-weight:700;color:var(--sky-d);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.modal-actions{display:flex;gap:8px;margin-top:18px}
+.modal-save{flex:1;padding:12px;background:var(--ora);color:white;border:none;font-weight:700;font-size:13px;cursor:pointer;font-family:'Lato',sans-serif;letter-spacing:.8px;text-transform:uppercase}
+.modal-save:hover{background:var(--ora-d)}
+.modal-cancel{padding:12px 20px;background:none;border:1px solid var(--line);color:var(--ink2);font-size:13px;cursor:pointer;font-family:'Lato',sans-serif}
+
+/* ── 스트릭 배너 ── */
+.streak-banner{background:linear-gradient(135deg,var(--sky-d),var(--sky));color:white;padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;gap:14px;border-left:4px solid var(--ora)}
+.streak-num{font-size:32px;font-weight:700;font-family:'Playfair Display',serif;line-height:1}
+.streak-info{display:flex;flex-direction:column;gap:2px}
+.streak-label{font-size:13px;font-weight:700;letter-spacing:.3px}
+.streak-sub{font-size:10px;opacity:.75;letter-spacing:.3px}
+
+/* ── 검색 ── */
+.search-wrap{position:relative;margin-bottom:14px}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--sky-d);font-size:14px;pointer-events:none}
+.search-input{width:100%;padding:10px 14px 10px 36px;border:1px solid var(--line);font-size:13px;font-family:'Lato',sans-serif;background:white;outline:none;color:var(--ink)}
+.search-input:focus{border-color:var(--sky);box-shadow:0 0 0 3px rgba(141,180,200,.15)}
+
+/* ── 카드 버튼 ── */
+.card-btn{background:none;border:1px solid var(--line);color:var(--ora-d);font-size:11px;cursor:pointer;padding:2px 8px;font-family:'Lato',sans-serif;font-weight:700;letter-spacing:.4px;opacity:.6}
+.card-btn:hover{background:var(--ora-l);border-color:var(--ora);opacity:1}
+
+/* ── 공유 카드 모달 ── */
+.share-backdrop{display:none;position:fixed;inset:0;background:rgba(38,24,12,.6);z-index:200;align-items:center;justify-content:center;padding:20px}
+.share-backdrop.show{display:flex}
+.share-modal-box{background:var(--cream);max-width:400px;width:100%;box-shadow:0 12px 40px rgba(38,24,12,.3)}
+#share-card{padding:28px 24px;font-family:'Lato',sans-serif}
+.sc-hd{background-image:repeating-linear-gradient(to right,var(--sky-s1) 0px,var(--sky-s1) 10px,var(--sky-s2) 10px,var(--sky-s2) 30px);padding:16px;text-align:center;margin:-28px -24px 20px;border-bottom:2px solid var(--sky-d)}
+.sc-hd-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--ora);font-weight:700}
+.sc-hd-verse{font-size:9px;color:var(--ink);font-family:'Playfair Display',serif;font-style:italic;margin-top:3px;opacity:.8}
+.sc-date{font-size:10px;color:var(--ora);font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px}
+.sc-passage{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;color:var(--ink);margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--line-l)}
+.sc-lbl{font-size:10px;font-weight:700;color:var(--sky-d);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
+.sc-txt{font-size:13px;color:var(--ink2);line-height:1.75;margin-bottom:14px}
+.sc-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.sc-chip{background:var(--sky-l);color:var(--sky-d);padding:3px 10px;font-size:11px;font-weight:700}
+.sc-foot{font-size:9px;color:var(--line);text-align:right;font-style:italic;border-top:1px solid var(--line-l);padding-top:8px}
+.share-actions{display:flex;gap:8px;padding:14px;background:white;border-top:1px solid var(--line-l)}
+.share-dl{flex:1;padding:11px;background:var(--ora);color:white;border:none;font-weight:700;font-size:12px;cursor:pointer;font-family:'Lato',sans-serif;letter-spacing:.8px;text-transform:uppercase}
+.share-dl:hover{background:var(--ora-d)}
+.share-cl{padding:11px 16px;background:none;border:1px solid var(--line);color:var(--ink2);font-size:12px;cursor:pointer;font-family:'Lato',sans-serif}
 </style>
 </head>
 <body>
@@ -458,7 +522,70 @@ textarea:focus{border-color:var(--sky);box-shadow:0 0 0 3px rgba(141,180,200,.15
 
 </div>
 
+<!-- 공유 카드 모달 -->
+<div class="share-backdrop" id="share-backdrop" onclick="if(event.target===this)closeShareCard()">
+  <div class="share-modal-box">
+    <div id="share-card">
+      <div class="sc-hd">
+        <div class="sc-hd-title">Come Away</div>
+        <div class="sc-hd-verse">"Turn your eyes away from me, for they overwhelm me." — Song of Songs 6:5</div>
+      </div>
+      <div class="sc-date" id="sc-date"></div>
+      <div class="sc-passage" id="sc-passage"></div>
+      <div class="sc-lbl">묵상</div>
+      <div class="sc-txt" id="sc-summary"></div>
+      <div id="sc-action-wrap">
+        <div class="sc-lbl">액션 플랜</div>
+        <div class="sc-txt" id="sc-action-text"></div>
+      </div>
+      <div id="sc-words-wrap">
+        <div class="sc-lbl">기억할 단어</div>
+        <div class="sc-chips" id="sc-words-list"></div>
+      </div>
+      <div class="sc-foot">Come Away · 아침 묵상</div>
+    </div>
+    <div class="share-actions">
+      <button class="share-cl" onclick="closeShareCard()">닫기</button>
+      <button class="share-dl" onclick="downloadCard()">이미지로 저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 편집 모달 -->
+<div class="modal-backdrop" id="edit-modal" onclick="if(event.target===this)closeEdit()">
+  <div class="modal">
+    <div class="modal-title">✦ &nbsp;묵상 기록 수정</div>
+    <div class="modal-field">
+      <label class="modal-label">묵상 내용</label>
+      <textarea id="edit-summary" style="width:100%;min-height:90px;border:1px solid var(--line);padding:10px 12px;font-size:14px;font-family:'Lato',sans-serif;outline:none;resize:vertical;background:white;color:var(--ink);line-height:1.75"></textarea>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">액션 플랜</label>
+      <textarea id="edit-action" style="width:100%;min-height:55px;border:1px solid var(--line);padding:10px 12px;font-size:14px;font-family:'Lato',sans-serif;outline:none;resize:vertical;background:white;color:var(--ink);line-height:1.75"></textarea>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">기억할 단어 <span style="font-size:10px;opacity:.6;text-transform:none;letter-spacing:0">(쉼표로 구분)</span></label>
+      <input type="text" id="edit-words" style="width:100%;padding:10px 12px;border:1px solid var(--line);font-size:13px;font-family:'Lato',sans-serif;outline:none;background:white;color:var(--ink)">
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeEdit()">취소</button>
+      <button class="modal-save" onclick="saveEdit()">저장</button>
+    </div>
+  </div>
+</div>
+
 <div id="tab-dashboard" class="page">
+  <div class="streak-banner" id="streak-banner" style="display:none">
+    <div class="streak-num" id="streak-num">0</div>
+    <div class="streak-info">
+      <div class="streak-label" id="streak-label">일 연속 묵상 중 🔥</div>
+      <div class="streak-sub">Keep going — He is waiting</div>
+    </div>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="search-input" type="text" placeholder="구절·내용으로 검색..." oninput="onSearch(this.value)">
+  </div>
   <div class="dash-toolbar">
     <button class="view-btn active" id="btn-list" onclick="setView('list')" title="목록 보기">☰</button>
     <button class="view-btn" id="btn-cal" onclick="setView('cal')" title="달력 보기">📅</button>
@@ -596,9 +723,16 @@ let allEntries = [];
 let calYear, calMonth;
 let dashView = 'list';
 
-function entryCardHtml(e) {
+function entryCardHtml(e, idx) {
   return `<div class="entry-card">
-    <div class="entry-date">${e.date}</div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px">
+      <div class="entry-date">${e.date}</div>
+      ${idx !== undefined ? `<div style="display:flex;gap:5px">
+        <button class="card-btn" onclick="openShareCard(${idx})">카드</button>
+        <button class="edit-btn" onclick="openEdit(${idx})">편집</button>
+        <button class="del-btn" onclick="deleteEntry(${idx})" title="삭제">×</button>
+      </div>` : ''}
+    </div>
     <div class="entry-passage">${e.passage}</div>
     <div class="entry-summary">${e.summary}</div>
     ${e.action?`<div class="entry-action">✍️ ${e.action}</div>`:''}
@@ -606,13 +740,116 @@ function entryCardHtml(e) {
   </div>`;
 }
 
+/* ── 스트릭 ── */
+function calcStreak() {
+  const dates = new Set(allEntries.map(e => e.date));
+  const today = new Date();
+  const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const todayStr = fmt(today);
+  const startOffset = dates.has(todayStr) ? 0 : 1;
+  let streak = 0;
+  for(let i = startOffset; i < 365; i++) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    if(dates.has(fmt(d))) streak++;
+    else break;
+  }
+  return streak;
+}
+function renderStreak() {
+  const streak = calcStreak();
+  const banner = document.getElementById('streak-banner');
+  if(!banner) return;
+  if(streak === 0) { banner.style.display = 'none'; return; }
+  banner.style.display = 'flex';
+  document.getElementById('streak-num').textContent = streak;
+  document.getElementById('streak-label').textContent = `일 연속 묵상 중 ${streak >= 7 ? '🔥🔥' : '🔥'}`;
+}
+
+/* ── 검색 ── */
+let searchQuery = '';
+function onSearch(val) { searchQuery = val.toLowerCase(); renderList(); }
+function getFiltered() {
+  if(!searchQuery) return allEntries;
+  return allEntries.filter(e =>
+    (e.passage||'').toLowerCase().includes(searchQuery) ||
+    (e.summary||'').toLowerCase().includes(searchQuery) ||
+    (e.action||'').toLowerCase().includes(searchQuery) ||
+    (e.words||[]).some(w => w.toLowerCase().includes(searchQuery))
+  );
+}
+
+/* ── 공유 카드 ── */
+function openShareCard(idx) {
+  const e = allEntries[idx];
+  document.getElementById('sc-date').textContent = e.date;
+  document.getElementById('sc-passage').textContent = e.passage;
+  document.getElementById('sc-summary').textContent = e.summary;
+  const hasAction = !!(e.action);
+  document.getElementById('sc-action-wrap').style.display = hasAction ? '' : 'none';
+  document.getElementById('sc-action-text').textContent = e.action || '';
+  const words = e.words || [];
+  document.getElementById('sc-words-wrap').style.display = words.length ? '' : 'none';
+  document.getElementById('sc-words-list').innerHTML = words.map(w=>`<span class="sc-chip">${w}</span>`).join('');
+  document.getElementById('share-backdrop').classList.add('show');
+}
+function closeShareCard() { document.getElementById('share-backdrop').classList.remove('show'); }
+async function downloadCard() {
+  const card = document.getElementById('share-card');
+  const btn = document.querySelector('.share-dl');
+  btn.textContent = '저장 중...'; btn.disabled = true;
+  try {
+    const canvas = await html2canvas(card, {scale:2, backgroundColor:'#fdfaf2'});
+    const a = document.createElement('a');
+    a.download = `묵상카드-${document.getElementById('sc-date').textContent}.png`;
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  } finally {
+    btn.textContent = '이미지로 저장'; btn.disabled = false;
+  }
+}
+
+async function deleteEntry(idx) {
+  if(!confirm('이 묵상 기록을 삭제할까요?')) return;
+  await fetch('/api/log/delete', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({index:idx})});
+  loadDashboard();
+}
+
+let editingIdx = null;
+function openEdit(idx) {
+  editingIdx = idx;
+  const e = allEntries[idx];
+  document.getElementById('edit-summary').value = e.summary || '';
+  document.getElementById('edit-action').value = e.action || '';
+  document.getElementById('edit-words').value = (e.words || []).join(', ');
+  document.getElementById('edit-modal').classList.add('show');
+}
+function closeEdit() {
+  document.getElementById('edit-modal').classList.remove('show');
+  editingIdx = null;
+}
+async function saveEdit() {
+  if(editingIdx === null) return;
+  const summary = document.getElementById('edit-summary').value.trim();
+  const action = document.getElementById('edit-action').value.trim();
+  const words = document.getElementById('edit-words').value.split(',').map(w=>w.trim()).filter(Boolean);
+  await fetch('/api/log/edit', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({index: editingIdx, summary, action, words})});
+  closeEdit();
+  loadDashboard();
+}
+
 function renderList() {
   const el = document.getElementById('dashboard-list');
+  const filtered = getFiltered();
   if(!allEntries.length){
     el.innerHTML='<div class="empty">아직 기록된 묵상이 없어요 🙏<br>첫 묵상을 시작해보세요.</div>';
     return;
   }
-  el.innerHTML=[...allEntries].reverse().map(entryCardHtml).join('');
+  if(!filtered.length){
+    el.innerHTML='<div class="empty">검색 결과가 없어요.</div>';
+    return;
+  }
+  el.innerHTML=[...filtered].map(e=>entryCardHtml(e, allEntries.indexOf(e))).reverse().join('');
 }
 
 function renderCal() {
@@ -653,13 +890,11 @@ function renderCal() {
 }
 
 function calClick(dateStr) {
-  const byDate={};
-  allEntries.forEach(e=>{byDate[e.date]=e;});
-  const e=byDate[dateStr];
-  const popup=document.getElementById('cal-popup');
-  if(!e){ popup.className='cal-popup'; return; }
-  popup.innerHTML=entryCardHtml(e);
-  popup.className='cal-popup show';
+  const idx = allEntries.findIndex(e => e.date === dateStr);
+  const popup = document.getElementById('cal-popup');
+  if(idx < 0){ popup.className='cal-popup'; return; }
+  popup.innerHTML = entryCardHtml(allEntries[idx], idx);
+  popup.className = 'cal-popup show';
 }
 
 function moveCal(dir) {
@@ -682,6 +917,7 @@ function setView(v) {
 async function loadDashboard() {
   const res = await fetch('/api/log');
   allEntries = await res.json();
+  renderStreak();
   renderList();
   if(dashView==='cal') renderCal();
 }
@@ -728,6 +964,24 @@ class Handler(BaseHTTPRequestHandler):
             entries.append(body)
             save_log(entries)
             schedule_reminders(body)
+            self.send_json({"ok": True})
+
+        elif path == "/api/log/delete":
+            entries = load_log()
+            idx = body.get("index")
+            if idx is not None and 0 <= idx < len(entries):
+                entries.pop(idx)
+                save_log(entries)
+            self.send_json({"ok": True})
+
+        elif path == "/api/log/edit":
+            entries = load_log()
+            idx = body.get("index")
+            if idx is not None and 0 <= idx < len(entries):
+                entries[idx]["summary"] = body.get("summary", entries[idx].get("summary", ""))
+                entries[idx]["action"] = body.get("action", entries[idx].get("action", ""))
+                entries[idx]["words"] = body.get("words", entries[idx].get("words", []))
+                save_log(entries)
             self.send_json({"ok": True})
 
 if __name__ == "__main__":
