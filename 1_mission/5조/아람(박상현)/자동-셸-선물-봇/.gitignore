@@ -1,0 +1,11 @@
+# 실행 중 자동 생성되는 상태/세션 파일 (절대 올리지 않음)
+state.json
+run.log
+.slack_profile/
+__pycache__/
+*.pyc
+
+# 혹시 모를 비밀정보
+.env
+*.token
+secrets.*
