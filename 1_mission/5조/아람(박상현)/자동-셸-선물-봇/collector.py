@@ -92,7 +92,9 @@ def build_alert(found):
     lines = [f":rotating_light: *셸 기회 발견!* ({datetime.now().strftime('%m/%d %H:%M')})", ""]
     for f in found:
         preview = " ".join(f["text"].split())[:180]
-        lines.append(f"• *#{f['channel']}*\n   {preview}\n   <{f['url']}|채널로 이동>")
+        # 브라우저로 직접 입력하므로 <url|텍스트> 문법은 쓸 수 없음 (그냥 글자로 나옴).
+        # 평문 URL을 넣으면 Slack이 자동으로 링크로 만들어 줍니다.
+        lines.append(f"[#{f['channel']}] {preview}\n{f['url']}")
     lines.append("\n_선착순이면 서두르세요!_")
     return "\n".join(lines)
 
