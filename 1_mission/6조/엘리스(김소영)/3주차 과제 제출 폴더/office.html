@@ -643,6 +643,28 @@ const COMMON_WORK=[
   {t:'상담그룹 재편', owner:'CS운영파트', due:'이번주 금(7/18)', parts:{
      S1:{st:'의견제출완료'}, S2:{st:'의견제출완료'}, S3:{st:'논의중', doc:'3파트 논의 문서'}, S4:{st:'진행사항없음'} }},
 ];
+// 과거 사례 추천(발표용 목업) — 업무 유형별로 "과거엔 이렇게 처리됨"(수용률·최근시점)
+const PAST_CASES=[
+  {key:['안내멘트','멘트','ivr'], cases:[
+    {t:'안내멘트 유입 급증 → 멘트 순서 조정', rate:'유사 9건 중 7건', when:'최근 4일 전'},
+    {t:'야간 안내 누락 → 시간대 분기 추가',   rate:'유사 5건 중 4건', when:'최근 2주 전'} ]},
+  {key:['민원','이의','요금','환불'], cases:[
+    {t:'중복결제 이의 → 환불 처리',      rate:'유사 12건 중 10건', when:'최근 3일 전'},
+    {t:'할인 미적용 → 재적용 안내',      rate:'유사 8건 중 6건',  when:'최근 1주 전'},
+    {t:'시스템 오류 → 결함 확인 후 보상', rate:'유사 4건 중 3건',  when:'최근 2주 전'} ]},
+  {key:['상담그룹','재편','그룹'], cases:[
+    {t:'그룹 재편 → 서비스별 롤 재정의 먼저', rate:'과거 2회 모두', when:'상반기'},
+    {t:'백데이터 교체 → 마감 후 일괄 반영',   rate:'과거 2회 모두', when:'상반기'} ]},
+  {key:['처리량','적체','모니터링','큐'], cases:[
+    {t:'적체 급증 → 동시 상담 상한 임시 확대', rate:'유사 6건 중 5건', when:'최근 5일 전'} ]},
+  {key:['데이터','정합성','쿼리','지표'], cases:[
+    {t:'집계 이상값 → 경계값(널·음수) 규칙 점검', rate:'유사 7건 중 7건', when:'최근 1주 전'} ]},
+  {key:['배포','공지','릴리즈'], cases:[
+    {t:'배포 공지 누락 → 표준 양식+체크리스트 도입', rate:'유사 5건 중 4건', when:'최근 6일 전'} ]},
+  {key:['보고','장표','리포트','응대율'], cases:[
+    {t:'보고 장표 → 지난 템플릿 재사용 + 지표만 교체', rate:'유사 10건 중 9건', when:'최근 3일 전'} ]},
+];
+function pastCases(text){ const t=(text||'').replace(/\s/g,''); for(const g of PAST_CASES){ if(g.key.some(k=>t.includes(k))) return g.cases; } return null; }
 // 활동 동기화 소스 — 각각 수동 동기화 + 출근/퇴근 시 일괄
 const SYNC_N={slack:14, agit:6, sheet:3, ai:31};
 const SOURCES=[
@@ -844,10 +866,14 @@ function openSchedule(){ if(running||busy) return; selected=null;
   ctrlEl.innerHTML=''; btn('닫기',()=>clearSelection(),true); }
 function relatedSkill(text){ const t=text.replace(/\s/g,''); return Object.keys(SKILL_NAME).find(k=> t.includes(sname(k).replace(/\s/g,''))); }
 function openTask(i){ if(running||busy) return; const t=TASKS[i]; if(!t) return; selected=null;
-  const rel=relatedSkill(t.t), stc=STC[t.st]||'#808080';
+  const rel=relatedSkill(t.t), stc=STC[t.st]||'#808080', cases=pastCases(t.t);
   sayEl.innerHTML=`<div class="bd"><span class="bh">📌 업무 처리 <small>담당 ${t.who}</small></span>`+
     `<div class="grp"><div class="item"><span class="tt">${t.t}</span><span class="who" style="background:${stc}22;color:${stc}">${t.st}</span></div>`+
-    (rel?`<div class="item"><span class="tt" style="font-weight:500;color:var(--fg2)">🧰 관련 도구: <b>${sname(rel)}</b></span></div>`:'')+`</div></div>`;
+    (rel?`<div class="item"><span class="tt" style="font-weight:500;color:var(--fg2)">🧰 관련 도구: <b>${sname(rel)}</b></span></div>`:'')+`</div>`+
+    (cases?`<div class="grp"><div class="glabel">🕘 비슷한 과거 사례 <span class="cnt">${cases.length}건</span></div>`+
+      cases.map((c,idx)=>`<div class="item"><span class="tt">${idx+1}. ${c.t}</span><span class="who" style="background:transparent;color:var(--muted);padding:0">${c.rate} · ${c.when}</span></div>`).join('')+
+      `<div class="empty" style="padding:6px 2px 2px 18px">⚠️ 과거 이력 기반 참고예요 — 지금 판단은 사람이.</div></div>`:'')+
+    `</div>`;
   ctrlEl.innerHTML='';
   if(rel){ const meHas=me.skills.includes(rel), inShelf=shelf.some(s=>s.skill===rel), cat=CATS.find(c=>c.key===catOf(rel));
     if(meHas) btn(`📤 「${sname(rel)}」 파트에 공유하기`, ()=>{ if(!shelf.find(s=>s.skill===rel)) shelf.push({skill:rel,by:'엘리스',_t:0}); t.st='완료'; updateCounts(); say('스택이',`<b>${sname(rel)}</b>${josa(sname(rel),'을','를')} 공공 자료실에 공유했어요 — 이제 누구나 가져다 쓸 수 있어요. (요청 완료 처리)`); setTimeout(openSchedule,900); });
