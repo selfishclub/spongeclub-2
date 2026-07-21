@@ -1,24 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { computeDailyTotal, nrsDelta } from '../js/scoring.js';
-
-test('computeDailyTotal sums 15 scores', () => {
-  assert.equal(computeDailyTotal(new Array(15).fill(4)), 60);
-});
-
-test('computeDailyTotal of all zeros is 0', () => {
-  assert.equal(computeDailyTotal(new Array(15).fill(0)), 0);
-});
-
-test('computeDailyTotal throws on wrong length', () => {
-  assert.throws(() => computeDailyTotal([1, 2, 3]));
-});
-
-test('computeDailyTotal throws on out-of-range value', () => {
-  const bad = new Array(15).fill(0);
-  bad[0] = 5;
-  assert.throws(() => computeDailyTotal(bad));
-});
+import { nrsDelta, improvementRate } from '../js/scoring.js';
 
 test('nrsDelta returns improvement (before - after)', () => {
   assert.equal(nrsDelta(8, 3), 5);
@@ -26,4 +8,20 @@ test('nrsDelta returns improvement (before - after)', () => {
 
 test('nrsDelta is negative when worse', () => {
   assert.equal(nrsDelta(2, 6), -4);
+});
+
+test('improvementRate computes percent reduction', () => {
+  assert.equal(improvementRate(8, 4), 50);
+});
+
+test('improvementRate rounds to nearest percent', () => {
+  assert.equal(improvementRate(3, 2), 33);
+});
+
+test('improvementRate is 0 when before is 0 (no divide by zero)', () => {
+  assert.equal(improvementRate(0, 0), 0);
+});
+
+test('improvementRate is negative when it got worse', () => {
+  assert.equal(improvementRate(4, 6), -50);
 });

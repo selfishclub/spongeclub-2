@@ -2,6 +2,7 @@ import { STORAGE_KEY } from './data.js';
 
 export function defaultState() {
   return {
+    nickname: '',
     onboardingDone: false,
     eftGuideSeen: false,
     dailyChecks: [],
@@ -34,6 +35,7 @@ export function createStore(backend) {
   return {
     load,
     save,
+    setNickname(nickname) { return update((s) => { s.nickname = nickname; }); },
     setOnboardingDone() { return update((s) => { s.onboardingDone = true; }); },
     setEftGuideSeen() { return update((s) => { s.eftGuideSeen = true; }); },
     addDailyCheck(check) { return update((s) => { s.dailyChecks.push(check); }); },

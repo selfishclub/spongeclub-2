@@ -42,6 +42,12 @@ test('setOnboardingDone and setEftGuideSeen flip flags', () => {
   assert.equal(s.eftGuideSeen, true);
 });
 
+test('setNickname stores the nickname', () => {
+  const store = createStore(memoryBackend());
+  store.setNickname('자인');
+  assert.equal(store.load().nickname, '자인');
+});
+
 test('load merges missing keys onto malformed/partial data', () => {
   const backend = memoryBackend();
   backend.setItem('eft_tracker_v1', JSON.stringify({ onboardingDone: true }));

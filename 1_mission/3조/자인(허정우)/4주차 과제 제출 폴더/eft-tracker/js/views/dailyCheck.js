@@ -1,50 +1,70 @@
 import { el, todayStr } from '../util.js';
-import { SYMPTOM_QUESTIONS, SYMPTOM_SCALE_LABELS } from '../data.js';
-import { computeDailyTotal } from '../scoring.js';
+import { SITUATION_EXAMPLES } from '../data.js';
+import { createEmotionPicker } from '../emotionPicker.js';
 
 export function renderDailyCheck(root, ctx) {
-  const scores = new Array(SYMPTOM_QUESTIONS.length).fill(null);
-
-  const section = el('section', { class: 'view daily' },
-    el('h1', { text: '오늘의 자가진단' }),
-    el('p', { class: 'lead', text: '지금 내 상태에 얼마나 해당하나요? (0 전혀 그렇지 않다 ~ 4 완전히 그렇다)' }),
-  );
-
-  const status = el('p', { class: 'status', text: '' });
-  const saveBtn = el('button', { class: 'primary big', disabled: 'true', text: '저장하기' });
-
-  function updateStatus() {
-    const done = scores.filter((s) => s !== null).length;
-    status.textContent = `${done} / ${scores.length} 문항 응답`;
-    if (done === scores.length) saveBtn.removeAttribute('disabled');
-    else saveBtn.setAttribute('disabled', 'true');
-  }
-
-  const list = el('div', { class: 'q-list' });
-  SYMPTOM_QUESTIONS.forEach((q, qi) => {
-    const options = el('div', { class: 'q-options' });
-    SYMPTOM_SCALE_LABELS.forEach((label, val) => {
-      const id = `q${qi}_v${val}`;
-      const input = el('input', { type: 'radio', name: `q${qi}`, id, value: String(val) });
-      input.addEventListener('change', () => { scores[qi] = val; updateStatus(); });
-      options.appendChild(el('label', { class: 'opt', for: id, title: label }, input, el('span', { text: String(val) })));
-    });
-    list.appendChild(el('div', { class: 'q-item' },
-      el('div', { class: 'q-text', text: `${qi + 1}. ${q}` }),
-      options,
-    ));
+  const situation = el('textarea', {
+    rows: '3',
+    placeholder: `예: ${SITUATION_EXAMPLES[0]}`,
   });
-  section.appendChild(list);
+
+  const status = el('p', { class: 'status', text: '감정을 하나 이상 골라주세요.' });
+  const saveBtn = el('button', { class: 'primary big', disabled: 'true', text: '기록하기' });
+
+  const picker = createEmotionPicker({
+    multi: true,
+    onChange: (selected) => {
+      status.textContent = selected.length
+        ? `${selected.length}개 선택됨`
+        : '감정을 하나 이상 골라주세요.';
+      if (selected.length) saveBtn.removeAttribute('disabled');
+      else saveBtn.setAttribute('disabled', 'true');
+    },
+  });
 
   saveBtn.addEventListener('click', () => {
-    const total = computeDailyTotal(scores);
-    ctx.store.addDailyCheck({ date: todayStr(), symptomScores: scores.slice(), total });
+    const emotions = picker.getSelected();
+    if (!emotions.length) return;
+    ctx.store.addDailyCheck({
+      date: todayStr(),
+      datetime: new Date().toISOString(),
+      situation: situation.value.trim(),
+      emotions,
+    });
     ctx.navigate('dashboard');
   });
 
-  section.appendChild(status);
-  section.appendChild(saveBtn);
-  section.appendChild(el('p', { class: 'source', text: '문항 출처: 권정혜·김종우, 화병척도' }));
-  updateStatus();
-  root.appendChild(section);
+  const exampleChips = SITUATION_EXAMPLES.map((ex) => {
+    const b = el('button', { class: 'chip ghost-chip', type: 'button', text: ex });
+    b.addEventListener('click', () => { situation.value = ex; });
+    return b;
+  });
+
+  root.appendChild(el('section', { class: 'view daily' },
+    el('h1', { text: '오늘의 자가진단' }),
+    el('p', { class: 'lead', text: '최근 감정이 불편하거나 힘들었던 상황, 혹은 그렇게 만든 사람을 구체적으로 떠올려 보세요.' }),
+
+    el('div', { class: 'card' },
+      el('h2', { text: '어떤 상황이었나요?' }),
+      el('label', { class: 'field' }, situation),
+      el('div', { class: 'examples' },
+        el('span', { class: 'hint', text: '예시를 눌러 채울 수 있어요' }),
+        el('div', { class: 'chips' }, ...exampleChips),
+      ),
+    ),
+
+    el('div', { class: 'card' },
+      el('h2', { text: '그때 어떤 감정들이 들었나요?' }),
+      el('p', { class: 'hint', text: '해당하는 것을 모두 골라주세요. 여러 개도 괜찮습니다.' }),
+      picker.element,
+    ),
+
+    status,
+    saveBtn,
+    el('button', {
+      class: 'ghost wide',
+      onClick: () => ctx.navigate('session'),
+      text: '바로 EFT 실천하러 가기',
+    }),
+  ));
 }
