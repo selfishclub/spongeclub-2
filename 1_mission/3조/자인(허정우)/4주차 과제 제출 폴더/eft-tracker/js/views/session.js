@@ -90,7 +90,7 @@ export function renderSession(root, ctx) {
       case 5:
         return el('div', { class: 'card' },
           el('h2', { text: '5. 그 느낌은 몸의 어디에 있나요?' }),
-          textField('몸의 위치', () => draft.bodyLocation, (v) => { draft.bodyLocation = v; }, '예: 가슴 한복판, 명지, 목'),
+          textField('몸의 위치', () => draft.bodyLocation, (v) => { draft.bodyLocation = v; }, '예: 가슴 한복판, 명치, 목'),
         );
       case 6:
         return el('div', { class: 'card' },
