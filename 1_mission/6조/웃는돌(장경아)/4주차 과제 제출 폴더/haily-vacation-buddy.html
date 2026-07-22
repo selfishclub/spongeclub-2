@@ -122,15 +122,13 @@
   }
   #mascot {
     width: 90px; height: 90px; flex: 0 0 auto;
-    image-rendering: pixelated;
     filter: drop-shadow(0 6px 7px rgba(150,100,60,.24));
     cursor: pointer;
     transition: transform .2s ease;
   }
   #mascot:hover { transform: translateY(-2px) rotate(-3deg); }
   .mini {
-    width: 40px; height: 40px; flex: 0 0 auto;
-    image-rendering: pixelated;
+    width: 42px; height: 42px; flex: 0 0 auto;
     filter: drop-shadow(0 2px 2px rgba(150,100,60,.20));
   }
   .hi { z-index: 1; }
@@ -279,7 +277,7 @@
 <div class="phone">
   <div class="top">
     <div class="brand">
-      <div class="logo">🍌</div>
+      <div class="logo">🌱</div>
       <div>
         <b>고고버디</b>
         <span>GoGo Buddy · 스스로 굴러가는 여름</span>
@@ -289,7 +287,7 @@
   </div>
 
   <div class="hero">
-    <canvas id="mascot" width="32" height="32" title="콕 눌러봐!"></canvas>
+    <canvas id="mascot" width="180" height="180" title="콕 눌러봐!"></canvas>
     <div class="hi">
       <span class="dday" id="dday">D-27 · 방학</span>
       <h1 id="greet">좋은 아침, Haily! 🌱</h1>
@@ -311,7 +309,7 @@
   <!-- 아침 브리핑 -->
   <div class="card" id="cBrief">
     <div class="card-h">
-      <canvas class="mini" data-expr="point" width="32" height="32" aria-hidden="true"></canvas>
+      <canvas class="mini" data-expr="point" width="84" height="84" aria-hidden="true"></canvas>
       <span class="chip" style="background:var(--lime)">오늘 이거부터</span>
       <h2>아침 브리핑</h2>
       <span class="sub" id="doneCount">0/5 완료</span>
@@ -323,7 +321,7 @@
   <!-- 진척 게이지 -->
   <div class="card" id="cGauge">
     <div class="card-h">
-      <canvas class="mini" data-expr="cheer" width="32" height="32" aria-hidden="true"></canvas>
+      <canvas class="mini" data-expr="cheer" width="84" height="84" aria-hidden="true"></canvas>
       <span class="chip" style="background:var(--mint)">목표까지 어디쯤</span>
       <h2>진척 게이지</h2>
       <span class="sub">방학 전체 목표 대비</span>
@@ -335,7 +333,7 @@
   <!-- 리듬 넛지 -->
   <div class="card" id="cNudge">
     <div class="card-h">
-      <canvas class="mini" data-expr="run" width="32" height="32" aria-hidden="true"></canvas>
+      <canvas class="mini" data-expr="run" width="84" height="84" aria-hidden="true"></canvas>
       <span class="chip" style="background:var(--apricot)">지치지 않게</span>
       <h2>리듬 넛지</h2>
       <span class="sub" id="nowClock">--:--</span>
@@ -354,7 +352,7 @@
   <!-- 저녁 회고 -->
   <div class="card reflect" id="cReflect">
     <div class="card-h">
-      <canvas class="mini" data-expr="sleepy" width="32" height="32" aria-hidden="true"></canvas>
+      <canvas class="mini" data-expr="sleepy" width="84" height="84" aria-hidden="true"></canvas>
       <span class="chip" style="background:var(--pink)">하루를 스스로 닫기</span>
       <h2>저녁 회고 3줄</h2>
     </div>
@@ -376,7 +374,7 @@
 
   <div class="card nots">
     <div class="card-h">
-      <canvas class="mini" data-expr="wave" width="32" height="32" aria-hidden="true"></canvas>
+      <canvas class="mini" data-expr="wave" width="84" height="84" aria-hidden="true"></canvas>
       <span class="chip" style="background:var(--sky)">약속</span>
       <h2>이 앱이 일부러 안 하는 것</h2>
     </div>
@@ -418,93 +416,112 @@
   function charPalette() {
     var d = currentDark();
     return {
-      Y:  d ? "#F7DE52" : "#F3D23E",  // minion yellow
-      K:  d ? "#241F18" : "#2E2A22",  // outline / hair / arms / legs
-      W:  "#FFFFFF",                   // goggle glass / teeth
-      Mt: d ? "#9BA3AB" : "#C2C8CE",  // goggle metal band
-      MtD: d ? "#767E86" : "#8A9198", // band edge
-      Bl: d ? "#4368AE" : "#4C72B8",  // overalls denim
-      BlD: d ? "#2E4A82" : "#35528C", // overalls pocket / shade
-      Li: d ? "#E4EF4E" : "#DDE94A",  // sparkle
-      M:  d ? "#8B7C70" : "#C3B4A7"   // motion / zzz
+      Y:  d ? "#F8CE55" : "#F7C948",  // buddy body (honey)
+      OL: d ? "#8A6A2A" : "#7A5A22",  // warm outline
+      Stem: d ? "#5FB56A" : "#4FA85C",
+      Leaf: d ? "#7FD98A" : "#6FCF7B",
+      Pupil: d ? "#2A2018" : "#3A2E22",
+      Cheek: d ? "#F58FA6" : "#FF9EB0",
+      Foot: d ? "#EAE4D8" : "#FFFFFF",  // sneaker
+      Li: d ? "#E4EF4E" : "#C7D22C",    // sparkle
+      M:  d ? "#8B7C70" : "#B7A99C"     // motion / zzz
     };
   }
-  // draw a Minion-style character on a 32x32 canvas with the given pose
+  // draw the original "GoGo" sprout-buddy (smooth vector) on a square canvas
   function drawChar(cv, expr) {
     var ctx = cv.getContext("2d");
+    var S = cv.width / 32;               // 32-unit virtual grid → canvas px
     var p = charPalette();
-    ctx.clearRect(0, 0, 32, 32);
-    function blk(x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(x, y, w, h); }
-    function clr(x, y, w, h) { ctx.clearRect(x, y, w, h); }
-
-    // hair sprouts
-    blk(13, 1, 1, 3, p.K); blk(16, 0, 1, 4, p.K); blk(19, 1, 1, 3, p.K);
-    blk(15, 2, 1, 2, p.K); blk(17, 2, 1, 2, p.K);
-
-    // legs (dark, behind body)
-    if (expr === "run") {
-      blk(12, 24, 3, 2, p.K); blk(11, 25, 4, 1, p.K);
-      blk(17, 25, 3, 3, p.K); blk(17, 28, 4, 1, p.K);
-    } else {
-      blk(12, 24, 3, 3, p.K); blk(11, 27, 4, 1, p.K);
-      blk(17, 24, 3, 3, p.K); blk(17, 27, 4, 1, p.K);
+    var PI = Math.PI;
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.lineJoin = "round"; ctx.lineCap = "round";
+    function disc(x, y, r, fill, stroke, lw) {
+      ctx.beginPath(); ctx.arc(x * S, y * S, r * S, 0, PI * 2);
+      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+      if (stroke) { ctx.lineWidth = (lw || 1.3) * S; ctx.strokeStyle = stroke; ctx.stroke(); }
+    }
+    function oval(x, y, rx, ry, fill, stroke, lw) {
+      ctx.beginPath(); ctx.ellipse(x * S, y * S, rx * S, ry * S, 0, 0, PI * 2);
+      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+      if (stroke) { ctx.lineWidth = (lw || 1.3) * S; ctx.strokeStyle = stroke; ctx.stroke(); }
+    }
+    function limb(x1, y1, x2, y2, c, w) {
+      ctx.beginPath(); ctx.moveTo(x1 * S, y1 * S); ctx.lineTo(x2 * S, y2 * S);
+      ctx.strokeStyle = c; ctx.lineWidth = w * S; ctx.stroke();
+    }
+    function arc(cx, cy, r, a0, a1, c, w) {
+      ctx.beginPath(); ctx.arc(cx * S, cy * S, r * S, a0, a1);
+      ctx.strokeStyle = c; ctx.lineWidth = w * S; ctx.stroke();
+    }
+    function star(x, y, c) {
+      ctx.fillStyle = c; ctx.beginPath();
+      for (var i = 0; i < 5; i++) {
+        var a = -PI / 2 + i * 2 * PI / 5;
+        ctx.lineTo((x + Math.cos(a) * 1.5) * S, (y + Math.sin(a) * 1.5) * S);
+        var b = a + PI / 5;
+        ctx.lineTo((x + Math.cos(b) * 0.62) * S, (y + Math.sin(b) * 0.62) * S);
+      }
+      ctx.closePath(); ctx.fill();
+    }
+    function zzz(x, y, c) {
+      ctx.strokeStyle = c; ctx.lineWidth = 1 * S;
+      [[0, 0, 1.7], [2.2, -2.6, 1.2]].forEach(function (z) {
+        var zx = x + z[0], zy = y + z[1], w = z[2];
+        ctx.beginPath();
+        ctx.moveTo(zx * S, zy * S); ctx.lineTo((zx + w) * S, zy * S);
+        ctx.lineTo(zx * S, (zy + w) * S); ctx.lineTo((zx + w) * S, (zy + w) * S);
+        ctx.stroke();
+      });
     }
 
-    // body capsule (yellow, outlined + rounded corners)
-    blk(9, 3, 14, 23, p.K);
-    blk(10, 4, 12, 21, p.Y);
-    clr(9, 3, 1, 1); clr(22, 3, 1, 1); clr(9, 25, 1, 1); clr(22, 25, 1, 1);
-    clr(10, 4, 1, 1); clr(21, 4, 1, 1);
+    // sprout
+    limb(16, 8, 16, 4.5, p.Stem, 1.4);
+    oval(17.5, 3.7, 1.7, 1.1, p.Leaf, p.Stem, 0.7);
+    oval(14.5, 4.5, 1.4, 0.9, p.Leaf, p.Stem, 0.7);
 
-    // overalls (denim)
-    blk(10, 19, 12, 6, p.Bl);
-    clr(10, 24, 1, 1); clr(21, 24, 1, 1);
-    blk(11, 14, 2, 5, p.Bl); blk(19, 14, 2, 5, p.Bl);   // straps
-    blk(14, 20, 4, 3, p.BlD);                            // pocket
-    blk(11, 19, 1, 1, p.K); blk(20, 19, 1, 1, p.K);      // buttons
+    // feet
+    if (expr === "run") { oval(12, 25.4, 2.4, 1.5, p.Foot, p.OL, 1); oval(20.6, 26, 2.4, 1.5, p.Foot, p.OL, 1); }
+    else { oval(12.6, 25.7, 2.4, 1.5, p.Foot, p.OL, 1); oval(19.4, 25.7, 2.4, 1.5, p.Foot, p.OL, 1); }
 
-    // goggle band
-    blk(8, 10, 16, 4, p.Mt);
-    blk(8, 10, 16, 1, p.MtD); blk(8, 13, 16, 1, p.MtD);
-    blk(8, 10, 1, 4, p.K); blk(23, 10, 1, 4, p.K);
+    // body
+    oval(16, 16.5, 8.6, 9, p.Y, p.OL, 1.4);
+    ctx.globalAlpha = 0.16; disc(12.3, 12.2, 3.1, "#fff", null); ctx.globalAlpha = 1;
 
-    // goggles + pupils
-    blk(11, 9, 5, 5, p.K); blk(12, 10, 3, 3, p.W);
-    blk(16, 9, 5, 5, p.K); blk(17, 10, 3, 3, p.W);
+    // arms
+    if (expr === "cheer") { limb(9.5, 15, 5.6, 8, p.Y, 3); limb(22.5, 15, 26.4, 8, p.Y, 3); disc(5.4, 8, 1.4, p.Y, p.OL, 0.9); disc(26.6, 8, 1.4, p.Y, p.OL, 0.9); }
+    else if (expr === "point") { limb(9, 17, 7, 19.5, p.Y, 3); disc(7, 19.7, 1.3, p.Y, p.OL, 0.9); limb(22.8, 15, 25.4, 7.4, p.Y, 3); disc(25.5, 6.8, 1.4, p.Y, p.OL, 0.9); }
+    else if (expr === "wave") { limb(9, 17, 7, 19.5, p.Y, 3); disc(7, 19.7, 1.3, p.Y, p.OL, 0.9); limb(22.8, 14, 25.8, 7, p.Y, 3); disc(26, 6.4, 1.5, p.Y, p.OL, 0.9); }
+    else if (expr === "run") { limb(9.5, 15, 6.2, 12, p.Y, 3); disc(6, 11.6, 1.3, p.Y, p.OL, 0.9); limb(22.5, 18, 25.4, 22, p.Y, 3); disc(25.6, 22.4, 1.3, p.Y, p.OL, 0.9); }
+    else { limb(8.8, 17, 7, 20, p.Y, 3); disc(7, 20.2, 1.4, p.Y, p.OL, 0.9); limb(23.2, 17, 25, 20, p.Y, 3); disc(25, 20.2, 1.4, p.Y, p.OL, 0.9); }
+
+    // cheeks
+    ctx.globalAlpha = 0.7; disc(10.6, 18.4, 1.5, p.Cheek, null); disc(21.4, 18.4, 1.5, p.Cheek, null); ctx.globalAlpha = 1;
+
+    // eyes
     var eyes = (expr === "cheer" || expr === "wave" || expr === "point") ? "happy"
              : (expr === "sleepy") ? "closed" : "open";
-    if (eyes === "open") { blk(13, 11, 1, 1, p.K); blk(18, 11, 1, 1, p.K); }
-    else if (eyes === "happy") { blk(13, 10, 1, 1, p.K); blk(18, 10, 1, 1, p.K); }
-    else { blk(12, 11, 3, 1, p.K); blk(17, 11, 3, 1, p.K); }
-
-    // mouth
-    if (expr === "cheer" || expr === "wave") { blk(13, 16, 6, 2, p.K); blk(14, 17, 4, 1, p.W); }
-    else if (expr === "sleepy") { blk(15, 17, 2, 2, p.K); }
-    else { blk(13, 17, 6, 1, p.K); blk(12, 16, 1, 1, p.K); blk(19, 16, 1, 1, p.K); }
-
-    // arms (dark) — pose, drawn on top at the sides
-    if (expr === "cheer") {
-      blk(8, 7, 2, 7, p.K); blk(7, 6, 3, 2, p.K);
-      blk(22, 7, 2, 7, p.K); blk(22, 6, 3, 2, p.K);
-    } else if (expr === "point") {
-      blk(8, 15, 2, 6, p.K); blk(7, 20, 3, 2, p.K);
-      blk(22, 6, 2, 9, p.K); blk(22, 5, 3, 2, p.K);
-    } else if (expr === "wave") {
-      blk(8, 15, 2, 6, p.K); blk(7, 20, 3, 2, p.K);
-      blk(22, 5, 2, 9, p.K); blk(22, 4, 3, 2, p.K);
-    } else if (expr === "run") {
-      blk(7, 13, 2, 5, p.K); blk(6, 12, 3, 2, p.K);
-      blk(23, 19, 2, 5, p.K); blk(23, 23, 3, 2, p.K);
+    if (eyes === "open") {
+      disc(12.6, 15, 2.7, "#fff", p.OL, 0.8); disc(19.4, 15, 2.7, "#fff", p.OL, 0.8);
+      disc(13, 15.4, 1.35, p.Pupil, null); disc(19.8, 15.4, 1.35, p.Pupil, null);
+      disc(12.5, 14.7, 0.5, "#fff", null); disc(19.3, 14.7, 0.5, "#fff", null);
+    } else if (eyes === "happy") {
+      arc(12.6, 15.6, 2.2, PI + 0.35, PI * 2 - 0.35, p.Pupil, 1.1);
+      arc(19.4, 15.6, 2.2, PI + 0.35, PI * 2 - 0.35, p.Pupil, 1.1);
     } else {
-      blk(8, 15, 2, 6, p.K); blk(7, 20, 3, 2, p.K);
-      blk(22, 15, 2, 6, p.K); blk(22, 20, 3, 2, p.K);
+      arc(12.6, 15, 2.2, 0.35, PI - 0.35, p.Pupil, 1.1);
+      arc(19.4, 15, 2.2, 0.35, PI - 0.35, p.Pupil, 1.1);
     }
 
+    // mouth
+    if (expr === "cheer" || expr === "wave") { ctx.beginPath(); ctx.ellipse(16 * S, 19.4 * S, 2.2 * S, 1.9 * S, 0, 0, PI); ctx.fillStyle = p.Pupil; ctx.fill(); }
+    else if (expr === "sleepy") { oval(16, 19.6, 0.9, 0.7, p.Pupil, null); }
+    else { arc(16, 18.4, 2, 0.16 * PI, 0.84 * PI, p.Pupil, 1.1); }
+
     // extras
-    if (expr === "cheer") { blk(5, 4, 2, 2, p.Li); blk(25, 5, 2, 2, p.Li); blk(27, 10, 1, 1, p.Li); blk(4, 10, 1, 1, p.Li); }
-    else if (expr === "sleepy") { blk(24, 2, 3, 1, p.M); blk(26, 3, 1, 1, p.M); blk(24, 4, 3, 1, p.M); blk(28, 0, 2, 1, p.M); blk(29, 1, 1, 1, p.M); blk(28, 2, 2, 1, p.M); }
-    else if (expr === "run") { blk(3, 14, 3, 1, p.M); blk(2, 17, 4, 1, p.M); blk(4, 20, 3, 1, p.M); }
-    else if (expr === "point") { blk(23, 2, 2, 3, p.Li); blk(23, 6, 2, 1, p.Li); }
+    if (expr === "cheer") { star(5, 6, p.Li); star(27, 7, p.Li); star(25.5, 13, p.Li); }
+    else if (expr === "sleepy") { zzz(23, 5, p.M); }
+    else if (expr === "run") { limb(2.5, 14, 5.5, 14, p.M, 1); limb(1.5, 17.5, 5, 17.5, p.M, 1); limb(3, 21, 6, 21, p.M, 1); }
+    else if (expr === "point") { limb(25.5, 2.4, 25.5, 4.4, p.Li, 1.5); disc(25.5, 5.6, 0.45, p.Li, null); }
   }
   function drawMascot() { drawChar(cvs, heroExpr); }
   function drawAllMinis() {
