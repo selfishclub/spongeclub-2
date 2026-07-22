@@ -2,53 +2,53 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
   :root {
-    --bg: #EFEAF6;
-    --bg-2: #E7E0F3;
+    --bg: #FBF5EC;
+    --bg-2: #FCE6D3;
     --card: #FFFFFF;
-    --ink: #322E4A;
-    --muted: #857FA6;
-    --line: #E4DEF0;
+    --ink: #40352E;
+    --muted: #A2938A;
+    --line: #F0E7DB;
     --lime: #DDE94A;
-    --lime-deep: #B9C41f;
-    --sky: #8FB8F5;
-    --mint: #7FE0C0;
-    --pink: #FFA9C4;
-    --apricot: #FFC876;
-    --shadow: 0 10px 30px rgba(70, 55, 110, .12);
-    --shadow-sm: 0 4px 14px rgba(70, 55, 110, .10);
+    --lime-deep: #B7C22C;
+    --sky: #7FB3F5;
+    --mint: #55CFAD;
+    --pink: #FF9EBC;
+    --apricot: #FFBE5C;
+    --shadow: 0 10px 30px rgba(120, 90, 60, .14);
+    --shadow-sm: 0 4px 14px rgba(120, 90, 60, .10);
     --radius: 22px;
     --font: "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", system-ui, -apple-system, "Segoe UI", sans-serif;
     --mono: "SFMono-Regular", ui-monospace, "Menlo", "Consolas", monospace;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #1D1830;
-      --bg-2: #241D3A;
-      --card: #2A2340;
-      --ink: #F1ECFB;
-      --muted: #A79EC6;
-      --line: #38304F;
+      --bg: #1E1A17;
+      --bg-2: #2A2320;
+      --card: #2B2521;
+      --ink: #F6EEE5;
+      --muted: #B6A79B;
+      --line: #3C332C;
       --lime: #E4EF4E;
       --lime-deep: #E4EF4E;
       --sky: #7FA9EC;
-      --mint: #74D5B5;
+      --mint: #63D6B4;
       --pink: #F294B4;
       --apricot: #F3BC6A;
-      --shadow: 0 12px 34px rgba(0, 0, 0, .38);
-      --shadow-sm: 0 4px 16px rgba(0, 0, 0, .32);
+      --shadow: 0 12px 34px rgba(0, 0, 0, .40);
+      --shadow-sm: 0 4px 16px rgba(0, 0, 0, .34);
     }
   }
   :root[data-theme="light"] {
-    --bg: #EFEAF6; --bg-2: #E7E0F3; --card: #FFFFFF; --ink: #322E4A; --muted: #857FA6;
-    --line: #E4DEF0; --lime: #DDE94A; --lime-deep: #B9C41f; --sky: #8FB8F5; --mint: #7FE0C0;
-    --pink: #FFA9C4; --apricot: #FFC876; --shadow: 0 10px 30px rgba(70,55,110,.12);
-    --shadow-sm: 0 4px 14px rgba(70,55,110,.10);
+    --bg: #FBF5EC; --bg-2: #FCE6D3; --card: #FFFFFF; --ink: #40352E; --muted: #A2938A;
+    --line: #F0E7DB; --lime: #DDE94A; --lime-deep: #B7C22C; --sky: #7FB3F5; --mint: #55CFAD;
+    --pink: #FF9EBC; --apricot: #FFBE5C; --shadow: 0 10px 30px rgba(120,90,60,.14);
+    --shadow-sm: 0 4px 14px rgba(120,90,60,.10);
   }
   :root[data-theme="dark"] {
-    --bg: #1D1830; --bg-2: #241D3A; --card: #2A2340; --ink: #F1ECFB; --muted: #A79EC6;
-    --line: #38304F; --lime: #E4EF4E; --lime-deep: #E4EF4E; --sky: #7FA9EC; --mint: #74D5B5;
-    --pink: #F294B4; --apricot: #F3BC6A; --shadow: 0 12px 34px rgba(0,0,0,.38);
-    --shadow-sm: 0 4px 16px rgba(0,0,0,.32);
+    --bg: #1E1A17; --bg-2: #2A2320; --card: #2B2521; --ink: #F6EEE5; --muted: #B6A79B;
+    --line: #3C332C; --lime: #E4EF4E; --lime-deep: #E4EF4E; --sky: #7FA9EC; --mint: #63D6B4;
+    --pink: #F294B4; --apricot: #F3BC6A; --shadow: 0 12px 34px rgba(0,0,0,.40);
+    --shadow-sm: 0 4px 16px rgba(0,0,0,.34);
   }
 
   * { box-sizing: border-box; }
@@ -57,12 +57,15 @@
     font-family: var(--font);
     color: var(--ink);
     background:
-      radial-gradient(1200px 600px at 20% -10%, var(--bg-2), transparent 60%),
-      radial-gradient(900px 500px at 110% 10%, var(--bg-2), transparent 55%),
+      radial-gradient(720px 380px at 10% -8%, color-mix(in srgb, var(--apricot) 46%, transparent), transparent 60%),
+      radial-gradient(680px 420px at 110% 2%, color-mix(in srgb, var(--mint) 42%, transparent), transparent 58%),
+      radial-gradient(640px 520px at 50% 118%, color-mix(in srgb, var(--pink) 32%, transparent), transparent 62%),
       var(--bg);
+    background-attachment: fixed;
     min-height: 100vh;
     display: flex;
     justify-content: center;
+    align-items: flex-start;
     padding: 22px 14px 60px;
     -webkit-font-smoothing: antialiased;
   }
@@ -118,10 +121,17 @@
     pointer-events: none;
   }
   #mascot {
-    width: 78px; height: 78px; flex: 0 0 auto;
+    width: 90px; height: 90px; flex: 0 0 auto;
     image-rendering: pixelated;
-    filter: drop-shadow(0 6px 8px rgba(80,60,120,.20));
+    filter: drop-shadow(0 6px 7px rgba(150,100,60,.24));
     cursor: pointer;
+    transition: transform .2s ease;
+  }
+  #mascot:hover { transform: translateY(-2px) rotate(-3deg); }
+  .mini {
+    width: 40px; height: 40px; flex: 0 0 auto;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 2px 2px rgba(150,100,60,.20));
   }
   .hi { z-index: 1; }
   .dday {
@@ -279,7 +289,7 @@
   </div>
 
   <div class="hero">
-    <canvas id="mascot" width="26" height="26" title="콕 눌러봐!"></canvas>
+    <canvas id="mascot" width="32" height="32" title="콕 눌러봐!"></canvas>
     <div class="hi">
       <span class="dday" id="dday">D-27 · 방학</span>
       <h1 id="greet">좋은 아침, Haily! 🌱</h1>
@@ -301,6 +311,7 @@
   <!-- 아침 브리핑 -->
   <div class="card" id="cBrief">
     <div class="card-h">
+      <canvas class="mini" data-expr="point" width="32" height="32" aria-hidden="true"></canvas>
       <span class="chip" style="background:var(--lime)">오늘 이거부터</span>
       <h2>아침 브리핑</h2>
       <span class="sub" id="doneCount">0/5 완료</span>
@@ -312,6 +323,7 @@
   <!-- 진척 게이지 -->
   <div class="card" id="cGauge">
     <div class="card-h">
+      <canvas class="mini" data-expr="cheer" width="32" height="32" aria-hidden="true"></canvas>
       <span class="chip" style="background:var(--mint)">목표까지 어디쯤</span>
       <h2>진척 게이지</h2>
       <span class="sub">방학 전체 목표 대비</span>
@@ -323,6 +335,7 @@
   <!-- 리듬 넛지 -->
   <div class="card" id="cNudge">
     <div class="card-h">
+      <canvas class="mini" data-expr="run" width="32" height="32" aria-hidden="true"></canvas>
       <span class="chip" style="background:var(--apricot)">지치지 않게</span>
       <h2>리듬 넛지</h2>
       <span class="sub" id="nowClock">--:--</span>
@@ -341,6 +354,7 @@
   <!-- 저녁 회고 -->
   <div class="card reflect" id="cReflect">
     <div class="card-h">
+      <canvas class="mini" data-expr="sleepy" width="32" height="32" aria-hidden="true"></canvas>
       <span class="chip" style="background:var(--pink)">하루를 스스로 닫기</span>
       <h2>저녁 회고 3줄</h2>
     </div>
@@ -362,6 +376,7 @@
 
   <div class="card nots">
     <div class="card-h">
+      <canvas class="mini" data-expr="wave" width="32" height="32" aria-hidden="true"></canvas>
       <span class="chip" style="background:var(--sky)">약속</span>
       <h2>이 앱이 일부러 안 하는 것</h2>
     </div>
@@ -393,71 +408,89 @@
   function syncThemeIcon() { themeBtn.textContent = currentDark() ? "☀️" : "🌙"; }
   themeBtn.addEventListener("click", function () {
     root.setAttribute("data-theme", currentDark() ? "light" : "dark");
-    syncThemeIcon(); drawMascot();
+    syncThemeIcon(); drawMascot(); drawAllMinis();
   });
   syncThemeIcon();
 
-  /* ---------- Pixel mascot (Roblox-style blocky character) ---------- */
+  /* ---------- Cute blocky mascot (parametric, many poses) ---------- */
   var cvs = document.getElementById("mascot");
-  var ctx = cvs.getContext("2d");
-  // palette keys
-  function pal() {
-    var dark = currentDark();
+  var heroExpr = "wave";
+  function charPalette() {
+    var d = currentDark();
     return {
-      H: dark ? "#F8D23A" : "#F6C930",  // head / hands (yellow)
-      K: dark ? "#211B33" : "#2B2540",  // outline / eyes / smile
-      B: dark ? "#3B7BF0" : "#2E6FE6",  // torso (shirt) blue
-      G: dark ? "#5FBB50" : "#57B14B",  // legs green
-      g: dark ? "#3E8C3E" : "#3E8C3E"   // legs divider / shade
+      Y:  d ? "#F8D23A" : "#F6C930",  // head / hands
+      K:  d ? "#2A211A" : "#3A2E24",  // outline / eyes / mouth
+      W:  "#FFFFFF",
+      B:  d ? "#3B7BF0" : "#2E6FE6",  // shirt
+      Bs: d ? "#2C5FC4" : "#245BC0",  // collar
+      G:  d ? "#5FBB50" : "#57B14B",  // legs
+      P:  d ? "#F58FB4" : "#FF9EBC",  // blush / bow
+      Pd: d ? "#E06B95" : "#F2789F",  // bow knot
+      Li: d ? "#E4EF4E" : "#DDE94A",  // sparkle
+      M:  d ? "#8B7C70" : "#C3B4A7"   // motion / zzz
     };
   }
-  // 26x26 grid. '.' transparent
-  var ART = [
-    "..........................",
-    "..........................",
-    "........KKKKKKKKKK........",
-    "........KHHHHHHHHK........",
-    "........KHHHHHHHHK........",
-    "........KHHKHHKHHK........",
-    "........KHHKHHKHHK........",
-    "........KHHHHHHHHK........",
-    "........KHKHHHHKHK........",
-    "........KHHKKKKHHK........",
-    "........KKKKKKKKKK........",
-    "...........HHHH...........",
-    "....HHHHBBBBBBBBBBHHHH....",
-    "....HHHHBBBBBBBBBBHHHH....",
-    "....HHHHBBBBBBBBBBHHHH....",
-    "....HHHHBBBBBBBBBBHHHH....",
-    "....HHHHBBBBBBBBBBHHHH....",
-    "....HHHHBBBBBBBBBBHHHH....",
-    "........GGGGggGGGG........",
-    "........GGGGggGGGG........",
-    "........GGGGggGGGG........",
-    "........GGGGggGGGG........",
-    "........GGGGggGGGG........",
-    "........GGGGggGGGG........",
-    "........GGGGggGGGG........",
-    ".........................."
-  ];
-  function drawMascot() {
-    var p = pal();
-    ctx.clearRect(0, 0, 26, 26);
-    for (var y = 0; y < ART.length; y++) {
-      var row = ART[y];
-      for (var x = 0; x < row.length; x++) {
-        var c = row[x];
-        if (c === "." || c === " ") continue;
-        var col = ({ K: p.K, H: p.H, B: p.B, G: p.G, g: p.g })[c];
-        if (!col) continue;
-        ctx.fillStyle = col;
-        ctx.fillRect(x, y, 1, 1);
-      }
+  // draw the character on a 32x32 canvas with the given expression/pose
+  function drawChar(cv, expr) {
+    var ctx = cv.getContext("2d");
+    var p = charPalette();
+    ctx.clearRect(0, 0, 32, 32);
+    function blk(x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(x, y, w, h); }
+    function oblk(x, y, w, h, c) { ctx.fillStyle = p.K; ctx.fillRect(x - 1, y - 1, w + 2, h + 2); ctx.fillStyle = c; ctx.fillRect(x, y, w, h); }
+
+    // legs
+    if (expr === "run") { oblk(12, 25, 4, 4, p.G); oblk(17, 26, 4, 5, p.G); }
+    else { oblk(11, 25, 4, 6, p.G); oblk(17, 25, 4, 6, p.G); }
+
+    // arms
+    if (expr === "cheer") { oblk(7, 8, 3, 8, p.Y); oblk(22, 8, 3, 8, p.Y); }
+    else if (expr === "point") { oblk(7, 16, 3, 8, p.Y); oblk(22, 6, 3, 10, p.Y); }
+    else if (expr === "wave") { oblk(7, 16, 3, 8, p.Y); oblk(22, 5, 3, 11, p.Y); }
+    else if (expr === "run") { oblk(6, 13, 3, 5, p.Y); oblk(23, 19, 3, 5, p.Y); }
+    else { oblk(7, 16, 3, 8, p.Y); oblk(22, 16, 3, 8, p.Y); }
+
+    // torso
+    oblk(11, 16, 10, 9, p.B);
+    blk(15, 16, 2, 1, p.Bs); // collar hint
+
+    // head + bow
+    oblk(10, 3, 12, 12, p.Y);
+    blk(12, 1, 3, 2, p.P); blk(18, 1, 3, 2, p.P); blk(15, 1, 2, 2, p.Pd);
+
+    // eyes
+    var eyes = (expr === "cheer" || expr === "wave" || expr === "point") ? "happy"
+             : (expr === "sleepy") ? "closed" : "open";
+    if (eyes === "open") {
+      blk(13, 8, 3, 3, p.W); blk(14, 9, 2, 2, p.K); blk(14, 9, 1, 1, p.W);
+      blk(17, 8, 3, 3, p.W); blk(18, 9, 2, 2, p.K); blk(18, 9, 1, 1, p.W);
+    } else if (eyes === "happy") {
+      blk(13, 9, 1, 1, p.K); blk(14, 8, 1, 1, p.K); blk(15, 9, 1, 1, p.K);
+      blk(17, 9, 1, 1, p.K); blk(18, 8, 1, 1, p.K); blk(19, 9, 1, 1, p.K);
+    } else {
+      blk(13, 9, 3, 1, p.K); blk(17, 9, 3, 1, p.K);
     }
+    // blush
+    blk(11, 10, 2, 2, p.P); blk(19, 10, 2, 2, p.P);
+    // mouth
+    if (expr === "cheer" || expr === "wave") { blk(13, 11, 6, 1, p.K); blk(14, 12, 4, 1, p.K); }
+    else if (expr === "sleepy") { blk(15, 12, 2, 1, p.K); }
+    else { blk(14, 12, 4, 1, p.K); blk(13, 11, 1, 1, p.K); blk(18, 11, 1, 1, p.K); }
+
+    // extras
+    if (expr === "cheer") { blk(6, 3, 2, 2, p.Li); blk(24, 4, 2, 2, p.P); blk(26, 9, 1, 1, p.Li); blk(5, 9, 1, 1, p.P); }
+    else if (expr === "sleepy") { blk(24, 2, 3, 1, p.M); blk(26, 3, 1, 1, p.M); blk(24, 4, 3, 1, p.M); blk(28, 0, 2, 1, p.M); blk(29, 1, 1, 1, p.M); blk(28, 2, 2, 1, p.M); }
+    else if (expr === "run") { blk(3, 15, 3, 1, p.M); blk(2, 18, 4, 1, p.M); blk(4, 21, 3, 1, p.M); }
+    else if (expr === "point") { blk(22, 2, 2, 3, p.Li); blk(22, 6, 2, 1, p.Li); }
   }
-  drawMascot();
+  function drawMascot() { drawChar(cvs, heroExpr); }
+  function drawAllMinis() {
+    var ms = document.querySelectorAll("canvas.mini");
+    for (var i = 0; i < ms.length; i++) { drawChar(ms[i], ms[i].getAttribute("data-expr") || "happy"); }
+  }
+  drawMascot(); drawAllMinis();
   cvs.addEventListener("click", function () {
     cvs.classList.remove("bounce"); void cvs.offsetWidth; cvs.classList.add("bounce");
+    heroExpr = pick(["cheer", "wave", "happy"]); drawMascot();
     say(pick(["같이 하면 안 무섭지! 💪", "오늘도 한 칸씩 굴러가자 🌱", "혼자여도 내가 있잖아 😎", "잘하고 있어, 진짜로!"]));
   });
 
@@ -520,6 +553,8 @@
       em.textContent = "😴"; nm.textContent = "밤샘은 내일의 나를 힘들게 해. 회고만 남기고 얼른 자자.";
       setMode("pm");
     }
+    heroExpr = (h >= 5 && h < 12) ? "wave" : (h >= 12 && h < 18) ? "run" : (h >= 18 && h < 23) ? "happy" : "sleepy";
+    drawMascot();
   }
 
   /* ---------- Mode toggle ---------- */
@@ -554,7 +589,7 @@
         state.done[t.id] = !state.done[t.id];
         el.setAttribute("aria-checked", state.done[t.id] ? "true" : "false");
         save(); renderTasks(); renderGauges(); updateDoneCount();
-        if (state.done[t.id]) say(pick(["하나 해결! 게이지 차는 거 봐 📈", "이거 굴러가는 소리 좋다 👍", "잘한다 진짜!"]));
+        if (state.done[t.id]) { heroExpr = "cheer"; drawMascot(); say(pick(["하나 해결! 게이지 차는 거 봐 📈", "이거 굴러가는 소리 좋다 👍", "잘한다 진짜!"])); }
       }
       el.addEventListener("click", toggle);
       el.addEventListener("keydown", function (e) {
@@ -648,7 +683,7 @@
   renderTasks(); renderGauges(); updateDoneCount(); renderStreak(); refreshTime();
   setInterval(refreshTime, 60000);
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () {
-    syncThemeIcon(); drawMascot();
+    syncThemeIcon(); drawMascot(); drawAllMinis();
   });
 })();
 </script>
