@@ -228,6 +228,37 @@
   .foot { text-align: center; font-size: 11px; color: var(--muted); line-height: 1.6; margin-top: 4px; }
   .foot b { color: var(--ink); }
 
+  /* differentiation strip */
+  .wedge { display: flex; gap: 6px; overflow-x: auto; padding: 1px 2px; scrollbar-width: none; }
+  .wedge::-webkit-scrollbar { display: none; }
+  .wpill {
+    flex: 0 0 auto; font-size: 11px; font-weight: 700; letter-spacing: -.2px;
+    padding: 6px 11px; border-radius: 999px; white-space: nowrap;
+    background: var(--card); border: 1px solid var(--line); color: var(--ink); box-shadow: var(--shadow-sm);
+  }
+
+  /* coach note in briefing */
+  .coach {
+    margin: 0 0 12px; font-size: 12px; line-height: 1.55; color: var(--ink);
+    background: color-mix(in srgb, var(--lime) 16%, var(--card));
+    border: 1px solid color-mix(in srgb, var(--lime) 40%, var(--line));
+    border-radius: 12px; padding: 9px 11px;
+  }
+  .coach b { color: var(--ink); }
+
+  /* caption line */
+  .cap { margin: -4px 0 13px; font-size: 11.5px; line-height: 1.5; color: var(--muted); }
+  .cap b { color: var(--ink); }
+
+  /* "일부러 안 하는 것" card */
+  .nots ul { list-style: none; margin: 0; padding: 0; }
+  .nots li {
+    font-size: 12.5px; line-height: 1.5; color: var(--ink);
+    padding: 9px 0; border-bottom: 1px solid var(--line);
+  }
+  .nots li:last-child { border-bottom: none; }
+  .nots li b { color: var(--muted); font-weight: 500; }
+
   @keyframes pop { 0%{ transform: scale(1);} 40%{ transform: scale(1.14) rotate(-4deg);} 100%{ transform: scale(1);} }
   .bounce { animation: pop .4s ease; }
   @media (prefers-reduced-motion: reduce) {
@@ -256,6 +287,12 @@
     </div>
   </div>
 
+  <div class="wedge">
+    <span class="wpill">🙅‍♀️ 랭킹·비교 없음</span>
+    <span class="wpill">🧑‍🏫 사람 매니저 없이</span>
+    <span class="wpill">📦 인강·문제집 굴리기</span>
+  </div>
+
   <div class="modes">
     <button id="mAm" class="on">☀️ 아침 브리핑</button>
     <button id="mPm">🌙 저녁 회고</button>
@@ -268,6 +305,7 @@
       <h2>아침 브리핑</h2>
       <span class="sub" id="doneCount">0/5 완료</span>
     </div>
+    <p class="coach">🤖 뭐부터 할지 고민 마 — <b>순서는 내가 정해뒀어.</b> 제일 안 풀리는 <b>과학</b>부터, 지치는 오후엔 <b>운동</b>으로. 위에서부터 하나씩만.</p>
     <div id="taskList"></div>
   </div>
 
@@ -278,6 +316,7 @@
       <h2>진척 게이지</h2>
       <span class="sub">방학 전체 목표 대비</span>
     </div>
+    <p class="cap">공부한 <b>시간</b> 말고 <b>목표까지 남은 거리</b>를 봐. 전국 랭킹 그런 거 없어 — <b>어제의 나</b>랑만 비교하면 돼.</p>
     <div id="gaugeList"></div>
   </div>
 
@@ -319,6 +358,18 @@
     </div>
     <button class="save-btn" id="saveBtn">오늘 하루 닫기 ✨</button>
     <div class="streak" id="streak">연속 회고 <b>0일</b> · 3일 이으면 습관이 돼!</div>
+  </div>
+
+  <div class="card nots">
+    <div class="card-h">
+      <span class="chip" style="background:var(--sky)">약속</span>
+      <h2>이 앱이 일부러 안 하는 것</h2>
+    </div>
+    <ul>
+      <li>🚫 전국 랭킹·친구 비교 <b>— 불안 대신 나만의 페이스</b></li>
+      <li>🚫 부모·관리자 감시 화면 <b>— 주도권은 Haily에게</b></li>
+      <li>🚫 인강·문제집 새로 강매 <b>— 네가 가진 걸 굴려줄 뿐</b></li>
+    </ul>
   </div>
 
   <div class="foot">
