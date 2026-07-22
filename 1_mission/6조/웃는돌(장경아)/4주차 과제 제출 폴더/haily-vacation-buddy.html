@@ -1,0 +1,730 @@
+<title>고고버디 · GoGo Buddy</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    --bg: #FBF5EC;
+    --bg-2: #FCE6D3;
+    --card: #FFFFFF;
+    --ink: #40352E;
+    --muted: #A2938A;
+    --line: #F0E7DB;
+    --lime: #DDE94A;
+    --lime-deep: #B7C22C;
+    --sky: #7FB3F5;
+    --mint: #55CFAD;
+    --pink: #FF9EBC;
+    --apricot: #FFBE5C;
+    --shadow: 0 10px 30px rgba(120, 90, 60, .14);
+    --shadow-sm: 0 4px 14px rgba(120, 90, 60, .10);
+    --radius: 22px;
+    --font: "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "SFMono-Regular", ui-monospace, "Menlo", "Consolas", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1E1A17;
+      --bg-2: #2A2320;
+      --card: #2B2521;
+      --ink: #F6EEE5;
+      --muted: #B6A79B;
+      --line: #3C332C;
+      --lime: #E4EF4E;
+      --lime-deep: #E4EF4E;
+      --sky: #7FA9EC;
+      --mint: #63D6B4;
+      --pink: #F294B4;
+      --apricot: #F3BC6A;
+      --shadow: 0 12px 34px rgba(0, 0, 0, .40);
+      --shadow-sm: 0 4px 16px rgba(0, 0, 0, .34);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #FBF5EC; --bg-2: #FCE6D3; --card: #FFFFFF; --ink: #40352E; --muted: #A2938A;
+    --line: #F0E7DB; --lime: #DDE94A; --lime-deep: #B7C22C; --sky: #7FB3F5; --mint: #55CFAD;
+    --pink: #FF9EBC; --apricot: #FFBE5C; --shadow: 0 10px 30px rgba(120,90,60,.14);
+    --shadow-sm: 0 4px 14px rgba(120,90,60,.10);
+  }
+  :root[data-theme="dark"] {
+    --bg: #1E1A17; --bg-2: #2A2320; --card: #2B2521; --ink: #F6EEE5; --muted: #B6A79B;
+    --line: #3C332C; --lime: #E4EF4E; --lime-deep: #E4EF4E; --sky: #7FA9EC; --mint: #63D6B4;
+    --pink: #F294B4; --apricot: #F3BC6A; --shadow: 0 12px 34px rgba(0,0,0,.40);
+    --shadow-sm: 0 4px 16px rgba(0,0,0,.34);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: var(--font);
+    color: var(--ink);
+    background:
+      radial-gradient(720px 380px at 10% -8%, color-mix(in srgb, var(--apricot) 46%, transparent), transparent 60%),
+      radial-gradient(680px 420px at 110% 2%, color-mix(in srgb, var(--mint) 42%, transparent), transparent 58%),
+      radial-gradient(640px 520px at 50% 118%, color-mix(in srgb, var(--pink) 32%, transparent), transparent 62%),
+      var(--bg);
+    background-attachment: fixed;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 22px 14px 60px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .phone {
+    width: 100%;
+    max-width: 430px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* ---------- Header ---------- */
+  .top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 4px;
+  }
+  .brand { display: flex; align-items: center; gap: 9px; }
+  .brand .logo {
+    width: 30px; height: 30px; border-radius: 9px;
+    background: var(--lime);
+    display: grid; place-items: center;
+    box-shadow: 0 3px 0 var(--lime-deep);
+    font-size: 15px;
+  }
+  .brand b { font-size: 15px; letter-spacing: -.2px; }
+  .brand span { color: var(--muted); font-size: 11.5px; display: block; margin-top: 1px; }
+  .theme-btn {
+    border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    width: 38px; height: 38px; border-radius: 12px; cursor: pointer; font-size: 16px;
+    box-shadow: var(--shadow-sm); transition: transform .15s ease;
+  }
+  .theme-btn:hover { transform: translateY(-1px); }
+
+  /* ---------- Hero greeting ---------- */
+  .hero {
+    background: linear-gradient(155deg, var(--card), var(--card));
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px 18px 16px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(300px 120px at 90% -20%, color-mix(in srgb, var(--lime) 40%, transparent), transparent 70%);
+    pointer-events: none;
+  }
+  #mascot {
+    width: 90px; height: 90px; flex: 0 0 auto;
+    filter: drop-shadow(0 6px 7px rgba(150,100,60,.24));
+    cursor: pointer;
+    transition: transform .2s ease;
+  }
+  #mascot:hover { transform: translateY(-2px) rotate(-3deg); }
+  .mini {
+    width: 42px; height: 42px; flex: 0 0 auto;
+    filter: drop-shadow(0 2px 2px rgba(150,100,60,.20));
+  }
+  .hi { z-index: 1; }
+  .dday {
+    display: inline-block; font-family: var(--mono); font-size: 11px; font-weight: 700;
+    letter-spacing: .5px; color: var(--ink);
+    background: var(--lime); padding: 3px 9px; border-radius: 999px;
+    box-shadow: 0 2px 0 var(--lime-deep); margin-bottom: 7px;
+  }
+  .hi h1 { font-size: 18px; margin: 0 0 4px; letter-spacing: -.4px; line-height: 1.3; text-wrap: balance; }
+  .hi p { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+
+  /* ---------- Mode toggle ---------- */
+  .modes { display: flex; gap: 6px; background: var(--card); border: 1px solid var(--line);
+    padding: 5px; border-radius: 16px; box-shadow: var(--shadow-sm); }
+  .modes button {
+    flex: 1; border: none; background: transparent; color: var(--muted);
+    padding: 9px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer;
+    font-family: var(--font); transition: all .18s ease;
+  }
+  .modes button.on { background: var(--ink); color: var(--card); box-shadow: var(--shadow-sm); }
+
+  /* ---------- Cards ---------- */
+  .card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius); box-shadow: var(--shadow-sm);
+    padding: 16px 16px 17px;
+  }
+  .card.dim { opacity: .55; }
+  .card-h { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .chip {
+    font-size: 10.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase;
+    padding: 4px 8px; border-radius: 8px; color: #2b2540;
+  }
+  .card-h h2 { font-size: 15px; margin: 0; letter-spacing: -.3px; }
+  .card-h .sub { margin-left: auto; font-size: 11.5px; color: var(--muted); font-family: var(--mono); }
+
+  /* task list */
+  .task {
+    display: flex; align-items: center; gap: 11px; padding: 11px 12px;
+    border: 1px solid var(--line); border-radius: 14px; margin-bottom: 8px;
+    cursor: pointer; user-select: none; background: var(--card);
+    transition: transform .12s ease, border-color .15s ease, background .15s ease;
+  }
+  .task:last-child { margin-bottom: 0; }
+  .task:hover { transform: translateX(2px); }
+  .task:focus-visible { outline: 3px solid color-mix(in srgb, var(--sky) 60%, transparent); outline-offset: 2px; }
+  .tick {
+    width: 24px; height: 24px; border-radius: 8px; flex: 0 0 auto;
+    border: 2px solid var(--line); display: grid; place-items: center;
+    font-size: 14px; color: transparent; transition: all .16s ease;
+  }
+  .task .body { flex: 1; }
+  .task .t-title { font-size: 13.5px; font-weight: 600; letter-spacing: -.2px; }
+  .task .t-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 3px; margin-right: 5px; vertical-align: middle; }
+  .task.done { background: color-mix(in srgb, var(--lime) 14%, var(--card)); border-color: color-mix(in srgb, var(--lime) 45%, var(--line)); }
+  .task.done .tick { background: var(--lime); border-color: var(--lime); color: #2b2540; }
+  .task.done .t-title { text-decoration: line-through; color: var(--muted); }
+
+  /* progress gauges */
+  .gauge { margin-bottom: 13px; }
+  .gauge:last-child { margin-bottom: 0; }
+  .gauge .g-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .gauge .g-name { font-size: 12.5px; font-weight: 700; }
+  .gauge .g-name small { color: var(--muted); font-weight: 500; margin-left: 4px; }
+  .gauge .g-pct { font-family: var(--mono); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .track { height: 12px; border-radius: 999px; background: var(--bg-2); overflow: hidden; }
+  .fill { height: 100%; border-radius: 999px; width: 0%; transition: width .7s cubic-bezier(.2,.8,.2,1); }
+
+  /* rhythm nudge */
+  .nudge-body { display: flex; gap: 12px; align-items: center; }
+  .nudge-emoji { font-size: 30px; }
+  .nudge-body p { margin: 0; font-size: 13px; line-height: 1.5; }
+  .nudge-actions { display: flex; gap: 8px; margin-top: 13px; }
+  .nudge-actions button {
+    flex: 1; padding: 11px; border-radius: 13px; font-size: 13px; font-weight: 700; cursor: pointer;
+    font-family: var(--font); border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    transition: transform .12s ease;
+  }
+  .nudge-actions button:hover { transform: translateY(-1px); }
+  .nudge-actions .move { background: var(--apricot); border-color: transparent; color: #4a3410; }
+  .nudge-actions .rest { background: var(--sky); border-color: transparent; color: #16345e; }
+  .nudge-reply { margin-top: 11px; font-size: 12.5px; color: var(--muted); min-height: 1em; }
+
+  /* reflection */
+  .reflect label { display: block; font-size: 12px; font-weight: 700; margin: 0 0 5px; }
+  .reflect label small { color: var(--muted); font-weight: 500; }
+  .reflect .field { margin-bottom: 11px; }
+  .reflect textarea {
+    width: 100%; resize: none; border: 1px solid var(--line); border-radius: 12px;
+    padding: 10px 11px; font-family: var(--font); font-size: 13px; color: var(--ink);
+    background: var(--bg); line-height: 1.5;
+  }
+  .reflect textarea:focus-visible { outline: none; border-color: color-mix(in srgb, var(--mint) 70%, var(--line)); background: var(--card); }
+  .save-btn {
+    width: 100%; padding: 13px; border: none; border-radius: 14px; cursor: pointer;
+    background: var(--lime); color: #2b2540; font-size: 14px; font-weight: 800; font-family: var(--font);
+    box-shadow: 0 4px 0 var(--lime-deep); transition: transform .1s ease, box-shadow .1s ease;
+  }
+  .save-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--lime-deep); }
+  .streak { text-align: center; margin-top: 10px; font-size: 12px; color: var(--muted); }
+  .streak b { color: var(--ink); }
+
+  .foot { text-align: center; font-size: 11px; color: var(--muted); line-height: 1.6; margin-top: 4px; }
+  .foot b { color: var(--ink); }
+
+  /* differentiation strip */
+  .wedge { display: flex; gap: 6px; overflow-x: auto; padding: 1px 2px; scrollbar-width: none; }
+  .wedge::-webkit-scrollbar { display: none; }
+  .wpill {
+    flex: 0 0 auto; font-size: 11px; font-weight: 700; letter-spacing: -.2px;
+    padding: 6px 11px; border-radius: 999px; white-space: nowrap;
+    background: var(--card); border: 1px solid var(--line); color: var(--ink); box-shadow: var(--shadow-sm);
+  }
+
+  /* coach note in briefing */
+  .coach {
+    margin: 0 0 12px; font-size: 12px; line-height: 1.55; color: var(--ink);
+    background: color-mix(in srgb, var(--lime) 16%, var(--card));
+    border: 1px solid color-mix(in srgb, var(--lime) 40%, var(--line));
+    border-radius: 12px; padding: 9px 11px;
+  }
+  .coach b { color: var(--ink); }
+
+  /* caption line */
+  .cap { margin: -4px 0 13px; font-size: 11.5px; line-height: 1.5; color: var(--muted); }
+  .cap b { color: var(--ink); }
+
+  /* "일부러 안 하는 것" card */
+  .nots ul { list-style: none; margin: 0; padding: 0; }
+  .nots li {
+    font-size: 12.5px; line-height: 1.5; color: var(--ink);
+    padding: 9px 0; border-bottom: 1px solid var(--line);
+  }
+  .nots li:last-child { border-bottom: none; }
+  .nots li b { color: var(--muted); font-weight: 500; }
+
+  @keyframes pop { 0%{ transform: scale(1);} 40%{ transform: scale(1.14) rotate(-4deg);} 100%{ transform: scale(1);} }
+  .bounce { animation: pop .4s ease; }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="phone">
+  <div class="top">
+    <div class="brand">
+      <div class="logo">🌱</div>
+      <div>
+        <b>고고버디</b>
+        <span>GoGo Buddy · 스스로 굴러가는 여름</span>
+      </div>
+    </div>
+    <button class="theme-btn" id="themeBtn" aria-label="테마 전환" title="라이트/다크 전환">🌙</button>
+  </div>
+
+  <div class="hero">
+    <canvas id="mascot" width="180" height="180" title="콕 눌러봐!"></canvas>
+    <div class="hi">
+      <span class="dday" id="dday">D-27 · 방학</span>
+      <h1 id="greet">좋은 아침, Haily! 🌱</h1>
+      <p id="greetSub">오늘도 스스로 굴러가볼까? 뭐부터 할지 내가 정리해뒀어.</p>
+    </div>
+  </div>
+
+  <div class="wedge">
+    <span class="wpill">🙅‍♀️ 랭킹·비교 없음</span>
+    <span class="wpill">🧑‍🏫 사람 매니저 없이</span>
+    <span class="wpill">📦 인강·문제집 굴리기</span>
+  </div>
+
+  <div class="modes">
+    <button id="mAm" class="on">☀️ 아침 브리핑</button>
+    <button id="mPm">🌙 저녁 회고</button>
+  </div>
+
+  <!-- 아침 브리핑 -->
+  <div class="card" id="cBrief">
+    <div class="card-h">
+      <canvas class="mini" data-expr="point" width="84" height="84" aria-hidden="true"></canvas>
+      <span class="chip" style="background:var(--lime)">오늘 이거부터</span>
+      <h2>아침 브리핑</h2>
+      <span class="sub" id="doneCount">0/5 완료</span>
+    </div>
+    <p class="coach">🤖 뭐부터 할지 고민 마 — <b>순서는 내가 정해뒀어.</b> 제일 안 풀리는 <b>과학</b>부터, 지치는 오후엔 <b>운동</b>으로. 위에서부터 하나씩만.</p>
+    <div id="taskList"></div>
+  </div>
+
+  <!-- 진척 게이지 -->
+  <div class="card" id="cGauge">
+    <div class="card-h">
+      <canvas class="mini" data-expr="cheer" width="84" height="84" aria-hidden="true"></canvas>
+      <span class="chip" style="background:var(--mint)">목표까지 어디쯤</span>
+      <h2>진척 게이지</h2>
+      <span class="sub">방학 전체 목표 대비</span>
+    </div>
+    <p class="cap">공부한 <b>시간</b> 말고 <b>목표까지 남은 거리</b>를 봐. 전국 랭킹 그런 거 없어 — <b>어제의 나</b>랑만 비교하면 돼.</p>
+    <div id="gaugeList"></div>
+  </div>
+
+  <!-- 리듬 넛지 -->
+  <div class="card" id="cNudge">
+    <div class="card-h">
+      <canvas class="mini" data-expr="run" width="84" height="84" aria-hidden="true"></canvas>
+      <span class="chip" style="background:var(--apricot)">지치지 않게</span>
+      <h2>리듬 넛지</h2>
+      <span class="sub" id="nowClock">--:--</span>
+    </div>
+    <div class="nudge-body">
+      <div class="nudge-emoji" id="nudgeEmoji">🏃‍♀️</div>
+      <p id="nudgeMsg">지금 슬슬 몸 움직일 시간! 15분만 스트레칭하고 오면 오후 집중력이 달라져.</p>
+    </div>
+    <div class="nudge-actions">
+      <button class="move" id="btnMove">🤸 15분 움직이기</button>
+      <button class="rest" id="btnRest">☕ 10분만 쉬기</button>
+    </div>
+    <div class="nudge-reply" id="nudgeReply"></div>
+  </div>
+
+  <!-- 저녁 회고 -->
+  <div class="card reflect" id="cReflect">
+    <div class="card-h">
+      <canvas class="mini" data-expr="sleepy" width="84" height="84" aria-hidden="true"></canvas>
+      <span class="chip" style="background:var(--pink)">하루를 스스로 닫기</span>
+      <h2>저녁 회고 3줄</h2>
+    </div>
+    <div class="field">
+      <label>① 오늘 실제로 한 것 <small>(인강·문제집 진도)</small></label>
+      <textarea id="r1" rows="2" placeholder="예: 수학 인강 3강 + 문제집 12p, 영단어 40개"></textarea>
+    </div>
+    <div class="field">
+      <label>② 오늘 잘된 것 하나 <small>(작아도 OK)</small></label>
+      <textarea id="r2" rows="2" placeholder="예: 낮잠 안 자고 저녁까지 페이스 유지함"></textarea>
+    </div>
+    <div class="field">
+      <label>③ 내일의 씨앗 <small>(내일 아침 첫 할 일)</small></label>
+      <textarea id="r3" rows="2" placeholder="예: 과학 인강 밀린 2강부터 시작"></textarea>
+    </div>
+    <button class="save-btn" id="saveBtn">오늘 하루 닫기 ✨</button>
+    <div class="streak" id="streak">연속 회고 <b>0일</b> · 3일 이으면 습관이 돼!</div>
+  </div>
+
+  <div class="card nots">
+    <div class="card-h">
+      <canvas class="mini" data-expr="wave" width="84" height="84" aria-hidden="true"></canvas>
+      <span class="chip" style="background:var(--sky)">약속</span>
+      <h2>이 앱이 일부러 안 하는 것</h2>
+    </div>
+    <ul>
+      <li>🚫 전국 랭킹·친구 비교 <b>— 불안 대신 나만의 페이스</b></li>
+      <li>🚫 부모·관리자 감시 화면 <b>— 주도권은 Haily에게</b></li>
+      <li>🚫 인강·문제집 새로 강매 <b>— 네가 가진 걸 굴려줄 뿐</b></li>
+    </ul>
+  </div>
+
+  <div class="foot">
+    <b>고고버디</b> · GoGo Buddy — 스폰지클럽 2기 · 4주차 PRD 프로토타입<br>
+    "혼자여도 뭐부터 할지 알려주고, 안 지치게 페이스 잡아주는 버디"
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Theme ---------- */
+  var root = document.documentElement;
+  var themeBtn = document.getElementById("themeBtn");
+  function currentDark() {
+    var t = root.getAttribute("data-theme");
+    if (t) return t === "dark";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function syncThemeIcon() { themeBtn.textContent = currentDark() ? "☀️" : "🌙"; }
+  themeBtn.addEventListener("click", function () {
+    root.setAttribute("data-theme", currentDark() ? "light" : "dark");
+    syncThemeIcon(); drawMascot(); drawAllMinis();
+  });
+  syncThemeIcon();
+
+  /* ---------- Cute blocky mascot (parametric, many poses) ---------- */
+  var cvs = document.getElementById("mascot");
+  var heroExpr = "wave";
+  function charPalette() {
+    var d = currentDark();
+    return {
+      Y:  d ? "#F8CE55" : "#F7C948",  // buddy body (honey)
+      OL: d ? "#8A6A2A" : "#7A5A22",  // warm outline
+      Stem: d ? "#5FB56A" : "#4FA85C",
+      Leaf: d ? "#7FD98A" : "#6FCF7B",
+      Pupil: d ? "#2A2018" : "#3A2E22",
+      Cheek: d ? "#F58FA6" : "#FF9EB0",
+      Foot: d ? "#EAE4D8" : "#FFFFFF",  // sneaker
+      Li: d ? "#E4EF4E" : "#C7D22C",    // sparkle
+      M:  d ? "#8B7C70" : "#B7A99C"     // motion / zzz
+    };
+  }
+  // draw the original "GoGo" sprout-buddy (smooth vector) on a square canvas
+  function drawChar(cv, expr) {
+    var ctx = cv.getContext("2d");
+    var S = cv.width / 32;               // 32-unit virtual grid → canvas px
+    var p = charPalette();
+    var PI = Math.PI;
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.lineJoin = "round"; ctx.lineCap = "round";
+    function disc(x, y, r, fill, stroke, lw) {
+      ctx.beginPath(); ctx.arc(x * S, y * S, r * S, 0, PI * 2);
+      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+      if (stroke) { ctx.lineWidth = (lw || 1.3) * S; ctx.strokeStyle = stroke; ctx.stroke(); }
+    }
+    function oval(x, y, rx, ry, fill, stroke, lw) {
+      ctx.beginPath(); ctx.ellipse(x * S, y * S, rx * S, ry * S, 0, 0, PI * 2);
+      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+      if (stroke) { ctx.lineWidth = (lw || 1.3) * S; ctx.strokeStyle = stroke; ctx.stroke(); }
+    }
+    function limb(x1, y1, x2, y2, c, w) {
+      ctx.beginPath(); ctx.moveTo(x1 * S, y1 * S); ctx.lineTo(x2 * S, y2 * S);
+      ctx.strokeStyle = c; ctx.lineWidth = w * S; ctx.stroke();
+    }
+    function arc(cx, cy, r, a0, a1, c, w) {
+      ctx.beginPath(); ctx.arc(cx * S, cy * S, r * S, a0, a1);
+      ctx.strokeStyle = c; ctx.lineWidth = w * S; ctx.stroke();
+    }
+    function star(x, y, c) {
+      ctx.fillStyle = c; ctx.beginPath();
+      for (var i = 0; i < 5; i++) {
+        var a = -PI / 2 + i * 2 * PI / 5;
+        ctx.lineTo((x + Math.cos(a) * 1.5) * S, (y + Math.sin(a) * 1.5) * S);
+        var b = a + PI / 5;
+        ctx.lineTo((x + Math.cos(b) * 0.62) * S, (y + Math.sin(b) * 0.62) * S);
+      }
+      ctx.closePath(); ctx.fill();
+    }
+    function zzz(x, y, c) {
+      ctx.strokeStyle = c; ctx.lineWidth = 1 * S;
+      [[0, 0, 1.7], [2.2, -2.6, 1.2]].forEach(function (z) {
+        var zx = x + z[0], zy = y + z[1], w = z[2];
+        ctx.beginPath();
+        ctx.moveTo(zx * S, zy * S); ctx.lineTo((zx + w) * S, zy * S);
+        ctx.lineTo(zx * S, (zy + w) * S); ctx.lineTo((zx + w) * S, (zy + w) * S);
+        ctx.stroke();
+      });
+    }
+
+    // sprout
+    limb(16, 8, 16, 4.5, p.Stem, 1.4);
+    oval(17.5, 3.7, 1.7, 1.1, p.Leaf, p.Stem, 0.7);
+    oval(14.5, 4.5, 1.4, 0.9, p.Leaf, p.Stem, 0.7);
+
+    // feet
+    if (expr === "run") { oval(12, 25.4, 2.4, 1.5, p.Foot, p.OL, 1); oval(20.6, 26, 2.4, 1.5, p.Foot, p.OL, 1); }
+    else { oval(12.6, 25.7, 2.4, 1.5, p.Foot, p.OL, 1); oval(19.4, 25.7, 2.4, 1.5, p.Foot, p.OL, 1); }
+
+    // body
+    oval(16, 16.5, 8.6, 9, p.Y, p.OL, 1.4);
+    ctx.globalAlpha = 0.16; disc(12.3, 12.2, 3.1, "#fff", null); ctx.globalAlpha = 1;
+
+    // arms
+    if (expr === "cheer") { limb(9.5, 15, 5.6, 8, p.Y, 3); limb(22.5, 15, 26.4, 8, p.Y, 3); disc(5.4, 8, 1.4, p.Y, p.OL, 0.9); disc(26.6, 8, 1.4, p.Y, p.OL, 0.9); }
+    else if (expr === "point") { limb(9, 17, 7, 19.5, p.Y, 3); disc(7, 19.7, 1.3, p.Y, p.OL, 0.9); limb(22.8, 15, 25.4, 7.4, p.Y, 3); disc(25.5, 6.8, 1.4, p.Y, p.OL, 0.9); }
+    else if (expr === "wave") { limb(9, 17, 7, 19.5, p.Y, 3); disc(7, 19.7, 1.3, p.Y, p.OL, 0.9); limb(22.8, 14, 25.8, 7, p.Y, 3); disc(26, 6.4, 1.5, p.Y, p.OL, 0.9); }
+    else if (expr === "run") { limb(9.5, 15, 6.2, 12, p.Y, 3); disc(6, 11.6, 1.3, p.Y, p.OL, 0.9); limb(22.5, 18, 25.4, 22, p.Y, 3); disc(25.6, 22.4, 1.3, p.Y, p.OL, 0.9); }
+    else { limb(8.8, 17, 7, 20, p.Y, 3); disc(7, 20.2, 1.4, p.Y, p.OL, 0.9); limb(23.2, 17, 25, 20, p.Y, 3); disc(25, 20.2, 1.4, p.Y, p.OL, 0.9); }
+
+    // cheeks
+    ctx.globalAlpha = 0.7; disc(10.6, 18.4, 1.5, p.Cheek, null); disc(21.4, 18.4, 1.5, p.Cheek, null); ctx.globalAlpha = 1;
+
+    // eyes
+    var eyes = (expr === "cheer" || expr === "wave" || expr === "point") ? "happy"
+             : (expr === "sleepy") ? "closed" : "open";
+    if (eyes === "open") {
+      disc(12.6, 15, 2.7, "#fff", p.OL, 0.8); disc(19.4, 15, 2.7, "#fff", p.OL, 0.8);
+      disc(13, 15.4, 1.35, p.Pupil, null); disc(19.8, 15.4, 1.35, p.Pupil, null);
+      disc(12.5, 14.7, 0.5, "#fff", null); disc(19.3, 14.7, 0.5, "#fff", null);
+    } else if (eyes === "happy") {
+      arc(12.6, 15.6, 2.2, PI + 0.35, PI * 2 - 0.35, p.Pupil, 1.1);
+      arc(19.4, 15.6, 2.2, PI + 0.35, PI * 2 - 0.35, p.Pupil, 1.1);
+    } else {
+      arc(12.6, 15, 2.2, 0.35, PI - 0.35, p.Pupil, 1.1);
+      arc(19.4, 15, 2.2, 0.35, PI - 0.35, p.Pupil, 1.1);
+    }
+
+    // mouth
+    if (expr === "cheer" || expr === "wave") { ctx.beginPath(); ctx.ellipse(16 * S, 19.4 * S, 2.2 * S, 1.9 * S, 0, 0, PI); ctx.fillStyle = p.Pupil; ctx.fill(); }
+    else if (expr === "sleepy") { oval(16, 19.6, 0.9, 0.7, p.Pupil, null); }
+    else { arc(16, 18.4, 2, 0.16 * PI, 0.84 * PI, p.Pupil, 1.1); }
+
+    // extras
+    if (expr === "cheer") { star(5, 6, p.Li); star(27, 7, p.Li); star(25.5, 13, p.Li); }
+    else if (expr === "sleepy") { zzz(23, 5, p.M); }
+    else if (expr === "run") { limb(2.5, 14, 5.5, 14, p.M, 1); limb(1.5, 17.5, 5, 17.5, p.M, 1); limb(3, 21, 6, 21, p.M, 1); }
+    else if (expr === "point") { limb(25.5, 2.4, 25.5, 4.4, p.Li, 1.5); disc(25.5, 5.6, 0.45, p.Li, null); }
+  }
+  function drawMascot() { drawChar(cvs, heroExpr); }
+  function drawAllMinis() {
+    var ms = document.querySelectorAll("canvas.mini");
+    for (var i = 0; i < ms.length; i++) { drawChar(ms[i], ms[i].getAttribute("data-expr") || "happy"); }
+  }
+  drawMascot(); drawAllMinis();
+  cvs.addEventListener("click", function () {
+    cvs.classList.remove("bounce"); void cvs.offsetWidth; cvs.classList.add("bounce");
+    heroExpr = pick(["cheer", "wave", "happy"]); drawMascot();
+    say(pick(["같이 하면 안 무섭지! 💪", "오늘도 한 칸씩 굴러가자 🌱", "혼자여도 내가 있잖아 😎", "잘하고 있어, 진짜로!"]));
+  });
+
+  /* ---------- Data ---------- */
+  var SUBJECTS = {
+    math:  { name: "수학", tool: "인강+문제집", color: "var(--sky)",     base: 45 },
+    sci:   { name: "과학", tool: "개념 인강",   color: "var(--mint)",    base: 30 },
+    eng:   { name: "영어", tool: "단어+독해",   color: "var(--pink)",    base: 60 },
+    pe:    { name: "운동", tool: "홈트+산책",   color: "var(--apricot)", base: 25 }
+  };
+  var TASKS = [
+    { id: "t1", subj: "math", title: "수학 인강 1강 + 개념 정리", meta: "가장 안 풀리는 것부터 · 아침 집중 시간에" },
+    { id: "t2", subj: "eng",  title: "영단어 40개 + 독해 1지문",  meta: "매일 같은 시간 루틴으로" },
+    { id: "t3", subj: "sci",  title: "과학 밀린 인강 2강 따라잡기", meta: "제일 뒤처진 과목 · 오늘 반 따라잡기" },
+    { id: "t4", subj: "pe",   title: "홈트 15분 or 동네 산책",     meta: "낮잠 대신 · 오후 3~4시 리듬 잡기" },
+    { id: "t5", subj: "math", title: "문제집 오답 5문제 다시",      meta: "짧게 · 하루 마무리 전" }
+  ];
+
+  var state = load();
+  function load() {
+    try { return JSON.parse(localStorage.getItem("haily_buddy") || "{}"); }
+    catch (e) { return {}; }
+  }
+  function save() {
+    try { localStorage.setItem("haily_buddy", JSON.stringify(state)); } catch (e) {}
+  }
+  if (!state.done) state.done = {};
+  if (typeof state.streak !== "number") state.streak = 0;
+  if (!state.bonus) state.bonus = {};
+
+  /* ---------- Time / greeting ---------- */
+  var VACATION_END = new Date(2026, 7, 17); // 8/17
+  function refreshTime() {
+    var now = new Date();
+    var h = now.getHours();
+    var dd = Math.max(0, Math.ceil((VACATION_END - now) / 86400000));
+    document.getElementById("dday").textContent = "D-" + dd + " · 방학";
+    document.getElementById("nowClock").textContent =
+      String(h).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+
+    var g = document.getElementById("greet"), gs = document.getElementById("greetSub");
+    var em = document.getElementById("nudgeEmoji"), nm = document.getElementById("nudgeMsg");
+    if (h >= 5 && h < 12) {
+      g.textContent = "좋은 아침, Haily! 🌱";
+      gs.textContent = "오늘도 스스로 굴러가볼까? 뭐부터 할지 내가 정리해뒀어.";
+      em.textContent = "🥣"; nm.textContent = "아침이 하루를 정해. 제일 안 풀리는 것부터 딱 하나 시작하자.";
+      setMode("am");
+    } else if (h >= 12 && h < 18) {
+      g.textContent = "오후엔 페이스가 관건! ☀️";
+      gs.textContent = "지치기 쉬운 시간이야. 낮잠 대신 몸 한번 움직여줄까?";
+      em.textContent = "🏃‍♀️"; nm.textContent = "슬슬 몸 움직일 시간! 15분만 스트레칭하고 오면 오후 집중력이 달라져.";
+    } else if (h >= 18 && h < 23) {
+      g.textContent = "하루 마무리 시간이야 🌙";
+      gs.textContent = "회고 3줄만 쓰면 오늘도 스스로 잘 닫은 거야.";
+      em.textContent = "🛏️"; nm.textContent = "이제 마무리 모드. 회고 3줄 쓰고 밤엔 푹 자야 내일 아침이 편해.";
+      setMode("pm");
+    } else {
+      g.textContent = "너무 늦었어, Haily 🌛";
+      gs.textContent = "지금 밤새면 바이오리듬이 깨져. 내일을 위해 오늘은 여기까지!";
+      em.textContent = "😴"; nm.textContent = "밤샘은 내일의 나를 힘들게 해. 회고만 남기고 얼른 자자.";
+      setMode("pm");
+    }
+    heroExpr = (h >= 5 && h < 12) ? "wave" : (h >= 12 && h < 18) ? "run" : (h >= 18 && h < 23) ? "happy" : "sleepy";
+    drawMascot();
+  }
+
+  /* ---------- Mode toggle ---------- */
+  var mAm = document.getElementById("mAm"), mPm = document.getElementById("mPm");
+  function setMode(m) {
+    var am = m === "am";
+    mAm.classList.toggle("on", am); mPm.classList.toggle("on", !am);
+    document.getElementById("cBrief").classList.toggle("dim", !am);
+    document.getElementById("cReflect").classList.toggle("dim", am);
+  }
+  mAm.addEventListener("click", function () { setMode("am"); });
+  mPm.addEventListener("click", function () { setMode("pm"); });
+
+  /* ---------- Render tasks ---------- */
+  var listEl = document.getElementById("taskList");
+  function renderTasks() {
+    listEl.innerHTML = "";
+    TASKS.forEach(function (t) {
+      var s = SUBJECTS[t.subj];
+      var el = document.createElement("div");
+      el.className = "task" + (state.done[t.id] ? " done" : "");
+      el.tabIndex = 0;
+      el.setAttribute("role", "checkbox");
+      el.setAttribute("aria-checked", state.done[t.id] ? "true" : "false");
+      el.innerHTML =
+        '<div class="tick">✓</div>' +
+        '<div class="body">' +
+          '<div class="t-title"><span class="dot" style="background:' + s.color + '"></span>' + t.title + '</div>' +
+          '<div class="t-meta">' + s.name + " · " + t.meta + "</div>" +
+        "</div>";
+      function toggle() {
+        state.done[t.id] = !state.done[t.id];
+        el.setAttribute("aria-checked", state.done[t.id] ? "true" : "false");
+        save(); renderTasks(); renderGauges(); updateDoneCount();
+        if (state.done[t.id]) { heroExpr = "cheer"; drawMascot(); say(pick(["하나 해결! 게이지 차는 거 봐 📈", "이거 굴러가는 소리 좋다 👍", "잘한다 진짜!"])); }
+      }
+      el.addEventListener("click", toggle);
+      el.addEventListener("keydown", function (e) {
+        if (e.key === " " || e.key === "Enter") { e.preventDefault(); toggle(); }
+      });
+      listEl.appendChild(el);
+    });
+  }
+  function updateDoneCount() {
+    var n = TASKS.filter(function (t) { return state.done[t.id]; }).length;
+    document.getElementById("doneCount").textContent = n + "/" + TASKS.length + " 완료";
+  }
+
+  /* ---------- Render gauges ---------- */
+  var gEl = document.getElementById("gaugeList");
+  function subjProgress(key) {
+    var s = SUBJECTS[key];
+    // base progress + today's completed tasks of this subject (+8 each) + rhythm bonus
+    var todays = TASKS.filter(function (t) { return t.subj === key && state.done[t.id]; }).length;
+    var bonus = state.bonus[key] || 0;
+    return Math.min(100, s.base + todays * 8 + bonus);
+  }
+  function renderGauges() {
+    gEl.innerHTML = "";
+    Object.keys(SUBJECTS).forEach(function (key) {
+      var s = SUBJECTS[key];
+      var pct = subjProgress(key);
+      var g = document.createElement("div");
+      g.className = "gauge";
+      g.innerHTML =
+        '<div class="g-top"><div class="g-name">' + s.name +
+          '<small>' + s.tool + "</small></div>" +
+          '<div class="g-pct">' + pct + "%</div></div>" +
+        '<div class="track"><div class="fill" style="background:' + s.color + '"></div></div>';
+      gEl.appendChild(g);
+      requestAnimationFrame(function () {
+        g.querySelector(".fill").style.width = pct + "%";
+      });
+    });
+  }
+
+  /* ---------- Rhythm nudge ---------- */
+  var reply = document.getElementById("nudgeReply");
+  document.getElementById("btnMove").addEventListener("click", function () {
+    state.bonus.pe = Math.min(30, (state.bonus.pe || 0) + 10);
+    save(); renderGauges();
+    reply.textContent = "🙌 나이스! 운동 게이지 올라갔어. 몸 풀고 오면 머리도 맑아져.";
+    say("움직인 거 잘했어! 이게 안 지치는 비결 🏃‍♀️");
+  });
+  document.getElementById("btnRest").addEventListener("click", function () {
+    reply.textContent = "☕ 딱 10분만! 눕지 말고 앉아서 쉬어야 낮잠으로 안 빠져.";
+    say("10분 알람 맞춰두고 쉬자 ⏰");
+  });
+
+  /* ---------- Reflection ---------- */
+  ["r1", "r2", "r3"].forEach(function (id) {
+    var ta = document.getElementById(id);
+    if (state[id]) ta.value = state[id];
+    ta.addEventListener("input", function () { state[id] = ta.value; save(); });
+  });
+  document.getElementById("saveBtn").addEventListener("click", function () {
+    var filled = ["r1", "r2", "r3"].filter(function (id) {
+      return (document.getElementById(id).value || "").trim().length > 0;
+    }).length;
+    if (filled === 0) { say("한 줄이라도 남겨봐 — 그게 내일의 시작점이야 ✍️"); return; }
+    var today = new Date().toDateString();
+    if (state.lastReflect !== today) {
+      state.streak = (state.streak || 0) + 1;
+      state.lastReflect = today;
+    }
+    save(); renderStreak();
+    say(pick(["오늘 하루 스스로 잘 닫았어. 푹 자! 🌙", "3줄이면 충분해. 내일 아침이 편해질 거야 ✨", "이렇게 매일이면 방학 끝이 달라진다 💛"]));
+  });
+  function renderStreak() {
+    var s = state.streak || 0;
+    var tail = s >= 3 ? " · 습관 만들기 성공 중! 🔥" : " · 3일 이으면 습관이 돼!";
+    document.getElementById("streak").innerHTML = "연속 회고 <b>" + s + "일</b>" + tail;
+  }
+
+  /* ---------- Mascot speech ---------- */
+  var sub = document.getElementById("greetSub");
+  var speakTimer = null;
+  function say(msg) {
+    sub.textContent = msg;
+    if (speakTimer) clearTimeout(speakTimer);
+    speakTimer = setTimeout(refreshTime, 3600);
+  }
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+
+  /* ---------- Init ---------- */
+  renderTasks(); renderGauges(); updateDoneCount(); renderStreak(); refreshTime();
+  setInterval(refreshTime, 60000);
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () {
+    syncThemeIcon(); drawMascot(); drawAllMinis();
+  });
+})();
+</script>
