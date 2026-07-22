@@ -1,0 +1,605 @@
+<title>Haily의 방학 짝꿍</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    --bg: #EFEAF6;
+    --bg-2: #E7E0F3;
+    --card: #FFFFFF;
+    --ink: #322E4A;
+    --muted: #857FA6;
+    --line: #E4DEF0;
+    --lime: #DDE94A;
+    --lime-deep: #B9C41f;
+    --sky: #8FB8F5;
+    --mint: #7FE0C0;
+    --pink: #FFA9C4;
+    --apricot: #FFC876;
+    --shadow: 0 10px 30px rgba(70, 55, 110, .12);
+    --shadow-sm: 0 4px 14px rgba(70, 55, 110, .10);
+    --radius: 22px;
+    --font: "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "SFMono-Regular", ui-monospace, "Menlo", "Consolas", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1D1830;
+      --bg-2: #241D3A;
+      --card: #2A2340;
+      --ink: #F1ECFB;
+      --muted: #A79EC6;
+      --line: #38304F;
+      --lime: #E4EF4E;
+      --lime-deep: #E4EF4E;
+      --sky: #7FA9EC;
+      --mint: #74D5B5;
+      --pink: #F294B4;
+      --apricot: #F3BC6A;
+      --shadow: 0 12px 34px rgba(0, 0, 0, .38);
+      --shadow-sm: 0 4px 16px rgba(0, 0, 0, .32);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #EFEAF6; --bg-2: #E7E0F3; --card: #FFFFFF; --ink: #322E4A; --muted: #857FA6;
+    --line: #E4DEF0; --lime: #DDE94A; --lime-deep: #B9C41f; --sky: #8FB8F5; --mint: #7FE0C0;
+    --pink: #FFA9C4; --apricot: #FFC876; --shadow: 0 10px 30px rgba(70,55,110,.12);
+    --shadow-sm: 0 4px 14px rgba(70,55,110,.10);
+  }
+  :root[data-theme="dark"] {
+    --bg: #1D1830; --bg-2: #241D3A; --card: #2A2340; --ink: #F1ECFB; --muted: #A79EC6;
+    --line: #38304F; --lime: #E4EF4E; --lime-deep: #E4EF4E; --sky: #7FA9EC; --mint: #74D5B5;
+    --pink: #F294B4; --apricot: #F3BC6A; --shadow: 0 12px 34px rgba(0,0,0,.38);
+    --shadow-sm: 0 4px 16px rgba(0,0,0,.32);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: var(--font);
+    color: var(--ink);
+    background:
+      radial-gradient(1200px 600px at 20% -10%, var(--bg-2), transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, var(--bg-2), transparent 55%),
+      var(--bg);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 22px 14px 60px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .phone {
+    width: 100%;
+    max-width: 430px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* ---------- Header ---------- */
+  .top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 4px;
+  }
+  .brand { display: flex; align-items: center; gap: 9px; }
+  .brand .logo {
+    width: 30px; height: 30px; border-radius: 9px;
+    background: var(--lime);
+    display: grid; place-items: center;
+    box-shadow: 0 3px 0 var(--lime-deep);
+    font-size: 15px;
+  }
+  .brand b { font-size: 15px; letter-spacing: -.2px; }
+  .brand span { color: var(--muted); font-size: 11.5px; display: block; margin-top: 1px; }
+  .theme-btn {
+    border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    width: 38px; height: 38px; border-radius: 12px; cursor: pointer; font-size: 16px;
+    box-shadow: var(--shadow-sm); transition: transform .15s ease;
+  }
+  .theme-btn:hover { transform: translateY(-1px); }
+
+  /* ---------- Hero greeting ---------- */
+  .hero {
+    background: linear-gradient(155deg, var(--card), var(--card));
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px 18px 16px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(300px 120px at 90% -20%, color-mix(in srgb, var(--lime) 40%, transparent), transparent 70%);
+    pointer-events: none;
+  }
+  #mascot {
+    width: 78px; height: 78px; flex: 0 0 auto;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 6px 8px rgba(80,60,120,.20));
+    cursor: pointer;
+  }
+  .hi { z-index: 1; }
+  .dday {
+    display: inline-block; font-family: var(--mono); font-size: 11px; font-weight: 700;
+    letter-spacing: .5px; color: var(--ink);
+    background: var(--lime); padding: 3px 9px; border-radius: 999px;
+    box-shadow: 0 2px 0 var(--lime-deep); margin-bottom: 7px;
+  }
+  .hi h1 { font-size: 18px; margin: 0 0 4px; letter-spacing: -.4px; line-height: 1.3; text-wrap: balance; }
+  .hi p { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+
+  /* ---------- Mode toggle ---------- */
+  .modes { display: flex; gap: 6px; background: var(--card); border: 1px solid var(--line);
+    padding: 5px; border-radius: 16px; box-shadow: var(--shadow-sm); }
+  .modes button {
+    flex: 1; border: none; background: transparent; color: var(--muted);
+    padding: 9px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer;
+    font-family: var(--font); transition: all .18s ease;
+  }
+  .modes button.on { background: var(--ink); color: var(--card); box-shadow: var(--shadow-sm); }
+
+  /* ---------- Cards ---------- */
+  .card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius); box-shadow: var(--shadow-sm);
+    padding: 16px 16px 17px;
+  }
+  .card.dim { opacity: .55; }
+  .card-h { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .chip {
+    font-size: 10.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase;
+    padding: 4px 8px; border-radius: 8px; color: #2b2540;
+  }
+  .card-h h2 { font-size: 15px; margin: 0; letter-spacing: -.3px; }
+  .card-h .sub { margin-left: auto; font-size: 11.5px; color: var(--muted); font-family: var(--mono); }
+
+  /* task list */
+  .task {
+    display: flex; align-items: center; gap: 11px; padding: 11px 12px;
+    border: 1px solid var(--line); border-radius: 14px; margin-bottom: 8px;
+    cursor: pointer; user-select: none; background: var(--card);
+    transition: transform .12s ease, border-color .15s ease, background .15s ease;
+  }
+  .task:last-child { margin-bottom: 0; }
+  .task:hover { transform: translateX(2px); }
+  .task:focus-visible { outline: 3px solid color-mix(in srgb, var(--sky) 60%, transparent); outline-offset: 2px; }
+  .tick {
+    width: 24px; height: 24px; border-radius: 8px; flex: 0 0 auto;
+    border: 2px solid var(--line); display: grid; place-items: center;
+    font-size: 14px; color: transparent; transition: all .16s ease;
+  }
+  .task .body { flex: 1; }
+  .task .t-title { font-size: 13.5px; font-weight: 600; letter-spacing: -.2px; }
+  .task .t-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 3px; margin-right: 5px; vertical-align: middle; }
+  .task.done { background: color-mix(in srgb, var(--lime) 14%, var(--card)); border-color: color-mix(in srgb, var(--lime) 45%, var(--line)); }
+  .task.done .tick { background: var(--lime); border-color: var(--lime); color: #2b2540; }
+  .task.done .t-title { text-decoration: line-through; color: var(--muted); }
+
+  /* progress gauges */
+  .gauge { margin-bottom: 13px; }
+  .gauge:last-child { margin-bottom: 0; }
+  .gauge .g-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .gauge .g-name { font-size: 12.5px; font-weight: 700; }
+  .gauge .g-name small { color: var(--muted); font-weight: 500; margin-left: 4px; }
+  .gauge .g-pct { font-family: var(--mono); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .track { height: 12px; border-radius: 999px; background: var(--bg-2); overflow: hidden; }
+  .fill { height: 100%; border-radius: 999px; width: 0%; transition: width .7s cubic-bezier(.2,.8,.2,1); }
+
+  /* rhythm nudge */
+  .nudge-body { display: flex; gap: 12px; align-items: center; }
+  .nudge-emoji { font-size: 30px; }
+  .nudge-body p { margin: 0; font-size: 13px; line-height: 1.5; }
+  .nudge-actions { display: flex; gap: 8px; margin-top: 13px; }
+  .nudge-actions button {
+    flex: 1; padding: 11px; border-radius: 13px; font-size: 13px; font-weight: 700; cursor: pointer;
+    font-family: var(--font); border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    transition: transform .12s ease;
+  }
+  .nudge-actions button:hover { transform: translateY(-1px); }
+  .nudge-actions .move { background: var(--apricot); border-color: transparent; color: #4a3410; }
+  .nudge-actions .rest { background: var(--sky); border-color: transparent; color: #16345e; }
+  .nudge-reply { margin-top: 11px; font-size: 12.5px; color: var(--muted); min-height: 1em; }
+
+  /* reflection */
+  .reflect label { display: block; font-size: 12px; font-weight: 700; margin: 0 0 5px; }
+  .reflect label small { color: var(--muted); font-weight: 500; }
+  .reflect .field { margin-bottom: 11px; }
+  .reflect textarea {
+    width: 100%; resize: none; border: 1px solid var(--line); border-radius: 12px;
+    padding: 10px 11px; font-family: var(--font); font-size: 13px; color: var(--ink);
+    background: var(--bg); line-height: 1.5;
+  }
+  .reflect textarea:focus-visible { outline: none; border-color: color-mix(in srgb, var(--mint) 70%, var(--line)); background: var(--card); }
+  .save-btn {
+    width: 100%; padding: 13px; border: none; border-radius: 14px; cursor: pointer;
+    background: var(--lime); color: #2b2540; font-size: 14px; font-weight: 800; font-family: var(--font);
+    box-shadow: 0 4px 0 var(--lime-deep); transition: transform .1s ease, box-shadow .1s ease;
+  }
+  .save-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--lime-deep); }
+  .streak { text-align: center; margin-top: 10px; font-size: 12px; color: var(--muted); }
+  .streak b { color: var(--ink); }
+
+  .foot { text-align: center; font-size: 11px; color: var(--muted); line-height: 1.6; margin-top: 4px; }
+  .foot b { color: var(--ink); }
+
+  @keyframes pop { 0%{ transform: scale(1);} 40%{ transform: scale(1.14) rotate(-4deg);} 100%{ transform: scale(1);} }
+  .bounce { animation: pop .4s ease; }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="phone">
+  <div class="top">
+    <div class="brand">
+      <div class="logo">🧽</div>
+      <div>
+        <b>방학 짝꿍</b>
+        <span>Haily의 스스로 굴러가는 여름</span>
+      </div>
+    </div>
+    <button class="theme-btn" id="themeBtn" aria-label="테마 전환" title="라이트/다크 전환">🌙</button>
+  </div>
+
+  <div class="hero">
+    <canvas id="mascot" width="26" height="26" title="콕 눌러봐!"></canvas>
+    <div class="hi">
+      <span class="dday" id="dday">D-27 · 방학</span>
+      <h1 id="greet">좋은 아침, Haily! 🌱</h1>
+      <p id="greetSub">오늘도 스스로 굴러가볼까? 뭐부터 할지 내가 정리해뒀어.</p>
+    </div>
+  </div>
+
+  <div class="modes">
+    <button id="mAm" class="on">☀️ 아침 브리핑</button>
+    <button id="mPm">🌙 저녁 회고</button>
+  </div>
+
+  <!-- 아침 브리핑 -->
+  <div class="card" id="cBrief">
+    <div class="card-h">
+      <span class="chip" style="background:var(--lime)">오늘 이거부터</span>
+      <h2>아침 브리핑</h2>
+      <span class="sub" id="doneCount">0/5 완료</span>
+    </div>
+    <div id="taskList"></div>
+  </div>
+
+  <!-- 진척 게이지 -->
+  <div class="card" id="cGauge">
+    <div class="card-h">
+      <span class="chip" style="background:var(--mint)">목표까지 어디쯤</span>
+      <h2>진척 게이지</h2>
+      <span class="sub">방학 전체 목표 대비</span>
+    </div>
+    <div id="gaugeList"></div>
+  </div>
+
+  <!-- 리듬 넛지 -->
+  <div class="card" id="cNudge">
+    <div class="card-h">
+      <span class="chip" style="background:var(--apricot)">지치지 않게</span>
+      <h2>리듬 넛지</h2>
+      <span class="sub" id="nowClock">--:--</span>
+    </div>
+    <div class="nudge-body">
+      <div class="nudge-emoji" id="nudgeEmoji">🏃‍♀️</div>
+      <p id="nudgeMsg">지금 슬슬 몸 움직일 시간! 15분만 스트레칭하고 오면 오후 집중력이 달라져.</p>
+    </div>
+    <div class="nudge-actions">
+      <button class="move" id="btnMove">🤸 15분 움직이기</button>
+      <button class="rest" id="btnRest">☕ 10분만 쉬기</button>
+    </div>
+    <div class="nudge-reply" id="nudgeReply"></div>
+  </div>
+
+  <!-- 저녁 회고 -->
+  <div class="card reflect" id="cReflect">
+    <div class="card-h">
+      <span class="chip" style="background:var(--pink)">하루를 스스로 닫기</span>
+      <h2>저녁 회고 3줄</h2>
+    </div>
+    <div class="field">
+      <label>① 오늘 실제로 한 것 <small>(인강·문제집 진도)</small></label>
+      <textarea id="r1" rows="2" placeholder="예: 수학 인강 3강 + 문제집 12p, 영단어 40개"></textarea>
+    </div>
+    <div class="field">
+      <label>② 오늘 잘된 것 하나 <small>(작아도 OK)</small></label>
+      <textarea id="r2" rows="2" placeholder="예: 낮잠 안 자고 저녁까지 페이스 유지함"></textarea>
+    </div>
+    <div class="field">
+      <label>③ 내일의 씨앗 <small>(내일 아침 첫 할 일)</small></label>
+      <textarea id="r3" rows="2" placeholder="예: 과학 인강 밀린 2강부터 시작"></textarea>
+    </div>
+    <button class="save-btn" id="saveBtn">오늘 하루 닫기 ✨</button>
+    <div class="streak" id="streak">연속 회고 <b>0일</b> · 3일 이으면 습관이 돼!</div>
+  </div>
+
+  <div class="foot">
+    <b>방학 짝꿍</b> — 스폰지클럽 2기 · 4주차 PRD 프로토타입<br>
+    "혼자여도 뭐부터 할지 알려주고, 안 지치게 페이스 잡아주는 짝꿍"
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Theme ---------- */
+  var root = document.documentElement;
+  var themeBtn = document.getElementById("themeBtn");
+  function currentDark() {
+    var t = root.getAttribute("data-theme");
+    if (t) return t === "dark";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function syncThemeIcon() { themeBtn.textContent = currentDark() ? "☀️" : "🌙"; }
+  themeBtn.addEventListener("click", function () {
+    root.setAttribute("data-theme", currentDark() ? "light" : "dark");
+    syncThemeIcon(); drawMascot();
+  });
+  syncThemeIcon();
+
+  /* ---------- Pixel mascot (sponge with sneakers) ---------- */
+  var cvs = document.getElementById("mascot");
+  var ctx = cvs.getContext("2d");
+  // palette keys
+  function pal() {
+    var dark = currentDark();
+    return {
+      Y: dark ? "#E4EF4E" : "#E7EF57",   // sponge body
+      y: dark ? "#C3CE33" : "#CBD53C",   // body shadow / holes
+      K: "#33304A",                       // outline / eyes
+      W: "#ffffff",                       // eye white
+      P: dark ? "#F294B4" : "#FF9EBE",   // blush
+      S: dark ? "#7FA9EC" : "#8FB8F5",   // sneakers
+      s: "#ffffff"                        // sneaker sole
+    };
+  }
+  // 26x26 grid. '.' transparent
+  var ART = [
+    "..........................",
+    "..........................",
+    "....KKKKKKKKKKKKKKKKKK....",
+    "...KYYYYYYYYYYYYYYYYYYK...",
+    "..KYYYyYYYYYYYYYYyYYYYYK..",
+    "..KYYYYYYYYYYYYYYYYYYYYK..",
+    "..KYYYYyYYYYYYYYYYyYYYYK..",
+    "..KYYYYYYYYYYYYYYYYYYYYK..",
+    "..KYYWWWKYYYYYYKWWWYYYYK..",
+    "..KYYWWWWKYYYYKWWWWYYYYK..",
+    "..KYYWKKWYYYYYYWKKWYYYYK..",
+    "..KYYWWWWYYYYYYWWWWYYYYK..",
+    "..KYYYWWyYYYYYYyWWYYYYYK..",
+    "..KYPPYYYYYYYYYYYYPPYYYK..",
+    "..KYPPYYYYKKKKYYYYPPYYYK..",
+    "..KYYYYYYKYYYYKYYYYYYYYK..",
+    "..KYYYYYYYKKKKYYYYYYYYYK..",
+    "..KYYyYYYYYYYYYYYYYyYYYK..",
+    "..KYYYYYYYYYYYYYYYYYYYYK..",
+    "...KYYYYYYYYYYYYYYYYYYK...",
+    "....KKKKKKKKKKKKKKKKKK....",
+    "....K..K........K..K.....",
+    "...KSSSK......KSSSK......",
+    "..KSSSSSK....KSSSSSK.....",
+    "..KsssssK....KsssssK.....",
+    "..KKKKKKK....KKKKKKK....."
+  ];
+  function drawMascot() {
+    var p = pal();
+    ctx.clearRect(0, 0, 26, 26);
+    for (var y = 0; y < ART.length; y++) {
+      var row = ART[y];
+      for (var x = 0; x < row.length; x++) {
+        var c = row[x];
+        if (c === "." || c === " ") continue;
+        var col = ({ K: p.K, Y: p.Y, y: p.y, W: p.W, P: p.P, S: p.S, s: p.s })[c];
+        if (!col) continue;
+        ctx.fillStyle = col;
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+  }
+  drawMascot();
+  cvs.addEventListener("click", function () {
+    cvs.classList.remove("bounce"); void cvs.offsetWidth; cvs.classList.add("bounce");
+    say(pick(["같이 하면 안 무섭지! 💪", "오늘도 한 칸씩 굴러가자 🌱", "혼자여도 내가 있잖아 😎", "잘하고 있어, 진짜로!"]));
+  });
+
+  /* ---------- Data ---------- */
+  var SUBJECTS = {
+    math:  { name: "수학", tool: "인강+문제집", color: "var(--sky)",     base: 45 },
+    sci:   { name: "과학", tool: "개념 인강",   color: "var(--mint)",    base: 30 },
+    eng:   { name: "영어", tool: "단어+독해",   color: "var(--pink)",    base: 60 },
+    pe:    { name: "운동", tool: "홈트+산책",   color: "var(--apricot)", base: 25 }
+  };
+  var TASKS = [
+    { id: "t1", subj: "math", title: "수학 인강 1강 + 개념 정리", meta: "가장 안 풀리는 것부터 · 아침 집중 시간에" },
+    { id: "t2", subj: "eng",  title: "영단어 40개 + 독해 1지문",  meta: "매일 같은 시간 루틴으로" },
+    { id: "t3", subj: "sci",  title: "과학 밀린 인강 2강 따라잡기", meta: "제일 뒤처진 과목 · 오늘 반 따라잡기" },
+    { id: "t4", subj: "pe",   title: "홈트 15분 or 동네 산책",     meta: "낮잠 대신 · 오후 3~4시 리듬 잡기" },
+    { id: "t5", subj: "math", title: "문제집 오답 5문제 다시",      meta: "짧게 · 하루 마무리 전" }
+  ];
+
+  var state = load();
+  function load() {
+    try { return JSON.parse(localStorage.getItem("haily_buddy") || "{}"); }
+    catch (e) { return {}; }
+  }
+  function save() {
+    try { localStorage.setItem("haily_buddy", JSON.stringify(state)); } catch (e) {}
+  }
+  if (!state.done) state.done = {};
+  if (typeof state.streak !== "number") state.streak = 0;
+  if (!state.bonus) state.bonus = {};
+
+  /* ---------- Time / greeting ---------- */
+  var VACATION_END = new Date(2026, 7, 17); // 8/17
+  function refreshTime() {
+    var now = new Date();
+    var h = now.getHours();
+    var dd = Math.max(0, Math.ceil((VACATION_END - now) / 86400000));
+    document.getElementById("dday").textContent = "D-" + dd + " · 방학";
+    document.getElementById("nowClock").textContent =
+      String(h).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+
+    var g = document.getElementById("greet"), gs = document.getElementById("greetSub");
+    var em = document.getElementById("nudgeEmoji"), nm = document.getElementById("nudgeMsg");
+    if (h >= 5 && h < 12) {
+      g.textContent = "좋은 아침, Haily! 🌱";
+      gs.textContent = "오늘도 스스로 굴러가볼까? 뭐부터 할지 내가 정리해뒀어.";
+      em.textContent = "🥣"; nm.textContent = "아침이 하루를 정해. 제일 안 풀리는 것부터 딱 하나 시작하자.";
+      setMode("am");
+    } else if (h >= 12 && h < 18) {
+      g.textContent = "오후엔 페이스가 관건! ☀️";
+      gs.textContent = "지치기 쉬운 시간이야. 낮잠 대신 몸 한번 움직여줄까?";
+      em.textContent = "🏃‍♀️"; nm.textContent = "슬슬 몸 움직일 시간! 15분만 스트레칭하고 오면 오후 집중력이 달라져.";
+    } else if (h >= 18 && h < 23) {
+      g.textContent = "하루 마무리 시간이야 🌙";
+      gs.textContent = "회고 3줄만 쓰면 오늘도 스스로 잘 닫은 거야.";
+      em.textContent = "🛏️"; nm.textContent = "이제 마무리 모드. 회고 3줄 쓰고 밤엔 푹 자야 내일 아침이 편해.";
+      setMode("pm");
+    } else {
+      g.textContent = "너무 늦었어, Haily 🌛";
+      gs.textContent = "지금 밤새면 바이오리듬이 깨져. 내일을 위해 오늘은 여기까지!";
+      em.textContent = "😴"; nm.textContent = "밤샘은 내일의 나를 힘들게 해. 회고만 남기고 얼른 자자.";
+      setMode("pm");
+    }
+  }
+
+  /* ---------- Mode toggle ---------- */
+  var mAm = document.getElementById("mAm"), mPm = document.getElementById("mPm");
+  function setMode(m) {
+    var am = m === "am";
+    mAm.classList.toggle("on", am); mPm.classList.toggle("on", !am);
+    document.getElementById("cBrief").classList.toggle("dim", !am);
+    document.getElementById("cReflect").classList.toggle("dim", am);
+  }
+  mAm.addEventListener("click", function () { setMode("am"); });
+  mPm.addEventListener("click", function () { setMode("pm"); });
+
+  /* ---------- Render tasks ---------- */
+  var listEl = document.getElementById("taskList");
+  function renderTasks() {
+    listEl.innerHTML = "";
+    TASKS.forEach(function (t) {
+      var s = SUBJECTS[t.subj];
+      var el = document.createElement("div");
+      el.className = "task" + (state.done[t.id] ? " done" : "");
+      el.tabIndex = 0;
+      el.setAttribute("role", "checkbox");
+      el.setAttribute("aria-checked", state.done[t.id] ? "true" : "false");
+      el.innerHTML =
+        '<div class="tick">✓</div>' +
+        '<div class="body">' +
+          '<div class="t-title"><span class="dot" style="background:' + s.color + '"></span>' + t.title + '</div>' +
+          '<div class="t-meta">' + s.name + " · " + t.meta + "</div>" +
+        "</div>";
+      function toggle() {
+        state.done[t.id] = !state.done[t.id];
+        el.setAttribute("aria-checked", state.done[t.id] ? "true" : "false");
+        save(); renderTasks(); renderGauges(); updateDoneCount();
+        if (state.done[t.id]) say(pick(["하나 해결! 게이지 차는 거 봐 📈", "이거 굴러가는 소리 좋다 👍", "잘한다 진짜!"]));
+      }
+      el.addEventListener("click", toggle);
+      el.addEventListener("keydown", function (e) {
+        if (e.key === " " || e.key === "Enter") { e.preventDefault(); toggle(); }
+      });
+      listEl.appendChild(el);
+    });
+  }
+  function updateDoneCount() {
+    var n = TASKS.filter(function (t) { return state.done[t.id]; }).length;
+    document.getElementById("doneCount").textContent = n + "/" + TASKS.length + " 완료";
+  }
+
+  /* ---------- Render gauges ---------- */
+  var gEl = document.getElementById("gaugeList");
+  function subjProgress(key) {
+    var s = SUBJECTS[key];
+    // base progress + today's completed tasks of this subject (+8 each) + rhythm bonus
+    var todays = TASKS.filter(function (t) { return t.subj === key && state.done[t.id]; }).length;
+    var bonus = state.bonus[key] || 0;
+    return Math.min(100, s.base + todays * 8 + bonus);
+  }
+  function renderGauges() {
+    gEl.innerHTML = "";
+    Object.keys(SUBJECTS).forEach(function (key) {
+      var s = SUBJECTS[key];
+      var pct = subjProgress(key);
+      var g = document.createElement("div");
+      g.className = "gauge";
+      g.innerHTML =
+        '<div class="g-top"><div class="g-name">' + s.name +
+          '<small>' + s.tool + "</small></div>" +
+          '<div class="g-pct">' + pct + "%</div></div>" +
+        '<div class="track"><div class="fill" style="background:' + s.color + '"></div></div>';
+      gEl.appendChild(g);
+      requestAnimationFrame(function () {
+        g.querySelector(".fill").style.width = pct + "%";
+      });
+    });
+  }
+
+  /* ---------- Rhythm nudge ---------- */
+  var reply = document.getElementById("nudgeReply");
+  document.getElementById("btnMove").addEventListener("click", function () {
+    state.bonus.pe = Math.min(30, (state.bonus.pe || 0) + 10);
+    save(); renderGauges();
+    reply.textContent = "🙌 나이스! 운동 게이지 올라갔어. 몸 풀고 오면 머리도 맑아져.";
+    say("움직인 거 잘했어! 이게 안 지치는 비결 🏃‍♀️");
+  });
+  document.getElementById("btnRest").addEventListener("click", function () {
+    reply.textContent = "☕ 딱 10분만! 눕지 말고 앉아서 쉬어야 낮잠으로 안 빠져.";
+    say("10분 알람 맞춰두고 쉬자 ⏰");
+  });
+
+  /* ---------- Reflection ---------- */
+  ["r1", "r2", "r3"].forEach(function (id) {
+    var ta = document.getElementById(id);
+    if (state[id]) ta.value = state[id];
+    ta.addEventListener("input", function () { state[id] = ta.value; save(); });
+  });
+  document.getElementById("saveBtn").addEventListener("click", function () {
+    var filled = ["r1", "r2", "r3"].filter(function (id) {
+      return (document.getElementById(id).value || "").trim().length > 0;
+    }).length;
+    if (filled === 0) { say("한 줄이라도 남겨봐 — 그게 내일의 시작점이야 ✍️"); return; }
+    var today = new Date().toDateString();
+    if (state.lastReflect !== today) {
+      state.streak = (state.streak || 0) + 1;
+      state.lastReflect = today;
+    }
+    save(); renderStreak();
+    say(pick(["오늘 하루 스스로 잘 닫았어. 푹 자! 🌙", "3줄이면 충분해. 내일 아침이 편해질 거야 ✨", "이렇게 매일이면 방학 끝이 달라진다 💛"]));
+  });
+  function renderStreak() {
+    var s = state.streak || 0;
+    var tail = s >= 3 ? " · 습관 만들기 성공 중! 🔥" : " · 3일 이으면 습관이 돼!";
+    document.getElementById("streak").innerHTML = "연속 회고 <b>" + s + "일</b>" + tail;
+  }
+
+  /* ---------- Mascot speech ---------- */
+  var sub = document.getElementById("greetSub");
+  var speakTimer = null;
+  function say(msg) {
+    sub.textContent = msg;
+    if (speakTimer) clearTimeout(speakTimer);
+    speakTimer = setTimeout(refreshTime, 3600);
+  }
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+
+  /* ---------- Init ---------- */
+  renderTasks(); renderGauges(); updateDoneCount(); renderStreak(); refreshTime();
+  setInterval(refreshTime, 60000);
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () {
+    syncThemeIcon(); drawMascot();
+  });
+})();
+</script>
