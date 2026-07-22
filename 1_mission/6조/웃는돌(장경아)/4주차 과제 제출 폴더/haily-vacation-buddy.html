@@ -1,4 +1,4 @@
-<title>Haily의 방학 짝꿍</title>
+<title>고고버디 · GoGo Buddy</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
   :root {
@@ -279,10 +279,10 @@
 <div class="phone">
   <div class="top">
     <div class="brand">
-      <div class="logo">🌱</div>
+      <div class="logo">🍌</div>
       <div>
-        <b>방학 짝꿍</b>
-        <span>Haily의 스스로 굴러가는 여름</span>
+        <b>고고버디</b>
+        <span>GoGo Buddy · 스스로 굴러가는 여름</span>
       </div>
     </div>
     <button class="theme-btn" id="themeBtn" aria-label="테마 전환" title="라이트/다크 전환">🌙</button>
@@ -388,8 +388,8 @@
   </div>
 
   <div class="foot">
-    <b>방학 짝꿍</b> — 스폰지클럽 2기 · 4주차 PRD 프로토타입<br>
-    "혼자여도 뭐부터 할지 알려주고, 안 지치게 페이스 잡아주는 짝꿍"
+    <b>고고버디</b> · GoGo Buddy — 스폰지클럽 2기 · 4주차 PRD 프로토타입<br>
+    "혼자여도 뭐부터 할지 알려주고, 안 지치게 페이스 잡아주는 버디"
   </div>
 </div>
 
@@ -418,69 +418,93 @@
   function charPalette() {
     var d = currentDark();
     return {
-      Y:  d ? "#F8D23A" : "#F6C930",  // head / hands
-      K:  d ? "#2A211A" : "#3A2E24",  // outline / eyes / mouth
-      W:  "#FFFFFF",
-      B:  d ? "#3B7BF0" : "#2E6FE6",  // shirt
-      Bs: d ? "#2C5FC4" : "#245BC0",  // collar
-      G:  d ? "#5FBB50" : "#57B14B",  // legs
-      P:  d ? "#F58FB4" : "#FF9EBC",  // blush / bow
-      Pd: d ? "#E06B95" : "#F2789F",  // bow knot
+      Y:  d ? "#F7DE52" : "#F3D23E",  // minion yellow
+      K:  d ? "#241F18" : "#2E2A22",  // outline / hair / arms / legs
+      W:  "#FFFFFF",                   // goggle glass / teeth
+      Mt: d ? "#9BA3AB" : "#C2C8CE",  // goggle metal band
+      MtD: d ? "#767E86" : "#8A9198", // band edge
+      Bl: d ? "#4368AE" : "#4C72B8",  // overalls denim
+      BlD: d ? "#2E4A82" : "#35528C", // overalls pocket / shade
       Li: d ? "#E4EF4E" : "#DDE94A",  // sparkle
       M:  d ? "#8B7C70" : "#C3B4A7"   // motion / zzz
     };
   }
-  // draw the character on a 32x32 canvas with the given expression/pose
+  // draw a Minion-style character on a 32x32 canvas with the given pose
   function drawChar(cv, expr) {
     var ctx = cv.getContext("2d");
     var p = charPalette();
     ctx.clearRect(0, 0, 32, 32);
     function blk(x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(x, y, w, h); }
-    function oblk(x, y, w, h, c) { ctx.fillStyle = p.K; ctx.fillRect(x - 1, y - 1, w + 2, h + 2); ctx.fillStyle = c; ctx.fillRect(x, y, w, h); }
+    function clr(x, y, w, h) { ctx.clearRect(x, y, w, h); }
 
-    // legs
-    if (expr === "run") { oblk(12, 25, 4, 4, p.G); oblk(17, 26, 4, 5, p.G); }
-    else { oblk(11, 25, 4, 6, p.G); oblk(17, 25, 4, 6, p.G); }
+    // hair sprouts
+    blk(13, 1, 1, 3, p.K); blk(16, 0, 1, 4, p.K); blk(19, 1, 1, 3, p.K);
+    blk(15, 2, 1, 2, p.K); blk(17, 2, 1, 2, p.K);
 
-    // arms
-    if (expr === "cheer") { oblk(7, 8, 3, 8, p.Y); oblk(22, 8, 3, 8, p.Y); }
-    else if (expr === "point") { oblk(7, 16, 3, 8, p.Y); oblk(22, 6, 3, 10, p.Y); }
-    else if (expr === "wave") { oblk(7, 16, 3, 8, p.Y); oblk(22, 5, 3, 11, p.Y); }
-    else if (expr === "run") { oblk(6, 13, 3, 5, p.Y); oblk(23, 19, 3, 5, p.Y); }
-    else { oblk(7, 16, 3, 8, p.Y); oblk(22, 16, 3, 8, p.Y); }
+    // legs (dark, behind body)
+    if (expr === "run") {
+      blk(12, 24, 3, 2, p.K); blk(11, 25, 4, 1, p.K);
+      blk(17, 25, 3, 3, p.K); blk(17, 28, 4, 1, p.K);
+    } else {
+      blk(12, 24, 3, 3, p.K); blk(11, 27, 4, 1, p.K);
+      blk(17, 24, 3, 3, p.K); blk(17, 27, 4, 1, p.K);
+    }
 
-    // torso
-    oblk(11, 16, 10, 9, p.B);
-    blk(15, 16, 2, 1, p.Bs); // collar hint
+    // body capsule (yellow, outlined + rounded corners)
+    blk(9, 3, 14, 23, p.K);
+    blk(10, 4, 12, 21, p.Y);
+    clr(9, 3, 1, 1); clr(22, 3, 1, 1); clr(9, 25, 1, 1); clr(22, 25, 1, 1);
+    clr(10, 4, 1, 1); clr(21, 4, 1, 1);
 
-    // head + bow
-    oblk(10, 3, 12, 12, p.Y);
-    blk(12, 1, 3, 2, p.P); blk(18, 1, 3, 2, p.P); blk(15, 1, 2, 2, p.Pd);
+    // overalls (denim)
+    blk(10, 19, 12, 6, p.Bl);
+    clr(10, 24, 1, 1); clr(21, 24, 1, 1);
+    blk(11, 14, 2, 5, p.Bl); blk(19, 14, 2, 5, p.Bl);   // straps
+    blk(14, 20, 4, 3, p.BlD);                            // pocket
+    blk(11, 19, 1, 1, p.K); blk(20, 19, 1, 1, p.K);      // buttons
 
-    // eyes
+    // goggle band
+    blk(8, 10, 16, 4, p.Mt);
+    blk(8, 10, 16, 1, p.MtD); blk(8, 13, 16, 1, p.MtD);
+    blk(8, 10, 1, 4, p.K); blk(23, 10, 1, 4, p.K);
+
+    // goggles + pupils
+    blk(11, 9, 5, 5, p.K); blk(12, 10, 3, 3, p.W);
+    blk(16, 9, 5, 5, p.K); blk(17, 10, 3, 3, p.W);
     var eyes = (expr === "cheer" || expr === "wave" || expr === "point") ? "happy"
              : (expr === "sleepy") ? "closed" : "open";
-    if (eyes === "open") {
-      blk(13, 8, 3, 3, p.W); blk(14, 9, 2, 2, p.K); blk(14, 9, 1, 1, p.W);
-      blk(17, 8, 3, 3, p.W); blk(18, 9, 2, 2, p.K); blk(18, 9, 1, 1, p.W);
-    } else if (eyes === "happy") {
-      blk(13, 9, 1, 1, p.K); blk(14, 8, 1, 1, p.K); blk(15, 9, 1, 1, p.K);
-      blk(17, 9, 1, 1, p.K); blk(18, 8, 1, 1, p.K); blk(19, 9, 1, 1, p.K);
-    } else {
-      blk(13, 9, 3, 1, p.K); blk(17, 9, 3, 1, p.K);
-    }
-    // blush
-    blk(11, 10, 2, 2, p.P); blk(19, 10, 2, 2, p.P);
+    if (eyes === "open") { blk(13, 11, 1, 1, p.K); blk(18, 11, 1, 1, p.K); }
+    else if (eyes === "happy") { blk(13, 10, 1, 1, p.K); blk(18, 10, 1, 1, p.K); }
+    else { blk(12, 11, 3, 1, p.K); blk(17, 11, 3, 1, p.K); }
+
     // mouth
-    if (expr === "cheer" || expr === "wave") { blk(13, 11, 6, 1, p.K); blk(14, 12, 4, 1, p.K); }
-    else if (expr === "sleepy") { blk(15, 12, 2, 1, p.K); }
-    else { blk(14, 12, 4, 1, p.K); blk(13, 11, 1, 1, p.K); blk(18, 11, 1, 1, p.K); }
+    if (expr === "cheer" || expr === "wave") { blk(13, 16, 6, 2, p.K); blk(14, 17, 4, 1, p.W); }
+    else if (expr === "sleepy") { blk(15, 17, 2, 2, p.K); }
+    else { blk(13, 17, 6, 1, p.K); blk(12, 16, 1, 1, p.K); blk(19, 16, 1, 1, p.K); }
+
+    // arms (dark) — pose, drawn on top at the sides
+    if (expr === "cheer") {
+      blk(8, 7, 2, 7, p.K); blk(7, 6, 3, 2, p.K);
+      blk(22, 7, 2, 7, p.K); blk(22, 6, 3, 2, p.K);
+    } else if (expr === "point") {
+      blk(8, 15, 2, 6, p.K); blk(7, 20, 3, 2, p.K);
+      blk(22, 6, 2, 9, p.K); blk(22, 5, 3, 2, p.K);
+    } else if (expr === "wave") {
+      blk(8, 15, 2, 6, p.K); blk(7, 20, 3, 2, p.K);
+      blk(22, 5, 2, 9, p.K); blk(22, 4, 3, 2, p.K);
+    } else if (expr === "run") {
+      blk(7, 13, 2, 5, p.K); blk(6, 12, 3, 2, p.K);
+      blk(23, 19, 2, 5, p.K); blk(23, 23, 3, 2, p.K);
+    } else {
+      blk(8, 15, 2, 6, p.K); blk(7, 20, 3, 2, p.K);
+      blk(22, 15, 2, 6, p.K); blk(22, 20, 3, 2, p.K);
+    }
 
     // extras
-    if (expr === "cheer") { blk(6, 3, 2, 2, p.Li); blk(24, 4, 2, 2, p.P); blk(26, 9, 1, 1, p.Li); blk(5, 9, 1, 1, p.P); }
+    if (expr === "cheer") { blk(5, 4, 2, 2, p.Li); blk(25, 5, 2, 2, p.Li); blk(27, 10, 1, 1, p.Li); blk(4, 10, 1, 1, p.Li); }
     else if (expr === "sleepy") { blk(24, 2, 3, 1, p.M); blk(26, 3, 1, 1, p.M); blk(24, 4, 3, 1, p.M); blk(28, 0, 2, 1, p.M); blk(29, 1, 1, 1, p.M); blk(28, 2, 2, 1, p.M); }
-    else if (expr === "run") { blk(3, 15, 3, 1, p.M); blk(2, 18, 4, 1, p.M); blk(4, 21, 3, 1, p.M); }
-    else if (expr === "point") { blk(22, 2, 2, 3, p.Li); blk(22, 6, 2, 1, p.Li); }
+    else if (expr === "run") { blk(3, 14, 3, 1, p.M); blk(2, 17, 4, 1, p.M); blk(4, 20, 3, 1, p.M); }
+    else if (expr === "point") { blk(23, 2, 2, 3, p.Li); blk(23, 6, 2, 1, p.Li); }
   }
   function drawMascot() { drawChar(cvs, heroExpr); }
   function drawAllMinis() {
