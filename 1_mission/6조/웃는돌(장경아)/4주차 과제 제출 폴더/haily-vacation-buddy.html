@@ -213,6 +213,32 @@
   .nudge-actions .move { background: var(--apricot); border-color: transparent; color: #4a3410; }
   .nudge-actions .rest { background: var(--sky); border-color: transparent; color: #16345e; }
   .nudge-reply { margin-top: 11px; font-size: 12.5px; color: var(--muted); min-height: 1em; }
+  .nudge-actions[hidden] { display: none; }
+
+  /* rhythm timer */
+  .timer { margin-top: 13px; }
+  .timer-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px; }
+  .timer-label { font-size: 12.5px; font-weight: 700; color: var(--ink); }
+  .timer-time { font-family: var(--mono); font-size: 27px; font-weight: 800; letter-spacing: 1px; font-variant-numeric: tabular-nums; color: var(--ink); }
+  .timer-bar { height: 10px; border-radius: 999px; background: var(--bg-2); overflow: hidden; }
+  .timer-fill { height: 100%; border-radius: 999px; width: 100%; background: linear-gradient(90deg, var(--apricot), var(--pink)); transition: width 1s linear; }
+  .timer-cancel { margin-top: 11px; width: 100%; border: 1px solid var(--line); background: var(--card); color: var(--muted); border-radius: 12px; padding: 9px; font-family: var(--font); font-size: 12.5px; font-weight: 700; cursor: pointer; }
+  .timer-cancel:hover { border-color: var(--muted); }
+
+  /* alarm overlay */
+  .alarm { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px;
+    background: rgba(30, 20, 10, .55); }
+  .alarm[hidden] { display: none; }
+  .alarm-card { background: var(--card); border-radius: 24px; padding: 24px 24px 20px; max-width: 300px; width: 100%;
+    text-align: center; box-shadow: 0 24px 60px rgba(0, 0, 0, .35); animation: alarmpop .35s cubic-bezier(.2, 1.2, .4, 1); }
+  @keyframes alarmpop { 0% { transform: scale(.82); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  .alarm-mascot { width: 120px; height: 120px; animation: alarmbounce .7s ease-in-out infinite; }
+  @keyframes alarmbounce { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-9px) rotate(4deg); } }
+  .alarm-title { font-size: 19px; font-weight: 900; margin: 4px 0 6px; letter-spacing: -.4px; }
+  .alarm-msg { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 18px; }
+  .alarm-ok { width: 100%; border: none; border-radius: 14px; padding: 13px; cursor: pointer; font-family: var(--font);
+    font-size: 15px; font-weight: 800; background: var(--lime); color: #2b2540; box-shadow: 0 4px 0 var(--lime-deep); }
+  .alarm-ok:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--lime-deep); }
 
   /* reflection */
   .reflect label { display: block; font-size: 12px; font-weight: 700; margin: 0 0 5px; }
@@ -461,9 +487,17 @@
       <div class="nudge-emoji" id="nudgeEmoji">🏃‍♀️</div>
       <p id="nudgeMsg">지금 슬슬 몸 움직일 시간! 15분만 스트레칭하고 오면 오후 집중력이 달라져.</p>
     </div>
-    <div class="nudge-actions">
+    <div class="nudge-actions" id="nudgeActions">
       <button class="move" id="btnMove">🤸 15분 움직이기</button>
       <button class="rest" id="btnRest">☕ 10분만 쉬기</button>
+    </div>
+    <div class="timer" id="timerBox" hidden>
+      <div class="timer-head">
+        <span class="timer-label" id="timerLabel">움직이는 중 🤸</span>
+        <span class="timer-time" id="timerTime">15:00</span>
+      </div>
+      <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+      <button class="timer-cancel" id="timerCancel">그만두기</button>
     </div>
     <div class="nudge-reply" id="nudgeReply"></div>
   </div>
@@ -507,6 +541,15 @@
   <div class="foot">
     <b>고고버디</b> · GoGo Buddy — 스폰지클럽 2기 · 4주차 PRD 프로토타입<br>
     "혼자여도 뭐부터 할지 알려주고, 안 지치게 페이스 잡아주는 버디"
+  </div>
+
+  <div class="alarm" id="alarm" hidden>
+    <div class="alarm-card">
+      <canvas class="alarm-mascot" id="alarmMascot" width="140" height="140"></canvas>
+      <div class="alarm-title" id="alarmTitle">시간 다 됐어! ⏰</div>
+      <div class="alarm-msg" id="alarmMsg"></div>
+      <button class="alarm-ok" id="alarmOk">확인 ✨</button>
+    </div>
   </div>
 </div>
 
@@ -925,18 +968,117 @@
     renderGauges();
   });
 
-  /* ---------- Rhythm nudge ---------- */
+  /* ---------- Rhythm nudge: timer + alarm ---------- */
   var reply = document.getElementById("nudgeReply");
-  document.getElementById("btnMove").addEventListener("click", function () {
-    state.bonus.pe = Math.min(30, (state.bonus.pe || 0) + 10);
-    save(); renderGauges();
-    reply.textContent = "🙌 나이스! 운동 게이지 올라갔어. 몸 풀고 오면 머리도 맑아져.";
-    say("움직인 거 잘했어! 이게 안 지치는 비결 🏃‍♀️");
-  });
-  document.getElementById("btnRest").addEventListener("click", function () {
-    reply.textContent = "☕ 딱 10분만! 눕지 말고 앉아서 쉬어야 낮잠으로 안 빠져.";
-    say("10분 알람 맞춰두고 쉬자 ⏰");
-  });
+  var nudgeActions = document.getElementById("nudgeActions");
+  var timerBox = document.getElementById("timerBox");
+  var timerLabelEl = document.getElementById("timerLabel");
+  var timerTimeEl = document.getElementById("timerTime");
+  var timerFillEl = document.getElementById("timerFill");
+  var TIMER_DUR = { move: 15 * 60, rest: 10 * 60 };
+  var TIMER_LABEL = { move: "움직이는 중 🤸", rest: "쉬는 중 ☕" };
+  var timerTick = null, audioCtx = null, chimeTimers = [];
+
+  function fmt(sec) { sec = Math.max(0, Math.round(sec)); return String(Math.floor(sec / 60)).padStart(2, "0") + ":" + String(sec % 60).padStart(2, "0"); }
+  function showTimerUI(on) { nudgeActions.hidden = on; timerBox.hidden = !on; }
+
+  function startTimer(mode) {
+    ensureAudio();
+    var dur = TIMER_DUR[mode];
+    state.timer = { mode: mode, endsAt: Date.now() + dur * 1000, dur: dur };
+    save();
+    timerLabelEl.textContent = TIMER_LABEL[mode];
+    reply.textContent = mode === "move" ? "🤸 좋아, 15분만 몸에 집중! 끝나면 깨워줄게." : "☕ 10분 휴식 시작. 눕지 말고 앉아서 쉬어.";
+    say(mode === "move" ? "타이머 켰어! 움직이고 오면 머리 맑아져 🏃" : "10분 뒤에 깨워줄게. 푹 쉬어 ⏰");
+    showTimerUI(true);
+    runTimerLoop();
+  }
+  function runTimerLoop() { if (timerTick) clearInterval(timerTick); tickTimer(); timerTick = setInterval(tickTimer, 250); }
+  function tickTimer() {
+    if (!state.timer) return;
+    var remain = (state.timer.endsAt - Date.now()) / 1000;
+    timerTimeEl.textContent = fmt(remain);
+    timerFillEl.style.width = Math.max(0, Math.min(100, (remain / state.timer.dur) * 100)) + "%";
+    if (remain <= 0) finishTimer();
+  }
+  function finishTimer() {
+    if (timerTick) { clearInterval(timerTick); timerTick = null; }
+    var mode = state.timer ? state.timer.mode : "move";
+    state.timer = null; save();
+    showTimerUI(false);
+    if (mode === "move") { state.bonus.pe = Math.min(30, (state.bonus.pe || 0) + 10); save(); renderGauges(); }
+    reply.textContent = mode === "move" ? "🙌 15분 완료! 운동 게이지 올라갔어." : "☕ 휴식 끝! 이제 다시 집중 각.";
+    showAlarm(mode);
+  }
+  function cancelTimer() {
+    if (timerTick) { clearInterval(timerTick); timerTick = null; }
+    state.timer = null; save();
+    showTimerUI(false);
+    reply.textContent = "괜찮아, 언제든 다시 눌러 🙂";
+  }
+  document.getElementById("btnMove").addEventListener("click", function () { startTimer("move"); });
+  document.getElementById("btnRest").addEventListener("click", function () { startTimer("rest"); });
+  document.getElementById("timerCancel").addEventListener("click", cancelTimer);
+
+  /* alarm */
+  var alarmEl = document.getElementById("alarm");
+  var alarmMascot = document.getElementById("alarmMascot");
+  function showAlarm(mode) {
+    document.getElementById("alarmTitle").textContent = mode === "move" ? "15분 끝! 🎉" : "휴식 끝! ⏰";
+    document.getElementById("alarmMsg").textContent = mode === "move"
+      ? "잘 움직였어! 몸이 풀렸으니 이제 집중 각 💪"
+      : "잘 쉬었어! 개운하게 다시 시작해볼까?";
+    drawChar(alarmMascot, "cheer");
+    alarmEl.hidden = false;
+    chime();
+    if (navigator.vibrate) { try { navigator.vibrate([200, 100, 200, 100, 300]); } catch (e) {} }
+    heroExpr = "cheer"; drawMascot();
+  }
+  function dismissAlarm() { alarmEl.hidden = true; stopChime(); }
+  document.getElementById("alarmOk").addEventListener("click", dismissAlarm);
+  alarmEl.addEventListener("click", function (e) { if (e.target === alarmEl) dismissAlarm(); });
+
+  /* sound — generated chime (no external assets) */
+  function ensureAudio() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+    } catch (e) { audioCtx = null; }
+  }
+  function chime() {
+    ensureAudio();
+    if (!audioCtx) return;
+    stopChime();
+    var notes = [660, 880, 990, 880, 1180];
+    function playRound() {
+      notes.forEach(function (f, i) {
+        var t = audioCtx.currentTime + i * 0.16;
+        var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = "sine"; o.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.25, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.32);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(t); o.stop(t + 0.34);
+      });
+    }
+    playRound();
+    chimeTimers.push(setInterval(playRound, 1500));
+    chimeTimers.push(setTimeout(stopChime, 20000));
+  }
+  function stopChime() { chimeTimers.forEach(function (t) { clearInterval(t); clearTimeout(t); }); chimeTimers = []; }
+
+  function resumeTimer() {
+    if (!state.timer) return;
+    if (state.timer.endsAt > Date.now()) {
+      timerLabelEl.textContent = TIMER_LABEL[state.timer.mode] || "타이머";
+      showTimerUI(true); runTimerLoop();
+    } else {
+      var mode = state.timer.mode; state.timer = null; save();
+      if (mode === "move") { state.bonus.pe = Math.min(30, (state.bonus.pe || 0) + 10); save(); renderGauges(); }
+      reply.textContent = "⏰ 타이머가 끝나 있었어! 잘했어.";
+    }
+  }
 
   /* ---------- Reflection ---------- */
   ["r1", "r2", "r3"].forEach(function (id) {
@@ -1033,6 +1175,7 @@
   /* ---------- Init ---------- */
   computeStreak(); renderQuote();
   renderTasks(); renderGauges(); updateDoneCount(); renderStreak(); renderStreakNews(); refreshTime();
+  resumeTimer();
   setInterval(refreshTime, 60000);
   if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     setInterval(function () {
