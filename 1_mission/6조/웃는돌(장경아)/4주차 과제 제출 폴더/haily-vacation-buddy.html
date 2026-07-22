@@ -238,7 +238,7 @@
 <div class="phone">
   <div class="top">
     <div class="brand">
-      <div class="logo">🧽</div>
+      <div class="logo">🌱</div>
       <div>
         <b>방학 짝꿍</b>
         <span>Haily의 스스로 굴러가는 여름</span>
@@ -346,50 +346,48 @@
   });
   syncThemeIcon();
 
-  /* ---------- Pixel mascot (sponge with sneakers) ---------- */
+  /* ---------- Pixel mascot (Roblox-style blocky character) ---------- */
   var cvs = document.getElementById("mascot");
   var ctx = cvs.getContext("2d");
   // palette keys
   function pal() {
     var dark = currentDark();
     return {
-      Y: dark ? "#E4EF4E" : "#E7EF57",   // sponge body
-      y: dark ? "#C3CE33" : "#CBD53C",   // body shadow / holes
-      K: "#33304A",                       // outline / eyes
-      W: "#ffffff",                       // eye white
-      P: dark ? "#F294B4" : "#FF9EBE",   // blush
-      S: dark ? "#7FA9EC" : "#8FB8F5",   // sneakers
-      s: "#ffffff"                        // sneaker sole
+      H: dark ? "#F8D23A" : "#F6C930",  // head / hands (yellow)
+      K: dark ? "#211B33" : "#2B2540",  // outline / eyes / smile
+      B: dark ? "#3B7BF0" : "#2E6FE6",  // torso (shirt) blue
+      G: dark ? "#5FBB50" : "#57B14B",  // legs green
+      g: dark ? "#3E8C3E" : "#3E8C3E"   // legs divider / shade
     };
   }
   // 26x26 grid. '.' transparent
   var ART = [
     "..........................",
     "..........................",
-    "....KKKKKKKKKKKKKKKKKK....",
-    "...KYYYYYYYYYYYYYYYYYYK...",
-    "..KYYYyYYYYYYYYYYyYYYYYK..",
-    "..KYYYYYYYYYYYYYYYYYYYYK..",
-    "..KYYYYyYYYYYYYYYYyYYYYK..",
-    "..KYYYYYYYYYYYYYYYYYYYYK..",
-    "..KYYWWWKYYYYYYKWWWYYYYK..",
-    "..KYYWWWWKYYYYKWWWWYYYYK..",
-    "..KYYWKKWYYYYYYWKKWYYYYK..",
-    "..KYYWWWWYYYYYYWWWWYYYYK..",
-    "..KYYYWWyYYYYYYyWWYYYYYK..",
-    "..KYPPYYYYYYYYYYYYPPYYYK..",
-    "..KYPPYYYYKKKKYYYYPPYYYK..",
-    "..KYYYYYYKYYYYKYYYYYYYYK..",
-    "..KYYYYYYYKKKKYYYYYYYYYK..",
-    "..KYYyYYYYYYYYYYYYYyYYYK..",
-    "..KYYYYYYYYYYYYYYYYYYYYK..",
-    "...KYYYYYYYYYYYYYYYYYYK...",
-    "....KKKKKKKKKKKKKKKKKK....",
-    "....K..K........K..K.....",
-    "...KSSSK......KSSSK......",
-    "..KSSSSSK....KSSSSSK.....",
-    "..KsssssK....KsssssK.....",
-    "..KKKKKKK....KKKKKKK....."
+    "........KKKKKKKKKK........",
+    "........KHHHHHHHHK........",
+    "........KHHHHHHHHK........",
+    "........KHHKHHKHHK........",
+    "........KHHKHHKHHK........",
+    "........KHHHHHHHHK........",
+    "........KHKHHHHKHK........",
+    "........KHHKKKKHHK........",
+    "........KKKKKKKKKK........",
+    "...........HHHH...........",
+    "....HHHHBBBBBBBBBBHHHH....",
+    "....HHHHBBBBBBBBBBHHHH....",
+    "....HHHHBBBBBBBBBBHHHH....",
+    "....HHHHBBBBBBBBBBHHHH....",
+    "....HHHHBBBBBBBBBBHHHH....",
+    "....HHHHBBBBBBBBBBHHHH....",
+    "........GGGGggGGGG........",
+    "........GGGGggGGGG........",
+    "........GGGGggGGGG........",
+    "........GGGGggGGGG........",
+    "........GGGGggGGGG........",
+    "........GGGGggGGGG........",
+    "........GGGGggGGGG........",
+    ".........................."
   ];
   function drawMascot() {
     var p = pal();
@@ -399,7 +397,7 @@
       for (var x = 0; x < row.length; x++) {
         var c = row[x];
         if (c === "." || c === " ") continue;
-        var col = ({ K: p.K, Y: p.Y, y: p.y, W: p.W, P: p.P, S: p.S, s: p.s })[c];
+        var col = ({ K: p.K, H: p.H, B: p.B, G: p.G, g: p.g })[c];
         if (!col) continue;
         ctx.fillStyle = col;
         ctx.fillRect(x, y, 1, 1);
