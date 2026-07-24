@@ -1,0 +1,1190 @@
+<title>고고버디 · GoGo Buddy</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    --bg: #FBF5EC;
+    --bg-2: #FCE6D3;
+    --card: #FFFFFF;
+    --ink: #40352E;
+    --muted: #A2938A;
+    --line: #F0E7DB;
+    --lime: #DDE94A;
+    --lime-deep: #B7C22C;
+    --sky: #7FB3F5;
+    --mint: #55CFAD;
+    --pink: #FF9EBC;
+    --apricot: #FFBE5C;
+    --shadow: 0 10px 30px rgba(120, 90, 60, .14);
+    --shadow-sm: 0 4px 14px rgba(120, 90, 60, .10);
+    --radius: 22px;
+    --font: "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "SFMono-Regular", ui-monospace, "Menlo", "Consolas", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1E1A17;
+      --bg-2: #2A2320;
+      --card: #2B2521;
+      --ink: #F6EEE5;
+      --muted: #B6A79B;
+      --line: #3C332C;
+      --lime: #E4EF4E;
+      --lime-deep: #E4EF4E;
+      --sky: #7FA9EC;
+      --mint: #63D6B4;
+      --pink: #F294B4;
+      --apricot: #F3BC6A;
+      --shadow: 0 12px 34px rgba(0, 0, 0, .40);
+      --shadow-sm: 0 4px 16px rgba(0, 0, 0, .34);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #FBF5EC; --bg-2: #FCE6D3; --card: #FFFFFF; --ink: #40352E; --muted: #A2938A;
+    --line: #F0E7DB; --lime: #DDE94A; --lime-deep: #B7C22C; --sky: #7FB3F5; --mint: #55CFAD;
+    --pink: #FF9EBC; --apricot: #FFBE5C; --shadow: 0 10px 30px rgba(120,90,60,.14);
+    --shadow-sm: 0 4px 14px rgba(120,90,60,.10);
+  }
+  :root[data-theme="dark"] {
+    --bg: #1E1A17; --bg-2: #2A2320; --card: #2B2521; --ink: #F6EEE5; --muted: #B6A79B;
+    --line: #3C332C; --lime: #E4EF4E; --lime-deep: #E4EF4E; --sky: #7FA9EC; --mint: #63D6B4;
+    --pink: #F294B4; --apricot: #F3BC6A; --shadow: 0 12px 34px rgba(0,0,0,.40);
+    --shadow-sm: 0 4px 16px rgba(0,0,0,.34);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: var(--font);
+    color: var(--ink);
+    background:
+      radial-gradient(720px 380px at 10% -8%, color-mix(in srgb, var(--apricot) 46%, transparent), transparent 60%),
+      radial-gradient(680px 420px at 110% 2%, color-mix(in srgb, var(--mint) 42%, transparent), transparent 58%),
+      radial-gradient(640px 520px at 50% 118%, color-mix(in srgb, var(--pink) 32%, transparent), transparent 62%),
+      var(--bg);
+    background-attachment: fixed;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 22px 14px 60px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .phone {
+    width: 100%;
+    max-width: 430px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* ---------- Header ---------- */
+  .top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 4px;
+  }
+  .brand { display: flex; align-items: center; gap: 9px; }
+  .brand .logo {
+    width: 30px; height: 30px; border-radius: 9px;
+    background: var(--lime);
+    display: grid; place-items: center;
+    box-shadow: 0 3px 0 var(--lime-deep);
+    font-size: 15px;
+  }
+  .brand b { font-size: 15px; letter-spacing: -.2px; }
+  .brand span { color: var(--muted); font-size: 11.5px; display: block; margin-top: 1px; }
+  .theme-btn {
+    border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    width: 38px; height: 38px; border-radius: 12px; cursor: pointer; font-size: 16px;
+    box-shadow: var(--shadow-sm); transition: transform .15s ease;
+  }
+  .theme-btn:hover { transform: translateY(-1px); }
+
+  /* ---------- Hero greeting ---------- */
+  .hero {
+    background: linear-gradient(155deg, var(--card), var(--card));
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px 18px 16px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(300px 120px at 90% -20%, color-mix(in srgb, var(--lime) 40%, transparent), transparent 70%);
+    pointer-events: none;
+  }
+  #mascot {
+    width: 90px; height: 90px; flex: 0 0 auto;
+    filter: drop-shadow(0 6px 7px rgba(150,100,60,.24));
+    cursor: pointer;
+    transition: transform .2s ease;
+  }
+  #mascot:hover { transform: translateY(-2px) rotate(-3deg); }
+  .mini {
+    width: 42px; height: 42px; flex: 0 0 auto;
+    filter: drop-shadow(0 2px 2px rgba(150,100,60,.20));
+  }
+  .hi { z-index: 1; }
+  .dday {
+    display: inline-block; font-family: var(--mono); font-size: 11px; font-weight: 700;
+    letter-spacing: .5px; color: var(--ink);
+    background: var(--lime); padding: 3px 9px; border-radius: 999px;
+    box-shadow: 0 2px 0 var(--lime-deep); margin-bottom: 7px;
+  }
+  .hi h1 { font-size: 18px; margin: 0 0 4px; letter-spacing: -.4px; line-height: 1.3; text-wrap: balance; }
+  .hi p { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+
+  /* ---------- Mode toggle ---------- */
+  .modes { display: flex; gap: 6px; background: var(--card); border: 1px solid var(--line);
+    padding: 5px; border-radius: 16px; box-shadow: var(--shadow-sm); }
+  .modes button {
+    flex: 1; border: none; background: transparent; color: var(--muted);
+    padding: 9px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer;
+    font-family: var(--font); transition: all .18s ease;
+  }
+  .modes button.on { background: var(--ink); color: var(--card); box-shadow: var(--shadow-sm); }
+
+  /* ---------- Cards ---------- */
+  .card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius); box-shadow: var(--shadow-sm);
+    padding: 16px 16px 17px;
+  }
+  .card.dim { opacity: .55; }
+  .card-h { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; row-gap: 6px; }
+  .chip {
+    font-size: 10.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase;
+    padding: 4px 8px; border-radius: 8px; color: #2b2540;
+  }
+  .card-h h2 { font-size: 15px; margin: 0; letter-spacing: -.3px; }
+  .card-h .sub { margin-left: auto; font-size: 11.5px; color: var(--muted); font-family: var(--mono); }
+
+  /* task list */
+  .task {
+    display: flex; align-items: center; gap: 11px; padding: 11px 12px;
+    border: 1px solid var(--line); border-radius: 14px; margin-bottom: 8px;
+    cursor: pointer; user-select: none; background: var(--card);
+    transition: transform .12s ease, border-color .15s ease, background .15s ease;
+  }
+  .task:last-child { margin-bottom: 0; }
+  .task:hover { transform: translateX(2px); }
+  .task:focus-visible { outline: 3px solid color-mix(in srgb, var(--sky) 60%, transparent); outline-offset: 2px; }
+  .tick {
+    width: 24px; height: 24px; border-radius: 8px; flex: 0 0 auto;
+    border: 2px solid var(--line); display: grid; place-items: center;
+    font-size: 14px; color: transparent; transition: all .16s ease;
+  }
+  .task .body { flex: 1; }
+  .task .t-title { font-size: 13.5px; font-weight: 600; letter-spacing: -.2px; }
+  .task .t-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 3px; margin-right: 5px; vertical-align: middle; }
+  .task.done { background: color-mix(in srgb, var(--lime) 14%, var(--card)); border-color: color-mix(in srgb, var(--lime) 45%, var(--line)); }
+  .task.done .tick { background: var(--lime); border-color: var(--lime); color: #2b2540; }
+  .task.done .t-title { text-decoration: line-through; color: var(--muted); }
+
+  /* progress gauges */
+  .gauge { margin-bottom: 13px; }
+  .gauge:last-child { margin-bottom: 0; }
+  .gauge .g-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .gauge .g-name { font-size: 12.5px; font-weight: 700; }
+  .gauge .g-name small { color: var(--muted); font-weight: 500; margin-left: 4px; }
+  .gauge .g-pct { font-family: var(--mono); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .track { height: 12px; border-radius: 999px; background: var(--bg-2); overflow: hidden; }
+  .fill { height: 100%; border-radius: 999px; width: 0%; transition: width .7s cubic-bezier(.2,.8,.2,1); }
+
+  /* rhythm nudge */
+  .nudge-body { display: flex; gap: 12px; align-items: center; }
+  .nudge-emoji { font-size: 30px; }
+  .nudge-body p { margin: 0; font-size: 13px; line-height: 1.5; }
+  .nudge-actions { display: flex; gap: 8px; margin-top: 13px; }
+  .nudge-actions button {
+    flex: 1; padding: 11px; border-radius: 13px; font-size: 13px; font-weight: 700; cursor: pointer;
+    font-family: var(--font); border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    transition: transform .12s ease;
+  }
+  .nudge-actions button:hover { transform: translateY(-1px); }
+  .nudge-actions .move { background: var(--apricot); border-color: transparent; color: #4a3410; }
+  .nudge-actions .rest { background: var(--sky); border-color: transparent; color: #16345e; }
+  .nudge-reply { margin-top: 11px; font-size: 12.5px; color: var(--muted); min-height: 1em; }
+  .nudge-actions[hidden] { display: none; }
+
+  /* rhythm timer */
+  .timer { margin-top: 13px; }
+  .timer-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px; }
+  .timer-label { font-size: 12.5px; font-weight: 700; color: var(--ink); }
+  .timer-time { font-family: var(--mono); font-size: 27px; font-weight: 800; letter-spacing: 1px; font-variant-numeric: tabular-nums; color: var(--ink); }
+  .timer-bar { height: 10px; border-radius: 999px; background: var(--bg-2); overflow: hidden; }
+  .timer-fill { height: 100%; border-radius: 999px; width: 100%; background: linear-gradient(90deg, var(--apricot), var(--pink)); transition: width 1s linear; }
+  .timer-cancel { margin-top: 11px; width: 100%; border: 1px solid var(--line); background: var(--card); color: var(--muted); border-radius: 12px; padding: 9px; font-family: var(--font); font-size: 12.5px; font-weight: 700; cursor: pointer; }
+  .timer-cancel:hover { border-color: var(--muted); }
+
+  /* alarm overlay */
+  .alarm { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px;
+    background: rgba(30, 20, 10, .55); }
+  .alarm[hidden] { display: none; }
+  .alarm-card { background: var(--card); border-radius: 24px; padding: 24px 24px 20px; max-width: 300px; width: 100%;
+    text-align: center; box-shadow: 0 24px 60px rgba(0, 0, 0, .35); animation: alarmpop .35s cubic-bezier(.2, 1.2, .4, 1); }
+  @keyframes alarmpop { 0% { transform: scale(.82); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  .alarm-mascot { width: 120px; height: 120px; animation: alarmbounce .7s ease-in-out infinite; }
+  @keyframes alarmbounce { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-9px) rotate(4deg); } }
+  .alarm-title { font-size: 19px; font-weight: 900; margin: 4px 0 6px; letter-spacing: -.4px; }
+  .alarm-msg { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 18px; }
+  .alarm-ok { width: 100%; border: none; border-radius: 14px; padding: 13px; cursor: pointer; font-family: var(--font);
+    font-size: 15px; font-weight: 800; background: var(--lime); color: #2b2540; box-shadow: 0 4px 0 var(--lime-deep); }
+  .alarm-ok:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--lime-deep); }
+
+  /* reflection */
+  .reflect label { display: block; font-size: 12px; font-weight: 700; margin: 0 0 5px; }
+  .reflect label small { color: var(--muted); font-weight: 500; }
+  .reflect .field { margin-bottom: 11px; }
+  .reflect textarea {
+    width: 100%; resize: none; border: 1px solid var(--line); border-radius: 12px;
+    padding: 10px 11px; font-family: var(--font); font-size: 13px; color: var(--ink);
+    background: var(--bg); line-height: 1.5;
+  }
+  .reflect textarea:focus-visible { outline: none; border-color: color-mix(in srgb, var(--mint) 70%, var(--line)); background: var(--card); }
+  .save-btn {
+    width: 100%; padding: 13px; border: none; border-radius: 14px; cursor: pointer;
+    background: var(--lime); color: #2b2540; font-size: 14px; font-weight: 800; font-family: var(--font);
+    box-shadow: 0 4px 0 var(--lime-deep); transition: transform .1s ease, box-shadow .1s ease;
+  }
+  .save-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--lime-deep); }
+  .streak { text-align: center; margin-top: 10px; font-size: 12px; color: var(--muted); }
+  .streak b { color: var(--ink); }
+
+  .foot { text-align: center; font-size: 11px; color: var(--muted); line-height: 1.6; margin-top: 4px; }
+  .foot b { color: var(--ink); }
+
+  /* differentiation strip */
+  .wedge { display: flex; gap: 6px; overflow-x: auto; padding: 1px 2px; scrollbar-width: none; }
+  .wedge::-webkit-scrollbar { display: none; }
+  .wpill {
+    flex: 0 0 auto; font-size: 11px; font-weight: 700; letter-spacing: -.2px;
+    padding: 6px 11px; border-radius: 999px; white-space: nowrap;
+    background: var(--card); border: 1px solid var(--line); color: var(--ink); box-shadow: var(--shadow-sm);
+  }
+
+  /* coach note in briefing */
+  .coach {
+    margin: 0 0 12px; font-size: 12px; line-height: 1.55; color: var(--ink);
+    background: color-mix(in srgb, var(--lime) 16%, var(--card));
+    border: 1px solid color-mix(in srgb, var(--lime) 40%, var(--line));
+    border-radius: 12px; padding: 9px 11px;
+  }
+  .coach b { color: var(--ink); }
+
+  /* caption line */
+  .cap { margin: -4px 0 13px; font-size: 11.5px; line-height: 1.5; color: var(--muted); }
+  .cap b { color: var(--ink); }
+
+  /* "일부러 안 하는 것" card */
+  .nots ul { list-style: none; margin: 0; padding: 0; }
+  .nots li {
+    font-size: 12.5px; line-height: 1.5; color: var(--ink);
+    padding: 9px 0; border-bottom: 1px solid var(--line);
+  }
+  .nots li:last-child { border-bottom: none; }
+  .nots li b { color: var(--muted); font-weight: 500; }
+
+  /* edit mode */
+  .edit-btn {
+    margin-left: 8px; border: 1px solid var(--line); background: var(--card); color: var(--muted);
+    font-size: 11px; font-weight: 700; padding: 5px 9px; border-radius: 9px; cursor: pointer;
+    font-family: var(--font); white-space: nowrap; transition: background .15s ease, color .15s ease;
+  }
+  .edit-btn:hover { border-color: var(--muted); }
+  .edit-btn.on { background: var(--ink); color: var(--card); border-color: var(--ink); }
+  .task.editing { cursor: default; }
+  .task.editing:hover { transform: none; }
+  .row-actions { margin-left: auto; display: flex; gap: 6px; }
+  .mini-btn {
+    border: 1px solid var(--line); background: var(--card); border-radius: 8px; cursor: pointer;
+    width: 32px; height: 32px; font-size: 14px; line-height: 1; padding: 0; flex: 0 0 auto;
+  }
+  .mini-btn:hover { border-color: var(--muted); }
+  .edit-form {
+    border: 1px dashed color-mix(in srgb, var(--lime-deep) 50%, var(--line));
+    background: color-mix(in srgb, var(--lime) 9%, var(--card));
+    border-radius: 14px; padding: 12px; margin-top: 8px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .ef-title { font-size: 12px; font-weight: 800; color: var(--ink); }
+  .ef-row { display: flex; gap: 8px; }
+  .ef-in {
+    flex: 1; min-width: 0; width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px;
+    font-family: var(--font); font-size: 13px; color: var(--ink); background: var(--card);
+  }
+  .ef-in:focus-visible { outline: none; border-color: color-mix(in srgb, var(--sky) 65%, var(--line)); }
+  .ef-actions { display: flex; gap: 8px; }
+  .ef-save {
+    flex: 1; border: none; border-radius: 10px; padding: 10px; cursor: pointer; font-family: var(--font);
+    font-size: 13px; font-weight: 800; background: var(--lime); color: #2b2540; box-shadow: 0 3px 0 var(--lime-deep);
+  }
+  .ef-save:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--lime-deep); }
+  .ef-cancel {
+    border: 1px solid var(--line); background: var(--card); color: var(--muted); border-radius: 10px;
+    padding: 10px 14px; cursor: pointer; font-family: var(--font); font-size: 13px; font-weight: 700;
+  }
+  .gauge-edit {
+    border: 1px solid var(--line); border-radius: 14px; padding: 11px; margin-bottom: 10px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .ge-top { display: flex; gap: 8px; align-items: center; }
+  .ge-name { flex: 1; font-weight: 700; }
+  .ge-slider { display: flex; align-items: center; gap: 10px; }
+  .ge-range { flex: 1; min-width: 0; accent-color: var(--lime-deep); }
+  .ge-val { font-family: var(--mono); font-size: 12px; font-weight: 700; min-width: 40px; text-align: right; font-variant-numeric: tabular-nums; }
+  .swatches { display: flex; gap: 6px; flex-wrap: wrap; }
+  .sw { width: 24px; height: 24px; border-radius: 7px; border: 2px solid transparent; cursor: pointer; padding: 0; }
+  .sw[data-on] { box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--ink); }
+
+  /* mascot idle animation */
+  .mascot-wrap { flex: 0 0 auto; animation: idlebob 3.4s ease-in-out infinite; transform-origin: 50% 92%; }
+  @keyframes idlebob {
+    0%   { transform: translateY(0) rotate(0deg); }
+    25%  { transform: translateY(-4px) rotate(-2.5deg); }
+    50%  { transform: translateY(0) rotate(0deg); }
+    75%  { transform: translateY(-3px) rotate(2.5deg); }
+    100% { transform: translateY(0) rotate(0deg); }
+  }
+
+  /* quote banner */
+  .quote-banner {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    padding: 9px 12px; box-shadow: var(--shadow-sm);
+  }
+  .qb-mascot { width: 40px; height: 40px; }
+  .qb-body { min-width: 0; }
+  .qb-label { font-size: 10px; font-weight: 800; letter-spacing: .5px; color: var(--muted); text-transform: uppercase; margin-bottom: 2px; }
+  .qb-text { font-size: 13px; font-weight: 700; color: var(--ink); line-height: 1.45; letter-spacing: -.2px; }
+
+  /* streak card-news */
+  .streak-news {
+    border-radius: 18px; padding: 15px 16px; color: #2b2540;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--lime) 88%, #fff), color-mix(in srgb, var(--apricot) 72%, #fff));
+    box-shadow: var(--shadow); border: 1px solid color-mix(in srgb, var(--lime-deep) 30%, transparent);
+  }
+  .sn-top { display: flex; align-items: center; gap: 12px; }
+  .sn-flame { font-size: 30px; filter: drop-shadow(0 2px 2px rgba(0,0,0,.12)); }
+  .sn-headline { flex: 1; min-width: 0; }
+  .sn-num { font-size: 26px; font-weight: 900; line-height: 1; letter-spacing: -.5px; font-variant-numeric: tabular-nums; }
+  .sn-num small { font-size: 14px; font-weight: 800; margin-left: 3px; }
+  .sn-sub { font-size: 12px; font-weight: 700; opacity: .82; margin-top: 4px; }
+  .sn-best { text-align: center; font-size: 10px; font-weight: 700; opacity: .78; line-height: 1.35; }
+  .sn-best b { font-size: 16px; }
+  .sn-week { display: flex; gap: 6px; margin: 13px 0 10px; }
+  .sn-dot { flex: 1; height: 8px; border-radius: 4px; background: rgba(43,37,64,.15); }
+  .sn-dot.on { background: #2b2540; }
+  .sn-dot.today { box-shadow: 0 0 0 2px color-mix(in srgb, var(--apricot) 85%, #2b2540); }
+  .sn-stats { display: flex; gap: 16px; font-size: 11.5px; font-weight: 600; opacity: .88; }
+  .sn-stats b { font-weight: 900; }
+
+  @keyframes pop { 0%{ transform: scale(1);} 40%{ transform: scale(1.14) rotate(-4deg);} 100%{ transform: scale(1);} }
+  .bounce { animation: pop .4s ease; }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="phone">
+  <div class="top">
+    <div class="brand">
+      <div class="logo">🌱</div>
+      <div>
+        <b>고고버디</b>
+        <span>GoGo Buddy · 스스로 굴러가는 여름</span>
+      </div>
+    </div>
+    <button class="theme-btn" id="themeBtn" aria-label="테마 전환" title="라이트/다크 전환">🌙</button>
+  </div>
+
+  <div class="quote-banner">
+    <canvas class="mini qb-mascot" data-expr="wave" width="84" height="84" aria-hidden="true"></canvas>
+    <div class="qb-body">
+      <div class="qb-label">오늘의 응원 ✨</div>
+      <div class="qb-text" id="quoteText">오늘도 한 칸씩 굴러가 보자.</div>
+    </div>
+  </div>
+
+  <div class="streak-news" id="streakNews">
+    <div class="sn-top">
+      <div class="sn-flame">🔥</div>
+      <div class="sn-headline">
+        <div class="sn-num"><span id="snStreak">1</span><small>일 연속</small></div>
+        <div class="sn-sub" id="snSub">스스로 굴러가는 중</div>
+      </div>
+      <div class="sn-best">최고<br><b id="snBest">1</b>일</div>
+    </div>
+    <div class="sn-week" id="snWeek"></div>
+    <div class="sn-stats">
+      <span>오늘 완료 <b id="snToday">0/0</b></span>
+      <span>연속 회고 <b id="snReflect">0</b>일</span>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="mascot-wrap"><canvas id="mascot" width="180" height="180" title="콕 눌러봐!"></canvas></div>
+    <div class="hi">
+      <span class="dday" id="dday">D-27 · 방학</span>
+      <h1 id="greet">좋은 아침, Haily! 🌱</h1>
+      <p id="greetSub">오늘도 스스로 굴러가볼까? 뭐부터 할지 내가 정리해뒀어.</p>
+    </div>
+  </div>
+
+  <div class="wedge">
+    <span class="wpill">🙅‍♀️ 랭킹·비교 없음</span>
+    <span class="wpill">🧑‍🏫 사람 매니저 없이</span>
+    <span class="wpill">📦 인강·문제집 굴리기</span>
+  </div>
+
+  <div class="modes">
+    <button id="mAm" class="on">☀️ 아침 브리핑</button>
+    <button id="mPm">🌙 저녁 회고</button>
+  </div>
+
+  <!-- 아침 브리핑 -->
+  <div class="card" id="cBrief">
+    <div class="card-h">
+      <canvas class="mini" data-expr="point" width="84" height="84" aria-hidden="true"></canvas>
+      <span class="chip" style="background:var(--lime)">오늘 이거부터</span>
+      <h2>아침 브리핑</h2>
+      <span class="sub" id="doneCount">0/5 완료</span>
+      <button class="edit-btn" id="editTasksBtn">✏️ 편집</button>
+    </div>
+    <p class="coach">🤖 뭐부터 할지 고민 마 — <b>순서는 내가 정해뒀어.</b> 제일 안 풀리는 <b>과학</b>부터, 지치는 오후엔 <b>운동</b>으로. 위에서부터 하나씩만.</p>
+    <div id="taskList"></div>
+  </div>
+
+  <!-- 진척 게이지 -->
+  <div class="card" id="cGauge">
+    <div class="card-h">
+      <canvas class="mini" data-expr="cheer" width="84" height="84" aria-hidden="true"></canvas>
+      <span class="chip" style="background:var(--mint)">목표까지 어디쯤</span>
+      <h2>진척 게이지</h2>
+      <span class="sub">목표 대비</span>
+      <button class="edit-btn" id="editSubjBtn">✏️ 편집</button>
+    </div>
+    <p class="cap">공부한 <b>시간</b> 말고 <b>목표까지 남은 거리</b>를 봐. 전국 랭킹 그런 거 없어 — <b>어제의 나</b>랑만 비교하면 돼.</p>
+    <div id="gaugeList"></div>
+  </div>
+
+  <!-- 리듬 넛지 -->
+  <div class="card" id="cNudge">
+    <div class="card-h">
+      <canvas class="mini" data-expr="run" width="84" height="84" aria-hidden="true"></canvas>
+      <span class="chip" style="background:var(--apricot)">지치지 않게</span>
+      <h2>리듬 넛지</h2>
+      <span class="sub" id="nowClock">--:--</span>
+    </div>
+    <div class="nudge-body">
+      <div class="nudge-emoji" id="nudgeEmoji">🏃‍♀️</div>
+      <p id="nudgeMsg">지금 슬슬 몸 움직일 시간! 15분만 스트레칭하고 오면 오후 집중력이 달라져.</p>
+    </div>
+    <div class="nudge-actions" id="nudgeActions">
+      <button class="move" id="btnMove">🤸 15분 움직이기</button>
+      <button class="rest" id="btnRest">☕ 10분만 쉬기</button>
+    </div>
+    <div class="timer" id="timerBox" hidden>
+      <div class="timer-head">
+        <span class="timer-label" id="timerLabel">움직이는 중 🤸</span>
+        <span class="timer-time" id="timerTime">15:00</span>
+      </div>
+      <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+      <button class="timer-cancel" id="timerCancel">그만두기</button>
+    </div>
+    <div class="nudge-reply" id="nudgeReply"></div>
+  </div>
+
+  <!-- 저녁 회고 -->
+  <div class="card reflect" id="cReflect">
+    <div class="card-h">
+      <canvas class="mini" data-expr="sleepy" width="84" height="84" aria-hidden="true"></canvas>
+      <span class="chip" style="background:var(--pink)">하루를 스스로 닫기</span>
+      <h2>저녁 회고 3줄</h2>
+    </div>
+    <div class="field">
+      <label>① 오늘 실제로 한 것 <small>(인강·문제집 진도)</small></label>
+      <textarea id="r1" rows="2" placeholder="예: 수학 인강 3강 + 문제집 12p, 영단어 40개"></textarea>
+    </div>
+    <div class="field">
+      <label>② 오늘 잘된 것 하나 <small>(작아도 OK)</small></label>
+      <textarea id="r2" rows="2" placeholder="예: 낮잠 안 자고 저녁까지 페이스 유지함"></textarea>
+    </div>
+    <div class="field">
+      <label>③ 내일의 씨앗 <small>(내일 아침 첫 할 일)</small></label>
+      <textarea id="r3" rows="2" placeholder="예: 과학 인강 밀린 2강부터 시작"></textarea>
+    </div>
+    <button class="save-btn" id="saveBtn">오늘 하루 닫기 ✨</button>
+    <div class="streak" id="streak">연속 회고 <b>0일</b> · 3일 이으면 습관이 돼!</div>
+  </div>
+
+  <div class="card nots">
+    <div class="card-h">
+      <canvas class="mini" data-expr="wave" width="84" height="84" aria-hidden="true"></canvas>
+      <span class="chip" style="background:var(--sky)">약속</span>
+      <h2>이 앱이 일부러 안 하는 것</h2>
+    </div>
+    <ul>
+      <li>🚫 전국 랭킹·친구 비교 <b>— 불안 대신 나만의 페이스</b></li>
+      <li>🚫 부모·관리자 감시 화면 <b>— 주도권은 Haily에게</b></li>
+      <li>🚫 인강·문제집 새로 강매 <b>— 네가 가진 걸 굴려줄 뿐</b></li>
+    </ul>
+  </div>
+
+  <div class="foot">
+    <b>고고버디</b> · GoGo Buddy — 스폰지클럽 2기 · 4주차 PRD 프로토타입<br>
+    "혼자여도 뭐부터 할지 알려주고, 안 지치게 페이스 잡아주는 버디"
+  </div>
+
+  <div class="alarm" id="alarm" hidden>
+    <div class="alarm-card">
+      <canvas class="alarm-mascot" id="alarmMascot" width="140" height="140"></canvas>
+      <div class="alarm-title" id="alarmTitle">시간 다 됐어! ⏰</div>
+      <div class="alarm-msg" id="alarmMsg"></div>
+      <button class="alarm-ok" id="alarmOk">확인 ✨</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Theme ---------- */
+  var root = document.documentElement;
+  var themeBtn = document.getElementById("themeBtn");
+  function currentDark() {
+    var t = root.getAttribute("data-theme");
+    if (t) return t === "dark";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function syncThemeIcon() { themeBtn.textContent = currentDark() ? "☀️" : "🌙"; }
+  themeBtn.addEventListener("click", function () {
+    root.setAttribute("data-theme", currentDark() ? "light" : "dark");
+    syncThemeIcon(); drawMascot(); drawAllMinis();
+  });
+  syncThemeIcon();
+
+  /* ---------- Cute blocky mascot (parametric, many poses) ---------- */
+  var cvs = document.getElementById("mascot");
+  var heroExpr = "wave";
+  var blinking = false;
+  function charPalette() {
+    var d = currentDark();
+    return {
+      Y:  d ? "#F8CE55" : "#F7C948",  // buddy body (honey)
+      OL: d ? "#8A6A2A" : "#7A5A22",  // warm outline
+      Stem: d ? "#5FB56A" : "#4FA85C",
+      Leaf: d ? "#7FD98A" : "#6FCF7B",
+      Pupil: d ? "#2A2018" : "#3A2E22",
+      Cheek: d ? "#F58FA6" : "#FF9EB0",
+      Foot: d ? "#EAE4D8" : "#FFFFFF",  // sneaker
+      Li: d ? "#E4EF4E" : "#C7D22C",    // sparkle
+      M:  d ? "#8B7C70" : "#B7A99C"     // motion / zzz
+    };
+  }
+  // draw the original "GoGo" sprout-buddy (smooth vector) on a square canvas
+  function drawChar(cv, expr, opts) {
+    var ctx = cv.getContext("2d");
+    var S = cv.width / 32;               // 32-unit virtual grid → canvas px
+    var p = charPalette();
+    var PI = Math.PI;
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.lineJoin = "round"; ctx.lineCap = "round";
+    function disc(x, y, r, fill, stroke, lw) {
+      ctx.beginPath(); ctx.arc(x * S, y * S, r * S, 0, PI * 2);
+      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+      if (stroke) { ctx.lineWidth = (lw || 1.3) * S; ctx.strokeStyle = stroke; ctx.stroke(); }
+    }
+    function oval(x, y, rx, ry, fill, stroke, lw) {
+      ctx.beginPath(); ctx.ellipse(x * S, y * S, rx * S, ry * S, 0, 0, PI * 2);
+      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+      if (stroke) { ctx.lineWidth = (lw || 1.3) * S; ctx.strokeStyle = stroke; ctx.stroke(); }
+    }
+    function limb(x1, y1, x2, y2, c, w) {
+      ctx.beginPath(); ctx.moveTo(x1 * S, y1 * S); ctx.lineTo(x2 * S, y2 * S);
+      ctx.strokeStyle = c; ctx.lineWidth = w * S; ctx.stroke();
+    }
+    function arc(cx, cy, r, a0, a1, c, w) {
+      ctx.beginPath(); ctx.arc(cx * S, cy * S, r * S, a0, a1);
+      ctx.strokeStyle = c; ctx.lineWidth = w * S; ctx.stroke();
+    }
+    function star(x, y, c) {
+      ctx.fillStyle = c; ctx.beginPath();
+      for (var i = 0; i < 5; i++) {
+        var a = -PI / 2 + i * 2 * PI / 5;
+        ctx.lineTo((x + Math.cos(a) * 1.5) * S, (y + Math.sin(a) * 1.5) * S);
+        var b = a + PI / 5;
+        ctx.lineTo((x + Math.cos(b) * 0.62) * S, (y + Math.sin(b) * 0.62) * S);
+      }
+      ctx.closePath(); ctx.fill();
+    }
+    function zzz(x, y, c) {
+      ctx.strokeStyle = c; ctx.lineWidth = 1 * S;
+      [[0, 0, 1.7], [2.2, -2.6, 1.2]].forEach(function (z) {
+        var zx = x + z[0], zy = y + z[1], w = z[2];
+        ctx.beginPath();
+        ctx.moveTo(zx * S, zy * S); ctx.lineTo((zx + w) * S, zy * S);
+        ctx.lineTo(zx * S, (zy + w) * S); ctx.lineTo((zx + w) * S, (zy + w) * S);
+        ctx.stroke();
+      });
+    }
+
+    // sprout
+    limb(16, 8, 16, 4.5, p.Stem, 1.4);
+    oval(17.5, 3.7, 1.7, 1.1, p.Leaf, p.Stem, 0.7);
+    oval(14.5, 4.5, 1.4, 0.9, p.Leaf, p.Stem, 0.7);
+
+    // feet
+    if (expr === "run") { oval(12, 25.4, 2.4, 1.5, p.Foot, p.OL, 1); oval(20.6, 26, 2.4, 1.5, p.Foot, p.OL, 1); }
+    else { oval(12.6, 25.7, 2.4, 1.5, p.Foot, p.OL, 1); oval(19.4, 25.7, 2.4, 1.5, p.Foot, p.OL, 1); }
+
+    // body
+    oval(16, 16.5, 8.6, 9, p.Y, p.OL, 1.4);
+    ctx.globalAlpha = 0.16; disc(12.3, 12.2, 3.1, "#fff", null); ctx.globalAlpha = 1;
+
+    // arms
+    if (expr === "cheer") { limb(9.5, 15, 5.6, 8, p.Y, 3); limb(22.5, 15, 26.4, 8, p.Y, 3); disc(5.4, 8, 1.4, p.Y, p.OL, 0.9); disc(26.6, 8, 1.4, p.Y, p.OL, 0.9); }
+    else if (expr === "point") { limb(9, 17, 7, 19.5, p.Y, 3); disc(7, 19.7, 1.3, p.Y, p.OL, 0.9); limb(22.8, 15, 25.4, 7.4, p.Y, 3); disc(25.5, 6.8, 1.4, p.Y, p.OL, 0.9); }
+    else if (expr === "wave") { limb(9, 17, 7, 19.5, p.Y, 3); disc(7, 19.7, 1.3, p.Y, p.OL, 0.9); limb(22.8, 14, 25.8, 7, p.Y, 3); disc(26, 6.4, 1.5, p.Y, p.OL, 0.9); }
+    else if (expr === "run") { limb(9.5, 15, 6.2, 12, p.Y, 3); disc(6, 11.6, 1.3, p.Y, p.OL, 0.9); limb(22.5, 18, 25.4, 22, p.Y, 3); disc(25.6, 22.4, 1.3, p.Y, p.OL, 0.9); }
+    else { limb(8.8, 17, 7, 20, p.Y, 3); disc(7, 20.2, 1.4, p.Y, p.OL, 0.9); limb(23.2, 17, 25, 20, p.Y, 3); disc(25, 20.2, 1.4, p.Y, p.OL, 0.9); }
+
+    // cheeks
+    ctx.globalAlpha = 0.7; disc(10.6, 18.4, 1.5, p.Cheek, null); disc(21.4, 18.4, 1.5, p.Cheek, null); ctx.globalAlpha = 1;
+
+    // eyes
+    var eyes = (expr === "cheer" || expr === "wave" || expr === "point") ? "happy"
+             : (expr === "sleepy") ? "closed" : "open";
+    if (opts && opts.blink) eyes = "closed";
+    if (eyes === "open") {
+      disc(12.6, 15, 2.7, "#fff", p.OL, 0.8); disc(19.4, 15, 2.7, "#fff", p.OL, 0.8);
+      disc(13, 15.4, 1.35, p.Pupil, null); disc(19.8, 15.4, 1.35, p.Pupil, null);
+      disc(12.5, 14.7, 0.5, "#fff", null); disc(19.3, 14.7, 0.5, "#fff", null);
+    } else if (eyes === "happy") {
+      arc(12.6, 15.6, 2.2, PI + 0.35, PI * 2 - 0.35, p.Pupil, 1.1);
+      arc(19.4, 15.6, 2.2, PI + 0.35, PI * 2 - 0.35, p.Pupil, 1.1);
+    } else {
+      arc(12.6, 15, 2.2, 0.35, PI - 0.35, p.Pupil, 1.1);
+      arc(19.4, 15, 2.2, 0.35, PI - 0.35, p.Pupil, 1.1);
+    }
+
+    // mouth
+    if (expr === "cheer" || expr === "wave") { ctx.beginPath(); ctx.ellipse(16 * S, 19.4 * S, 2.2 * S, 1.9 * S, 0, 0, PI); ctx.fillStyle = p.Pupil; ctx.fill(); }
+    else if (expr === "sleepy") { oval(16, 19.6, 0.9, 0.7, p.Pupil, null); }
+    else { arc(16, 18.4, 2, 0.16 * PI, 0.84 * PI, p.Pupil, 1.1); }
+
+    // extras
+    if (expr === "cheer") { star(5, 6, p.Li); star(27, 7, p.Li); star(25.5, 13, p.Li); }
+    else if (expr === "sleepy") { zzz(23, 5, p.M); }
+    else if (expr === "run") { limb(2.5, 14, 5.5, 14, p.M, 1); limb(1.5, 17.5, 5, 17.5, p.M, 1); limb(3, 21, 6, 21, p.M, 1); }
+    else if (expr === "point") { limb(25.5, 2.4, 25.5, 4.4, p.Li, 1.5); disc(25.5, 5.6, 0.45, p.Li, null); }
+  }
+  function drawMascot() { drawChar(cvs, heroExpr, { blink: blinking }); }
+  function drawAllMinis() {
+    var ms = document.querySelectorAll("canvas.mini");
+    for (var i = 0; i < ms.length; i++) { drawChar(ms[i], ms[i].getAttribute("data-expr") || "happy"); }
+  }
+  drawMascot(); drawAllMinis();
+  cvs.addEventListener("click", function () {
+    cvs.classList.remove("bounce"); void cvs.offsetWidth; cvs.classList.add("bounce");
+    heroExpr = pick(["cheer", "wave", "happy"]); drawMascot();
+    say(pick(["같이 하면 안 무섭지! 💪", "오늘도 한 칸씩 굴러가자 🌱", "혼자여도 내가 있잖아 😎", "잘하고 있어, 진짜로!"]));
+  });
+
+  /* ---------- Data (editable, persisted) ---------- */
+  var DEFAULT_SUBJECTS = {
+    math: { name: "수학", tool: "인강+문제집", color: "var(--sky)",     pct: 45 },
+    sci:  { name: "과학", tool: "개념 인강",   color: "var(--mint)",    pct: 30 },
+    eng:  { name: "영어", tool: "단어+독해",   color: "var(--pink)",    pct: 60 },
+    pe:   { name: "운동", tool: "홈트+산책",   color: "var(--apricot)", pct: 25 }
+  };
+  var DEFAULT_TASKS = [
+    { id: "t1", subj: "math", title: "수학 인강 1강 + 개념 정리", meta: "가장 안 풀리는 것부터 · 아침 집중 시간에" },
+    { id: "t2", subj: "eng",  title: "영단어 40개 + 독해 1지문",  meta: "매일 같은 시간 루틴으로" },
+    { id: "t3", subj: "sci",  title: "과학 밀린 인강 2강 따라잡기", meta: "제일 뒤처진 과목 · 오늘 반 따라잡기" },
+    { id: "t4", subj: "pe",   title: "홈트 15분 or 동네 산책",     meta: "낮잠 대신 · 오후 3~4시 리듬 잡기" },
+    { id: "t5", subj: "math", title: "문제집 오답 5문제 다시",      meta: "짧게 · 하루 마무리 전" }
+  ];
+  var SWATCHES = [
+    { n: "하늘", v: "var(--sky)" }, { n: "민트", v: "var(--mint)" },
+    { n: "핑크", v: "var(--pink)" }, { n: "살구", v: "var(--apricot)" }, { n: "라임", v: "var(--lime)" }
+  ];
+
+  var state = load();
+  function load() {
+    try { return JSON.parse(localStorage.getItem("haily_buddy") || "{}"); }
+    catch (e) { return {}; }
+  }
+  function save() {
+    try { localStorage.setItem("haily_buddy", JSON.stringify(state)); } catch (e) {}
+  }
+  if (!state.done) state.done = {};
+  if (typeof state.streak !== "number") state.streak = 0;
+  if (!state.bonus) state.bonus = {};
+  if (!state.subjects) state.subjects = JSON.parse(JSON.stringify(DEFAULT_SUBJECTS));
+  if (!state.tasks) state.tasks = JSON.parse(JSON.stringify(DEFAULT_TASKS));
+
+  var editMode = { tasks: false, subjects: false };
+  var editingTaskId = null;
+  var newSubjColor = SWATCHES[0].v;
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function newId(pfx) { return pfx + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36); }
+
+  /* ---------- Time / greeting ---------- */
+  var VACATION_END = new Date(2026, 7, 17); // 8/17
+  function refreshTime() {
+    var now = new Date();
+    var h = now.getHours();
+    var dd = Math.max(0, Math.ceil((VACATION_END - now) / 86400000));
+    document.getElementById("dday").textContent = "D-" + dd + " · 방학";
+    document.getElementById("nowClock").textContent =
+      String(h).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+
+    var g = document.getElementById("greet"), gs = document.getElementById("greetSub");
+    var em = document.getElementById("nudgeEmoji"), nm = document.getElementById("nudgeMsg");
+    if (h >= 5 && h < 12) {
+      g.textContent = "좋은 아침, Haily! 🌱";
+      gs.textContent = "오늘도 스스로 굴러가볼까? 뭐부터 할지 내가 정리해뒀어.";
+      em.textContent = "🥣"; nm.textContent = "아침이 하루를 정해. 제일 안 풀리는 것부터 딱 하나 시작하자.";
+      setMode("am");
+    } else if (h >= 12 && h < 18) {
+      g.textContent = "오후엔 페이스가 관건! ☀️";
+      gs.textContent = "지치기 쉬운 시간이야. 낮잠 대신 몸 한번 움직여줄까?";
+      em.textContent = "🏃‍♀️"; nm.textContent = "슬슬 몸 움직일 시간! 15분만 스트레칭하고 오면 오후 집중력이 달라져.";
+    } else if (h >= 18 && h < 23) {
+      g.textContent = "하루 마무리 시간이야 🌙";
+      gs.textContent = "회고 3줄만 쓰면 오늘도 스스로 잘 닫은 거야.";
+      em.textContent = "🛏️"; nm.textContent = "이제 마무리 모드. 회고 3줄 쓰고 밤엔 푹 자야 내일 아침이 편해.";
+      setMode("pm");
+    } else {
+      g.textContent = "너무 늦었어, Haily 🌛";
+      gs.textContent = "지금 밤새면 바이오리듬이 깨져. 내일을 위해 오늘은 여기까지!";
+      em.textContent = "😴"; nm.textContent = "밤샘은 내일의 나를 힘들게 해. 회고만 남기고 얼른 자자.";
+      setMode("pm");
+    }
+    heroExpr = (h >= 5 && h < 12) ? "wave" : (h >= 12 && h < 18) ? "run" : (h >= 18 && h < 23) ? "happy" : "sleepy";
+    drawMascot();
+  }
+
+  /* ---------- Mode toggle ---------- */
+  var mAm = document.getElementById("mAm"), mPm = document.getElementById("mPm");
+  function setMode(m) {
+    var am = m === "am";
+    mAm.classList.toggle("on", am); mPm.classList.toggle("on", !am);
+    document.getElementById("cBrief").classList.toggle("dim", !am);
+    document.getElementById("cReflect").classList.toggle("dim", am);
+  }
+  mAm.addEventListener("click", function () { setMode("am"); });
+  mPm.addEventListener("click", function () { setMode("pm"); });
+
+  /* ---------- Render tasks (+ edit) ---------- */
+  var listEl = document.getElementById("taskList");
+  function renderTasks() {
+    listEl.innerHTML = "";
+    state.tasks.forEach(function (t) {
+      var s = state.subjects[t.subj] || { name: "기타", color: "var(--muted)" };
+      var el = document.createElement("div");
+      el.className = "task" + (state.done[t.id] ? " done" : "") + (editMode.tasks ? " editing" : "");
+      var bodyHTML =
+        '<div class="body">' +
+          '<div class="t-title"><span class="dot" style="background:' + s.color + '"></span>' + esc(t.title) + '</div>' +
+          '<div class="t-meta">' + esc(s.name) + " · " + esc(t.meta) + "</div>" +
+        "</div>";
+      if (editMode.tasks) {
+        el.innerHTML = bodyHTML +
+          '<div class="row-actions">' +
+            '<button class="mini-btn r-edit" aria-label="수정">✏️</button>' +
+            '<button class="mini-btn r-del" aria-label="삭제">🗑️</button>' +
+          "</div>";
+        el.querySelector(".r-edit").addEventListener("click", function () { editingTaskId = t.id; renderTasks(); });
+        el.querySelector(".r-del").addEventListener("click", function () {
+          state.tasks = state.tasks.filter(function (x) { return x.id !== t.id; });
+          delete state.done[t.id];
+          if (editingTaskId === t.id) editingTaskId = null;
+          save(); renderTasks(); renderGauges(); updateDoneCount();
+        });
+      } else {
+        el.tabIndex = 0; el.setAttribute("role", "checkbox");
+        el.setAttribute("aria-checked", state.done[t.id] ? "true" : "false");
+        el.innerHTML = '<div class="tick">✓</div>' + bodyHTML;
+        var toggle = function () {
+          state.done[t.id] = !state.done[t.id];
+          el.setAttribute("aria-checked", state.done[t.id] ? "true" : "false");
+          save(); renderTasks(); renderGauges(); updateDoneCount();
+          if (state.done[t.id]) { heroExpr = "cheer"; drawMascot(); say(pick(["하나 해결! 게이지 차는 거 봐 📈", "이거 굴러가는 소리 좋다 👍", "잘한다 진짜!"])); }
+        };
+        el.addEventListener("click", toggle);
+        el.addEventListener("keydown", function (e) { if (e.key === " " || e.key === "Enter") { e.preventDefault(); toggle(); } });
+      }
+      listEl.appendChild(el);
+    });
+    if (editMode.tasks) listEl.appendChild(buildTaskForm());
+  }
+  function buildTaskForm() {
+    var wrap = document.createElement("div");
+    wrap.className = "edit-form";
+    var cur = editingTaskId != null ? state.tasks.filter(function (x) { return x.id === editingTaskId; })[0] : null;
+    var editing = !!cur;
+    var opts = Object.keys(state.subjects).map(function (k) {
+      return '<option value="' + k + '"' + (cur && cur.subj === k ? " selected" : "") + ">" + esc(state.subjects[k].name) + "</option>";
+    }).join("");
+    wrap.innerHTML =
+      '<div class="ef-title">' + (editing ? "✏️ 할 일 수정" : "➕ 새 할 일") + "</div>" +
+      '<input class="ef-in" id="tfTitle" placeholder="할 일 (예: 수학 인강 2강)" />' +
+      '<div class="ef-row">' +
+        '<select class="ef-in" id="tfSubj">' + opts + "</select>" +
+        '<input class="ef-in" id="tfMeta" placeholder="메모 (예: 오전에)" />' +
+      "</div>" +
+      '<div class="ef-actions">' +
+        '<button class="ef-save" id="tfSave">' + (editing ? "저장" : "추가") + "</button>" +
+        (editing ? '<button class="ef-cancel" id="tfCancel">취소</button>' : "") +
+      "</div>";
+    if (cur) { wrap.querySelector("#tfTitle").value = cur.title; wrap.querySelector("#tfMeta").value = cur.meta; }
+    wrap.querySelector("#tfSave").addEventListener("click", function () {
+      var title = wrap.querySelector("#tfTitle").value.trim();
+      if (!title) { wrap.querySelector("#tfTitle").focus(); return; }
+      var subj = wrap.querySelector("#tfSubj").value;
+      var meta = wrap.querySelector("#tfMeta").value.trim();
+      if (cur) { cur.title = title; cur.subj = subj; cur.meta = meta; editingTaskId = null; }
+      else { state.tasks.push({ id: newId("t"), subj: subj, title: title, meta: meta }); }
+      save(); renderTasks(); renderGauges(); updateDoneCount();
+    });
+    var cancel = wrap.querySelector("#tfCancel");
+    if (cancel) cancel.addEventListener("click", function () { editingTaskId = null; renderTasks(); });
+    return wrap;
+  }
+  function updateDoneCount() {
+    var n = state.tasks.filter(function (t) { return state.done[t.id]; }).length;
+    document.getElementById("doneCount").textContent = n + "/" + state.tasks.length + " 완료";
+    if (typeof renderStreakNews === "function") renderStreakNews();
+  }
+  document.getElementById("editTasksBtn").addEventListener("click", function () {
+    editMode.tasks = !editMode.tasks; editingTaskId = null;
+    this.textContent = editMode.tasks ? "완료" : "✏️ 편집";
+    this.classList.toggle("on", editMode.tasks);
+    document.getElementById("cBrief").classList.remove("dim");
+    renderTasks();
+  });
+
+  /* ---------- Render gauges (+ edit) ---------- */
+  var gEl = document.getElementById("gaugeList");
+  function subjProgress(key) {
+    var s = state.subjects[key];
+    if (!s) return 0;
+    // user-set progress + today's completed tasks of this subject (+8 each) + rhythm bonus
+    var todays = state.tasks.filter(function (t) { return t.subj === key && state.done[t.id]; }).length;
+    var bonus = state.bonus[key] || 0;
+    return Math.max(0, Math.min(100, (s.pct || 0) + todays * 8 + bonus));
+  }
+  function renderGauges() {
+    gEl.innerHTML = "";
+    Object.keys(state.subjects).forEach(function (key) {
+      var s = state.subjects[key];
+      if (editMode.subjects) { gEl.appendChild(buildGaugeEdit(key, s)); return; }
+      var pct = subjProgress(key);
+      var g = document.createElement("div");
+      g.className = "gauge";
+      g.innerHTML =
+        '<div class="g-top"><div class="g-name">' + esc(s.name) +
+          '<small>' + esc(s.tool) + "</small></div>" +
+          '<div class="g-pct">' + pct + "%</div></div>" +
+        '<div class="track"><div class="fill" style="background:' + s.color + '"></div></div>';
+      gEl.appendChild(g);
+      requestAnimationFrame(function () { g.querySelector(".fill").style.width = pct + "%"; });
+    });
+    if (editMode.subjects) gEl.appendChild(buildSubjectForm());
+  }
+  function buildGaugeEdit(key, s) {
+    var wrap = document.createElement("div");
+    wrap.className = "gauge-edit";
+    wrap.innerHTML =
+      '<div class="ge-top">' +
+        '<input class="ef-in ge-name" value="' + esc(s.name) + '" placeholder="과목" />' +
+        '<button class="mini-btn r-del" aria-label="삭제">🗑️</button>' +
+      "</div>" +
+      '<input class="ef-in ge-tool" value="' + esc(s.tool) + '" placeholder="도구 (예: 인강+문제집)" />' +
+      '<div class="ge-slider">' +
+        '<input type="range" min="0" max="100" value="' + (s.pct || 0) + '" class="ge-range" />' +
+        '<span class="ge-val">' + (s.pct || 0) + "%</span>" +
+      "</div>" +
+      '<div class="swatches">' + SWATCHES.map(function (c) {
+        return '<button class="sw" data-c="' + c.v + '" style="background:' + c.v + '"' + (c.v === s.color ? ' data-on="1"' : "") + ' aria-label="' + c.n + '"></button>';
+      }).join("") + "</div>";
+    wrap.querySelector(".ge-name").addEventListener("input", function () { s.name = this.value; save(); });
+    wrap.querySelector(".ge-tool").addEventListener("input", function () { s.tool = this.value; save(); });
+    var range = wrap.querySelector(".ge-range"), val = wrap.querySelector(".ge-val");
+    range.addEventListener("input", function () { s.pct = parseInt(this.value, 10) || 0; val.textContent = s.pct + "%"; save(); });
+    wrap.querySelector(".r-del").addEventListener("click", function () { delete state.subjects[key]; save(); renderGauges(); });
+    wrap.querySelectorAll(".sw").forEach(function (b) {
+      b.addEventListener("click", function () {
+        s.color = this.getAttribute("data-c"); save();
+        wrap.querySelectorAll(".sw").forEach(function (x) { x.removeAttribute("data-on"); });
+        this.setAttribute("data-on", "1");
+      });
+    });
+    return wrap;
+  }
+  function buildSubjectForm() {
+    var wrap = document.createElement("div");
+    wrap.className = "edit-form";
+    wrap.innerHTML =
+      '<div class="ef-title">➕ 새 과목</div>' +
+      '<div class="ef-row">' +
+        '<input class="ef-in" id="sfName" placeholder="과목 (예: 국어)" />' +
+        '<input class="ef-in" id="sfTool" placeholder="도구 (예: 인강)" />' +
+      "</div>" +
+      '<div class="swatches" id="sfSw">' + SWATCHES.map(function (c) {
+        return '<button class="sw" data-c="' + c.v + '" style="background:' + c.v + '"' + (c.v === newSubjColor ? ' data-on="1"' : "") + ' aria-label="' + c.n + '"></button>';
+      }).join("") + "</div>" +
+      '<div class="ef-actions"><button class="ef-save" id="sfSave">과목 추가</button></div>';
+    wrap.querySelectorAll("#sfSw .sw").forEach(function (b) {
+      b.addEventListener("click", function () {
+        newSubjColor = this.getAttribute("data-c");
+        wrap.querySelectorAll("#sfSw .sw").forEach(function (x) { x.removeAttribute("data-on"); });
+        this.setAttribute("data-on", "1");
+      });
+    });
+    wrap.querySelector("#sfSave").addEventListener("click", function () {
+      var name = wrap.querySelector("#sfName").value.trim();
+      if (!name) { wrap.querySelector("#sfName").focus(); return; }
+      var tool = wrap.querySelector("#sfTool").value.trim() || "직접 입력";
+      state.subjects[newId("s")] = { name: name, tool: tool, color: newSubjColor, pct: 0 };
+      save(); renderGauges();
+    });
+    return wrap;
+  }
+  document.getElementById("editSubjBtn").addEventListener("click", function () {
+    editMode.subjects = !editMode.subjects;
+    this.textContent = editMode.subjects ? "완료" : "✏️ 편집";
+    this.classList.toggle("on", editMode.subjects);
+    renderGauges();
+  });
+
+  /* ---------- Rhythm nudge: timer + alarm ---------- */
+  var reply = document.getElementById("nudgeReply");
+  var nudgeActions = document.getElementById("nudgeActions");
+  var timerBox = document.getElementById("timerBox");
+  var timerLabelEl = document.getElementById("timerLabel");
+  var timerTimeEl = document.getElementById("timerTime");
+  var timerFillEl = document.getElementById("timerFill");
+  var TIMER_DUR = { move: 15 * 60, rest: 10 * 60 };
+  var TIMER_LABEL = { move: "움직이는 중 🤸", rest: "쉬는 중 ☕" };
+  var timerTick = null, audioCtx = null, chimeTimers = [];
+
+  function fmt(sec) { sec = Math.max(0, Math.round(sec)); return String(Math.floor(sec / 60)).padStart(2, "0") + ":" + String(sec % 60).padStart(2, "0"); }
+  function showTimerUI(on) { nudgeActions.hidden = on; timerBox.hidden = !on; }
+
+  function startTimer(mode) {
+    ensureAudio();
+    var dur = TIMER_DUR[mode];
+    state.timer = { mode: mode, endsAt: Date.now() + dur * 1000, dur: dur };
+    save();
+    timerLabelEl.textContent = TIMER_LABEL[mode];
+    reply.textContent = mode === "move" ? "🤸 좋아, 15분만 몸에 집중! 끝나면 깨워줄게." : "☕ 10분 휴식 시작. 눕지 말고 앉아서 쉬어.";
+    say(mode === "move" ? "타이머 켰어! 움직이고 오면 머리 맑아져 🏃" : "10분 뒤에 깨워줄게. 푹 쉬어 ⏰");
+    showTimerUI(true);
+    runTimerLoop();
+  }
+  function runTimerLoop() { if (timerTick) clearInterval(timerTick); tickTimer(); timerTick = setInterval(tickTimer, 250); }
+  function tickTimer() {
+    if (!state.timer) return;
+    var remain = (state.timer.endsAt - Date.now()) / 1000;
+    timerTimeEl.textContent = fmt(remain);
+    timerFillEl.style.width = Math.max(0, Math.min(100, (remain / state.timer.dur) * 100)) + "%";
+    if (remain <= 0) finishTimer();
+  }
+  function finishTimer() {
+    if (timerTick) { clearInterval(timerTick); timerTick = null; }
+    var mode = state.timer ? state.timer.mode : "move";
+    state.timer = null; save();
+    showTimerUI(false);
+    if (mode === "move") { state.bonus.pe = Math.min(30, (state.bonus.pe || 0) + 10); save(); renderGauges(); }
+    reply.textContent = mode === "move" ? "🙌 15분 완료! 운동 게이지 올라갔어." : "☕ 휴식 끝! 이제 다시 집중 각.";
+    showAlarm(mode);
+  }
+  function cancelTimer() {
+    if (timerTick) { clearInterval(timerTick); timerTick = null; }
+    state.timer = null; save();
+    showTimerUI(false);
+    reply.textContent = "괜찮아, 언제든 다시 눌러 🙂";
+  }
+  document.getElementById("btnMove").addEventListener("click", function () { startTimer("move"); });
+  document.getElementById("btnRest").addEventListener("click", function () { startTimer("rest"); });
+  document.getElementById("timerCancel").addEventListener("click", cancelTimer);
+
+  /* alarm */
+  var alarmEl = document.getElementById("alarm");
+  var alarmMascot = document.getElementById("alarmMascot");
+  function showAlarm(mode) {
+    document.getElementById("alarmTitle").textContent = mode === "move" ? "15분 끝! 🎉" : "휴식 끝! ⏰";
+    document.getElementById("alarmMsg").textContent = mode === "move"
+      ? "잘 움직였어! 몸이 풀렸으니 이제 집중 각 💪"
+      : "잘 쉬었어! 개운하게 다시 시작해볼까?";
+    drawChar(alarmMascot, "cheer");
+    alarmEl.hidden = false;
+    chime();
+    if (navigator.vibrate) { try { navigator.vibrate([200, 100, 200, 100, 300]); } catch (e) {} }
+    heroExpr = "cheer"; drawMascot();
+  }
+  function dismissAlarm() { alarmEl.hidden = true; stopChime(); }
+  document.getElementById("alarmOk").addEventListener("click", dismissAlarm);
+  alarmEl.addEventListener("click", function (e) { if (e.target === alarmEl) dismissAlarm(); });
+
+  /* sound — generated chime (no external assets) */
+  function ensureAudio() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+    } catch (e) { audioCtx = null; }
+  }
+  function chime() {
+    ensureAudio();
+    if (!audioCtx) return;
+    stopChime();
+    var notes = [660, 880, 990, 880, 1180];
+    function playRound() {
+      notes.forEach(function (f, i) {
+        var t = audioCtx.currentTime + i * 0.16;
+        var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = "sine"; o.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.25, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.32);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(t); o.stop(t + 0.34);
+      });
+    }
+    playRound();
+    chimeTimers.push(setInterval(playRound, 1500));
+    chimeTimers.push(setTimeout(stopChime, 20000));
+  }
+  function stopChime() { chimeTimers.forEach(function (t) { clearInterval(t); clearTimeout(t); }); chimeTimers = []; }
+
+  function resumeTimer() {
+    if (!state.timer) return;
+    if (state.timer.endsAt > Date.now()) {
+      timerLabelEl.textContent = TIMER_LABEL[state.timer.mode] || "타이머";
+      showTimerUI(true); runTimerLoop();
+    } else {
+      var mode = state.timer.mode; state.timer = null; save();
+      if (mode === "move") { state.bonus.pe = Math.min(30, (state.bonus.pe || 0) + 10); save(); renderGauges(); }
+      reply.textContent = "⏰ 타이머가 끝나 있었어! 잘했어.";
+    }
+  }
+
+  /* ---------- Reflection ---------- */
+  ["r1", "r2", "r3"].forEach(function (id) {
+    var ta = document.getElementById(id);
+    if (state[id]) ta.value = state[id];
+    ta.addEventListener("input", function () { state[id] = ta.value; save(); });
+  });
+  document.getElementById("saveBtn").addEventListener("click", function () {
+    var filled = ["r1", "r2", "r3"].filter(function (id) {
+      return (document.getElementById(id).value || "").trim().length > 0;
+    }).length;
+    if (filled === 0) { say("한 줄이라도 남겨봐 — 그게 내일의 시작점이야 ✍️"); return; }
+    var today = new Date().toDateString();
+    if (state.lastReflect !== today) {
+      state.streak = (state.streak || 0) + 1;
+      state.lastReflect = today;
+    }
+    save(); renderStreak(); renderStreakNews();
+    say(pick(["오늘 하루 스스로 잘 닫았어. 푹 자! 🌙", "3줄이면 충분해. 내일 아침이 편해질 거야 ✨", "이렇게 매일이면 방학 끝이 달라진다 💛"]));
+  });
+  function renderStreak() {
+    var s = state.streak || 0;
+    var tail = s >= 3 ? " · 습관 만들기 성공 중! 🔥" : " · 3일 이으면 습관이 돼!";
+    document.getElementById("streak").innerHTML = "연속 회고 <b>" + s + "일</b>" + tail;
+  }
+
+  /* ---------- Mascot speech ---------- */
+  var sub = document.getElementById("greetSub");
+  var speakTimer = null;
+  function say(msg) {
+    sub.textContent = msg;
+    if (speakTimer) clearTimeout(speakTimer);
+    speakTimer = setTimeout(refreshTime, 3600);
+  }
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+
+  /* ---------- Encouraging quote (rotates each visit) ---------- */
+  var QUOTES = [
+    "어제보다 딱 1%만. 그거면 충분해.",
+    "완벽하게 말고, 꾸준하게.",
+    "시작이 반이야 — 이미 앱을 열었잖아.",
+    "혼자 해내는 중이라는 거, 그게 제일 멋진 거야.",
+    "느려도 괜찮아. 멈추지만 않으면 돼.",
+    "오늘의 작은 한 걸음이 방학 끝을 바꿔.",
+    "지치면 쉬어도 돼. 대신 다시 굴러오기.",
+    "남과 비교 말고, 어제의 나랑만.",
+    "계획대로 안 돼도 하루는 다시 시작할 수 있어.",
+    "지금 이 순간에 집중. 나머지는 내가 챙길게.",
+    "작심삼일? 삼일마다 다시 결심하면 되지.",
+    "너의 여름은 네가 만든다."
+  ];
+  function renderQuote() {
+    state.quoteIdx = ((typeof state.quoteIdx === "number" ? state.quoteIdx : -1) + 1) % QUOTES.length;
+    document.getElementById("quoteText").textContent = QUOTES[state.quoteIdx];
+    save();
+  }
+
+  /* ---------- Habit streak (consecutive days) ---------- */
+  function dayKey(d) { var x = new Date(d); x.setHours(0, 0, 0, 0); return x.toDateString(); }
+  function computeStreak() {
+    if (!Array.isArray(state.history)) state.history = [];
+    var today = dayKey(new Date());
+    var yest = dayKey(new Date(Date.now() - 86400000));
+    if (state.lastVisit !== today) {
+      state.visitStreak = (state.lastVisit === yest) ? (state.visitStreak || 0) + 1 : 1;
+      state.lastVisit = today;
+      if (state.history.indexOf(today) === -1) state.history.push(today);
+      if (state.history.length > 21) state.history = state.history.slice(-21);
+      save();
+    }
+    if (!state.visitStreak || state.visitStreak < 1) state.visitStreak = 1;
+    if (!state.bestStreak || state.bestStreak < state.visitStreak) { state.bestStreak = state.visitStreak; save(); }
+  }
+  function renderStreakNews() {
+    var st = state.visitStreak || 1;
+    document.getElementById("snStreak").textContent = st;
+    document.getElementById("snBest").textContent = state.bestStreak || 1;
+    document.getElementById("snSub").textContent =
+      st >= 7 ? "일주일째 스스로! 습관 됐어 🔥" :
+      st >= 3 ? "3일 넘게 굴러가는 중 💪" : "스스로 굴러가는 중";
+    var done = state.tasks.filter(function (t) { return state.done[t.id]; }).length;
+    document.getElementById("snToday").textContent = done + "/" + state.tasks.length;
+    document.getElementById("snReflect").textContent = (state.streak || 0);
+    var wk = document.getElementById("snWeek");
+    wk.innerHTML = "";
+    for (var i = 6; i >= 0; i--) {
+      var k = dayKey(new Date(Date.now() - i * 86400000));
+      var dot = document.createElement("div");
+      dot.className = "sn-dot" + (state.history.indexOf(k) >= 0 ? " on" : "") + (i === 0 ? " today" : "");
+      wk.appendChild(dot);
+    }
+  }
+
+  /* ---------- Init ---------- */
+  computeStreak(); renderQuote();
+  renderTasks(); renderGauges(); updateDoneCount(); renderStreak(); renderStreakNews(); refreshTime();
+  resumeTimer();
+  setInterval(refreshTime, 60000);
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    setInterval(function () {
+      blinking = true; drawMascot();
+      setTimeout(function () { blinking = false; drawMascot(); }, 130);
+    }, 3800);
+  }
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () {
+    syncThemeIcon(); drawMascot(); drawAllMinis();
+  });
+})();
+</script>
