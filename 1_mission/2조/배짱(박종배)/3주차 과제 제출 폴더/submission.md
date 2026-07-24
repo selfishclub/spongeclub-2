@@ -51,6 +51,63 @@ date: 2026-07-12
   - 실기기(감열 프린터 SC05) 인쇄 검증 완료 · 안드로이드 태블릿 크롬 키오스크(홈 화면에 추가)로 **교회 비치 준비 완료**
   - <!-- 인쇄 결과물·키오스크 화면 스크린샷 첨부 예정 -->
 
+  **🎁 현장 적용 사례 — 실제로 만들어드린 어르신의 노래**
+
+  데모가 아니라, 실제 선교 현장에서 어르신 한 분 한 분께 만들어 드린 결과물입니다.
+
+  - **이의복 어르신 (올해 아흔)** — 고향 평해에서 아내 황고분 어머님과 한평생 천생연분으로 살아오신 이야기. 아내의 회복을 간절히 기도하는 마음을 담은 노래.
+    🎵 https://suno.com/s/5mAsCRjn3O8oSdGE
+  - **송분선 어머님** — 울진 평해 학곡리로 시집와 네 남매를 키워 온 팔십 평생을 담은 노래. 두 가지 버전으로 제작.
+    🎵 트로트 버전 → https://suno.com/s/MqyRwwYUlvM2Mpyg
+    🎵 CCM 버전 → https://suno.com/s/vUCCIyUrbA4mO58t
+
+  > **AI가 지어낸 '송분선 어머님' 맞춤 가사** — 설계 의도(어르신 성함이 후렴에 반복)가 그대로 실현됨:
+  >
+  > *[Verse 1]* 울진 평해 꽃피던 고향 마을 / 학곡리로 시집와 살았다네 / 호미 들고 땀 흘린 팔십 평생 / 정직하게 걸어온 고운 그 길
+  > *[Chorus]* **송분선 송분선 우리 어머니** / 아들 둘 딸 둘 잘도 키웠네 / **송분선 송분선 꽃 같은 인생** / 얼씨구 좋다 복이 넘치네
+  > *[Verse 2]* 논밭에 뿌린 씨앗 열매 되고 / 네 남매 웃음소리 보물이라 / 주름진 그 손등이 훈장이네 / 주님 사랑 그 품에 안기었네
+
+  **📷 말씀 사진관 — 현장에서 인쇄한 카드 (어르신 18분 · 19장)**
+
+  평해감리교회 118주년 기념예배 초대 카드로, 어르신 한 분 한 분의 사진을 현장에서 찍어 성함·말씀과 합성해 감열 프린터로 즉석 인쇄했습니다. 디더링·역광 보정·한글 폰트 합성이 실물에서 정상 작동함을 확인.
+
+<table>
+  <tr>
+    <td align="center" width="33%"><img src="이미지첨부/말씀사진관/01-안순연.png" width="200"><br><b>안순연 어르신</b><br><sub>마태복음 5:16</sub></td>
+    <td align="center" width="33%"><img src="이미지첨부/말씀사진관/02-김영자.png" width="200"><br><b>김영자 어르신</b><br><sub>로마서 15:13</sub></td>
+    <td align="center" width="33%"><img src="이미지첨부/말씀사진관/03-최순옥.png" width="200"><br><b>최순옥 어르신</b><br><sub>데살로니가전서 5:16-18</sub></td>
+  </tr>
+  <tr>
+    <td align="center" width="33%"><img src="이미지첨부/말씀사진관/04-권석순.png" width="200"><br><b>권석순 어르신</b><br><sub>고린도전서 13:4</sub></td>
+    <td align="center" width="33%"><img src="이미지첨부/말씀사진관/05-김봉연.png" width="200"><br><b>김봉연 어머님</b><br><sub>고린도전서 13:4</sub></td>
+    <td align="center" width="33%"><img src="이미지첨부/말씀사진관/06-손필여.png" width="200"><br><b>손필여 어머님</b><br><sub>고린도전서 13:4</sub></td>
+  </tr>
+  <tr>
+    <td align="center" width="33%"><img src="이미지첨부/말씀사진관/07-권순덕.png" width="200"><br><b>권순덕 어머님</b><br><sub>마태복음 11:28</sub></td>
+    <td align="center" width="33%"><img src="이미지첨부/말씀사진관/08-이복순.png" width="200"><br><b>이복순 어머님</b><br><sub>데살로니가전서 5:16-18</sub></td>
+    <td align="center" width="33%"><img src="이미지첨부/말씀사진관/09-김봉연-2.png" width="200"><br><b>김봉연 어머님</b><br><sub>빌립보서 4:4</sub></td>
+  </tr>
+  <tr>
+    <td align="center" width="33%"><img src="이미지첨부/말씀사진관/10-황순옥.png" width="200"><br><b>황순옥 어머님</b><br><sub>빌립보서 4:6</sub></td>
+    <td align="center" width="33%"><img src="이미지첨부/말씀사진관/11-손달순.png" width="200"><br><b>손달순 어머님</b><br><sub>민수기 6:25</sub></td>
+    <td align="center" width="33%"><img src="이미지첨부/말씀사진관/12-박봉선.png" width="200"><br><b>박봉선 어머님</b><br><sub>시편 23:1</sub></td>
+  </tr>
+  <tr>
+    <td align="center" width="33%"><img src="이미지첨부/말씀사진관/13-박수열.png" width="200"><br><b>박수열 어머님</b><br><sub>이사야 43:4</sub></td>
+    <td align="center" width="33%"><img src="이미지첨부/말씀사진관/14-황순분.png" width="200"><br><b>황순분 어머님</b><br><sub>시편 100:4</sub></td>
+    <td align="center" width="33%"><img src="이미지첨부/말씀사진관/15-남순자.png" width="200"><br><b>남순자 어머님</b><br><sub>요한삼서 1:2</sub></td>
+  </tr>
+  <tr>
+    <td align="center" width="33%"><img src="이미지첨부/말씀사진관/16-임숙자.png" width="200"><br><b>임숙자 어머님</b><br><sub>시편 34:8</sub></td>
+    <td align="center" width="33%"><img src="이미지첨부/말씀사진관/17-최학순.png" width="200"><br><b>최학순 어머님</b><br><sub>시편 37:5</sub></td>
+    <td align="center" width="33%"><img src="이미지첨부/말씀사진관/18-남순자-2.png" width="200"><br><b>남순자 어머님</b><br><sub>로마서 8:28</sub></td>
+  </tr>
+  <tr>
+    <td align="center" width="33%"><img src="이미지첨부/말씀사진관/19-이의복.png" width="200"><br><b>이의복 어르신</b><br><sub>빌립보서 4:13</sub></td>
+  </tr>
+</table>
+
+
 - **알게 된 인사이트:**
 
   1. **"연결됐는데 출력이 안 된다"의 범인은 프로토콜이 아니라 감열지 방향이었다.** 소프트웨어 하던 사람은 소프트웨어를 의심한다 — 물리적인 것부터 봤어야 했다. 그리고 그 삽질 덕분에 진단 기능(급지 테스트·로그)이 태어났다. **삽질은 기능이 된다.**
