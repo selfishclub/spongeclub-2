@@ -218,7 +218,15 @@
   /* rhythm nudge */
   .nudge-body { display: flex; gap: 12px; align-items: center; }
   .nudge-buddy { width: 92px; height: 92px; flex: 0 0 auto; object-fit: contain; display: block;
-    margin: -10px -4px -12px -6px; filter: drop-shadow(0 3px 4px rgba(150,100,60,.20)); }
+    margin: -10px -4px -12px -6px; filter: drop-shadow(0 3px 4px rgba(150,100,60,.20));
+    transform-origin: 50% 88%; animation: dashrun 1s ease-in-out infinite; }
+  @keyframes dashrun {
+    0%   { transform: translate(0, 0) rotate(-2deg); }
+    25%  { transform: translate(4px, -6px) rotate(2deg); }
+    50%  { transform: translate(0, 0) rotate(-2deg); }
+    75%  { transform: translate(-3px, -4px) rotate(-5deg); }
+    100% { transform: translate(0, 0) rotate(-2deg); }
+  }
   .nudge-body p { margin: 0; font-size: 13px; line-height: 1.5; }
   .nudge-actions { display: flex; gap: 8px; margin-top: 13px; }
   .nudge-actions button {
@@ -282,15 +290,6 @@
 
   .foot { text-align: center; font-size: 11px; color: var(--muted); line-height: 1.6; margin-top: 4px; }
   .foot b { color: var(--ink); }
-
-  /* differentiation strip */
-  .wedge { display: flex; gap: 6px; overflow-x: auto; padding: 1px 2px; scrollbar-width: none; }
-  .wedge::-webkit-scrollbar { display: none; }
-  .wpill {
-    flex: 0 0 auto; font-size: 11px; font-weight: 700; letter-spacing: -.2px;
-    padding: 6px 11px; border-radius: 999px; white-space: nowrap;
-    background: var(--card); border: 1px solid var(--line); color: var(--ink); box-shadow: var(--shadow-sm);
-  }
 
   /* coach note in briefing */
   .coach {
@@ -468,12 +467,6 @@
       <h1 id="greet">좋은 아침, Haily! </h1>
       <p id="greetSub">오늘도 스스로 굴러가볼까? 뭐부터 할지 내가 정리해뒀어.</p>
     </div>
-  </div>
-
-  <div class="wedge">
-    <span class="wpill">랭킹·비교 없음</span>
-    <span class="wpill">사람 매니저 없이</span>
-    <span class="wpill">인강·문제집 굴리기</span>
   </div>
 
   <div class="modes">
