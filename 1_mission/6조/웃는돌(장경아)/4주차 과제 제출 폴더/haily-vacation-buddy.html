@@ -129,7 +129,8 @@
   }
   #mascot:hover { transform: translateY(-2px) rotate(-3deg); }
   .mini {
-    width: 44px; height: 44px; flex: 0 0 auto; object-fit: contain; display: block;
+    width: 54px; height: 54px; flex: 0 0 auto; object-fit: contain; display: block;
+    margin: -8px -4px -10px -6px;
     filter: drop-shadow(0 2px 2px rgba(150,100,60,.20));
   }
   .hi { z-index: 1; }
@@ -159,7 +160,8 @@
     padding: 16px 16px 17px;
   }
   .card.dim { opacity: .55; }
-  .card-h { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; row-gap: 6px; }
+  .card-h { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; row-gap: 6px; }
+  @media (max-width: 410px) { .card-h .sub { display: none; } }
   .chip {
     font-size: 10.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase;
     padding: 4px 8px; border-radius: 8px; color: #2b2540;
@@ -202,7 +204,8 @@
 
   /* rhythm nudge */
   .nudge-body { display: flex; gap: 12px; align-items: center; }
-  .nudge-emoji { font-size: 30px; }
+  .nudge-buddy { width: 92px; height: 92px; flex: 0 0 auto; object-fit: contain; display: block;
+    margin: -10px -4px -12px -6px; filter: drop-shadow(0 3px 4px rgba(150,100,60,.20)); }
   .nudge-body p { margin: 0; font-size: 13px; line-height: 1.5; }
   .nudge-actions { display: flex; gap: 8px; margin-top: 13px; }
   .nudge-actions button {
@@ -296,7 +299,7 @@
 
   /* edit mode */
   .edit-btn {
-    margin-left: 8px; border: 1px solid var(--line); background: var(--card); color: var(--muted);
+    margin-left: 4px; border: 1px solid var(--line); background: var(--card); color: var(--muted);
     font-size: 11px; font-weight: 700; padding: 5px 9px; border-radius: 9px; cursor: pointer;
     font-family: var(--font); white-space: nowrap; transition: background .15s ease, color .15s ease;
   }
@@ -361,7 +364,7 @@
     background: var(--card); border: 1px solid var(--line); border-radius: 16px;
     padding: 9px 12px; box-shadow: var(--shadow-sm);
   }
-  .qb-mascot { width: 42px; height: 42px; }
+  .qb-mascot { width: 52px; height: 52px; margin: -6px -2px -6px -4px; }
   .qb-body { min-width: 0; }
   .qb-label { font-size: 10px; font-weight: 800; letter-spacing: .5px; color: var(--muted); text-transform: uppercase; margin-bottom: 2px; }
   .qb-text { font-size: 13px; font-weight: 700; color: var(--ink); line-height: 1.45; letter-spacing: -.2px; }
@@ -479,13 +482,12 @@
   <!-- 리듬 넛지 -->
   <div class="card" id="cNudge">
     <div class="card-h">
-      <img class="mini" data-expr="run" alt="" aria-hidden="true" />
       <span class="chip" style="background:var(--apricot)">지치지 않게</span>
       <h2>리듬 넛지</h2>
       <span class="sub" id="nowClock">--:--</span>
     </div>
     <div class="nudge-body">
-      <div class="nudge-emoji" id="nudgeEmoji">🏃‍♀️</div>
+      <img class="nudge-buddy" id="nudgeBuddy" alt="" aria-hidden="true" />
       <p id="nudgeMsg">지금 슬슬 몸 움직일 시간! 15분만 스트레칭하고 오면 오후 집중력이 달라져.</p>
     </div>
     <div class="nudge-actions" id="nudgeActions">
@@ -596,11 +598,11 @@
     var map = useHead ? BUDDY_HEAD : BUDDY_FULL;
     el.src = map[expr] || map.happy;
   }
-  function drawChar(el, expr) { setBuddy(el, expr, el.classList.contains("mini")); }
+  function drawChar(el, expr) { setBuddy(el, expr, false); }
   function drawMascot() { setBuddy(cvs, heroExpr, false); }
   function drawAllMinis() {
     var ms = document.querySelectorAll("img.mini");
-    for (var i = 0; i < ms.length; i++) { setBuddy(ms[i], ms[i].getAttribute("data-expr") || "happy", true); }
+    for (var i = 0; i < ms.length; i++) { setBuddy(ms[i], ms[i].getAttribute("data-expr") || "happy", false); }
   }
   drawMascot(); drawAllMinis();
   setBuddy(document.getElementById("logoImg"), "happy", true);
@@ -660,25 +662,25 @@
       String(h).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
 
     var g = document.getElementById("greet"), gs = document.getElementById("greetSub");
-    var em = document.getElementById("nudgeEmoji"), nm = document.getElementById("nudgeMsg");
+    var em = document.getElementById("nudgeBuddy"), nm = document.getElementById("nudgeMsg");
     if (h >= 5 && h < 12) {
       g.textContent = "좋은 아침, Haily! 🌱";
       gs.textContent = "오늘도 스스로 굴러가볼까? 뭐부터 할지 내가 정리해뒀어.";
-      em.textContent = "🥣"; nm.textContent = "아침이 하루를 정해. 제일 안 풀리는 것부터 딱 하나 시작하자.";
+      setBuddy(em, "point", false); nm.textContent = "아침이 하루를 정해. 제일 안 풀리는 것부터 딱 하나 시작하자.";
       setMode("am");
     } else if (h >= 12 && h < 18) {
       g.textContent = "오후엔 페이스가 관건! ☀️";
       gs.textContent = "지치기 쉬운 시간이야. 낮잠 대신 몸 한번 움직여줄까?";
-      em.textContent = "🏃‍♀️"; nm.textContent = "슬슬 몸 움직일 시간! 15분만 스트레칭하고 오면 오후 집중력이 달라져.";
+      setBuddy(em, "run", false); nm.textContent = "슬슬 몸 움직일 시간! 15분만 스트레칭하고 오면 오후 집중력이 달라져.";
     } else if (h >= 18 && h < 23) {
       g.textContent = "하루 마무리 시간이야 🌙";
       gs.textContent = "회고 3줄만 쓰면 오늘도 스스로 잘 닫은 거야.";
-      em.textContent = "🛏️"; nm.textContent = "이제 마무리 모드. 회고 3줄 쓰고 밤엔 푹 자야 내일 아침이 편해.";
+      setBuddy(em, "happy", false); nm.textContent = "이제 마무리 모드. 회고 3줄 쓰고 밤엔 푹 자야 내일 아침이 편해.";
       setMode("pm");
     } else {
       g.textContent = "너무 늦었어, Haily 🌛";
       gs.textContent = "지금 밤새면 바이오리듬이 깨져. 내일을 위해 오늘은 여기까지!";
-      em.textContent = "😴"; nm.textContent = "밤샘은 내일의 나를 힘들게 해. 회고만 남기고 얼른 자자.";
+      setBuddy(em, "sleepy", false); nm.textContent = "밤샘은 내일의 나를 힘들게 해. 회고만 남기고 얼른 자자.";
       setMode("pm");
     }
     heroExpr = (h >= 5 && h < 12) ? "wave" : (h >= 12 && h < 18) ? "run" : (h >= 18 && h < 23) ? "happy" : "sleepy";
