@@ -13,6 +13,9 @@
     --lime-deep: #B7C22C;
     --brand: #2E6FE6;
     --on-brand: #FFFFFF;
+    --now-bg: #3B3129;
+    --now-fg: #FBF5EC;
+    --now-accent: #DDE94A;
     --sky: #93B8E8;
     --mint: #6FC7AE;
     --pink: #F0A6BB;
@@ -35,6 +38,9 @@
       --lime-deep: #E4EF4E;
       --brand: #7FA9EC;
       --on-brand: #142440;
+      --now-bg: #F6EEE5;
+      --now-fg: #241E19;
+      --now-accent: #B7C22C;
       --sky: #7FA0CE;
       --mint: #63B79D;
       --pink: #D291A5;
@@ -45,13 +51,13 @@
   }
   :root[data-theme="light"] {
     --bg: #FBF5EC; --bg-2: #FCE6D3; --card: #FFFFFF; --ink: #40352E; --muted: #A2938A;
-    --line: #F0E7DB; --lime: #DDE94A; --lime-deep: #B7C22C; --brand: #2E6FE6; --on-brand: #FFFFFF; --sky: #93B8E8; --mint: #6FC7AE;
+    --line: #F0E7DB; --lime: #DDE94A; --lime-deep: #B7C22C; --brand: #2E6FE6; --on-brand: #FFFFFF; --now-bg: #3B3129; --now-fg: #FBF5EC; --now-accent: #DDE94A; --sky: #93B8E8; --mint: #6FC7AE;
     --pink: #F0A6BB; --apricot: #F2C071; --shadow: 0 10px 30px rgba(120,90,60,.14);
     --shadow-sm: 0 4px 14px rgba(120,90,60,.10);
   }
   :root[data-theme="dark"] {
     --bg: #1E1A17; --bg-2: #2A2320; --card: #2B2521; --ink: #F6EEE5; --muted: #B6A79B;
-    --line: #3C332C; --lime: #E4EF4E; --lime-deep: #E4EF4E; --brand: #7FA9EC; --on-brand: #142440; --sky: #7FA0CE; --mint: #63B79D;
+    --line: #3C332C; --lime: #E4EF4E; --lime-deep: #E4EF4E; --brand: #7FA9EC; --on-brand: #142440; --now-bg: #F6EEE5; --now-fg: #241E19; --now-accent: #B7C22C; --sky: #7FA0CE; --mint: #63B79D;
     --pink: #D291A5; --apricot: #D9AE6F; --shadow: 0 12px 34px rgba(0,0,0,.40);
     --shadow-sm: 0 4px 16px rgba(0,0,0,.34);
   }
@@ -153,7 +159,7 @@
     box-shadow: 0 2px 0 var(--lime-deep); margin-bottom: 7px;
   }
   .hi h1 { font-size: 18px; margin: 0 0 4px; letter-spacing: -.4px; line-height: 1.3; text-wrap: balance; }
-  .hi p { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+  .hi p { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.5; font-weight: 600; }
 
   /* ---------- Mode toggle ---------- */
   .modes { display: flex; gap: 6px; background: var(--card); border: 1px solid var(--line);
@@ -378,36 +384,39 @@
 
   /* NOW card — 다음 행동을 최상단에 */
   .now-card {
-    background: var(--card); border: 1px solid color-mix(in srgb, var(--brand) 30%, var(--line));
-    border-radius: var(--radius); padding: 15px 16px 16px;
-    box-shadow: 0 8px 24px color-mix(in srgb, var(--brand) 14%, transparent);
+    background: var(--now-bg); color: var(--now-fg);
+    border: 1px solid color-mix(in srgb, var(--now-fg) 12%, transparent);
+    border-radius: var(--radius); padding: 16px;
+    box-shadow: 0 10px 26px rgba(90, 65, 40, .20);
     position: relative; overflow: hidden;
   }
-  .now-card::before {
-    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--brand);
-  }
   .now-label {
-    font-size: 10.5px; font-weight: 800; letter-spacing: .4px; color: var(--brand);
-    text-transform: uppercase; margin-bottom: 5px;
+    font-size: 10.5px; font-weight: 800; letter-spacing: .5px; color: var(--now-accent);
+    text-transform: uppercase; margin-bottom: 6px;
   }
-  .now-title { font-size: 17px; font-weight: 800; letter-spacing: -.4px; line-height: 1.35; color: var(--ink); }
-  .now-meta { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+  .now-title { font-size: 18px; font-weight: 800; letter-spacing: -.4px; line-height: 1.35; color: var(--now-fg); }
+  .now-meta { font-size: 11.5px; color: color-mix(in srgb, var(--now-fg) 62%, transparent); margin-top: 5px; }
   .now-actions { display: flex; gap: 8px; margin-top: 13px; }
   .now-actions button {
     flex: 1; padding: 11px; border-radius: 13px; font-size: 13.5px; font-weight: 800; cursor: pointer;
-    font-family: var(--font); border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    font-family: var(--font);
+    border: 1px solid color-mix(in srgb, var(--now-fg) 28%, transparent);
+    background: transparent; color: var(--now-fg);
   }
   .now-actions .now-start {
-    background: var(--brand); border-color: transparent; color: var(--on-brand);
-    box-shadow: 0 3px 0 color-mix(in srgb, var(--brand) 65%, #000);
+    background: var(--lime); border-color: transparent; color: #2b2540;
+    box-shadow: 0 3px 0 var(--lime-deep);
   }
-  .now-actions .now-start:active { transform: translateY(2px); box-shadow: 0 1px 0 color-mix(in srgb, var(--brand) 65%, #000); }
+  .now-actions .now-start:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--lime-deep); }
   .now-timer { margin-top: 13px; }
   .nt-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px; }
   .nt-head span:first-child { font-size: 12.5px; font-weight: 700; }
   .nt-time { font-family: var(--mono); font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
-  .now-timer .timer-fill { background: linear-gradient(90deg, var(--brand), var(--mint)); }
-  .now-card.done-all .now-title { color: var(--muted); }
+  .now-timer .timer-bar { background: color-mix(in srgb, var(--now-fg) 16%, transparent); }
+  .now-timer .timer-fill { background: linear-gradient(90deg, var(--lime), var(--apricot)); }
+  .now-timer .timer-cancel { background: transparent; color: color-mix(in srgb, var(--now-fg) 65%, transparent);
+    border-color: color-mix(in srgb, var(--now-fg) 25%, transparent); }
+  .now-card.done-all .now-title { color: color-mix(in srgb, var(--now-fg) 70%, transparent); }
 
   /* gauge breakdown */
   .g-basis { font-size: 10.5px; color: var(--muted); margin-top: 4px; letter-spacing: -.1px; }
@@ -415,18 +424,7 @@
   /* schedule rule */
   .rule-list { margin: 0 0 12px; padding: 0; list-style: none; font-size: 11.5px; color: var(--muted); line-height: 1.6; }
   .rule-list li { padding-left: 14px; position: relative; }
-  .rule-list li::before { content: ""; position: absolute; left: 3px; top: 8px; width: 4px; height: 4px; border-radius: 50%; background: var(--brand); }
-
-  /* quote banner */
-  .quote-banner {
-    display: flex; align-items: center; gap: 10px;
-    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
-    padding: 9px 12px; box-shadow: var(--shadow-sm);
-  }
-  .qb-mascot { width: 52px; height: 52px; margin: -6px -2px -6px -4px; }
-  .qb-body { min-width: 0; }
-  .qb-label { font-size: 10px; font-weight: 800; letter-spacing: .5px; color: var(--muted); text-transform: uppercase; margin-bottom: 2px; }
-  .qb-text { font-size: 13px; font-weight: 700; color: var(--ink); line-height: 1.45; letter-spacing: -.2px; }
+  .rule-list li::before { content: ""; position: absolute; left: 3px; top: 8px; width: 4px; height: 4px; border-radius: 50%; background: var(--lime-deep); }
 
   /* streak card-news */
   .streak-news {
@@ -479,6 +477,15 @@
     <button class="theme-btn" id="themeBtn" aria-label="테마 전환" title="라이트/다크 전환">🌙</button>
   </div>
 
+  <div class="hero">
+    <div class="mascot-wrap"><img id="mascot" title="콕 눌러봐!" alt="고고버디 마스코트" /></div>
+    <div class="hi">
+      <span class="dday" id="dday">D-27 · 방학</span>
+      <h1 id="greet">좋은 아침, Haily! </h1>
+      <p id="greetSub">오늘도 한 칸씩 굴러가 보자.</p>
+    </div>
+  </div>
+
   <div class="now-card" id="nowCard">
     <div class="now-label">지금 이거 하나</div>
     <div class="now-title" id="nowTitle">—</div>
@@ -491,14 +498,6 @@
       <div class="nt-head"><span>집중 중</span><span class="nt-time" id="nowTime">25:00</span></div>
       <div class="timer-bar"><div class="timer-fill" id="nowFill"></div></div>
       <button class="timer-cancel" id="nowCancel">그만두기</button>
-    </div>
-  </div>
-
-  <div class="quote-banner">
-    <img class="mini qb-mascot" data-expr="happy" alt="" aria-hidden="true" />
-    <div class="qb-body">
-      <div class="qb-label">오늘의 응원</div>
-      <div class="qb-text" id="quoteText">오늘도 한 칸씩 굴러가 보자.</div>
     </div>
   </div>
 
@@ -515,15 +514,6 @@
     <div class="sn-stats">
       <span>오늘 완료 <b id="snToday">0/0</b></span>
       <span>연속 회고 <b id="snReflect">0</b>일</span>
-    </div>
-  </div>
-
-  <div class="hero">
-    <div class="mascot-wrap"><img id="mascot" title="콕 눌러봐!" alt="고고버디 마스코트" /></div>
-    <div class="hi">
-      <span class="dday" id="dday">D-27 · 방학</span>
-      <h1 id="greet">좋은 아침, Haily! </h1>
-      <p id="greetSub">오늘도 스스로 굴러가볼까? 뭐부터 할지 내가 정리해뒀어.</p>
     </div>
   </div>
 
@@ -754,25 +744,21 @@
     document.getElementById("nowClock").textContent =
       String(h).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
 
-    var g = document.getElementById("greet"), gs = document.getElementById("greetSub");
+    var g = document.getElementById("greet");
     var em = document.getElementById("nudgeBuddy"), nm = document.getElementById("nudgeMsg");
     if (h >= 5 && h< 12) {
       g.textContent = "좋은 아침, Haily!";
-      gs.textContent = "오늘도 스스로 굴러가볼까? 뭐부터 할지 내가 정리해뒀어.";
        nm.textContent = "아침이 하루를 정해. 제일 안 풀리는 것부터 딱 하나 시작하자.";
       setMode("am");
     } else if (h >= 12 && h< 18) {
       g.textContent = "오후엔 페이스가 관건!";
-      gs.textContent = "지치기 쉬운 시간이야. 낮잠 대신 몸 한번 움직여줄까?";
        nm.textContent = "슬슬 몸 움직일 시간! 15분만 스트레칭하고 오면 오후 집중력이 달라져.";
     } else if (h >= 18 && h< 23) {
       g.textContent = "하루 마무리 시간이야";
-      gs.textContent = "회고 3줄만 쓰면 오늘도 스스로 잘 닫은 거야.";
        nm.textContent = "이제 마무리 모드. 회고 3줄 쓰고 밤엔 푹 자야 내일 아침이 편해.";
       setMode("pm");
     } else {
       g.textContent = "너무 늦었어, Haily ";
-      gs.textContent = "지금 밤새면 바이오리듬이 깨져. 내일을 위해 오늘은 여기까지!";
        nm.textContent = "밤샘은 내일의 나를 힘들게 해. 회고만 남기고 얼른 자자.";
       setMode("pm");
     }
@@ -1185,11 +1171,12 @@
   function say(msg) {
     sub.textContent = msg;
     if (speakTimer) clearTimeout(speakTimer);
-    speakTimer = setTimeout(refreshTime, 3600);
+    speakTimer = setTimeout(function () { sub.textContent = quoteLine; }, 3600);
   }
   function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
 
   /* ---------- Encouraging quote (rotates each visit) ---------- */
+  var quoteLine = "";
   var QUOTES = [
     "어제보다 딱 1%만. 그거면 충분해.",
     "완벽하게 말고, 꾸준하게.",
@@ -1206,7 +1193,8 @@
   ];
   function renderQuote() {
     state.quoteIdx = ((typeof state.quoteIdx === "number" ? state.quoteIdx : -1) + 1) % QUOTES.length;
-    document.getElementById("quoteText").textContent = QUOTES[state.quoteIdx];
+    quoteLine = QUOTES[state.quoteIdx];
+    document.getElementById("greetSub").textContent = quoteLine;
     save();
   }
 
