@@ -12,6 +12,7 @@
     --lime: #DDE94A;
     --lime-deep: #B7C22C;
     --brand: #2E6FE6;
+    --on-brand: #FFFFFF;
     --sky: #93B8E8;
     --mint: #6FC7AE;
     --pink: #F0A6BB;
@@ -33,6 +34,7 @@
       --lime: #E4EF4E;
       --lime-deep: #E4EF4E;
       --brand: #7FA9EC;
+      --on-brand: #142440;
       --sky: #7FA0CE;
       --mint: #63B79D;
       --pink: #D291A5;
@@ -43,13 +45,13 @@
   }
   :root[data-theme="light"] {
     --bg: #FBF5EC; --bg-2: #FCE6D3; --card: #FFFFFF; --ink: #40352E; --muted: #A2938A;
-    --line: #F0E7DB; --lime: #DDE94A; --lime-deep: #B7C22C; --brand: #2E6FE6; --sky: #93B8E8; --mint: #6FC7AE;
+    --line: #F0E7DB; --lime: #DDE94A; --lime-deep: #B7C22C; --brand: #2E6FE6; --on-brand: #FFFFFF; --sky: #93B8E8; --mint: #6FC7AE;
     --pink: #F0A6BB; --apricot: #F2C071; --shadow: 0 10px 30px rgba(120,90,60,.14);
     --shadow-sm: 0 4px 14px rgba(120,90,60,.10);
   }
   :root[data-theme="dark"] {
     --bg: #1E1A17; --bg-2: #2A2320; --card: #2B2521; --ink: #F6EEE5; --muted: #B6A79B;
-    --line: #3C332C; --lime: #E4EF4E; --lime-deep: #E4EF4E; --brand: #7FA9EC; --sky: #7FA0CE; --mint: #63B79D;
+    --line: #3C332C; --lime: #E4EF4E; --lime-deep: #E4EF4E; --brand: #7FA9EC; --on-brand: #142440; --sky: #7FA0CE; --mint: #63B79D;
     --pink: #D291A5; --apricot: #D9AE6F; --shadow: 0 12px 34px rgba(0,0,0,.40);
     --shadow-sm: 0 4px 16px rgba(0,0,0,.34);
   }
@@ -146,7 +148,7 @@
   .hi { z-index: 1; }
   .dday {
     display: inline-block; font-family: var(--mono); font-size: 11px; font-weight: 700;
-    letter-spacing: .5px; color: var(--ink);
+    letter-spacing: .5px; color: #2b2540;
     background: var(--lime); padding: 3px 9px; border-radius: 999px;
     box-shadow: 0 2px 0 var(--lime-deep); margin-bottom: 7px;
   }
@@ -374,6 +376,47 @@
     100% { transform: translateY(0) rotate(0deg); }
   }
 
+  /* NOW card — 다음 행동을 최상단에 */
+  .now-card {
+    background: var(--card); border: 1px solid color-mix(in srgb, var(--brand) 30%, var(--line));
+    border-radius: var(--radius); padding: 15px 16px 16px;
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--brand) 14%, transparent);
+    position: relative; overflow: hidden;
+  }
+  .now-card::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--brand);
+  }
+  .now-label {
+    font-size: 10.5px; font-weight: 800; letter-spacing: .4px; color: var(--brand);
+    text-transform: uppercase; margin-bottom: 5px;
+  }
+  .now-title { font-size: 17px; font-weight: 800; letter-spacing: -.4px; line-height: 1.35; color: var(--ink); }
+  .now-meta { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+  .now-actions { display: flex; gap: 8px; margin-top: 13px; }
+  .now-actions button {
+    flex: 1; padding: 11px; border-radius: 13px; font-size: 13.5px; font-weight: 800; cursor: pointer;
+    font-family: var(--font); border: 1px solid var(--line); background: var(--card); color: var(--ink);
+  }
+  .now-actions .now-start {
+    background: var(--brand); border-color: transparent; color: var(--on-brand);
+    box-shadow: 0 3px 0 color-mix(in srgb, var(--brand) 65%, #000);
+  }
+  .now-actions .now-start:active { transform: translateY(2px); box-shadow: 0 1px 0 color-mix(in srgb, var(--brand) 65%, #000); }
+  .now-timer { margin-top: 13px; }
+  .nt-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px; }
+  .nt-head span:first-child { font-size: 12.5px; font-weight: 700; }
+  .nt-time { font-family: var(--mono); font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .now-timer .timer-fill { background: linear-gradient(90deg, var(--brand), var(--mint)); }
+  .now-card.done-all .now-title { color: var(--muted); }
+
+  /* gauge breakdown */
+  .g-basis { font-size: 10.5px; color: var(--muted); margin-top: 4px; letter-spacing: -.1px; }
+
+  /* schedule rule */
+  .rule-list { margin: 0 0 12px; padding: 0; list-style: none; font-size: 11.5px; color: var(--muted); line-height: 1.6; }
+  .rule-list li { padding-left: 14px; position: relative; }
+  .rule-list li::before { content: ""; position: absolute; left: 3px; top: 8px; width: 4px; height: 4px; border-radius: 50%; background: var(--brand); }
+
   /* quote banner */
   .quote-banner {
     display: flex; align-items: center; gap: 10px;
@@ -436,6 +479,21 @@
     <button class="theme-btn" id="themeBtn" aria-label="테마 전환" title="라이트/다크 전환">🌙</button>
   </div>
 
+  <div class="now-card" id="nowCard">
+    <div class="now-label">지금 이거 하나</div>
+    <div class="now-title" id="nowTitle">—</div>
+    <div class="now-meta" id="nowMeta"></div>
+    <div class="now-actions" id="nowActions">
+      <button class="now-start" id="nowStart">25분 집중 시작</button>
+      <button id="nowDone">완료</button>
+    </div>
+    <div class="now-timer" id="nowTimer" hidden>
+      <div class="nt-head"><span>집중 중</span><span class="nt-time" id="nowTime">25:00</span></div>
+      <div class="timer-bar"><div class="timer-fill" id="nowFill"></div></div>
+      <button class="timer-cancel" id="nowCancel">그만두기</button>
+    </div>
+  </div>
+
   <div class="quote-banner">
     <img class="mini qb-mascot" data-expr="happy" alt="" aria-hidden="true" />
     <div class="qb-body">
@@ -483,7 +541,12 @@
       <span class="sub" id="doneCount">0/5 완료</span>
       <button class="edit-btn" id="editTasksBtn">편집</button>
     </div>
-    <p class="coach">뭐부터 할지 고민 마 — <b>순서는 내가 정해뒀어.</b> 제일 안 풀리는 <b>과학</b>부터, 지치는 오후엔 <b>운동</b>으로. 위에서부터 하나씩만.</p>
+    <p class="coach">뭐부터 할지 고민 마 — <b>순서는 내가 정해뒀어.</b> 위에서부터 하나씩만 하면 돼.</p>
+    <ul class="rule-list">
+      <li>진척이 가장 뒤처진 과목을 맨 앞에 (지금은 <b>과학</b>)</li>
+      <li>머리가 맑은 아침엔 어려운 과목, 짧은 복습은 하루 끝에</li>
+      <li>지치는 오후 시간대엔 운동을 끼워 넣어 리듬 유지</li>
+    </ul>
     <div id="taskList"></div>
   </div>
 
@@ -496,7 +559,8 @@
       <span class="sub">목표 대비</span>
       <button class="edit-btn" id="editSubjBtn">편집</button>
     </div>
-    <p class="cap">공부한 <b>시간</b> 말고 <b>목표까지 남은 거리</b>를 봐. 전국 랭킹 그런 거 없어 — <b>어제의 나</b>랑만 비교하면 돼.</p>
+    <p class="cap">공부한 <b>시간</b> 말고 <b>목표까지 남은 거리</b>를 봐. 전국 랭킹 그런 거 없어 — <b>어제의 나</b>랑만 비교하면 돼.<br>
+      게이지 = <b>내가 설정한 진척률</b> + <b>오늘 완료한 할 일</b>(개당 8%) + 운동 보너스</p>
     <div id="gaugeList"></div>
   </div>
 
@@ -807,6 +871,7 @@
     var n = state.tasks.filter(function (t) { return state.done[t.id]; }).length;
     document.getElementById("doneCount").textContent = n + "/" + state.tasks.length + " 완료";
     if (typeof renderStreakNews === "function") renderStreakNews();
+    if (typeof renderNow === "function") renderNow();
   }
   document.getElementById("editTasksBtn").addEventListener("click", function () {
     editMode.tasks = !editMode.tasks; editingTaskId = null;
@@ -826,6 +891,14 @@
     var bonus = state.bonus[key] || 0;
     return Math.max(0, Math.min(100, (s.pct || 0) + todays * 8 + bonus));
   }
+  function basisText(key, s) {
+    var todays = state.tasks.filter(function (t) { return t.subj === key && state.done[t.id]; }).length;
+    var bonus = state.bonus[key] || 0;
+    var parts = ["설정 " + (s.pct || 0) + "%"];
+    if (todays) parts.push("오늘 완료 " + todays + "개 +" + todays * 8 + "%");
+    if (bonus) parts.push("운동 보너스 +" + bonus + "%");
+    return '<div class="g-basis">' + parts.join(" · ") + "</div>";
+  }
   function renderGauges() {
     gEl.innerHTML = "";
     Object.keys(state.subjects).forEach(function (key) {
@@ -838,7 +911,8 @@
         '<div class="g-top"><div class="g-name">' + esc(s.name) +
           ' <small>' + esc(s.tool) + "</small></div>" +
           '<div class="g-pct">' + pct + "%</div></div>" +
-        '<div class="track"><div class="fill" style="background:' + s.color + '"></div></div>';
+        '<div class="track"><div class="fill" style="background:' + s.color + '"></div></div>' +
+        basisText(key, s);
       gEl.appendChild(g);
       requestAnimationFrame(function () { g.querySelector(".fill").style.width = pct + "%"; });
     });
@@ -917,12 +991,22 @@
   var timerLabelEl = document.getElementById("timerLabel");
   var timerTimeEl = document.getElementById("timerTime");
   var timerFillEl = document.getElementById("timerFill");
-  var TIMER_DUR = { move: 15 * 60, rest: 10 * 60 };
-  var TIMER_LABEL = { move: "움직이는 중", rest: "쉬는 중" };
+  var TIMER_DUR = { move: 15 * 60, rest: 10 * 60, focus: 25 * 60 };
+  var TIMER_LABEL = { move: "움직이는 중", rest: "쉬는 중", focus: "집중 중" };
+  var nowActionsEl = document.getElementById("nowActions");
+  var nowTimerEl = document.getElementById("nowTimer");
+  var nowTimeEl = document.getElementById("nowTime");
+  var nowFillEl = document.getElementById("nowFill");
   var timerTick = null, audioCtx = null, chimeTimers = [];
 
   function fmt(sec) { sec = Math.max(0, Math.round(sec)); return String(Math.floor(sec / 60)).padStart(2, "0") + ":" + String(sec % 60).padStart(2, "0"); }
-  function showTimerUI(on) { nudgeActions.hidden = on; timerBox.hidden = !on; }
+  function showTimerUI(on, mode) {
+    var focus = mode === "focus";
+    nudgeActions.hidden = on && !focus;
+    timerBox.hidden = !(on && !focus);
+    nowActionsEl.hidden = on && focus;
+    nowTimerEl.hidden = !(on && focus);
+  }
 
   function startTimer(mode) {
     ensureAudio();
@@ -930,34 +1014,78 @@
     state.timer = { mode: mode, endsAt: Date.now() + dur * 1000, dur: dur };
     save();
     timerLabelEl.textContent = TIMER_LABEL[mode];
-    reply.textContent = mode === "move" ?"좋아, 15분만 몸에 집중! 끝나면 깨워줄게." : " 10분 휴식 시작. 눕지 말고 앉아서 쉬어.";
-    say(mode === "move" ?"타이머 켰어! 움직이고 오면 머리 맑아져" : "10분 뒤에 깨워줄게. 푹 쉬어");
-    showTimerUI(true);
+    if (mode === "focus") {
+      say("25분만 이거 하나에 집중! 끝나면 깨워줄게");
+    } else {
+      reply.textContent = mode === "move" ? "좋아, 15분만 몸에 집중! 끝나면 깨워줄게." : "10분 휴식 시작. 눕지 말고 앉아서 쉬어.";
+      say(mode === "move" ? "타이머 켰어! 움직이고 오면 머리 맑아져" : "10분 뒤에 깨워줄게. 푹 쉬어");
+    }
+    showTimerUI(true, mode);
     runTimerLoop();
   }
   function runTimerLoop() { if (timerTick) clearInterval(timerTick); tickTimer(); timerTick = setInterval(tickTimer, 250); }
   function tickTimer() {
     if (!state.timer) return;
     var remain = (state.timer.endsAt - Date.now()) / 1000;
-    timerTimeEl.textContent = fmt(remain);
-    timerFillEl.style.width = Math.max(0, Math.min(100, (remain / state.timer.dur) * 100)) + "%";
-    if (remain<= 0) finishTimer();
+    var pct = Math.max(0, Math.min(100, (remain / state.timer.dur) * 100)) + "%";
+    if (state.timer.mode === "focus") { nowTimeEl.textContent = fmt(remain); nowFillEl.style.width = pct; }
+    else { timerTimeEl.textContent = fmt(remain); timerFillEl.style.width = pct; }
+    if (remain <= 0) finishTimer();
   }
   function finishTimer() {
     if (timerTick) { clearInterval(timerTick); timerTick = null; }
     var mode = state.timer ? state.timer.mode : "move";
     state.timer = null; save();
-    showTimerUI(false);
+    showTimerUI(false, mode);
     if (mode === "move") { state.bonus.pe = Math.min(30, (state.bonus.pe || 0) + 10); save(); renderGauges(); }
-    reply.textContent = mode === "move" ?" 15분 완료! 운동 게이지 올라갔어." : "휴식 끝! 이제 다시 집중 각.";
+    if (mode !== "focus") reply.textContent = mode === "move" ? "15분 완료! 운동 게이지 올라갔어." : "휴식 끝! 이제 다시 집중 각.";
     showAlarm(mode);
   }
   function cancelTimer() {
     if (timerTick) { clearInterval(timerTick); timerTick = null; }
+    var m = state.timer ? state.timer.mode : "move";
     state.timer = null; save();
-    showTimerUI(false);
-    reply.textContent = "괜찮아, 언제든 다시 눌러";
+    showTimerUI(false, m);
+    if (m !== "focus") reply.textContent = "괜찮아, 언제든 다시 눌러";
   }
+  /* NOW 카드 — 다음 할 일 하나를 최상단에 */
+  function nextTask() {
+    for (var i = 0; i < state.tasks.length; i++) { if (!state.done[state.tasks[i].id]) return state.tasks[i]; }
+    return null;
+  }
+  function renderNow() {
+    var card = document.getElementById("nowCard");
+    var t = nextTask();
+    var titleEl = document.getElementById("nowTitle"), metaEl = document.getElementById("nowMeta");
+    if (!state.tasks.length) {
+      card.classList.add("done-all");
+      titleEl.textContent = "아직 할 일이 없어";
+      metaEl.textContent = "아침 브리핑에서 편집을 눌러 오늘 할 일을 넣어봐";
+      nowActionsEl.hidden = true; nowTimerEl.hidden = true; return;
+    }
+    if (!t) {
+      card.classList.add("done-all");
+      titleEl.textContent = "오늘 할 일 다 했어!";
+      metaEl.textContent = "이제 저녁 회고 3줄만 쓰면 하루를 스스로 잘 닫는 거야";
+      nowActionsEl.hidden = true; nowTimerEl.hidden = true; return;
+    }
+    card.classList.remove("done-all");
+    var subj = state.subjects[t.subj] || { name: "기타" };
+    var left = state.tasks.filter(function (x) { return !state.done[x.id]; }).length;
+    titleEl.textContent = t.title;
+    metaEl.textContent = subj.name + " · " + t.meta + " · 남은 할 일 " + left + "개";
+    if (!state.timer) { nowActionsEl.hidden = false; nowTimerEl.hidden = true; }
+  }
+  document.getElementById("nowStart").addEventListener("click", function () { startTimer("focus"); });
+  document.getElementById("nowCancel").addEventListener("click", cancelTimer);
+  document.getElementById("nowDone").addEventListener("click", function () {
+    var t = nextTask(); if (!t) return;
+    state.done[t.id] = true; save();
+    renderTasks(); renderGauges(); updateDoneCount();
+    heroExpr = "cheer"; drawMascot();
+    say(pick(["하나 해결! 게이지 차는 거 봐", "이거 굴러가는 소리 좋다", "잘한다 진짜!"]));
+  });
+
   document.getElementById("btnMove").addEventListener("click", function () { startTimer("move"); });
   document.getElementById("btnRest").addEventListener("click", function () { startTimer("rest"); });
   document.getElementById("timerCancel").addEventListener("click", cancelTimer);
@@ -966,10 +1094,14 @@
   var alarmEl = document.getElementById("alarm");
   var alarmMascot = document.getElementById("alarmMascot");
   function showAlarm(mode) {
-    document.getElementById("alarmTitle").textContent = mode === "move" ?"15분 끝!" : "휴식 끝!";
-    document.getElementById("alarmMsg").textContent = mode === "move"
-      ?"잘 움직였어! 몸이 풀렸으니 이제 집중 각"
-      : "잘 쉬었어! 개운하게 다시 시작해볼까?";
+    var TITLES = { move: "15분 끝!", rest: "휴식 끝!", focus: "25분 집중 끝!" };
+    var MSGS = {
+      move: "잘 움직였어! 몸이 풀렸으니 이제 집중 각",
+      rest: "잘 쉬었어! 개운하게 다시 시작해볼까?",
+      focus: "잘했어! 방금 한 거 완료로 체크하고 잠깐 숨 돌리자"
+    };
+    document.getElementById("alarmTitle").textContent = TITLES[mode] || "시간 다 됐어";
+    document.getElementById("alarmMsg").textContent = MSGS[mode] || "";
     setBuddy(alarmMascot, "cheer", false);
     alarmEl.hidden = false;
     chime();
@@ -1014,11 +1146,11 @@
     if (!state.timer) return;
     if (state.timer.endsAt >Date.now()) {
       timerLabelEl.textContent = TIMER_LABEL[state.timer.mode] || "타이머";
-      showTimerUI(true); runTimerLoop();
+      showTimerUI(true, state.timer.mode); runTimerLoop();
     } else {
       var mode = state.timer.mode; state.timer = null; save();
       if (mode === "move") { state.bonus.pe = Math.min(30, (state.bonus.pe || 0) + 10); save(); renderGauges(); }
-      reply.textContent = "타이머가 끝나 있었어! 잘했어.";
+      if (mode !== "focus") reply.textContent = "타이머가 끝나 있었어! 잘했어.";
     }
   }
 
@@ -1116,7 +1248,7 @@
 
   /* ---------- Init ---------- */
   computeStreak(); renderQuote();
-  renderTasks(); renderGauges(); updateDoneCount(); renderStreak(); renderStreakNews(); refreshTime();
+  renderTasks(); renderGauges(); updateDoneCount(); renderStreak(); renderStreakNews(); renderNow(); refreshTime();
   resumeTimer();
   setInterval(refreshTime, 60000);
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () {
