@@ -87,12 +87,13 @@
   }
   .brand { display: flex; align-items: center; gap: 9px; }
   .brand .logo {
-    width: 30px; height: 30px; border-radius: 9px;
+    width: 34px; height: 34px; border-radius: 10px; overflow: hidden;
     background: var(--lime);
     display: grid; place-items: center;
     box-shadow: 0 3px 0 var(--lime-deep);
     font-size: 15px;
   }
+  .brand .logo img { width: 106%; height: 106%; object-fit: contain; display: block; margin-top: 1px; }
   .brand b { font-size: 15px; letter-spacing: -.2px; }
   .brand span { color: var(--muted); font-size: 11.5px; display: block; margin-top: 1px; }
   .theme-btn {
@@ -396,7 +397,7 @@
 <div class="phone">
   <div class="top">
     <div class="brand">
-      <div class="logo">🐶</div>
+      <div class="logo"><img id="logoImg" alt="고고버디" /></div>
       <div>
         <b>고고버디</b>
         <span>GoGo Buddy · 스스로 굴러가는 여름</span>
@@ -602,6 +603,7 @@
     for (var i = 0; i < ms.length; i++) { setBuddy(ms[i], ms[i].getAttribute("data-expr") || "happy", true); }
   }
   drawMascot(); drawAllMinis();
+  setBuddy(document.getElementById("logoImg"), "happy", true);
   cvs.addEventListener("click", function () {
     cvs.classList.remove("bounce"); void cvs.offsetWidth; cvs.classList.add("bounce");
     heroExpr = pick(["cheer", "wave", "happy"]); drawMascot();
