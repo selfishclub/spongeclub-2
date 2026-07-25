@@ -85,17 +85,24 @@
     justify-content: space-between;
     padding: 2px 4px;
   }
-  .brand { display: flex; align-items: center; gap: 9px; }
+  .brand { display: flex; align-items: center; gap: 11px; }
   .brand .logo {
-    width: 34px; height: 34px; border-radius: 10px; overflow: hidden;
-    background: var(--lime);
+    width: 46px; height: 46px; border-radius: 50%; overflow: hidden; flex: 0 0 auto;
+    background: radial-gradient(120% 120% at 50% 15%, var(--card), color-mix(in srgb, var(--lime) 22%, var(--card)));
+    border: 1px solid color-mix(in srgb, var(--lime-deep) 22%, var(--line));
+    box-shadow: 0 3px 10px rgba(150, 110, 60, .16);
     display: grid; place-items: center;
-    box-shadow: 0 3px 0 var(--lime-deep);
-    font-size: 15px;
   }
-  .brand .logo img { width: 106%; height: 106%; object-fit: contain; display: block; margin-top: 1px; }
-  .brand b { font-size: 15px; letter-spacing: -.2px; }
-  .brand span { color: var(--muted); font-size: 11.5px; display: block; margin-top: 1px; }
+  .brand .logo img { width: 88%; height: 88%; object-fit: contain; display: block; margin-top: 2px; }
+  .brand b {
+    font-size: 23px; font-weight: 900; letter-spacing: -1px; line-height: 1.1;
+    display: block; color: var(--ink);
+  }
+  .brand b i { font-style: normal; color: var(--lime-deep); }
+  .brand span {
+    color: var(--muted); font-size: 10.5px; display: block; margin-top: 3px;
+    letter-spacing: .2px; font-weight: 600;
+  }
   .theme-btn {
     border: 1px solid var(--line); background: var(--card); color: var(--ink);
     width: 38px; height: 38px; border-radius: 12px; cursor: pointer; font-size: 16px;
@@ -376,7 +383,18 @@
     box-shadow: var(--shadow); border: 1px solid color-mix(in srgb, var(--lime-deep) 30%, transparent);
   }
   .sn-top { display: flex; align-items: center; gap: 12px; }
-  .sn-flame { font-size: 30px; filter: drop-shadow(0 2px 2px rgba(0,0,0,.12)); }
+  .sn-flame {
+    font-size: 30px; filter: drop-shadow(0 2px 3px rgba(220, 110, 20, .35));
+    transform-origin: 50% 85%;
+    animation: flicker 1.6s ease-in-out infinite;
+  }
+  @keyframes flicker {
+    0%   { transform: scale(1) rotate(-3deg);   filter: drop-shadow(0 2px 3px rgba(220,110,20,.35)) brightness(1); }
+    22%  { transform: scale(1.11) rotate(2deg);  filter: drop-shadow(0 3px 7px rgba(255,140,30,.55)) brightness(1.12); }
+    45%  { transform: scale(.97) rotate(-2deg);  filter: drop-shadow(0 2px 3px rgba(220,110,20,.30)) brightness(.97); }
+    68%  { transform: scale(1.07) rotate(3deg);  filter: drop-shadow(0 3px 6px rgba(255,150,40,.50)) brightness(1.08); }
+    100% { transform: scale(1) rotate(-3deg);   filter: drop-shadow(0 2px 3px rgba(220,110,20,.35)) brightness(1); }
+  }
   .sn-headline { flex: 1; min-width: 0; }
   .sn-num { font-size: 26px; font-weight: 900; line-height: 1; letter-spacing: -.5px; font-variant-numeric: tabular-nums; }
   .sn-num small { font-size: 14px; font-weight: 800; margin-left: 3px; }
@@ -402,8 +420,8 @@
     <div class="brand">
       <div class="logo"><img id="logoImg" alt="고고버디" /></div>
       <div>
-        <b>고고버디</b>
-        <span>GoGo Buddy · 스스로 굴러가는 여름</span>
+        <b><i>고고</i>버디</b>
+        <span>GOGO BUDDY · 스스로 굴러가는 여름</span>
       </div>
     </div>
     <button class="theme-btn" id="themeBtn" aria-label="테마 전환" title="라이트/다크 전환">🌙</button>
@@ -542,8 +560,8 @@
   </div>
 
   <div class="foot">
-    <b>고고버디</b> · GoGo Buddy — 스폰지클럽 2기 · 4주차 PRD 프로토타입<br>
-    "혼자여도 뭐부터 할지 알려주고, 안 지치게 페이스 잡아주는 버디"
+    <b>고고버디</b> · GoGo Buddy — Haily를 위한 MVP<br>
+    "혼자 하는 공부가 막막한 날에도, 나는 언제 어디서나 네 옆에 있어."
   </div>
 
   <div class="alarm" id="alarm" hidden>
