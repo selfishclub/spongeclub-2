@@ -10,10 +10,10 @@
     --line: #F0E7DB;
     --lime: #DDE94A;
     --lime-deep: #B7C22C;
-    --sky: #7FB3F5;
-    --mint: #55CFAD;
-    --pink: #FF9EBC;
-    --apricot: #FFBE5C;
+    --sky: #93B8E8;
+    --mint: #6FC7AE;
+    --pink: #F0A6BB;
+    --apricot: #F2C071;
     --shadow: 0 10px 30px rgba(120, 90, 60, .14);
     --shadow-sm: 0 4px 14px rgba(120, 90, 60, .10);
     --radius: 22px;
@@ -30,24 +30,24 @@
       --line: #3C332C;
       --lime: #E4EF4E;
       --lime-deep: #E4EF4E;
-      --sky: #7FA9EC;
-      --mint: #63D6B4;
-      --pink: #F294B4;
-      --apricot: #F3BC6A;
+      --sky: #7FA0CE;
+      --mint: #63B79D;
+      --pink: #D291A5;
+      --apricot: #D9AE6F;
       --shadow: 0 12px 34px rgba(0, 0, 0, .40);
       --shadow-sm: 0 4px 16px rgba(0, 0, 0, .34);
     }
   }
   :root[data-theme="light"] {
     --bg: #FBF5EC; --bg-2: #FCE6D3; --card: #FFFFFF; --ink: #40352E; --muted: #A2938A;
-    --line: #F0E7DB; --lime: #DDE94A; --lime-deep: #B7C22C; --sky: #7FB3F5; --mint: #55CFAD;
-    --pink: #FF9EBC; --apricot: #FFBE5C; --shadow: 0 10px 30px rgba(120,90,60,.14);
+    --line: #F0E7DB; --lime: #DDE94A; --lime-deep: #B7C22C; --sky: #93B8E8; --mint: #6FC7AE;
+    --pink: #F0A6BB; --apricot: #F2C071; --shadow: 0 10px 30px rgba(120,90,60,.14);
     --shadow-sm: 0 4px 14px rgba(120,90,60,.10);
   }
   :root[data-theme="dark"] {
     --bg: #1E1A17; --bg-2: #2A2320; --card: #2B2521; --ink: #F6EEE5; --muted: #B6A79B;
-    --line: #3C332C; --lime: #E4EF4E; --lime-deep: #E4EF4E; --sky: #7FA9EC; --mint: #63D6B4;
-    --pink: #F294B4; --apricot: #F3BC6A; --shadow: 0 12px 34px rgba(0,0,0,.40);
+    --line: #3C332C; --lime: #E4EF4E; --lime-deep: #E4EF4E; --sky: #7FA0CE; --mint: #63B79D;
+    --pink: #D291A5; --apricot: #D9AE6F; --shadow: 0 12px 34px rgba(0,0,0,.40);
     --shadow-sm: 0 4px 16px rgba(0,0,0,.34);
   }
 
@@ -170,8 +170,11 @@
   .card-h { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; row-gap: 6px; }
   @media (max-width: 410px) { .card-h .sub { display: none; } }
   .chip {
-    font-size: 10.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase;
-    padding: 4px 8px; border-radius: 8px; color: #2b2540;
+    font-size: 11px; font-weight: 800; letter-spacing: -.2px;
+    padding: 5px 10px; border-radius: 999px; color: var(--ink);
+    background: color-mix(in srgb, var(--chip-hue, var(--lime)) 26%, var(--card));
+    border: 1px solid color-mix(in srgb, var(--chip-hue, var(--lime)) 42%, var(--line));
+    white-space: nowrap;
   }
   .card-h h2 { font-size: 15px; margin: 0; letter-spacing: -.3px; }
   .card-h .sub { margin-left: auto; font-size: 11.5px; color: var(--muted); font-family: var(--mono); }
@@ -221,8 +224,12 @@
     transition: transform .12s ease;
   }
   .nudge-actions button:hover { transform: translateY(-1px); }
-  .nudge-actions .move { background: var(--apricot); border-color: transparent; color: #4a3410; }
-  .nudge-actions .rest { background: var(--sky); border-color: transparent; color: #16345e; }
+  .nudge-actions .move {
+    background: var(--lime); border-color: transparent; color: #2b2540;
+    box-shadow: 0 3px 0 var(--lime-deep);
+  }
+  .nudge-actions .move:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--lime-deep); }
+  .nudge-actions .rest { background: var(--card); border-color: var(--line); color: var(--ink); }
   .nudge-reply { margin-top: 11px; font-size: 12.5px; color: var(--muted); min-height: 1em; }
   .nudge-actions[hidden] { display: none; }
 
@@ -379,7 +386,7 @@
   /* streak card-news */
   .streak-news {
     border-radius: 18px; padding: 15px 16px; color: #2b2540;
-    background: linear-gradient(135deg, color-mix(in srgb, var(--lime) 88%, #fff), color-mix(in srgb, var(--apricot) 72%, #fff));
+    background: linear-gradient(135deg, color-mix(in srgb, var(--lime) 72%, #fff), color-mix(in srgb, var(--apricot) 62%, #fff));
     box-shadow: var(--shadow); border: 1px solid color-mix(in srgb, var(--lime-deep) 30%, transparent);
   }
   .sn-top { display: flex; align-items: center; gap: 12px; }
@@ -430,7 +437,7 @@
   <div class="quote-banner">
     <img class="mini qb-mascot" data-expr="happy" alt="" aria-hidden="true" />
     <div class="qb-body">
-      <div class="qb-label">오늘의 응원 ✨</div>
+      <div class="qb-label">오늘의 응원</div>
       <div class="qb-text" id="quoteText">오늘도 한 칸씩 굴러가 보자.</div>
     </div>
   </div>
@@ -455,32 +462,32 @@
     <div class="mascot-wrap"><img id="mascot" title="콕 눌러봐!" alt="고고버디 마스코트" /></div>
     <div class="hi">
       <span class="dday" id="dday">D-27 · 방학</span>
-      <h1 id="greet">좋은 아침, Haily! 🌱</h1>
+      <h1 id="greet">좋은 아침, Haily! </h1>
       <p id="greetSub">오늘도 스스로 굴러가볼까? 뭐부터 할지 내가 정리해뒀어.</p>
     </div>
   </div>
 
   <div class="wedge">
-    <span class="wpill">🙅‍♀️ 랭킹·비교 없음</span>
-    <span class="wpill">🧑‍🏫 사람 매니저 없이</span>
-    <span class="wpill">📦 인강·문제집 굴리기</span>
+    <span class="wpill">랭킹·비교 없음</span>
+    <span class="wpill">사람 매니저 없이</span>
+    <span class="wpill">인강·문제집 굴리기</span>
   </div>
 
   <div class="modes">
-    <button id="mAm" class="on">☀️ 아침 브리핑</button>
-    <button id="mPm">🌙 저녁 회고</button>
+    <button id="mAm" class="on">아침 브리핑</button>
+    <button id="mPm">저녁 회고</button>
   </div>
 
   <!-- 아침 브리핑 -->
   <div class="card" id="cBrief">
     <div class="card-h">
       <img class="mini" data-expr="point" alt="" aria-hidden="true" />
-      <span class="chip" style="background:var(--lime)">오늘 이거부터</span>
+      <span class="chip" style="--chip-hue:var(--lime)">오늘 이거부터</span>
       <h2>아침 브리핑</h2>
       <span class="sub" id="doneCount">0/5 완료</span>
-      <button class="edit-btn" id="editTasksBtn">✏️ 편집</button>
+      <button class="edit-btn" id="editTasksBtn">편집</button>
     </div>
-    <p class="coach">🤖 뭐부터 할지 고민 마 — <b>순서는 내가 정해뒀어.</b> 제일 안 풀리는 <b>과학</b>부터, 지치는 오후엔 <b>운동</b>으로. 위에서부터 하나씩만.</p>
+    <p class="coach">뭐부터 할지 고민 마 — <b>순서는 내가 정해뒀어.</b> 제일 안 풀리는 <b>과학</b>부터, 지치는 오후엔 <b>운동</b>으로. 위에서부터 하나씩만.</p>
     <div id="taskList"></div>
   </div>
 
@@ -488,10 +495,10 @@
   <div class="card" id="cGauge">
     <div class="card-h">
       <img class="mini" data-expr="cheer" alt="" aria-hidden="true" />
-      <span class="chip" style="background:var(--mint)">목표까지 어디쯤</span>
+      <span class="chip" style="--chip-hue:var(--mint)">목표까지 어디쯤</span>
       <h2>진척 게이지</h2>
       <span class="sub">목표 대비</span>
-      <button class="edit-btn" id="editSubjBtn">✏️ 편집</button>
+      <button class="edit-btn" id="editSubjBtn">편집</button>
     </div>
     <p class="cap">공부한 <b>시간</b> 말고 <b>목표까지 남은 거리</b>를 봐. 전국 랭킹 그런 거 없어 — <b>어제의 나</b>랑만 비교하면 돼.</p>
     <div id="gaugeList"></div>
@@ -500,7 +507,7 @@
   <!-- 리듬 넛지 -->
   <div class="card" id="cNudge">
     <div class="card-h">
-      <span class="chip" style="background:var(--apricot)">지치지 않게</span>
+      <span class="chip" style="--chip-hue:var(--apricot)">지치지 않게</span>
       <h2>리듬 넛지</h2>
       <span class="sub" id="nowClock">--:--</span>
     </div>
@@ -509,12 +516,12 @@
       <p id="nudgeMsg">지금 슬슬 몸 움직일 시간! 15분만 스트레칭하고 오면 오후 집중력이 달라져.</p>
     </div>
     <div class="nudge-actions" id="nudgeActions">
-      <button class="move" id="btnMove">🤸 15분 움직이기</button>
-      <button class="rest" id="btnRest">☕ 10분만 쉬기</button>
+      <button class="move" id="btnMove">15분 움직이기</button>
+      <button class="rest" id="btnRest">10분만 쉬기</button>
     </div>
     <div class="timer" id="timerBox" hidden>
       <div class="timer-head">
-        <span class="timer-label" id="timerLabel">움직이는 중 🤸</span>
+        <span class="timer-label" id="timerLabel">움직이는 중</span>
         <span class="timer-time" id="timerTime">15:00</span>
       </div>
       <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
@@ -527,7 +534,7 @@
   <div class="card reflect" id="cReflect">
     <div class="card-h">
       <img class="mini" data-expr="study" alt="" aria-hidden="true" />
-      <span class="chip" style="background:var(--pink)">하루를 스스로 닫기</span>
+      <span class="chip" style="--chip-hue:var(--pink)">하루를 스스로 닫기</span>
       <h2>저녁 회고 3줄</h2>
     </div>
     <div class="field">
@@ -542,20 +549,20 @@
       <label>③ 내일의 씨앗 <small>(내일 아침 첫 할 일)</small></label>
       <textarea id="r3" rows="2" placeholder="예: 과학 인강 밀린 2강부터 시작"></textarea>
     </div>
-    <button class="save-btn" id="saveBtn">오늘 하루 닫기 ✨</button>
+    <button class="save-btn" id="saveBtn">오늘 하루 닫기</button>
     <div class="streak" id="streak">연속 회고 <b>0일</b> · 3일 이으면 습관이 돼!</div>
   </div>
 
   <div class="card nots">
     <div class="card-h">
       <img class="mini" data-expr="wave" alt="" aria-hidden="true" />
-      <span class="chip" style="background:var(--sky)">약속</span>
+      <span class="chip" style="--chip-hue:var(--sky)">약속</span>
       <h2>이 앱이 일부러 안 하는 것</h2>
     </div>
     <ul>
-      <li>🚫 전국 랭킹·친구 비교 <b>— 불안 대신 나만의 페이스</b></li>
-      <li>🚫 부모·관리자 감시 화면 <b>— 주도권은 Haily에게</b></li>
-      <li>🚫 인강·문제집 새로 강매 <b>— 네가 가진 걸 굴려줄 뿐</b></li>
+      <li>전국 랭킹·친구 비교 <b>— 불안 대신 나만의 페이스</b></li>
+      <li>부모·관리자 감시 화면 <b>— 주도권은 Haily에게</b></li>
+      <li>인강·문제집 새로 강매 <b>— 네가 가진 걸 굴려줄 뿐</b></li>
     </ul>
   </div>
 
@@ -567,9 +574,9 @@
   <div class="alarm" id="alarm" hidden>
     <div class="alarm-card">
       <img class="alarm-mascot" id="alarmMascot" alt="" />
-      <div class="alarm-title" id="alarmTitle">시간 다 됐어! ⏰</div>
+      <div class="alarm-title" id="alarmTitle">시간 다 됐어! </div>
       <div class="alarm-msg" id="alarmMsg"></div>
-      <button class="alarm-ok" id="alarmOk">확인 ✨</button>
+      <button class="alarm-ok" id="alarmOk">확인</button>
     </div>
   </div>
 </div>
@@ -588,7 +595,7 @@
   }
   function syncThemeIcon() { themeBtn.textContent = currentDark() ? "☀️" : "🌙"; }
   themeBtn.addEventListener("click", function () {
-    root.setAttribute("data-theme", currentDark() ? "light" : "dark");
+    root.setAttribute("data-theme", currentDark() ?"light" : "dark");
     syncThemeIcon(); drawMascot(); drawAllMinis();
   });
   syncThemeIcon();
@@ -626,7 +633,7 @@
   function drawMascot() { setBuddy(cvs, heroExpr, false); }
   function drawAllMinis() {
     var ms = document.querySelectorAll("img.mini");
-    for (var i = 0; i < ms.length; i++) { setBuddy(ms[i], ms[i].getAttribute("data-expr") || "happy", false); }
+    for (var i = 0; i< ms.length; i++) { setBuddy(ms[i], ms[i].getAttribute("data-expr") || "happy", false); }
   }
   drawMascot(); drawAllMinis();
   setBuddy(document.getElementById("logoImg"), "happy", true);
@@ -634,7 +641,7 @@
   cvs.addEventListener("click", function () {
     cvs.classList.remove("bounce"); void cvs.offsetWidth; cvs.classList.add("bounce");
     heroExpr = pick(["cheer", "thumbsup", "wave"]); drawMascot();
-    say(pick(["같이 하면 안 무섭지! 💪", "오늘도 한 칸씩 굴러가자 🌱", "혼자여도 내가 있잖아 😎", "잘하고 있어, 진짜로!"]));
+    say(pick(["같이 하면 안 무섭지!", "오늘도 한 칸씩 굴러가자", "혼자여도 내가 있잖아", "잘하고 있어, 진짜로!"]));
   });
 
   /* ---------- Data (editable, persisted) ---------- */
@@ -688,27 +695,27 @@
 
     var g = document.getElementById("greet"), gs = document.getElementById("greetSub");
     var em = document.getElementById("nudgeBuddy"), nm = document.getElementById("nudgeMsg");
-    if (h >= 5 && h < 12) {
-      g.textContent = "좋은 아침, Haily! 🌱";
+    if (h >= 5 && h< 12) {
+      g.textContent = "좋은 아침, Haily!";
       gs.textContent = "오늘도 스스로 굴러가볼까? 뭐부터 할지 내가 정리해뒀어.";
        nm.textContent = "아침이 하루를 정해. 제일 안 풀리는 것부터 딱 하나 시작하자.";
       setMode("am");
-    } else if (h >= 12 && h < 18) {
-      g.textContent = "오후엔 페이스가 관건! ☀️";
+    } else if (h >= 12 && h< 18) {
+      g.textContent = "오후엔 페이스가 관건!";
       gs.textContent = "지치기 쉬운 시간이야. 낮잠 대신 몸 한번 움직여줄까?";
        nm.textContent = "슬슬 몸 움직일 시간! 15분만 스트레칭하고 오면 오후 집중력이 달라져.";
-    } else if (h >= 18 && h < 23) {
-      g.textContent = "하루 마무리 시간이야 🌙";
+    } else if (h >= 18 && h< 23) {
+      g.textContent = "하루 마무리 시간이야";
       gs.textContent = "회고 3줄만 쓰면 오늘도 스스로 잘 닫은 거야.";
        nm.textContent = "이제 마무리 모드. 회고 3줄 쓰고 밤엔 푹 자야 내일 아침이 편해.";
       setMode("pm");
     } else {
-      g.textContent = "너무 늦었어, Haily 🌛";
+      g.textContent = "너무 늦었어, Haily ";
       gs.textContent = "지금 밤새면 바이오리듬이 깨져. 내일을 위해 오늘은 여기까지!";
        nm.textContent = "밤샘은 내일의 나를 힘들게 해. 회고만 남기고 얼른 자자.";
       setMode("pm");
     }
-    heroExpr = (h >= 5 && h < 12) ? "thumbsup" : (h >= 12 && h < 18) ? "stretch" : "sleepy";
+    heroExpr = (h >= 5 && h< 12) ?"thumbsup" : (h >= 12 && h< 18) ?"stretch" : "sleepy";
     drawMascot();
   }
 
@@ -730,7 +737,7 @@
     state.tasks.forEach(function (t) {
       var s = state.subjects[t.subj] || { name: "기타", color: "var(--muted)" };
       var el = document.createElement("div");
-      el.className = "task" + (state.done[t.id] ? " done" : "") + (editMode.tasks ? " editing" : "");
+      el.className = "task" + (state.done[t.id] ?" done" : "") + (editMode.tasks ?" editing" : "");
       var bodyHTML =
         '<div class="body">' +
           '<div class="t-title"><span class="dot" style="background:' + s.color + '"></span>' + esc(t.title) + '</div>' +
@@ -751,13 +758,13 @@
         });
       } else {
         el.tabIndex = 0; el.setAttribute("role", "checkbox");
-        el.setAttribute("aria-checked", state.done[t.id] ? "true" : "false");
-        el.innerHTML = '<div class="tick">✓</div>' + bodyHTML;
+        el.setAttribute("aria-checked", state.done[t.id] ?"true" : "false");
+        el.innerHTML = '<div class="tick"></div>' + bodyHTML;
         var toggle = function () {
           state.done[t.id] = !state.done[t.id];
-          el.setAttribute("aria-checked", state.done[t.id] ? "true" : "false");
+          el.setAttribute("aria-checked", state.done[t.id] ?"true" : "false");
           save(); renderTasks(); renderGauges(); updateDoneCount();
-          if (state.done[t.id]) { heroExpr = "cheer"; drawMascot(); say(pick(["하나 해결! 게이지 차는 거 봐 📈", "이거 굴러가는 소리 좋다 👍", "잘한다 진짜!"])); }
+          if (state.done[t.id]) { heroExpr = "cheer"; drawMascot(); say(pick(["하나 해결! 게이지 차는 거 봐", "이거 굴러가는 소리 좋다", "잘한다 진짜!"])); }
         };
         el.addEventListener("click", toggle);
         el.addEventListener("keydown", function (e) { if (e.key === " " || e.key === "Enter") { e.preventDefault(); toggle(); } });
@@ -772,17 +779,17 @@
     var cur = editingTaskId != null ? state.tasks.filter(function (x) { return x.id === editingTaskId; })[0] : null;
     var editing = !!cur;
     var opts = Object.keys(state.subjects).map(function (k) {
-      return '<option value="' + k + '"' + (cur && cur.subj === k ? " selected" : "") + ">" + esc(state.subjects[k].name) + "</option>";
+      return '<option value="' + k + '"' + (cur && cur.subj === k ?" selected" : "") + ">" + esc(state.subjects[k].name) + "</option>";
     }).join("");
     wrap.innerHTML =
-      '<div class="ef-title">' + (editing ? "✏️ 할 일 수정" : "➕ 새 할 일") + "</div>" +
+      '<div class="ef-title">' + (editing ?"할 일 수정" : "새 할 일") + "</div>" +
       '<input class="ef-in" id="tfTitle" placeholder="할 일 (예: 수학 인강 2강)" />' +
       '<div class="ef-row">' +
         '<select class="ef-in" id="tfSubj">' + opts + "</select>" +
         '<input class="ef-in" id="tfMeta" placeholder="메모 (예: 오전에)" />' +
       "</div>" +
       '<div class="ef-actions">' +
-        '<button class="ef-save" id="tfSave">' + (editing ? "저장" : "추가") + "</button>" +
+        '<button class="ef-save" id="tfSave">' + (editing ?"저장" : "추가") + "</button>" +
         (editing ? '<button class="ef-cancel" id="tfCancel">취소</button>' : "") +
       "</div>";
     if (cur) { wrap.querySelector("#tfTitle").value = cur.title; wrap.querySelector("#tfMeta").value = cur.meta; }
@@ -806,7 +813,7 @@
   }
   document.getElementById("editTasksBtn").addEventListener("click", function () {
     editMode.tasks = !editMode.tasks; editingTaskId = null;
-    this.textContent = editMode.tasks ? "완료" : "✏️ 편집";
+    this.textContent = editMode.tasks ?"완료" : "편집";
     this.classList.toggle("on", editMode.tasks);
     document.getElementById("cBrief").classList.remove("dim");
     renderTasks();
@@ -832,7 +839,7 @@
       g.className = "gauge";
       g.innerHTML =
         '<div class="g-top"><div class="g-name">' + esc(s.name) +
-          '<small>' + esc(s.tool) + "</small></div>" +
+          ' <small>' + esc(s.tool) + "</small></div>" +
           '<div class="g-pct">' + pct + "%</div></div>" +
         '<div class="track"><div class="fill" style="background:' + s.color + '"></div></div>';
       gEl.appendChild(g);
@@ -874,7 +881,7 @@
     var wrap = document.createElement("div");
     wrap.className = "edit-form";
     wrap.innerHTML =
-      '<div class="ef-title">➕ 새 과목</div>' +
+      '<div class="ef-title">새 과목</div>' +
       '<div class="ef-row">' +
         '<input class="ef-in" id="sfName" placeholder="과목 (예: 국어)" />' +
         '<input class="ef-in" id="sfTool" placeholder="도구 (예: 인강)" />' +
@@ -901,7 +908,7 @@
   }
   document.getElementById("editSubjBtn").addEventListener("click", function () {
     editMode.subjects = !editMode.subjects;
-    this.textContent = editMode.subjects ? "완료" : "✏️ 편집";
+    this.textContent = editMode.subjects ?"완료" : "편집";
     this.classList.toggle("on", editMode.subjects);
     renderGauges();
   });
@@ -914,7 +921,7 @@
   var timerTimeEl = document.getElementById("timerTime");
   var timerFillEl = document.getElementById("timerFill");
   var TIMER_DUR = { move: 15 * 60, rest: 10 * 60 };
-  var TIMER_LABEL = { move: "움직이는 중 🤸", rest: "쉬는 중 ☕" };
+  var TIMER_LABEL = { move: "움직이는 중", rest: "쉬는 중" };
   var timerTick = null, audioCtx = null, chimeTimers = [];
 
   function fmt(sec) { sec = Math.max(0, Math.round(sec)); return String(Math.floor(sec / 60)).padStart(2, "0") + ":" + String(sec % 60).padStart(2, "0"); }
@@ -926,8 +933,8 @@
     state.timer = { mode: mode, endsAt: Date.now() + dur * 1000, dur: dur };
     save();
     timerLabelEl.textContent = TIMER_LABEL[mode];
-    reply.textContent = mode === "move" ? "🤸 좋아, 15분만 몸에 집중! 끝나면 깨워줄게." : "☕ 10분 휴식 시작. 눕지 말고 앉아서 쉬어.";
-    say(mode === "move" ? "타이머 켰어! 움직이고 오면 머리 맑아져 🏃" : "10분 뒤에 깨워줄게. 푹 쉬어 ⏰");
+    reply.textContent = mode === "move" ?"좋아, 15분만 몸에 집중! 끝나면 깨워줄게." : " 10분 휴식 시작. 눕지 말고 앉아서 쉬어.";
+    say(mode === "move" ?"타이머 켰어! 움직이고 오면 머리 맑아져" : "10분 뒤에 깨워줄게. 푹 쉬어");
     showTimerUI(true);
     runTimerLoop();
   }
@@ -937,7 +944,7 @@
     var remain = (state.timer.endsAt - Date.now()) / 1000;
     timerTimeEl.textContent = fmt(remain);
     timerFillEl.style.width = Math.max(0, Math.min(100, (remain / state.timer.dur) * 100)) + "%";
-    if (remain <= 0) finishTimer();
+    if (remain<= 0) finishTimer();
   }
   function finishTimer() {
     if (timerTick) { clearInterval(timerTick); timerTick = null; }
@@ -945,14 +952,14 @@
     state.timer = null; save();
     showTimerUI(false);
     if (mode === "move") { state.bonus.pe = Math.min(30, (state.bonus.pe || 0) + 10); save(); renderGauges(); }
-    reply.textContent = mode === "move" ? "🙌 15분 완료! 운동 게이지 올라갔어." : "☕ 휴식 끝! 이제 다시 집중 각.";
+    reply.textContent = mode === "move" ?" 15분 완료! 운동 게이지 올라갔어." : "휴식 끝! 이제 다시 집중 각.";
     showAlarm(mode);
   }
   function cancelTimer() {
     if (timerTick) { clearInterval(timerTick); timerTick = null; }
     state.timer = null; save();
     showTimerUI(false);
-    reply.textContent = "괜찮아, 언제든 다시 눌러 🙂";
+    reply.textContent = "괜찮아, 언제든 다시 눌러";
   }
   document.getElementById("btnMove").addEventListener("click", function () { startTimer("move"); });
   document.getElementById("btnRest").addEventListener("click", function () { startTimer("rest"); });
@@ -962,9 +969,9 @@
   var alarmEl = document.getElementById("alarm");
   var alarmMascot = document.getElementById("alarmMascot");
   function showAlarm(mode) {
-    document.getElementById("alarmTitle").textContent = mode === "move" ? "15분 끝! 🎉" : "휴식 끝! ⏰";
+    document.getElementById("alarmTitle").textContent = mode === "move" ?"15분 끝!" : "휴식 끝!";
     document.getElementById("alarmMsg").textContent = mode === "move"
-      ? "잘 움직였어! 몸이 풀렸으니 이제 집중 각 💪"
+      ?"잘 움직였어! 몸이 풀렸으니 이제 집중 각"
       : "잘 쉬었어! 개운하게 다시 시작해볼까?";
     setBuddy(alarmMascot, "cheer", false);
     alarmEl.hidden = false;
@@ -1008,13 +1015,13 @@
 
   function resumeTimer() {
     if (!state.timer) return;
-    if (state.timer.endsAt > Date.now()) {
+    if (state.timer.endsAt >Date.now()) {
       timerLabelEl.textContent = TIMER_LABEL[state.timer.mode] || "타이머";
       showTimerUI(true); runTimerLoop();
     } else {
       var mode = state.timer.mode; state.timer = null; save();
       if (mode === "move") { state.bonus.pe = Math.min(30, (state.bonus.pe || 0) + 10); save(); renderGauges(); }
-      reply.textContent = "⏰ 타이머가 끝나 있었어! 잘했어.";
+      reply.textContent = "타이머가 끝나 있었어! 잘했어.";
     }
   }
 
@@ -1026,20 +1033,20 @@
   });
   document.getElementById("saveBtn").addEventListener("click", function () {
     var filled = ["r1", "r2", "r3"].filter(function (id) {
-      return (document.getElementById(id).value || "").trim().length > 0;
+      return (document.getElementById(id).value || "").trim().length >0;
     }).length;
-    if (filled === 0) { say("한 줄이라도 남겨봐 — 그게 내일의 시작점이야 ✍️"); return; }
+    if (filled === 0) { say("한 줄이라도 남겨봐 — 그게 내일의 시작점이야"); return; }
     var today = new Date().toDateString();
     if (state.lastReflect !== today) {
       state.streak = (state.streak || 0) + 1;
       state.lastReflect = today;
     }
     save(); renderStreak(); renderStreakNews();
-    say(pick(["오늘 하루 스스로 잘 닫았어. 푹 자! 🌙", "3줄이면 충분해. 내일 아침이 편해질 거야 ✨", "이렇게 매일이면 방학 끝이 달라진다 💛"]));
+    say(pick(["오늘 하루 스스로 잘 닫았어. 푹 자!", "3줄이면 충분해. 내일 아침이 편해질 거야", "이렇게 매일이면 방학 끝이 달라진다"]));
   });
   function renderStreak() {
     var s = state.streak || 0;
-    var tail = s >= 3 ? " · 습관 만들기 성공 중! 🔥" : " · 3일 이으면 습관이 돼!";
+    var tail = s >= 3 ?" · 습관 만들기 성공 중!" : " · 3일 이으면 습관이 돼!";
     document.getElementById("streak").innerHTML = "연속 회고 <b>" + s + "일</b>" + tail;
   }
 
@@ -1084,19 +1091,19 @@
       state.visitStreak = (state.lastVisit === yest) ? (state.visitStreak || 0) + 1 : 1;
       state.lastVisit = today;
       if (state.history.indexOf(today) === -1) state.history.push(today);
-      if (state.history.length > 21) state.history = state.history.slice(-21);
+      if (state.history.length >21) state.history = state.history.slice(-21);
       save();
     }
-    if (!state.visitStreak || state.visitStreak < 1) state.visitStreak = 1;
-    if (!state.bestStreak || state.bestStreak < state.visitStreak) { state.bestStreak = state.visitStreak; save(); }
+    if (!state.visitStreak || state.visitStreak< 1) state.visitStreak = 1;
+    if (!state.bestStreak || state.bestStreak< state.visitStreak) { state.bestStreak = state.visitStreak; save(); }
   }
   function renderStreakNews() {
     var st = state.visitStreak || 1;
     document.getElementById("snStreak").textContent = st;
     document.getElementById("snBest").textContent = state.bestStreak || 1;
     document.getElementById("snSub").textContent =
-      st >= 7 ? "일주일째 스스로! 습관 됐어 🔥" :
-      st >= 3 ? "3일 넘게 굴러가는 중 💪" : "스스로 굴러가는 중";
+      st >= 7 ?"일주일째 스스로! 습관 됐어" :
+      st >= 3 ?"3일 넘게 굴러가는 중" : "스스로 굴러가는 중";
     var done = state.tasks.filter(function (t) { return state.done[t.id]; }).length;
     document.getElementById("snToday").textContent = done + "/" + state.tasks.length;
     document.getElementById("snReflect").textContent = (state.streak || 0);
@@ -1105,7 +1112,7 @@
     for (var i = 6; i >= 0; i--) {
       var k = dayKey(new Date(Date.now() - i * 86400000));
       var dot = document.createElement("div");
-      dot.className = "sn-dot" + (state.history.indexOf(k) >= 0 ? " on" : "") + (i === 0 ? " today" : "");
+      dot.className = "sn-dot" + (state.history.indexOf(k) >= 0 ?" on" : "") + (i === 0 ?" today" : "");
       wk.appendChild(dot);
     }
   }
