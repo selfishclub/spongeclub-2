@@ -65,6 +65,8 @@ date: 2026-06-29
   - 결과 화면(브라우저에서 열기): [`피드백정리-OS/결과화면.html`](피드백정리-OS/결과화면.html)
   - 동작 원본(마크다운): [`예시-회원가입화면.md`](피드백정리-OS/예시-회원가입화면.md) · [`예시-결정서-회원가입화면.md`](피드백정리-OS/예시-결정서-회원가입화면.md)
 
+  ![피드백 정리 OS 2단계 — 피드백 7개 자동 분류표 → 반영/기각/별도검토 결정서](image.png)
+
 ## 📱 미션 4. SNS 1주차 소감
 > AI 도움 없이 직접 작성! (인증하면 셀 지급)
 - **인증 링크:** https://www.instagram.com/p/DaIozS3Dybi/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==
