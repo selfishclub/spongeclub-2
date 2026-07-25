@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>티키타 (Tikitah) · 부담 없는 커피챗</title>
+<style>
+  :root{
+    --bg:#F4EFE7; --surface:#FFFFFF; --surface-soft:#FBF7F1;
+    --text:#3B352E; --muted:#8C8378; --faint:#B7AFA4;
+    --accent:#B47B5B; --accent-deep:#8A5A3E; --accent-soft:#EFE2D7;
+    --border:#E7DED2; --border-strong:#D8CCBC;
+    --ai:#FBF7F1; --me:#EFE2D7;
+    --radius:16px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","맑은 고딕",sans-serif;
+    line-height:1.6; -webkit-font-smoothing:antialiased;
+    display:flex; justify-content:center;
+  }
+  .app{
+    width:100%; max-width:480px; min-height:100vh; background:var(--surface-soft);
+    display:flex; flex-direction:column; position:relative;
+    box-shadow:0 0 40px rgba(90,70,50,.06);
+  }
+  .voice{font-family:Georgia,"Nanum Myeongjo","바탕",serif;}
+  button{font-family:inherit; cursor:pointer; border:none; background:none; color:inherit;}
+  .screen{display:none; flex-direction:column; flex:1; min-height:100vh;}
+  .screen.active{display:flex;}
+
+  /* ---------- top bar ---------- */
+  .topbar{display:flex; align-items:center; justify-content:space-between; padding:16px 20px; min-height:56px;}
+  .iconbtn{width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    color:var(--muted); font-size:19px; transition:background .15s;}
+  .iconbtn:hover{background:var(--accent-soft);}
+
+  /* ---------- home ---------- */
+  .home-body{flex:1; display:flex; flex-direction:column; padding:8px 24px 28px;}
+  .brand{margin-top:24px; margin-bottom:auto;}
+  .brand .mark{width:46px; height:46px; border-radius:14px; background:var(--accent-soft);
+    display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:22px;}
+  .hook{font-size:26px; line-height:1.35; font-weight:500; letter-spacing:-.01em;}
+  .hook .sub{display:block; color:var(--muted); font-size:17px; font-weight:400; margin-top:8px;}
+  .cards{display:flex; flex-direction:column; gap:11px; margin:30px 0 18px;}
+  .situation{
+    text-align:left; background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); padding:16px 18px; font-size:15.5px; color:var(--text);
+    display:flex; align-items:center; justify-content:space-between; transition:all .15s;
+  }
+  .situation:hover{border-color:var(--accent); background:#fff; transform:translateY(-1px);}
+  .situation .arr{color:var(--faint); font-size:17px;}
+  .trust{display:flex; align-items:center; justify-content:center; gap:7px; color:var(--muted);
+    font-size:13px; margin-top:4px;}
+  .trust svg{width:14px; height:14px; opacity:.7;}
+
+  /* ---------- chat ---------- */
+  .progress{display:flex; align-items:center; gap:5px;}
+  .dot{width:8px; height:8px; border-radius:50%; background:var(--border-strong); transition:background .3s;}
+  .dot.on{background:var(--accent);}
+  .progress .frac{margin-left:6px; font-size:13px; color:var(--muted);}
+  .summarize-btn{border:1px solid var(--border-strong); color:var(--accent-deep); background:var(--surface);
+    padding:7px 14px; border-radius:20px; font-size:13.5px; transition:all .15s;}
+  .summarize-btn:hover{background:var(--accent-soft); border-color:var(--accent);}
+  .chat-scroll{flex:1; overflow-y:auto; padding:10px 20px 6px; display:flex; flex-direction:column; gap:13px;}
+  .msg{max-width:82%; padding:12px 15px; border-radius:16px; font-size:15px; line-height:1.55; white-space:pre-wrap;}
+  .msg.ai{align-self:flex-start; background:var(--ai); border:1px solid var(--border); border-bottom-left-radius:5px;}
+  .msg.me{align-self:flex-end; background:var(--me); border-bottom-right-radius:5px; color:var(--accent-deep);}
+  .msg.ai.typing{color:var(--muted); font-style:italic;}
+  .composer{display:flex; gap:9px; align-items:flex-end; padding:12px 16px 18px; border-top:1px solid var(--border);}
+  .composer textarea{flex:1; resize:none; border:1px solid var(--border-strong); border-radius:20px;
+    padding:11px 15px; font-size:15px; font-family:inherit; background:var(--surface); color:var(--text);
+    max-height:120px; line-height:1.4;}
+  .composer textarea:focus{outline:none; border-color:var(--accent);}
+  .send{width:42px; height:42px; flex:none; border-radius:50%; background:var(--accent); color:#fff;
+    font-size:19px; display:flex; align-items:center; justify-content:center; transition:opacity .15s;}
+  .send:disabled{opacity:.4; cursor:default;}
+
+  /* ---------- card ---------- */
+  .card-body{flex:1; overflow-y:auto; padding:6px 24px 24px;}
+  .card-title{font-size:20px; font-weight:500; margin:8px 0 20px;}
+  .summary-card{background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:22px 20px;
+    display:flex; flex-direction:column; gap:20px;}
+  .block .label{font-size:12.5px; color:var(--muted); margin-bottom:7px; display:flex; align-items:center; gap:6px; letter-spacing:.01em;}
+  .block .label svg{width:14px; height:14px;}
+  .concern{font-size:18px; font-weight:500; line-height:1.45;}
+  .quote{background:var(--surface-soft); border-left:3px solid var(--accent); padding:12px 15px; border-radius:0 10px 10px 0;}
+  .quote p{font-size:16px; line-height:1.5;}
+  .quote p + p{margin-top:9px;}
+  .next{font-size:16px; line-height:1.5; color:var(--accent-deep);}
+  .saved{display:flex; align-items:center; gap:7px; color:var(--muted); font-size:13px; margin-top:16px; justify-content:center;}
+  .saved svg{width:15px; height:15px; color:var(--accent);}
+  .card-actions{display:flex; gap:10px; padding:14px 24px 24px;}
+  .card-actions button{flex:1; padding:13px; border-radius:14px; font-size:15px; border:1px solid var(--border-strong); background:var(--surface); transition:all .15s;}
+  .card-actions button:hover{background:var(--accent-soft);}
+  .card-actions .primary{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .card-actions .primary:hover{background:var(--accent-deep);}
+
+  /* ---------- library ---------- */
+  .lib-body{flex:1; overflow-y:auto; padding:6px 20px 24px;}
+  .lib-head{padding:0 4px 6px;}
+  .lib-head h2{font-size:20px; font-weight:500;}
+  .lib-head p{color:var(--muted); font-size:13.5px; margin-top:3px;}
+  .lib-list{display:flex; flex-direction:column; gap:11px; margin-top:16px;}
+  .lib-card{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px 16px; text-align:left; transition:all .15s;}
+  .lib-card:hover{border-color:var(--accent); transform:translateY(-1px);}
+  .lib-card .meta{display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;}
+  .lib-card .date{font-size:12px; color:var(--faint);}
+  .tag{font-size:11.5px; background:var(--accent-soft); color:var(--accent-deep); padding:2px 10px; border-radius:20px;}
+  .lib-card .oneline{font-size:15px; line-height:1.45;}
+  .lib-empty{text-align:center; color:var(--muted); padding:60px 20px; font-size:15px; line-height:1.7;}
+  .lib-future{margin-top:20px; border:1px dashed var(--border-strong); border-radius:14px; padding:14px; text-align:center; color:var(--faint); font-size:12.5px;}
+
+  /* ---------- intro (서비스 소개) ---------- */
+  .intro-body{flex:1; overflow-y:auto; padding:6px 24px 18px; display:flex; flex-direction:column; gap:26px;}
+  .intro-hero{text-align:center; margin-top:12px;}
+  .intro-hero .mark{width:54px; height:54px; border-radius:16px; background:var(--accent-soft); display:flex; align-items:center; justify-content:center; font-size:26px; margin:0 auto 15px;}
+  .intro-hero .kicker{font-size:12.5px; color:var(--muted); letter-spacing:.05em; margin-bottom:5px;}
+  .intro-hero h1{font-size:28px; font-weight:500; letter-spacing:-.01em;}
+  .intro-hero h1 .en{font-size:15px; color:var(--faint); font-weight:400; letter-spacing:.03em; margin-left:3px;}
+  .intro-hero .meaning{font-size:13px; color:var(--accent-deep); margin-top:8px;}
+  .intro-hero .tagline{color:var(--muted); font-size:15.5px; margin-top:12px; line-height:1.55;}
+  .intro-what{background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:19px 20px;}
+  .intro-what .lead{font-size:17px; font-weight:500; margin-bottom:9px; line-height:1.5;}
+  .intro-what .lead em{color:var(--accent-deep); font-style:normal;}
+  .intro-what .desc{font-size:14.5px; color:var(--muted); line-height:1.65;}
+  .intro-section h2{font-size:16px; font-weight:500; margin-bottom:13px;}
+  .feel{list-style:none; display:flex; flex-direction:column; gap:9px;}
+  .feel li{background:var(--surface-soft); border:1px solid var(--border); border-radius:12px; padding:12px 15px; font-size:14.5px; color:var(--text);}
+  .steps{display:flex; flex-direction:column; gap:15px;}
+  .step{display:flex; gap:13px; align-items:flex-start;}
+  .step .n{flex:none; width:26px; height:26px; border-radius:50%; background:var(--accent); color:#fff; font-size:14px; display:flex; align-items:center; justify-content:center; margin-top:1px;}
+  .step b{font-size:15px; font-weight:500;}
+  .step p{font-size:13.5px; color:var(--muted); margin-top:2px;}
+  .promises{display:flex; flex-direction:column; gap:12px;}
+  .promise{display:flex; align-items:center; gap:11px; font-size:14.5px;}
+  .promise svg{flex:none; width:17px; height:17px; color:var(--accent);}
+  .promise .note{color:var(--muted); font-size:12.5px; margin-left:auto;}
+  .steps-note{font-size:13px; color:var(--muted); margin-top:13px; line-height:1.55;}
+  .intro-note{background:var(--accent-soft); border-radius:14px; padding:14px 16px;}
+  .intro-note p{font-size:13.5px; color:var(--accent-deep); line-height:1.62;}
+  .intro-note b{font-weight:500;}
+  .disclaimer{text-align:center; font-size:12.5px; color:var(--faint); padding:2px 0;}
+  .intro-cta{padding:13px 24px 22px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:6px;}
+  .start-btn{width:100%; padding:15px; background:var(--accent); color:#fff; border-radius:15px; font-size:16px; font-weight:500; transition:background .15s;}
+  .start-btn:hover{background:var(--accent-deep);}
+  .ghost-link{width:100%; padding:9px; color:var(--muted); font-size:13.5px;}
+  .home-q{font-size:23px; font-weight:500; line-height:1.35; letter-spacing:-.01em;}
+
+  /* ---------- overlay (nudge / settings) ---------- */
+  .overlay{position:fixed; inset:0; background:rgba(50,40,30,.35); display:none; align-items:center; justify-content:center; padding:24px; z-index:20;}
+  .overlay.active{display:flex;}
+  .sheet{background:var(--surface); border-radius:20px; padding:24px 22px; max-width:400px; width:100%;}
+  .sheet h3{font-size:18px; font-weight:500; margin-bottom:8px;}
+  .sheet p{color:var(--muted); font-size:14.5px; margin-bottom:18px; line-height:1.55;}
+  .sheet-actions{display:flex; gap:10px;}
+  .sheet-actions button{flex:1; padding:12px; border-radius:12px; font-size:14.5px; border:1px solid var(--border-strong); background:var(--surface);}
+  .sheet-actions .primary{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .set-field{margin-bottom:16px;}
+  .set-field label{display:block; font-size:13.5px; margin-bottom:7px; color:var(--text);}
+  .set-field input{width:100%; padding:11px 13px; border:1px solid var(--border-strong); border-radius:10px; font-size:14px; font-family:inherit;}
+  .set-field input:focus{outline:none; border-color:var(--accent);}
+  .tone-seg{display:flex; gap:8px;}
+  .tone-seg button{flex:1; padding:9px; border:1px solid var(--border-strong); border-radius:10px; font-size:14px; background:var(--surface); color:var(--text);}
+  .tone-seg button.on{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .mode-row{display:flex; align-items:center; gap:8px; font-size:13.5px; color:var(--muted); margin-bottom:16px;}
+  .badge-mode{font-size:11.5px; padding:2px 9px; border-radius:20px; background:var(--accent-soft); color:var(--accent-deep);}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===== INTRO (서비스 소개) ===== -->
+  <section id="intro" class="screen active">
+    <div class="topbar">
+      <button class="iconbtn" id="openSettings" aria-label="설정">⚙</button>
+      <button class="iconbtn" id="toLibraryTop" aria-label="보관함">🗂</button>
+    </div>
+    <div class="intro-body">
+      <div class="intro-hero">
+        <div class="mark">☕</div>
+        <p class="kicker">부담 없는 커피챗</p>
+        <h1 class="voice">티키타 <span class="en">Tikitah</span></h1>
+        <p class="meaning">‘티키타카’처럼, 퐁당퐁당 주고받는 대화</p>
+        <p class="tagline voice">뭐부터 말해야 할지 몰라도 괜찮아.<br>네 얘기, 판단 없이 들을게.</p>
+      </div>
+
+      <div class="intro-what">
+        <p class="lead voice">물어보는 도구가 아니라, <em>물어봐주는</em> 서비스.</p>
+        <p class="desc">챗GPT엔 내가 질문을 잘해야 하지만, 여긴 AI가 먼저 물어봐. 고민이 정리 안 된 상태여도, 질문을 따라가다 보면 생각이 스스로 정리돼.</p>
+      </div>
+
+      <div class="intro-section">
+        <h2>이런 적 있어?</h2>
+        <ul class="feel voice">
+          <li>“이런 거 물어볼 사람이 마땅히 없네.”</li>
+          <li>“친구한테 말하자니 배경부터 다 설명해야 하고.”</li>
+          <li>“콘텐츠는 많이 보는데, 왜 내 삶은 그대로지?”</li>
+        </ul>
+      </div>
+
+      <div class="intro-section">
+        <h2>여긴 이렇게 흘러가</h2>
+        <div class="steps">
+          <div class="step"><span class="n">1</span><div><b>지금 마음 하나 고르기</b><p>빈 화면 없이, 상황 카드로 시작해</p></div></div>
+          <div class="step"><span class="n">2</span><div><b>질문을 따라 얘기하기</b><p>AI가 되묻는 일곱 번의 질문</p></div></div>
+          <div class="step"><span class="n">3</span><div><b>내가 한 말로 카드 받기</b><p>대화가 ‘정리 카드’로 남아 쌓여</p></div></div>
+        </div>
+        <p class="steps-note">일곱 번이 부담이면 한두 마디만 해도 괜찮아. 언제든 ‘정리해줘’를 누르면 카드가 나와.</p>
+      </div>
+
+      <div class="intro-section">
+        <h2>여기서의 약속</h2>
+        <div class="promises">
+          <div class="promise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>배경을 묻지 않아요<span class="note">나이·직업 몰라도 돼</span></div>
+          <div class="promise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>판단하지 않아요<span class="note">옳고 그름 없이</span></div>
+          <div class="promise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>아무도 볼 수 없어요<span class="note">이 브라우저에만 저장돼요</span></div>
+          <div class="promise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>대화 중엔 조언하지 않아요<span class="note">스스로 답을 찾게</span></div>
+        </div>
+      </div>
+
+      <div class="intro-note">
+        <p><b>왜 무료냐고?</b> 광고도, 판매도 없어. 네 대화는 이 브라우저 안에만 남고, 우리가 모으거나 팔지 않아. 그래서 마음 놓고 뱉어도 돼.</p>
+      </div>
+      <p class="disclaimer">상담·치료가 아니라, 생각을 정리하는 대화예요.</p>
+    </div>
+    <div class="intro-cta">
+      <button class="start-btn" id="startBtn">얘기 시작하기</button>
+      <button class="ghost-link" id="introToLib">지난 기록 보기</button>
+    </div>
+  </section>
+
+  <!-- ===== HOME (상황 카드) ===== -->
+  <section id="home" class="screen">
+    <div class="topbar">
+      <button class="iconbtn" id="homeBack" aria-label="뒤로">‹</button>
+      <button class="iconbtn" id="toLibraryHome" aria-label="보관함">🗂</button>
+    </div>
+    <div class="home-body">
+      <div class="brand">
+        <h1 class="home-q voice">지금, 어떤 얘기가<br>하고 싶어?</h1>
+      </div>
+      <div class="cards" id="situationCards"></div>
+      <div class="trust">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        아무도 안 봐요 · 여긴 나만의 공간
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CHAT ===== -->
+  <section id="chat" class="screen">
+    <div class="topbar">
+      <button class="iconbtn" id="chatBack" aria-label="뒤로">‹</button>
+      <div class="progress" id="progress"></div>
+      <button class="summarize-btn" id="summarizeBtn">정리해줘</button>
+    </div>
+    <div class="chat-scroll" id="chatScroll"></div>
+    <div class="composer">
+      <textarea id="answerInput" rows="1" placeholder="편하게 적어봐…"></textarea>
+      <button class="send" id="sendBtn" aria-label="보내기">↑</button>
+    </div>
+  </section>
+
+  <!-- ===== CARD ===== -->
+  <section id="card" class="screen">
+    <div class="topbar"><span style="width:38px"></span>
+      <span class="voice" style="font-size:15px; color:var(--muted)">정리 카드</span>
+      <span style="width:38px"></span></div>
+    <div class="card-body">
+      <h2 class="card-title voice" id="cardHeadline">오늘 네가 한 말, 정리해봤어</h2>
+      <div class="summary-card" id="summaryCard"></div>
+      <div class="saved"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg> 보관함에 저장됐어</div>
+    </div>
+    <div class="card-actions">
+      <button id="toLibrary">보관함 보기</button>
+      <button class="primary" id="newChat">새 대화</button>
+    </div>
+  </section>
+
+  <!-- ===== LIBRARY ===== -->
+  <section id="library" class="screen">
+    <div class="topbar">
+      <button class="iconbtn" id="libBack" aria-label="뒤로">‹</button>
+      <span class="voice" style="font-size:15px; color:var(--muted)">내 생각의 기록</span>
+      <span style="width:38px"></span>
+    </div>
+    <div class="lib-body">
+      <div class="lib-head">
+        <h2 class="voice">내 생각의 기록</h2>
+        <p id="libCount"></p>
+      </div>
+      <div class="lib-list" id="libList"></div>
+      <div class="lib-future">언젠가, 비슷한 고민을 지나온 사람과 이어질 자리 · 준비 중</div>
+    </div>
+  </section>
+
+  <!-- ===== OVERLAYS ===== -->
+  <div class="overlay" id="nudgeOverlay">
+    <div class="sheet">
+      <h3 class="voice" id="nudgeTitle">지금 3/7단계야</h3>
+      <p id="nudgeBody">조금 더 얘기하면, 더 자세한 정리를 줄 수 있어. 더 해볼래?</p>
+      <div class="sheet-actions">
+        <button class="primary" id="nudgeContinue">더 얘기할래</button>
+        <button id="nudgeStop">지금 정리해줘</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="toneOverlay">
+    <div class="sheet">
+      <h3 class="voice">어떻게 말할까요?</h3>
+      <p>편한 쪽으로 골라주세요. 언제든 설정에서 바꿀 수 있어요.</p>
+      <div class="sheet-actions">
+        <button class="primary" id="toneBan">반말로<br><span style="font-size:12px">편한 친구처럼</span></button>
+        <button id="toneJon">존댓말로<br><span style="font-size:12px; color:var(--muted)">정중하게</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="settingsOverlay">
+    <div class="sheet">
+      <h3 class="voice">대화 방식</h3>
+      <div class="mode-row">
+        지금: <span class="badge-mode" id="modeBadge">체험 모드</span>
+      </div>
+      <p style="margin-bottom:16px">키를 넣으면 진짜 AI와 대화해. 비워두면 체험 모드(미리 짠 흐름)로 작동하고, 키는 이 브라우저에만 저장돼.</p>
+      <div class="set-field">
+        <label>말투</label>
+        <div class="tone-seg" id="toneSeg">
+          <button data-t="ban" id="segBan">반말</button>
+          <button data-t="jon" id="segJon">존댓말</button>
+        </div>
+      </div>
+      <div class="set-field">
+        <label>Claude API 키 (선택)</label>
+        <input type="password" id="apiKeyInput" placeholder="sk-ant-...">
+      </div>
+      <div class="sheet-actions">
+        <button id="settingsCancel">닫기</button>
+        <button class="primary" id="settingsSave">저장</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============ 상태 ============ */
+const LS_CARDS='coffeechat_cards', LS_KEY='coffeechat_apikey', LS_TONE='coffeechat_tone';
+const MODEL='claude-sonnet-5';
+let state={ cardKey:null, messages:[], answered:0, nudged:false, busy:false };
+
+/* ============ 대화 설계 (체험 모드 스크립트 = 7턴 arc · 반말/존댓말) ============ */
+const TRACKS={
+  career:{ label:'요즘 커리어가 막막해요', tag:'커리어',
+    q:{ ban:[ "막막하다는 게, 방향을 모르겠는 거야? 아니면 방향은 아는데 확신이 없는 거야?",
+        "최근에 그 막막함을 제일 세게 느낀 순간이 언제였어?",
+        "그 순간, 어떤 기분이 제일 컸어?",
+        "그 기분이 들 때 머릿속에 훅 스친 생각은 뭐였어?",
+        "그 생각이 꼭 맞다고 어떻게 확신해? 친구가 같은 말 하면 넌 뭐라고 해줄 거 같아?",
+        "그래서 네가 진짜 바라는 건 뭐야?",
+        "오늘 얘기 중에 너한테 제일 걸리는 한 마디는 뭐였어?" ],
+      jon:[ "막막하다는 게, 방향을 모르겠는 걸까요? 아니면 방향은 아는데 확신이 없는 걸까요?",
+        "최근에 그 막막함을 가장 크게 느낀 순간은 언제였어요?",
+        "그 순간, 어떤 기분이 가장 컸어요?",
+        "그 기분이 들 때 머릿속에 스친 생각은 무엇이었어요?",
+        "그 생각이 꼭 맞다고 어떻게 확신하세요? 친구가 같은 말을 한다면 뭐라고 해주고 싶으세요?",
+        "그래서 진짜 바라는 건 무엇이세요?",
+        "오늘 이야기 중에 가장 마음에 걸리는 한마디는 무엇이었어요?" ] },
+    next:{ ban:"확신이 조금이라도 서려면, 최소한 뭐 하나가 채워지면 될까?", jon:"확신이 조금이라도 서려면, 최소한 무엇 하나가 채워지면 될까요?" } },
+  first:{ label:'처음 겪는 상황이라 혼란스러워요', tag:'막연',
+    q:{ ban:[ "혼란스러운 게, 뭘 해야 할지 몰라서야? 아니면 이게 맞는 선택인지 몰라서야?",
+        "그 상황을 한 문장으로 말하면 뭐가 될까?",
+        "그걸 떠올리면 지금 어떤 기분이 들어?",
+        "그 기분 밑에, 혹시 걱정하고 있는 게 있어?",
+        "그 걱정이 진짜 현실이 될 확률이 얼마나 될 거 같아?",
+        "이 상황이 잘 풀린다면, 어떤 모습이면 좋겠어?",
+        "오늘 얘기하면서 스스로 알게 된 게 있다면 뭐야?" ],
+      jon:[ "혼란스러운 게, 뭘 해야 할지 몰라서일까요? 아니면 이게 맞는 선택인지 몰라서일까요?",
+        "그 상황을 한 문장으로 말하면 무엇이 될까요?",
+        "그걸 떠올리면 지금 어떤 기분이 드세요?",
+        "그 기분 밑에, 혹시 걱정하고 있는 게 있으세요?",
+        "그 걱정이 실제로 현실이 될 확률은 얼마나 될 것 같으세요?",
+        "이 상황이 잘 풀린다면, 어떤 모습이면 좋으시겠어요?",
+        "오늘 이야기하면서 스스로 알게 된 게 있다면 무엇이에요?" ] },
+    next:{ ban:"지금의 나에게, 딱 한 가지만 물어본다면 뭘 묻고 싶어?", jon:"지금의 나에게 딱 한 가지만 물어본다면, 무엇을 묻고 싶으세요?" } },
+  decide:{ label:'결정을 못 내리고 있어요', tag:'막연',
+    q:{ ban:[ "결정을 미루게 만드는 게, 정보가 부족해서야? 아니면 뭔가 잃을까 봐서야?",
+        "지금 저울 위에 올라와 있는 선택지가 뭐랑 뭐야?",
+        "한쪽을 골랐다고 상상하면, 어떤 기분이 들어?",
+        "그 기분은 너한테 뭘 말해주는 걸까?",
+        "결정을 못 내리는 지금, 사실은 뭘 지키고 싶은 거야?",
+        "1년 뒤의 네가 지금을 본다면, 뭐라고 해줄 거 같아?",
+        "오늘 얘기 중에 마음이 조금이라도 기운 쪽은 어디였어?" ],
+      jon:[ "결정을 미루게 만드는 게, 정보가 부족해서일까요? 아니면 뭔가 잃을까 봐서일까요?",
+        "지금 저울 위에 올라와 있는 선택지가 무엇과 무엇이에요?",
+        "한쪽을 골랐다고 상상하면, 어떤 기분이 드세요?",
+        "그 기분은 무엇을 말해주는 걸까요?",
+        "결정을 못 내리는 지금, 사실은 무엇을 지키고 싶으세요?",
+        "1년 뒤의 내가 지금을 본다면, 뭐라고 해줄 것 같으세요?",
+        "오늘 이야기 중에 마음이 조금이라도 기운 쪽은 어디였어요?" ] },
+    next:{ ban:"어느 쪽을 고르든, 후회를 가장 줄이는 기준 하나는 뭘까?", jon:"어느 쪽을 고르든, 후회를 가장 줄이는 기준 하나는 무엇일까요?" } },
+  free:{ label:'그냥 얘기가 하고 싶어요', tag:'막연',
+    q:{ ban:[ "좋아, 편하게. 지금 머릿속 제일 위에 떠 있는 게 뭐야 — 사람이야, 일이야, 아니면 그냥 나 자신이야?",
+        "그게 언제부터 마음에 남아 있었어?",
+        "그걸 생각하면 어떤 기분이 들어?",
+        "그 기분한테 이름을 붙인다면 뭐라고 부를래?",
+        "그 마음이 너한테 뭘 말해주고 싶은 걸까?",
+        "지금 너한테 제일 필요한 건 뭘까?",
+        "오늘 이 얘기, 한 문장으로 남긴다면 뭐라고 쓸래?" ],
+      jon:[ "좋아요, 편하게. 지금 머릿속 가장 위에 떠 있는 게 뭐예요 — 사람일까요, 일일까요, 아니면 그냥 나 자신일까요?",
+        "그게 언제부터 마음에 남아 있었어요?",
+        "그걸 생각하면 어떤 기분이 드세요?",
+        "그 기분에 이름을 붙인다면 뭐라고 부르고 싶으세요?",
+        "그 마음이 무엇을 말해주고 싶은 걸까요?",
+        "지금 가장 필요한 건 무엇일까요?",
+        "오늘 이 이야기, 한 문장으로 남긴다면 뭐라고 쓰고 싶으세요?" ] },
+    next:{ ban:"오늘 꺼낸 이 마음, 내일의 나한테 딱 한 마디 해준다면?", jon:"오늘 꺼낸 이 마음, 내일의 나에게 딱 한마디 해준다면요?" } }
+};
+const ACK={ ban:["음, 그랬구나.","그 말, 더 듣고 싶었어.","천천히 말해줘도 돼.","그 마음 알 것 같아.","응, 계속 들을게.","그렇게 느낄 수 있지."],
+  jon:["아, 그러셨군요.","그 말씀, 더 듣고 싶었어요.","천천히 말씀하셔도 돼요.","그 마음 알 것 같아요.","네, 계속 들을게요.","그렇게 느끼실 수 있죠."] };
+const STR={
+  transition:{ban:"얘기 잘 들었어. 이제 네가 한 말들, 정리해볼게.", jon:"이야기 잘 들었어요. 이제 하신 말씀들, 정리해 볼게요."},
+  shortWords:{ban:"(오늘은 짧게 꺼내봤어)", jon:"(오늘은 짧게 꺼내봤어요)"},
+  headFresh:{ban:"오늘 네가 한 말, 정리해봤어", jon:"오늘 하신 말씀, 정리해봤어요"},
+  headPast:{ban:"그때 네가 한 말", jon:"그때 하신 말씀"},
+  nudgeBody:{ban:"조금 더 얘기하면, 더 자세한 정리를 줄 수 있어. 더 해볼래?", jon:"조금 더 이야기하면, 더 자세한 정리를 드릴 수 있어요. 더 해보실래요?"},
+  nudgeGo:{ban:"더 얘기할래", jon:"더 얘기할래요"},
+  nudgeStop:{ban:"지금 정리해줘", jon:"지금 정리해 주세요"}
+};
+function T(o){ return o[tone()]; }
+
+/* ============ 시스템 프롬프트 (실제 AI 모드) ============ */
+const SYS_CHAT=`너는 '부담 없는 커피챗'의 대화 상대야. 사용자가 처음 겪는 고민을 혼자 정리할 수 있게, 판단 없이 들어주고 좋은 질문을 던지는 친구야.
+[정체성] 상담사·선생·조언가가 아니라, 사용자가 스스로 답을 찾게 돕는 산파. 배경(나이·직업·성별)은 절대 묻지 않는다.
+[말투] 다정한 반말, 한 번에 2~3문장 이내. 질문은 딱 하나. 재촉·판단 금지. "모르겠어" 하면 각도를 바꿔 다시 묻는다.
+[절대규칙] 대화 중엔 조언·해결책·평가·진단 금지. 오직 '공감 한 마디(선택)+질문 하나'로만 응답. "~하는 게 좋아/~해봐/방법은/정답은/내 생각엔"·번호목록 금지. 사용자 말을 그의 언어로 짧게 되비춘 뒤(reflect) 한 걸음 더 들어가는 열린 질문(ask).
+[흐름 7턴 가이드] 1 명료화→2 구체적 장면→3 감정→4 감정 밑 생각→5 그 생각 다른 각도→6 진짜 원함→7 스스로 한 줄 정리.
+[안전] 자해·자살·위기 신호가 보이면 질문 규칙을 멈추고 판단 없이 마음을 받아준 뒤 전문 도움을 안내(예: 자살예방상담 109). 너는 치료자가 아니다.`;
+function sysChat(){ return SYS_CHAT + (tone()==='jon'
+  ? "\n[말투 지정] 이 사용자에겐 다정한 '존댓말'로 말한다. 반말 대신 존댓말을 쓴다."
+  : "\n[말투 지정] 이 사용자에겐 다정한 '반말'로 말한다."); }
+
+/* ============ 유틸 ============ */
+const $=s=>document.querySelector(s);
+function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); $('#'+id).classList.add('active'); window.scrollTo(0,0); }
+function apiKey(){ return localStorage.getItem(LS_KEY)||''; }
+function tone(){ return localStorage.getItem(LS_TONE)||'ban'; }
+function cards(){ try{return JSON.parse(localStorage.getItem(LS_CARDS))||[];}catch(e){return[];} }
+function esc(t){ const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+
+/* ============ 홈 ============ */
+function renderHome(){
+  const wrap=$('#situationCards'); wrap.innerHTML='';
+  Object.entries(TRACKS).forEach(([k,t])=>{
+    const b=document.createElement('button'); b.className='situation';
+    b.innerHTML=`<span>${t.label}</span><span class="arr">→</span>`;
+    b.onclick=()=>startSession(k); wrap.appendChild(b);
+  });
+}
+
+/* ============ 세션 ============ */
+function startSession(key){
+  state={ cardKey:key, messages:[], answered:0, nudged:false, busy:false };
+  $('#chatScroll').innerHTML=''; renderProgress();
+  show('chat');
+  const firstQ=T(TRACKS[key].q)[0];
+  addMsg('ai', firstQ); state.messages.push({role:'assistant',text:firstQ});
+  $('#answerInput').focus();
+}
+function renderProgress(){
+  const p=$('#progress'); p.innerHTML='';
+  for(let i=0;i<7;i++){ const d=document.createElement('span'); d.className='dot'+(i<state.answered?' on':''); p.appendChild(d); }
+  const f=document.createElement('span'); f.className='frac'; f.textContent=Math.min(state.answered,7)+'/7'; p.appendChild(f);
+}
+function addMsg(role,text){
+  const m=document.createElement('div'); m.className='msg '+role+(role==='ai'?' voice':'');
+  m.textContent=text; $('#chatScroll').appendChild(m);
+  $('#chatScroll').scrollTop=$('#chatScroll').scrollHeight; return m;
+}
+
+async function sendAnswer(){
+  const inp=$('#answerInput'); const text=inp.value.trim();
+  if(!text||state.busy) return;
+  inp.value=''; inp.style.height='auto';
+  addMsg('me',text); state.messages.push({role:'user',text});
+  state.answered++; renderProgress();
+
+  if(state.answered>=7){ await aiReply(true); setTimeout(()=>generateCard(),700); return; }
+  await aiReply(false);
+}
+
+async function aiReply(isLast){
+  state.busy=true; $('#sendBtn').disabled=true;
+  const typing=addMsg('ai','…'); typing.classList.add('typing');
+  let reply;
+  if(apiKey()){
+    try{ reply=await callClaudeChat(); }
+    catch(e){ reply=fallbackReply(isLast); }
+  } else { await wait(650+Math.random()*500); reply=fallbackReply(isLast); }
+  typing.remove();
+  addMsg('ai',reply); state.messages.push({role:'assistant',text:reply});
+  state.busy=false; $('#sendBtn').disabled=false;
+}
+function fallbackReply(isLast){
+  const t=TRACKS[state.cardKey];
+  if(isLast) return T(STR.transition);
+  const acks=T(ACK); const ack=acks[Math.floor(Math.random()*acks.length)];
+  const qs=T(t.q); const q=qs[Math.min(state.answered,qs.length-1)];
+  return ack+" "+q;
+}
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+
+/* ============ 정리해줘 / 넛지 ============ */
+function requestSummary(){
+  if(state.answered<3 && state.messages.filter(m=>m.role==='user').length===0){ return; }
+  if(state.answered<7 && !state.nudged){
+    state.nudged=true;
+    $('#nudgeTitle').textContent=`지금 ${state.answered}/7단계`+(tone()==='jon'?'예요':'야');
+    $('#nudgeBody').textContent=T(STR.nudgeBody);
+    $('#nudgeContinue').textContent=T(STR.nudgeGo);
+    $('#nudgeStop').textContent=T(STR.nudgeStop);
+    $('#nudgeOverlay').classList.add('active'); return;
+  }
+  generateCard();
+}
+
+/* ============ 카드 생성 ============ */
+async function generateCard(){
+  $('#nudgeOverlay').classList.remove('active');
+  let card;
+  if(apiKey()){ try{ card=await callClaudeCard(); }catch(e){ card=demoCard(); } }
+  else card=demoCard();
+  card.date=todayStr(); card.ts=Date.now();
+  saveCard(card); renderCard(card); $('#cardHeadline').textContent=T(STR.headFresh); show('card');
+}
+function todayStr(){ const d=new Date(); return (d.getMonth()+1)+'/'+d.getDate(); }
+function userMsgs(){ return state.messages.filter(m=>m.role==='user').map(m=>m.text); }
+function demoCard(){
+  const t=TRACKS[state.cardKey]; const ums=userMsgs();
+  const sorted=[...ums].sort((a,b)=>b.length-a.length);
+  const words=sorted.slice(0,2).filter(Boolean);
+  return {
+    concern: ums[0] ? shorten(ums[ums.length-1]||ums[0]) : t.label,
+    user_words: words.length?words:[T(STR.shortWords)],
+    next_thought: T(t.next),
+    topic_tag: t.tag
+  };
+}
+function shorten(s){ s=s.replace(/\s+/g,' ').trim(); return s.length>28?s.slice(0,27)+'…':s; }
+
+function renderCard(c){
+  const el=$('#summaryCard');
+  const quotes=(c.user_words||[]).map(w=>`<p>"${esc(w)}"</p>`).join('');
+  el.innerHTML=`
+    <div class="block">
+      <div class="label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><circle cx="12" cy="16" r=".5" fill="currentColor"/></svg>오늘의 고민</div>
+      <div class="concern voice">${esc(c.concern)}</div>
+    </div>
+    <div class="block">
+      <div class="label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 10h8M8 14h5"/><path d="M21 12a8 8 0 0 1-8 8H7l-4 3V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8z"/></svg>이건 네가 한 말이야</div>
+      <div class="quote voice">${quotes}</div>
+    </div>
+    <div class="block">
+      <div class="label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 20a6 6 0 0 0 4-10.5C15 8 13.5 7 12 7s-3 1-4 2.5A6 6 0 0 0 12 20z"/></svg>다음에 생각해볼 것</div>
+      <div class="next voice">${esc(c.next_thought)}</div>
+    </div>`;
+}
+
+function saveCard(c){ const arr=cards(); arr.unshift(c); localStorage.setItem(LS_CARDS,JSON.stringify(arr)); }
+
+/* ============ 보관함 ============ */
+function renderLibrary(){
+  const arr=cards(); const list=$('#libList'); list.innerHTML='';
+  $('#libCount').textContent = arr.length? `카드 ${arr.length}개 · 쌓이는 중` : '';
+  if(!arr.length){ list.innerHTML='<div class="lib-empty">아직 기록이 없어.<br>첫 대화를 나눠보면, 여기 네 말이 쌓여.</div>'; return; }
+  arr.forEach(c=>{
+    const b=document.createElement('button'); b.className='lib-card';
+    b.innerHTML=`<div class="meta"><span class="date">${c.date||''}</span><span class="tag">${esc(c.topic_tag||'')}</span></div>
+      <div class="oneline voice">${esc(c.concern||'')}</div>`;
+    b.onclick=()=>{ renderCard(c); $('#cardHeadline').textContent=T(STR.headPast); show('card'); };
+    list.appendChild(b);
+  });
+}
+
+/* ============ 실제 Claude API ============ */
+async function callClaudeChat(){
+  const msgs=state.messages.map(m=>({role:m.role==='ai'?'assistant':m.role, content:m.text}));
+  const data=await anthropic({ system:sysChat(), max_tokens:300, messages:msgs });
+  return data.content.map(b=>b.text||'').join('').trim();
+}
+async function callClaudeCard(){
+  const transcript=state.messages.map(m=>(m.role==='user'?'사용자: ':'AI: ')+m.text).join('\n');
+  const prompt=`아래 대화로 '정리 카드'를 만들어. 반드시 아래 JSON만 출력(코드블록·설명 금지):
+{"concern":"오늘의 고민 한 줄(사용자 관점,판단 없이,20자 내외)","user_words":["사용자가 실제로 한 말 1~2개를 거의 그대로 인용"],"next_thought":"해결책 아닌 '질문 형태' 하나(물음표로 끝)","topic_tag":"커리어|관계|육아|막연 중 하나"}
+규칙: user_words는 반드시 사용자 발화에서 뽑고 지어내지 않는다.\n\n[대화]\n${transcript}`;
+  const data=await anthropic({ max_tokens:400, messages:[{role:'user',content:prompt}] });
+  let txt=data.content.map(b=>b.text||'').join('').trim().replace(/^```json?/,'').replace(/```$/,'').trim();
+  return JSON.parse(txt);
+}
+async function anthropic(body){
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{ 'content-type':'application/json','x-api-key':apiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true' },
+    body:JSON.stringify({ model:MODEL, ...body })
+  });
+  if(!res.ok) throw new Error('api '+res.status);
+  return res.json();
+}
+
+/* ============ 설정 ============ */
+function openSettings(){ $('#apiKeyInput').value=apiKey(); updateModeBadge(); syncToneSeg(); $('#settingsOverlay').classList.add('active'); }
+function syncToneSeg(){ const t=tone(); $('#segBan').classList.toggle('on',t==='ban'); $('#segJon').classList.toggle('on',t==='jon'); }
+function openToneSheet(){ $('#toneOverlay').classList.add('active'); }
+function updateModeBadge(){ $('#modeBadge').textContent = apiKey()?'실제 AI 연결됨':'체험 모드'; }
+
+/* ============ 이벤트 바인딩 ============ */
+$('#toLibraryTop').onclick=()=>{ renderLibrary(); show('library'); };
+$('#toLibraryHome').onclick=()=>{ renderLibrary(); show('library'); };
+$('#introToLib').onclick=()=>{ renderLibrary(); show('library'); };
+$('#startBtn').onclick=()=>{ if(!localStorage.getItem(LS_TONE)) openToneSheet(); else show('home'); };
+$('#homeBack').onclick=()=>show('intro');
+$('#libBack').onclick=()=>show('intro');
+$('#chatBack').onclick=()=>{ if(confirm('대화를 그만둘까? 지금 내용은 저장되지 않아.')) show('home'); };
+$('#sendBtn').onclick=sendAnswer;
+$('#answerInput').addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendAnswer(); } });
+$('#answerInput').addEventListener('input',function(){ this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,120)+'px'; });
+$('#summarizeBtn').onclick=requestSummary;
+$('#nudgeContinue').onclick=()=>{ $('#nudgeOverlay').classList.remove('active'); $('#answerInput').focus(); };
+$('#nudgeStop').onclick=()=>generateCard();
+$('#toLibrary').onclick=()=>{ renderLibrary(); show('library'); };
+$('#newChat').onclick=()=>{ $('#cardHeadline').textContent=T(STR.headFresh); show('home'); };
+$('#openSettings').onclick=openSettings;
+$('#settingsCancel').onclick=()=>$('#settingsOverlay').classList.remove('active');
+$('#settingsSave').onclick=()=>{ const k=$('#apiKeyInput').value.trim(); if(k) localStorage.setItem(LS_KEY,k); else localStorage.removeItem(LS_KEY); updateModeBadge(); $('#settingsOverlay').classList.remove('active'); };
+$('#segBan').onclick=()=>{ localStorage.setItem(LS_TONE,'ban'); syncToneSeg(); };
+$('#segJon').onclick=()=>{ localStorage.setItem(LS_TONE,'jon'); syncToneSeg(); };
+$('#toneBan').onclick=()=>{ localStorage.setItem(LS_TONE,'ban'); $('#toneOverlay').classList.remove('active'); show('home'); };
+$('#toneJon').onclick=()=>{ localStorage.setItem(LS_TONE,'jon'); $('#toneOverlay').classList.remove('active'); show('home'); };
+
+/* ============ 시작 ============ */
+renderHome();
+</script>
+</body>
+</html>
