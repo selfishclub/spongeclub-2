@@ -480,7 +480,7 @@
   <div class="hero">
     <div class="mascot-wrap"><img id="mascot" title="콕 눌러봐!" alt="고고버디 마스코트" /></div>
     <div class="hi">
-      <span class="dday" id="dday">D-27 · 방학</span>
+      <span class="dday" id="dday">방학 끝까지 27일</span>
       <h1 id="greet">좋은 아침, Haily! </h1>
       <p id="greetSub">오늘도 한 칸씩 굴러가 보자.</p>
     </div>
@@ -735,12 +735,21 @@
   function newId(pfx) { return pfx + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36); }
 
   /* ---------- Time / greeting ---------- */
-  var VACATION_END = new Date(2026, 7, 17); // 8/17
+  var VACATION_START = new Date(2026, 6, 22);  // 7/22 방학 시작
+  var VACATION_END = new Date(2026, 7, 17);    // 8/17 방학 마지막 날
   function refreshTime() {
     var now = new Date();
     var h = now.getHours();
-    var dd = Math.max(0, Math.ceil((VACATION_END - now) / 86400000));
-    document.getElementById("dday").textContent = "D-" + dd + " · 방학";
+    var DAY = 86400000;
+    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var left = Math.round((VACATION_END - today) / DAY);          // 오늘 이후 남은 날
+    var nth = Math.round((today - VACATION_START) / DAY) + 1;      // 방학 며칠째
+    var total = Math.round((VACATION_END - VACATION_START) / DAY) + 1;
+    var ddayEl = document.getElementById("dday");
+    ddayEl.textContent = left > 0 ? "방학 끝까지 " + left + "일"
+                        : left === 0 ? "방학 마지막 날"
+                        : "방학 끝";
+    ddayEl.title = "여름방학 7/22~8/17 · 총 " + total + "일 중 " + Math.min(Math.max(nth, 1), total) + "일째";
     document.getElementById("nowClock").textContent =
       String(h).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
 
