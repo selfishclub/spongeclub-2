@@ -3,7 +3,17 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>WeatherClothe — 여행 옷차림 추천</title>
+<title>WeatherClothe — 날씨 기반 여행 준비</title>
+<meta name="description" content="여행지와 날짜만 넣으면 최근 10년 실제 기온과 예보로 옷차림·준비물 리스트를 만들어 줍니다." />
+<meta name="theme-color" content="#1a1aff" />
+<meta name="color-scheme" content="light dark" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="WeatherClothe" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231a1aff'/%3E%3Ctext x='16' y='23' font-size='19' font-family='Helvetica,Arial' font-weight='bold' fill='%23fff' text-anchor='middle'%3EW%3C/text%3E%3C/svg%3E" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="WeatherClothe — 날씨 기반 여행 준비" />
+<meta property="og:description" content="그 도시, 그 날짜의 날씨에 맞춰 여행 준비물을 한 번에." />
+<meta name="twitter:card" content="summary" />
 <!-- Pretendard: 한글/본문 · Anton: 포스터형 디스플레이(워드마크·숫자) -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,62 +26,99 @@
   <div class="app">
     <header class="app-header">
       <h1>WeatherClothe</h1>
-      <p class="tagline">그 도시, 그 날짜의 날씨와 옷차림을 미리 확인하세요</p>
+      <p class="tagline" data-i18n="tagline"></p>
+      <div class="header-prefs">
+        <span id="home-baseline" class="home-baseline"></span>
+        <div class="pref-toggles">
+          <div class="unit-toggle" id="lang-toggle">
+            <button type="button" class="unit-btn" data-lang="ko">한국어</button>
+            <button type="button" class="unit-btn" data-lang="en">EN</button>
+          </div>
+          <div class="unit-toggle" id="unit-toggle">
+            <button type="button" class="unit-btn" data-unit="C">°C</button>
+            <button type="button" class="unit-btn" data-unit="F">°F</button>
+          </div>
+        </div>
+      </div>
     </header>
 
+    <div id="view-search" class="view active">
     <section class="input-card">
       <div class="field">
-        <label for="city-input">여행지</label>
-        <input id="city-input" type="text" placeholder="예: 파리, 그랜드캐년, 도쿄" autocomplete="off" />
+        <label for="city-input" data-i18n="labelCity"></label>
+        <input id="city-input" type="text" data-i18n-placeholder="placeholderCity" autocomplete="off" />
         <div id="city-suggestions" class="suggestions hidden"></div>
       </div>
 
       <div class="field-row">
         <div class="field">
-          <label for="start-date">출발일</label>
+          <label for="start-date" data-i18n="labelStart"></label>
           <input id="start-date" type="date" />
         </div>
         <div class="field">
-          <label for="end-date">도착일(귀국일)</label>
+          <label for="end-date" data-i18n="labelEnd"></label>
           <input id="end-date" type="date" />
         </div>
       </div>
 
       <div class="field">
-        <label>목적지 유형</label>
+        <label data-i18n="labelType"></label>
         <div class="type-toggle" id="type-toggle">
-          <button type="button" class="type-btn" data-type="city">도시형</button>
-          <button type="button" class="type-btn" data-type="activity">자연·액티비티형</button>
-          <button type="button" class="type-btn" data-type="mixed">혼합형</button>
+          <button type="button" class="type-btn" data-type="city" data-i18n="typeCity"></button>
+          <button type="button" class="type-btn" data-type="activity" data-i18n="typeActivity"></button>
+          <button type="button" class="type-btn" data-type="mixed" data-i18n="typeMixed"></button>
         </div>
         <p class="hint" id="type-hint"></p>
       </div>
 
       <div class="field">
-        <label>내 스타일</label>
-        <input type="file" id="photo-input" accept="image/*" multiple hidden />
-        <button type="button" id="upload-btn" class="upload-btn">📷 내 사진 업로드로 스타일 분석</button>
-        <p class="hint">Phase 1은 사진의 색감·톤 기반 간단 분석이에요. Phase 2에서 AI 비전 분석으로 업그레이드됩니다.</p>
-        <div id="photo-preview" class="photo-preview hidden"></div>
-        <div id="style-analysis" class="style-analysis hidden"></div>
-        <select id="style-pref">
-          <option value="minimal">미니멀 · 뉴트럴 톤</option>
-          <option value="casual">캐주얼 · 편안함 우선</option>
-          <option value="classic">클래식 · 단정함</option>
-          <option value="street">스트릿 · 개성 있는 룩</option>
+        <label><span data-i18n="labelPurpose"></span> <span class="label-sub" data-i18n="purposeSub"></span></label>
+        <div id="purpose-chips" class="purpose-chips"></div>
+        <p class="hint" data-i18n="purposeHint"></p>
+      </div>
+
+      <div class="field">
+        <label for="gender-pref"><span data-i18n="labelGender"></span> <span class="label-sub" data-i18n="genderSub"></span></label>
+        <select id="gender-pref">
+          <option value="" data-i18n="genderNone"></option>
+          <option value="female" data-i18n="genderFemale"></option>
+          <option value="male" data-i18n="genderMale"></option>
         </select>
       </div>
 
-      <button id="submit-btn" class="submit-btn">옷차림 추천 받기</button>
+      <div class="field">
+        <label data-i18n="labelStyle"></label>
+        <input type="file" id="photo-input" accept="image/*" multiple hidden />
+        <button type="button" id="upload-btn" class="upload-btn" data-i18n="uploadBtn"></button>
+        <p class="hint" data-i18n="uploadHint"></p>
+        <div id="photo-preview" class="photo-preview hidden"></div>
+        <div id="style-analysis" class="style-analysis hidden"></div>
+        <select id="style-pref">
+          <option value="minimal"></option>
+          <option value="casual"></option>
+          <option value="classic"></option>
+          <option value="street"></option>
+        </select>
+      </div>
+
+      <button id="submit-btn" class="submit-btn" data-i18n="submit"></button>
       <p id="error-msg" class="error hidden"></p>
     </section>
+    </div>
 
+    <div id="view-saved" class="view">
+      <section id="saved-card" class="saved-card hidden"></section>
+      <p id="saved-empty" class="view-empty" data-i18n-html="savedEmpty"></p>
+    </div>
+
+    <div id="view-results" class="view">
+    <p id="results-empty" class="view-empty" data-i18n-html="resultsEmpty"></p>
     <section id="results" class="results hidden">
       <nav class="tabs">
-        <button class="tab-btn active" data-tab="weather">날씨</button>
-        <button class="tab-btn" data-tab="reference">여행객 룩</button>
-        <button class="tab-btn" data-tab="outfit">내 코디</button>
-        <button class="tab-btn" data-tab="tips">팁</button>
+        <button class="tab-btn active" data-tab="weather" data-i18n="tabWeather"></button>
+        <button class="tab-btn" data-tab="reference" data-i18n="tabReference"></button>
+        <button class="tab-btn" data-tab="outfit" data-i18n="tabOutfit"></button>
+        <button class="tab-btn" data-tab="tips" data-i18n="tabTips"></button>
       </nav>
 
       <div id="tab-weather" class="tab-panel active">
@@ -83,7 +130,7 @@
       </div>
 
       <div id="tab-outfit" class="tab-panel">
-        <p class="wardrobe-intro">날짜별 추천 코디예요. 각 아이템을 눌러 <b>보유</b> / <b>사야 함</b>을 전환하고, <b>✎</b>로 이름을 내 옷에 맞게 수정(예: '와이드 린넨 팬츠' → '베이지 와이드 린넨 팬츠')하거나, 보유한 아이템을 직접 추가하세요. 여러 날 쓰는 옷은 자동 병합돼 아래 지참 리스트가 실시간으로 갱신됩니다.</p>
+        <p class="wardrobe-intro" data-i18n-html="wardrobeIntro"></p>
         <div id="outfit-list"></div>
         <div id="packing-list" class="card"></div>
       </div>
@@ -92,13 +139,21 @@
         <div id="tips-content" class="card"></div>
       </div>
     </section>
+    </div>
+
+    <nav class="app-nav" id="app-nav">
+      <button type="button" class="nav-btn active" data-view="search"><span class="nav-ico">🔍</span><span data-i18n="navSearch"></span></button>
+      <button type="button" class="nav-btn" data-view="results"><span class="nav-ico">🧳</span><span data-i18n="navResults"></span></button>
+      <button type="button" class="nav-btn" data-view="saved"><span class="nav-ico">🔖</span><span data-i18n="navSaved"></span><span class="nav-badge hidden" id="nav-saved-count">0</span></button>
+    </nav>
 
     <div id="loading" class="loading hidden">
       <div class="spinner"></div>
-      <p id="loading-text">최근 10년 날씨 데이터를 불러오는 중...</p>
+      <p id="loading-text" data-i18n="loadingText"></p>
     </div>
   </div>
 
+  <script src="i18n.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

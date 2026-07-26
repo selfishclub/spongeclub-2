@@ -82,12 +82,22 @@ body {
   text-transform: none;
 }
 .app-header h1::after { content: "."; color: var(--pink); }
+
+/* unit + baseline (D2) */
+.header-prefs { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.home-baseline { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; color: rgba(255, 255, 255, 0.78); }
+.unit-toggle { display: flex; border: 1px solid rgba(255, 255, 255, 0.45); border-radius: 999px; overflow: hidden; }
+.unit-btn {
+  padding: 5px 13px; border: 0; background: transparent; cursor: pointer;
+  color: rgba(255, 255, 255, 0.85); font-size: 12px; font-weight: 800; letter-spacing: 0.02em;
+}
+.unit-btn.selected { background: #fff; color: var(--blue); }
 .tagline {
   margin: 0 0 12px;
   color: rgba(255, 255, 255, 0.9);
   font-size: 14px;
   line-height: 1.5;
-  max-width: 34ch;
+  max-width: 42ch;
 }
 .phase-note {
   margin: 0;
@@ -152,6 +162,10 @@ input:focus, select:focus { outline: 2px solid var(--blue); outline-offset: 1px;
 }
 .suggestions .suggestion-item:last-child { border-bottom: none; }
 .suggestions .suggestion-item:hover { background: var(--blue); color: #fff; }
+.suggestions .sugg-name { display: block; font-weight: 700; }
+.suggestions .sugg-meta { display: block; margin-top: 2px; font-size: 12px; color: var(--muted); }
+.suggestions .suggestion-item:hover .sugg-meta { color: rgba(255, 255, 255, 0.8); }
+.suggestion-empty { padding: 14px; font-size: 13px; color: var(--muted); line-height: 1.6; }
 
 .hidden { display: none !important; }
 
@@ -173,6 +187,47 @@ input:focus, select:focus { outline: 2px solid var(--blue); outline-offset: 1px;
 .type-btn.selected { background: var(--blue); border-color: var(--blue); color: #fff; }
 
 .hint { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.5; }
+.label-sub { font-weight: 500; color: var(--muted); letter-spacing: 0; text-transform: none; }
+
+/* ---------- Trip purpose chips (D3) ---------- */
+.purpose-chips { display: flex; flex-direction: column; gap: 12px; }
+.purpose-group { display: flex; flex-direction: column; gap: 7px; }
+.purpose-group-label {
+  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  font-weight: 800; color: var(--muted);
+}
+.purpose-group.primary .purpose-group-label { color: var(--blue); }
+.purpose-chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.purpose-chip {
+  padding: 8px 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.purpose-chip:hover { background: var(--blue-soft); border-color: var(--blue); }
+.purpose-chip.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+.purpose-chip.on::before { content: "✓ "; }
+
+/* purpose notes banner above the day cards */
+.purpose-notes {
+  border: 1px solid var(--blue);
+  background: var(--blue-soft);
+  border-radius: 12px;
+  padding: 13px 15px;
+  margin-bottom: 14px;
+}
+.purpose-notes-label {
+  display: block; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  font-weight: 800; color: var(--blue); margin-bottom: 7px;
+}
+.purpose-notes ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.purpose-notes li { font-size: 12.5px; line-height: 1.55; color: var(--ink); }
+.purpose-notes li b { color: var(--blue); }
 
 .upload-btn {
   padding: 13px;
@@ -385,9 +440,53 @@ input:focus, select:focus { outline: 2px solid var(--blue); outline-offset: 1px;
   border: 1px solid var(--line);
 }
 .pack-row.buy { background: var(--pink-soft); border-color: var(--pink); }
+.pack-row { cursor: pointer; }
+.pack-row:hover { border-color: var(--blue); }
+.pack-remove {
+  border: 0; background: transparent; cursor: pointer; color: var(--muted);
+  font-size: 13px; padding: 0 0 0 10px; line-height: 1;
+}
+.pack-remove:hover { color: var(--pink); }
+.pack-add { display: flex; gap: 8px; margin-top: 14px; border-top: 1px solid var(--line); padding-top: 14px; }
+.pack-add input { flex: 1; min-width: 0; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: inherit; font-size: 13px; }
+.pack-add select { padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: inherit; font-size: 13px; }
+.pack-add button {
+  padding: 9px 14px; border: 1px solid var(--ink); border-radius: 10px;
+  background: var(--ink); color: var(--bg); font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap;
+}
+.pack-add button:hover { background: var(--blue); border-color: var(--blue); color: #fff; }
 .pack-name { font-size: 14px; font-weight: 600; }
 .pack-meta { font-size: 12px; color: var(--muted); }
 .buy-tag { color: var(--pink); }
+.pack-actions { display: flex; gap: 8px; }
+.pack-actions button {
+  padding: 7px 12px; border: 1px solid var(--line-strong); border-radius: 999px;
+  background: var(--paper); color: inherit; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap;
+}
+.pack-actions button:hover { border-color: var(--blue); color: var(--blue); }
+
+/* ---------- Saved trips (D4) ---------- */
+.saved-card {
+  margin-top: 18px; padding: 18px; border: 1px solid var(--line-strong);
+  border-radius: 16px; background: var(--paper);
+}
+.saved-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.saved-head h3 { margin: 0; font-size: 15px; font-weight: 900; letter-spacing: -0.02em; }
+.saved-list { list-style: none; margin: 0; padding: 0; }
+.saved-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 13px; border: 1px solid var(--line); border-radius: 12px; margin-bottom: 6px;
+}
+.saved-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.saved-city { font-size: 14px; font-weight: 800; }
+.saved-meta { font-size: 12px; color: var(--muted); }
+.saved-load {
+  padding: 7px 12px; border: 1px solid var(--ink); border-radius: 999px;
+  background: var(--ink); color: var(--bg); font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap;
+}
+.saved-load:hover { background: var(--blue); border-color: var(--blue); color: #fff; }
+.saved-del { border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 13px; padding: 0 2px; }
+.saved-del:hover { color: var(--pink); }
 
 /* ---------- Tips ---------- */
 .tips-city { font-size: 15px; font-weight: 900; letter-spacing: -0.02em; margin: 0 0 10px; }
@@ -410,7 +509,73 @@ input:focus, select:focus { outline: 2px solid var(--blue); outline-offset: 1px;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ---------- 최상위 뷰 전환 (검색 / 준비 리스트 / 저장) ----------
+   모바일에서 세 영역이 한 페이지에 쌓이면 스크롤이 지나치게 길어져 분리했다. */
+.view { display: none; }
+.view.active { display: block; }
+.view-empty {
+  margin: 40px 0; padding: 28px 20px; text-align: center;
+  border: 1px dashed var(--line-strong); border-radius: var(--radius);
+  color: var(--muted); font-size: 13px; line-height: 1.8;
+}
+
+.pref-toggles { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+#lang-toggle .unit-btn { font-size: 11px; letter-spacing: 0; }
+
+/* 검색 뷰 밖에서는 히어로를 한 줄짜리 바로 축소 — 결과를 더 많이 보여주기 위함 */
+body[data-view="results"] .app-header,
+body[data-view="saved"] .app-header {
+  padding: 14px 18px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+body[data-view="results"] .app-header::before,
+body[data-view="saved"] .app-header::before,
+body[data-view="results"] .tagline,
+body[data-view="saved"] .tagline,
+body[data-view="results"] .home-baseline,
+body[data-view="saved"] .home-baseline { display: none; }
+body[data-view="results"] .app-header h1,
+body[data-view="saved"] .app-header h1 { font-size: 22px; margin: 0; }
+body[data-view="results"] .header-prefs,
+body[data-view="saved"] .header-prefs { margin: 0; }
+
+.app-nav {
+  position: fixed;
+  left: 50%; bottom: 0;
+  transform: translateX(-50%);
+  width: 100%; max-width: 660px;
+  display: flex;
+  background: var(--paper);
+  border-top: 1px solid var(--line-strong);
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 40;
+}
+.nav-btn {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 9px 4px 10px;
+  border: 0; background: transparent; cursor: pointer;
+  color: var(--muted); font-family: inherit; font-size: 11px; font-weight: 700;
+  letter-spacing: -0.01em; position: relative;
+}
+.nav-ico { font-size: 17px; line-height: 1; filter: grayscale(1); opacity: 0.55; }
+.nav-btn.active { color: var(--blue); }
+.nav-btn.active .nav-ico { filter: none; opacity: 1; }
+.nav-badge {
+  position: absolute; top: 5px; left: 50%; margin-left: 5px;
+  min-width: 16px; padding: 0 4px; border-radius: 999px;
+  background: var(--pink); color: #fff; font-size: 10px; line-height: 16px;
+}
+
 @media (max-width: 480px) {
+  .app { padding: 14px 14px 84px; }
+  .app-header { padding: 20px 18px 18px; border-radius: 18px; }
   .app-header h1 { font-size: 32px; }
-  .tabs { gap: 16px; }
+  .tagline { font-size: 13px; }
+  .input-card { gap: 14px; padding: 16px; }
+  .tabs { gap: 14px; overflow-x: auto; }
+  .tab-btn { white-space: nowrap; font-size: 14px; }
+  .pack-head { gap: 10px; }
+  .pack-actions { width: 100%; }
+  .pack-actions button { flex: 1; }
 }

@@ -1,10 +1,65 @@
 // ---------- Constants ----------
 
-const REFERENCE_CITY = { name: "서울", lat: 37.5665, lon: 126.9780 };
+// D2: the comparison baseline used to be hardcoded to Seoul, which is meaningless
+// for anyone who doesn't live there (and circular for a trip *to* Seoul). We infer
+// the user's home city from their IANA timezone instead.
+const HOME_BASELINES = {
+  "Asia/Seoul": { name: "서울", lat: 37.5665, lon: 126.978 },
+  "Asia/Tokyo": { name: "도쿄", lat: 35.6762, lon: 139.6503 },
+  "Asia/Singapore": { name: "싱가포르", lat: 1.3521, lon: 103.8198 },
+  "Asia/Hong_Kong": { name: "홍콩", lat: 22.3193, lon: 114.1694 },
+  "Asia/Taipei": { name: "타이베이", lat: 25.033, lon: 121.5654 },
+  "Asia/Shanghai": { name: "상하이", lat: 31.2304, lon: 121.4737 },
+  "Asia/Bangkok": { name: "방콕", lat: 13.7563, lon: 100.5018 },
+  "Asia/Ho_Chi_Minh": { name: "호치민", lat: 10.8231, lon: 106.6297 },
+  "Asia/Jakarta": { name: "자카르타", lat: -6.2088, lon: 106.8456 },
+  "Asia/Manila": { name: "마닐라", lat: 14.5995, lon: 120.9842 },
+  "Asia/Kolkata": { name: "뭄바이", lat: 19.076, lon: 72.8777 },
+  "Asia/Dubai": { name: "두바이", lat: 25.2048, lon: 55.2708 },
+  "Europe/London": { name: "런던", lat: 51.5074, lon: -0.1278 },
+  "Europe/Paris": { name: "파리", lat: 48.8566, lon: 2.3522 },
+  "Europe/Berlin": { name: "베를린", lat: 52.52, lon: 13.405 },
+  "Europe/Madrid": { name: "마드리드", lat: 40.4168, lon: -3.7038 },
+  "Europe/Rome": { name: "로마", lat: 41.9028, lon: 12.4964 },
+  "America/New_York": { name: "뉴욕", lat: 40.7128, lon: -74.006 },
+  "America/Chicago": { name: "시카고", lat: 41.8781, lon: -87.6298 },
+  "America/Denver": { name: "덴버", lat: 39.7392, lon: -104.9903 },
+  "America/Los_Angeles": { name: "로스앤젤레스", lat: 34.0522, lon: -118.2437 },
+  "America/Toronto": { name: "토론토", lat: 43.6532, lon: -79.3832 },
+  "America/Vancouver": { name: "밴쿠버", lat: 49.2827, lon: -123.1207 },
+  "Australia/Sydney": { name: "시드니", lat: -33.8688, lon: 151.2093 },
+  "Pacific/Auckland": { name: "오클랜드", lat: -36.8485, lon: 174.7633 },
+};
+const DEFAULT_HOME = { name: "서울", lat: 37.5665, lon: 126.978 };
+
+// Countries that use Fahrenheit day-to-day.
+const FAHRENHEIT_REGIONS = new Set(["US", "BS", "KY", "LR", "PW", "FM", "MH", "BZ"]);
 
 // Korean → English aliases for destinations (mostly POIs / nature spots) that
 // Open-Meteo geocoding fails to match with a Korean query.
 const KOREAN_ALIASES = {
+  // 해외 도시 — 음절 자동 로마자화로는 엉뚱한 곳이 잡힌다("교토" → gyoto → Gyotog)
+  "도쿄": "Tokyo", "동경": "Tokyo", "교토": "Kyoto", "오사카": "Osaka", "삿포로": "Sapporo",
+  "후쿠오카": "Fukuoka", "나고야": "Nagoya", "오키나와": "Okinawa", "요코하마": "Yokohama",
+  "베이징": "Beijing", "북경": "Beijing", "상하이": "Shanghai", "상해": "Shanghai",
+  "홍콩": "Hong Kong", "타이베이": "Taipei", "대만": "Taipei", "마카오": "Macau",
+  "방콕": "Bangkok", "치앙마이": "Chiang Mai", "푸켓": "Phuket", "다낭": "Da Nang",
+  "하노이": "Hanoi", "호치민": "Ho Chi Minh City", "나트랑": "Nha Trang", "달랏": "Da Lat",
+  "싱가포르": "Singapore", "쿠알라룸푸르": "Kuala Lumpur", "발리": "Denpasar", "자카르타": "Jakarta",
+  "세부": "Cebu", "마닐라": "Manila", "델리": "Delhi", "뭄바이": "Mumbai", "두바이": "Dubai",
+  "이스탄불": "Istanbul", "파리": "Paris", "런던": "London", "로마": "Rome", "밀라노": "Milan",
+  "피렌체": "Florence", "베네치아": "Venice", "베니스": "Venice", "나폴리": "Naples",
+  "바르셀로나": "Barcelona", "마드리드": "Madrid", "리스본": "Lisbon", "포르투": "Porto",
+  "베를린": "Berlin", "뮌헨": "Munich", "프랑크푸르트": "Frankfurt", "프라하": "Prague",
+  "빈": "Vienna", "비엔나": "Vienna", "부다페스트": "Budapest", "취리히": "Zurich",
+  "암스테르담": "Amsterdam", "브뤼셀": "Brussels", "코펜하겐": "Copenhagen",
+  "스톡홀름": "Stockholm", "오슬로": "Oslo", "헬싱키": "Helsinki", "아테네": "Athens",
+  "뉴욕": "New York", "로스앤젤레스": "Los Angeles", "엘에이": "Los Angeles",
+  "샌프란시스코": "San Francisco", "라스베이거스": "Las Vegas", "시애틀": "Seattle",
+  "시카고": "Chicago", "보스턴": "Boston", "하와이": "Honolulu", "호놀룰루": "Honolulu",
+  "밴쿠버": "Vancouver", "토론토": "Toronto", "멕시코시티": "Mexico City", "칸쿤": "Cancun",
+  "리우": "Rio de Janeiro", "부에노스아이레스": "Buenos Aires", "시드니": "Sydney",
+  "멜버른": "Melbourne", "브리즈번": "Brisbane", "오클랜드": "Auckland", "카이로": "Cairo",
   "그랜드캐년": "Grand Canyon",
   "그랜드캐니언": "Grand Canyon",
   "융프라우": "Jungfrau",
@@ -42,6 +97,58 @@ const KOREAN_ALIASES = {
   "퀸스타운": "Queenstown",
   "밀포드사운드": "Milford Sound",
 };
+
+// S1: Open-Meteo(GeoNames)의 주 색인은 로마자다. language=ko 는 결과 라벨만 번역할 뿐
+// 한글로 검색되게 해주지 않는다 → '서울'·'제주'·'경주'는 0건, '대구'·'전주'는 북한이 나온다.
+// 그래서 한글 질의는 로마자로 바꿔 한 번 더 던진다. 사전이 1순위(표기 정확), 그 다음이
+// 음절 단위 자동 변환(사전에 없는 지명 대응).
+const KR_ROMAN = {
+  서울: "Seoul", 부산: "Busan", 인천: "Incheon", 대구: "Daegu", 대전: "Daejeon",
+  광주: "Gwangju", 울산: "Ulsan", 세종: "Sejong", 수원: "Suwon", 용인: "Yongin",
+  성남: "Seongnam", 고양: "Goyang", 청주: "Cheongju", 천안: "Cheonan", 김해: "Gimhae",
+  제주: "Jeju", 서귀포: "Seogwipo", 강릉: "Gangneung", 속초: "Sokcho", 양양: "Yangyang",
+  평창: "Pyeongchang", 춘천: "Chuncheon", 경주: "Gyeongju", 전주: "Jeonju", 여수: "Yeosu",
+  순천: "Suncheon", 통영: "Tongyeong", 거제: "Geoje", 안동: "Andong", 남해: "Namhae",
+  태안: "Taean", 가평: "Gapyeong", 부여: "Buyeo", 공주: "Gongju", 목포: "Mokpo",
+  포항: "Pohang", 군산: "Gunsan", 담양: "Damyang", 보령: "Boryeong", 영월: "Yeongwol",
+  설악산: "Seoraksan", 지리산: "Jirisan", 한라산: "Hallasan", 북한산: "Bukhansan",
+  오대산: "Odaesan", 내장산: "Naejangsan", 남산: "Namsan", 성산일출봉: "Seongsan Ilchulbong",
+};
+
+// 한글 음절 → 로마자 (개정 로마자 표기법 근사). 자음동화까지는 처리하지 않으므로
+// 표기가 갈리는 지명은 위 사전이 우선한다.
+const RR_INITIAL = ["g","kk","n","d","tt","r","m","b","pp","s","ss","","j","jj","ch","k","t","p","h"];
+const RR_MEDIAL = ["a","ae","ya","yae","eo","e","yeo","ye","o","wa","wae","oe","yo","u","wo","we","wi","yu","eu","ui","i"];
+const RR_FINAL = ["","k","k","k","n","n","n","t","l","k","m","p","l","l","p","l","m","p","p","t","t","ng","t","t","k","t","p","t"];
+
+function romanize(q) {
+  let out = "";
+  let hadHangul = false;
+  for (const ch of q) {
+    const code = ch.charCodeAt(0) - 0xac00;
+    if (code < 0 || code > 11171) {
+      out += ch;
+      continue;
+    }
+    hadHangul = true;
+    out += RR_INITIAL[Math.floor(code / 588)] + RR_MEDIAL[Math.floor((code % 588) / 28)] + RR_FINAL[code % 28];
+  }
+  return hadHangul ? out : null;
+}
+
+function toRoman(q) {
+  const key = q.replace(/\s/g, "");
+  return KR_ROMAN[key] || romanize(key);
+}
+
+// 여행 대상이 될 수 없는 국가는 후보에서 제외 (한글 질의 시 북한 지명이 대량으로 올라옴)
+const BLOCKED_COUNTRIES = new Set(["KP"]);
+
+// GeoNames feature code 우선순위 — 수도 > 광역 > 시·군 > 마을.
+// 이게 없으면 '부산'이 경상북도 마을로, '인천'이 전라남도 마을로 잡힌다.
+// 도시(PPL*)를 자연 지형(MT·PRK)보다 앞에 둔다 — "경주"처럼 같은 이름의 국립공원이
+// 함께 잡히는 경우, 인구 24만 도시가 인구 0인 공원에 밀리면 안 되기 때문.
+const FEATURE_RANK = { PPLC: 0, PPLA: 1, PPLA2: 2, PPLA3: 3, PPLA4: 4, PPL: 5, PPLX: 6, MT: 7, PRK: 7 };
 
 // Known natural / activity-type destinations. `keys` matched as case-insensitive
 // substrings against the (space-stripped) place name, in Korean or English —
@@ -270,12 +377,113 @@ const DRESSY_POINTS = {
   street: ["레더 자켓", "볼드 주얼리"],
 };
 
+// D3: 목적지 유형(지형)만으로는 여행의 '목적'이 표현되지 않는다는 페르소나 피드백에
+// 따라, 상위 유형 아래에 다중선택 목적 칩을 둔다. 한 여행에 2~3개 선택을 상정.
+const TRIP_PURPOSES = {
+  city: ["미식", "감성·기록", "쇼핑", "전시·문화", "야경·나이트"],
+  activity: ["트레킹·등산", "숲길·산책", "해변·물놀이", "캠핑"],
+  mixed: ["온천·스파", "리조트·호캉스", "로컬 체험", "격식·이벤트"],
+};
+
+// 각 목적이 옷차림/준비물에 주는 실제 변화. shoes/outer 는 그날 추천을 덮어쓰고,
+// packing 은 여행 전체 준비물에 추가된다.
+const PURPOSE_EFFECTS = {
+  "미식": {
+    note: "좌식 식당이 있을 수 있어요 — 벗기 편한 신발과 여유 있는 허리선이 편해요. 냄새 잘 배는 소재(울·기모)는 피하세요.",
+    packing: [{ name: "물티슈", category: "기타" }],
+  },
+  "감성·기록": {
+    note: "사진에 남는 여행이라면 무채색 배경에 포인트 컬러 하나만 더하는 조합이 가장 잘 나와요.",
+    packing: [{ name: "카메라·여분 배터리", category: "전자기기" }],
+  },
+  "쇼핑": {
+    note: "피팅이 잦아요 — 탈착 쉬운 겉옷과 벗기 편한 신발을 권장해요.",
+    packing: [{ name: "접이식 에코백", category: "기타" }],
+  },
+  "전시·문화": {
+    note: "전시장 냉방이 강해요 — 얇은 레이어 한 장을 가방에 넣어두세요.",
+  },
+  "야경·나이트": {
+    note: "해가 진 뒤 기온이 크게 떨어져요 — 낮에 덥더라도 겉옷 하나는 필수예요.",
+  },
+  "트레킹·등산": {
+    note: "기능성 우선 — 땀 배출 잘 되는 이너에 방풍 아우터를 겹치세요.",
+    shoes: "트레킹화",
+    outer: "방풍 바람막이",
+    packing: [{ name: "등산 양말", category: "의류" }, { name: "물통", category: "기타" }],
+  },
+  "숲길·산책": {
+    note: "저강도 산책이라 트레킹화는 과해요 — 쿠션 좋은 운동화면 충분해요.",
+    shoes: "쿠션 좋은 운동화",
+  },
+  "해변·물놀이": {
+    note: "자외선이 강해요 — 속건 소재와 모자를 챙기세요.",
+    shoes: "샌들",
+    packing: [
+      { name: "수영복", category: "의류" },
+      { name: "비치 타월", category: "기타" },
+      { name: "자외선 차단제", category: "상비약" },
+    ],
+  },
+  "캠핑": {
+    note: "밤 기온이 낮보다 크게 떨어져요 — 경량 패딩 한 벌이 짐 대비 효율이 가장 좋아요.",
+    packing: [{ name: "경량 패딩", category: "의류" }, { name: "헤드랜턴", category: "전자기기" }],
+  },
+  "온천·스파": {
+    note: "입고 벗기 간편한 옷이 유리해요 — 복잡한 레이어드는 피하세요.",
+    packing: [{ name: "여벌 속옷", category: "의류" }, { name: "세면도구", category: "기타" }],
+  },
+  "리조트·호캉스": {
+    note: "실내 냉방이 강해요 — 여름이어도 얇은 겉옷을 챙기세요.",
+    packing: [{ name: "슬리퍼", category: "신발" }],
+  },
+  "로컬 체험": {
+    note: "활동성과 예의를 함께 지켜야 해요 — 과한 노출은 피하고 움직이기 편한 옷을 고르세요.",
+  },
+  "격식·이벤트": {
+    note: "격식 있는 일정이 있어요 — 재킷과 구두 한 벌을 별도로 준비하세요.",
+    packing: [{ name: "재킷", category: "의류" }, { name: "구두", category: "신발" }],
+  },
+};
+
+// D4: 기본 풀은 성별 중립이다. 성별을 고르면 그 성별에서 실제로 선택지가 늘어나는
+// 항목만 덧붙인다 (풀 전체를 성별로 복제하지 않음 — 관리 비용 대비 이득이 없다).
+const GENDER_EXTRAS = {
+  female: {
+    bottom: {
+      freezing: ["기모 롱스커트 + 두꺼운 타이츠"],
+      cold: ["울 미디 스커트 + 타이츠"],
+      cool: ["미디 스커트"],
+      mild: ["플리츠 스커트"],
+      warm: ["린넨 스커트"],
+      hot: ["코튼 스커트"],
+    },
+    shoes: { cool: ["앵클부츠"], mild: ["플랫 슈즈"], warm: ["스트랩 샌들"] },
+  },
+  male: {
+    bottom: { warm: ["치노 반바지"], hot: ["코튼 반바지"] },
+    shoes: { cold: ["첼시부츠"], mild: ["스웨이드 스니커즈"] },
+  },
+};
+
+function poolFor(stylePref, bandKey, gender) {
+  const base = OUTFIT_POOLS[stylePref][bandKey];
+  const extra = GENDER_EXTRAS[gender];
+  if (!extra) return base;
+  const merged = { ...base };
+  ["outer", "top", "bottom", "shoes"].forEach((slot) => {
+    const add = extra[slot] && extra[slot][bandKey];
+    if (add) merged[slot] = [...base[slot], ...add];
+  });
+  return merged;
+}
+
 function pick(arr, n) {
   return arr[((n % arr.length) + arr.length) % arr.length];
 }
 
-function composeOutfit(stylePref, bandKey, activity, dayIndex) {
-  const pool = OUTFIT_POOLS[stylePref][bandKey];
+function composeOutfit(stylePref, bandKey, activity, dayIndex, purposes = [], gender = "") {
+  const pool = poolFor(stylePref, bandKey, gender);
   let outer = pick(pool.outer, dayIndex);
   const top = pick(pool.top, dayIndex);
   const bottom = pick(pool.bottom, dayIndex + 1);
@@ -285,20 +493,71 @@ function composeOutfit(stylePref, bandKey, activity, dayIndex) {
   if (activity === "액티비티") {
     outer = pick(ACTIVITY_GEAR.outer, dayIndex);
     shoes = pick(ACTIVITY_GEAR.shoes, dayIndex);
-    extra = "기능성 우선 — 땀 배출 잘 되는 소재로 상의를 고르세요.";
+    extra = T("기능성 우선 — 땀 배출 잘 되는 소재로 상의를 고르세요.");
   } else if (activity === "식사·격식") {
-    extra = `포인트: ${pick(DRESSY_POINTS[stylePref], dayIndex)}를 더해 격식을 높이세요.`;
+    extra = t("dressyPoint", T(pick(DRESSY_POINTS[stylePref], dayIndex)));
   } else {
-    extra = "도보 이동이 많다면 신발은 편한 쪽을 우선하세요.";
+    extra = T("도보 이동이 많다면 신발은 편한 쪽을 우선하세요.");
   }
+
+  // 목적 칩이 신발/아우터를 덮어쓴다 (뒤에 선택된 목적이 우선)
+  purposes.forEach((p) => {
+    const eff = PURPOSE_EFFECTS[p];
+    if (!eff) return;
+    if (eff.shoes) shoes = eff.shoes;
+    if (eff.outer && outer) outer = eff.outer;
+  });
 
   const clothing = [outer, top, bottom].filter(Boolean);
   const items = [
     ...clothing.map((name) => ({ name, category: "의류" })),
     { name: shoes, category: "신발" },
   ];
-  const parts = clothing.join(" + ");
-  return { line: `${parts}, ${shoes}`, extra, items };
+  // items(상태)는 한국어 원문을 유지하고, 화면에 나가는 line 만 현재 언어로 만든다
+  const parts = clothing.map(T).join(" + ");
+  return { line: `${parts}, ${T(shoes)}`, extra, items };
+}
+
+// D1: 준비물의 중심이 옷이 아니라는 피드백 → 여행 전체 단위 준비물을 자동 생성.
+// 옷/신발은 날짜별 코디에서 오고, 여기서는 그 외 전부를 담당한다.
+function buildEssentials({ isOverseas, nights, hist, purposes }) {
+  const items = [];
+  const add = (name, category) => items.push({ name, category, status: "own" });
+
+  if (isOverseas) {
+    add("여권 (유효기간 6개월 이상)", "서류·결제");
+    add("항공권 e티켓", "서류·결제");
+    add("해외 결제 가능 카드", "서류·결제");
+    add("현지 통화 현금", "서류·결제");
+    add("여행자 보험 증서", "서류·결제");
+    add("멀티 어댑터", "전자기기");
+  } else {
+    add("신분증", "서류·결제");
+    add("교통·숙소 예약 확인", "서류·결제");
+  }
+
+  add("휴대폰 충전기", "전자기기");
+  if (nights >= 2) add("보조배터리", "전자기기");
+  add("상비약 (진통제·소화제·밴드)", "상비약");
+  add("세면도구", "기타");
+
+  if (hist.precipChance >= 35) add("접이식 우산", "기타");
+  if (hist.avgHigh >= 26) add("자외선 차단제", "상비약");
+  if (hist.avgLow <= 5) add("보온 이너웨어", "의류");
+  if (hist.diurnal >= 10) add("얇은 겉옷 (아침저녁용)", "의류");
+
+  purposes.forEach((p) => {
+    (PURPOSE_EFFECTS[p]?.packing || []).forEach((it) => add(it.name, it.category));
+  });
+
+  // 목적 칩이 중복 추가하는 항목 제거
+  const seen = new Set();
+  return items.filter((it) => {
+    const k = itemKey(it.name);
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
 }
 
 // ---------- State ----------
@@ -306,11 +565,72 @@ function composeOutfit(stylePref, bandKey, activity, dayIndex) {
 let selectedCity = null; // { name, lat, lon, country }
 let selectedType = "city";
 let geocodeTimer = null;
+let selectedPurposes = []; // D3: 다중선택된 여행 목적 칩
 
 // wardrobe planner state: date -> { activity, stylePref, bandKey, dayIndex, items:[{name,category,status}] }
 // status: "own" (보유) | "buy" (사야 함); item.editing = true while renaming inline
 let wardrobeState = {};
+let essentialsState = []; // D1: 여행 전체 단위 준비물 (옷/신발 외)
 let editingFocus = null; // { date, idx } to refocus after a redraw
+let lastPlanContext = null; // { hist, isOverseas, nights } — 목적 변경 시 준비물 재생성용
+
+// ---------- D2: 온도 단위 & 기준 도시 ----------
+
+function detectHome() {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (HOME_BASELINES[tz]) return { ...HOME_BASELINES[tz], tz };
+  } catch {
+    /* noop */
+  }
+  return { ...DEFAULT_HOME, tz: null };
+}
+
+function detectUnit() {
+  const langs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ""];
+  for (const l of langs) {
+    const region = (l.split("-")[1] || "").toUpperCase();
+    if (region) return FAHRENHEIT_REGIONS.has(region) ? "F" : "C";
+  }
+  return "C";
+}
+
+const homeCity = detectHome();
+let tempUnit = localStorage.getItem("wc-unit") || detectUnit();
+
+// ---------- D6: 언어 ----------
+// 상태에는 항상 한국어 원문을 저장하고, 그릴 때만 번역한다. 저장 리스트와 마지막
+// 스냅샷이 언어와 무관하게 유지되고, 언어를 바꿔도 다시 계산할 필요가 없다.
+
+let lang = localStorage.getItem("wc-lang") || (String(navigator.language || "").toLowerCase().startsWith("ko") ? "ko" : "en");
+
+// 화면 문장 (없는 키는 한국어로 폴백)
+function t(key, ...args) {
+  const v = (UI[lang] && UI[lang][key]) ?? UI.ko[key];
+  return typeof v === "function" ? v(...args) : v;
+}
+
+// 데이터에 박힌 한국어 용어 → 현재 언어. 사용자가 직접 입력한 아이템은 사전에
+// 없으므로 원문 그대로 나간다.
+function T(s) {
+  if (lang === "ko" || s == null) return s;
+  return TERMS[s] || s;
+}
+
+function toUnit(c) {
+  return tempUnit === "F" ? c * 9 / 5 + 32 : c;
+}
+
+// 절대 온도 표기 (예: 12.3°C / 54.1°F)
+function fmtTemp(c, digits = 0) {
+  return `${toUnit(c).toFixed(digits)}°${tempUnit}`;
+}
+
+// 온도 '차이' 표기 — 화씨 변환 시 +32 오프셋을 적용하면 안 되므로 분리
+function fmtDelta(c, digits = 0) {
+  const v = tempUnit === "F" ? c * 9 / 5 : c;
+  return `${v.toFixed(digits)}°`;
+}
 
 // ---------- DOM ----------
 
@@ -320,6 +640,11 @@ const startDateInput = document.getElementById("start-date");
 const endDateInput = document.getElementById("end-date");
 const typeToggle = document.getElementById("type-toggle");
 const typeHint = document.getElementById("type-hint");
+const purposeBox = document.getElementById("purpose-chips");
+const unitToggle = document.getElementById("unit-toggle");
+const langToggle = document.getElementById("lang-toggle");
+const genderSelect = document.getElementById("gender-pref");
+const savedCard = document.getElementById("saved-card");
 const styleSelect = document.getElementById("style-pref");
 const photoInput = document.getElementById("photo-input");
 const uploadBtn = document.getElementById("upload-btn");
@@ -348,13 +673,12 @@ function setType(type, auto) {
   [...typeToggle.children].forEach((btn) => {
     btn.classList.toggle("selected", btn.dataset.type === type);
   });
-  typeHint.textContent = auto
-    ? `자동 판별: "${selectedCity ? selectedCity.name : ""}"은(는) ${typeLabel(type)}으로 분류했어요. 필요하면 위에서 직접 바꿀 수 있어요.`
-    : "";
+  typeHint.textContent = auto ? t("typeAuto", selectedCity ? selectedCity.name : "", typeLabel(type)) : "";
+  drawPurposes();
 }
 
 function typeLabel(type) {
-  return type === "activity" ? "자연·액티비티형" : type === "mixed" ? "혼합형" : "도시형";
+  return t(type === "activity" ? "typeActivity" : type === "mixed" ? "typeMixed" : "typeCity");
 }
 
 typeToggle.addEventListener("click", (e) => {
@@ -362,6 +686,292 @@ typeToggle.addEventListener("click", (e) => {
   if (!btn) return;
   setType(btn.dataset.type, false);
 });
+
+// D3: 상위 유형의 목적 칩을 우선 노출하되, 여행은 대개 섞이므로 다른 유형의 목적도
+// 함께 고를 수 있게 전부 보여준다 (선택된 유형 것이 앞에 오도록 정렬).
+function drawPurposes() {
+  const order = [selectedType, ...Object.keys(TRIP_PURPOSES).filter((t) => t !== selectedType)];
+  purposeBox.innerHTML = order
+    .map((t) => {
+      const chips = TRIP_PURPOSES[t]
+        .map((p) => {
+          const on = selectedPurposes.includes(p);
+          return `<button type="button" class="purpose-chip${on ? " on" : ""}" data-purpose="${esc(p)}">${esc(T(p))}</button>`;
+        })
+        .join("");
+      return `<div class="purpose-group${t === selectedType ? " primary" : ""}">
+          <span class="purpose-group-label">${typeLabel(t)}</span>
+          <div class="purpose-chip-row">${chips}</div>
+        </div>`;
+    })
+    .join("");
+}
+
+purposeBox.addEventListener("click", (e) => {
+  const btn = e.target.closest(".purpose-chip");
+  if (!btn) return;
+  const p = btn.dataset.purpose;
+  const i = selectedPurposes.indexOf(p);
+  if (i >= 0) selectedPurposes.splice(i, 1);
+  else selectedPurposes.push(p);
+  drawPurposes();
+  // 결과가 이미 떠 있으면 목적 변경을 즉시 반영
+  if (lastPlanContext) {
+    rebuildEssentials();
+    drawPlan();
+    renderTips(lastPlanContext.cityName, lastPlanContext.country, lastPlanContext.hist, selectedType, lastPlanContext.activity);
+  }
+});
+
+// D2: 온도 단위 토글 — 기본값은 로케일 자동 감지, 사용자가 바꾸면 기억한다.
+function drawUnitToggle() {
+  [...unitToggle.children].forEach((b) => b.classList.toggle("selected", b.dataset.unit === tempUnit));
+  document.getElementById("home-baseline").textContent = t("baseline", T(homeCity.name), tempUnit);
+}
+
+// D6: 정적 텍스트를 현재 언어로 채운다. data-i18n(텍스트) / -html(태그 포함) / -placeholder.
+function applyStaticI18n() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  document.querySelectorAll("[data-i18n-html]").forEach((el) => {
+    el.innerHTML = t(el.dataset.i18nHtml);
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+    el.placeholder = t(el.dataset.i18nPlaceholder);
+  });
+  [...styleSelect.options].forEach((o) => {
+    o.textContent = T(STYLE_LABELS[o.value]);
+  });
+  [...langToggle.children].forEach((b) => b.classList.toggle("selected", b.dataset.lang === lang));
+  drawUnitToggle();
+}
+
+// 언어를 바꾸면 화면 전체를 다시 그린다 — 상태는 한국어로 남아 있으므로 재조회는 없다.
+langToggle.addEventListener("click", (e) => {
+  const btn = e.target.closest(".unit-btn");
+  if (!btn || btn.dataset.lang === lang) return;
+  lang = btn.dataset.lang;
+  localStorage.setItem("wc-lang", lang);
+  applyStaticI18n();
+  drawPurposes();
+  drawSaved();
+  if (selectedCity) setType(selectedType, false);
+  if (lastPlanContext) {
+    const c = lastPlanContext;
+    renderWeather(c.hist, c.forecast, c.cityName, c.homeHist);
+    renderReference(c.cityName, selectedType, c.activity, c.hist);
+    drawPlan();
+    renderTips(c.cityName, c.country, c.hist, selectedType, c.activity);
+  }
+});
+
+unitToggle.addEventListener("click", (e) => {
+  const btn = e.target.closest(".unit-btn");
+  if (!btn || btn.dataset.unit === tempUnit) return;
+  tempUnit = btn.dataset.unit;
+  localStorage.setItem("wc-unit", tempUnit);
+  drawUnitToggle();
+  if (lastPlanContext) {
+    const c = lastPlanContext;
+    renderWeather(c.hist, c.forecast, c.cityName, c.homeHist);
+    drawPlan();
+    renderTips(c.cityName, c.country, c.hist, selectedType, c.activity);
+  }
+});
+
+// D4: 성별은 추천 아이템 풀만 넓힌다 (스커트/반바지/부츠 등). 이미 결과가 떠 있으면 즉시 반영.
+genderSelect.addEventListener("change", () => {
+  if (!lastPlanContext) return;
+  Object.keys(wardrobeState).forEach((date) => seedItems(date));
+  drawPlan();
+});
+
+// ---------- 뷰 전환 (검색 / 준비 리스트 / 저장) ----------
+// 모바일에서 입력·결과·저장이 한 페이지에 쌓여 스크롤이 길어지는 문제를 뷰 분리로 해결.
+
+const appNav = document.getElementById("app-nav");
+
+function showView(name) {
+  document.body.dataset.view = name; // 결과·저장 뷰에서는 히어로 헤더를 축소해 화면을 아낀다
+  document.querySelectorAll(".view").forEach((v) => v.classList.toggle("active", v.id === `view-${name}`));
+  [...appNav.children].forEach((b) => b.classList.toggle("active", b.dataset.view === name));
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+appNav.addEventListener("click", (e) => {
+  const btn = e.target.closest(".nav-btn");
+  if (btn) showView(btn.dataset.view);
+});
+
+// ---------- D4: 저장 리스트 ----------
+// 1인용 구조를 유지하되, 가족 여행처럼 "기준을 바꿔 다시 검색"해야 하는 경우를
+// 저장 리스트로 해결한다. localStorage에 남으므로 창을 닫아도 결과가 사라지지 않는다.
+
+const SAVED_KEY = "wc-saved";
+
+function loadSaved() {
+  try {
+    const v = JSON.parse(localStorage.getItem(SAVED_KEY));
+    return Array.isArray(v) ? v : [];
+  } catch {
+    return [];
+  }
+}
+
+let savedTrips = loadSaved();
+
+function persistSaved() {
+  localStorage.setItem(SAVED_KEY, JSON.stringify(savedTrips));
+}
+
+function genderLabel(g) {
+  return t(g === "female" ? "genderFemale" : g === "male" ? "genderMale" : "savedGenderNone");
+}
+
+function saveCurrentTrip() {
+  if (!selectedCity || !lastPlanContext) return;
+  savedTrips.unshift({
+    id: `t${Date.now()}`,
+    city: { ...selectedCity },
+    start: startDateInput.value,
+    end: endDateInput.value,
+    type: selectedType,
+    purposes: [...selectedPurposes],
+    style: styleSelect.value,
+    gender: genderSelect.value,
+    buyCount: buildPackingList().filter((i) => i.status === "buy").length,
+    total: buildPackingList().length,
+  });
+  savedTrips = savedTrips.slice(0, 20);
+  persistSaved();
+  drawSaved();
+}
+
+function drawSaved() {
+  const badge = document.getElementById("nav-saved-count");
+  badge.textContent = savedTrips.length;
+  badge.classList.toggle("hidden", !savedTrips.length);
+  document.getElementById("saved-empty").classList.toggle("hidden", savedTrips.length > 0);
+
+  if (!savedTrips.length) {
+    savedCard.classList.add("hidden");
+    savedCard.innerHTML = "";
+    return;
+  }
+  savedCard.classList.remove("hidden");
+  const rows = savedTrips
+    .map(
+      (s) => `<li class="saved-row">
+        <div class="saved-main">
+          <span class="saved-city">${esc(s.city.name)}</span>
+          <span class="saved-meta">${esc(s.start)} ~ ${esc(s.end)} · ${esc(genderLabel(s.gender))}${
+        s.purposes.length ? ` · ${esc(s.purposes.map(T).join(", "))}` : ""
+      }</span>
+          <span class="saved-meta">${esc(t("savedCount", s.total, s.buyCount))}</span>
+        </div>
+        <button type="button" class="saved-load" data-saved-id="${s.id}">${t("savedLoad")}</button>
+        <button type="button" class="saved-del" data-saved-del="${s.id}" aria-label="${t("ariaDelete")}">✕</button>
+      </li>`
+    )
+    .join("");
+  savedCard.innerHTML = `
+    <div class="saved-head">
+      <h3>${t("savedTitle")}</h3>
+      <span class="hint">${t("savedHint")}</span>
+    </div>
+    <ul class="saved-list">${rows}</ul>
+  `;
+}
+
+savedCard.addEventListener("click", (e) => {
+  const del = e.target.closest(".saved-del");
+  if (del) {
+    savedTrips = savedTrips.filter((t) => t.id !== del.dataset.savedDel);
+    persistSaved();
+    drawSaved();
+    return;
+  }
+  const load = e.target.closest(".saved-load");
+  if (!load) return;
+  const t = savedTrips.find((x) => x.id === load.dataset.savedId);
+  if (!t) return;
+  selectedCity = { ...t.city };
+  cityInput.value = t.city.name;
+  startDateInput.value = t.start;
+  endDateInput.value = t.end;
+  styleSelect.value = t.style;
+  genderSelect.value = t.gender || "";
+  selectedPurposes = [...t.purposes];
+  setType(t.type, false);
+  suggestionsBox.classList.add("hidden");
+  submitBtn.click();
+});
+
+drawSaved();
+
+// ---------- 마지막 결과 자동 보존 ----------
+// 저장 버튼을 누르지 않아도 마지막으로 만든 준비 리스트는 남아야 한다.
+// (브라우저 탭을 옮겼다 돌아오거나 새로고침해도 사라지지 않도록 localStorage에 스냅샷)
+// 날씨 응답까지 통째로 담으므로 복원 시 네트워크 요청이 없다.
+
+const LAST_KEY = "wc-last";
+
+function persistLast() {
+  if (!lastPlanContext || !selectedCity) return;
+  try {
+    localStorage.setItem(
+      LAST_KEY,
+      JSON.stringify({
+        city: selectedCity,
+        start: startDateInput.value,
+        end: endDateInput.value,
+        type: selectedType,
+        purposes: selectedPurposes,
+        style: styleSelect.value,
+        gender: genderSelect.value,
+        ctx: lastPlanContext,
+        wardrobeState,
+        essentialsState,
+      })
+    );
+  } catch {
+    /* 용량 초과 등은 무시 — 보존은 부가 기능이므로 앱을 막지 않는다 */
+  }
+}
+
+function restoreLast() {
+  let s;
+  try {
+    s = JSON.parse(localStorage.getItem(LAST_KEY));
+  } catch {
+    return;
+  }
+  if (!s || !s.ctx || !s.wardrobeState) return;
+
+  selectedCity = s.city;
+  cityInput.value = s.city.name;
+  startDateInput.value = s.start;
+  endDateInput.value = s.end;
+  styleSelect.value = s.style;
+  genderSelect.value = s.gender || "";
+  selectedPurposes = s.purposes || [];
+  setType(s.type, false);
+
+  lastPlanContext = s.ctx;
+  wardrobeState = s.wardrobeState;
+  essentialsState = s.essentialsState || [];
+
+  const c = s.ctx;
+  renderWeather(c.hist, c.forecast, c.cityName, c.homeHist);
+  renderReference(c.cityName, s.type, c.activity, c.hist);
+  drawPlan();
+  renderTips(c.cityName, c.country, c.hist, s.type, c.activity);
+
+  resultsSection.classList.remove("hidden");
+  document.getElementById("results-empty").classList.add("hidden");
+}
 
 // ---------- Geocoding & autocomplete ----------
 
@@ -376,48 +986,98 @@ cityInput.addEventListener("input", () => {
   geocodeTimer = setTimeout(() => searchCity(q), 300);
 });
 
-async function geocode(q, lang) {
-  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=6&language=${lang}&format=json`;
-  const res = await fetch(url);
+let searchAbort = null;
+
+async function geocode(q, labelLang, signal) {
+  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=10&language=${labelLang}&format=json`;
+  const res = await fetch(url, { signal });
   const data = await res.json();
   return data.results || [];
 }
 
+// 규모를 행정등급보다 먼저 본다. 등급만 보면 인구 7,864명의 York(영국식 PPLA2)가
+// 인구 880만 뉴욕시(PPL)를 이기고, 이름이 겹치는 벽지 지명이 광역시를 밀어낸다.
+function popBucket(r) {
+  const p = r.population || 0;
+  if (p >= 500000) return 0;
+  if (p >= 100000) return 1;
+  if (p >= 10000) return 2;
+  return 3;
+}
+
+function rankResults(results) {
+  const seen = new Set();
+  return results
+    .filter((r) => {
+      if (BLOCKED_COUNTRIES.has(r.country_code)) return false;
+      // 질의를 여러 번 던지므로 같은 곳이 중복으로 들어온다
+      const key = `${r.latitude.toFixed(2)},${r.longitude.toFixed(2)}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort(
+      (a, b) =>
+        popBucket(a) - popBucket(b) ||
+        (FEATURE_RANK[a.feature_code] ?? 8) - (FEATURE_RANK[b.feature_code] ?? 8) ||
+        (b.population || 0) - (a.population || 0)
+    )
+    .slice(0, 6);
+}
+
 function resolveAlias(q) {
   const norm = q.replace(/\s/g, "").toLowerCase();
-  for (const [k, v] of Object.entries(KOREAN_ALIASES)) {
-    const key = k.toLowerCase();
-    if (norm.includes(key) || (norm.length >= 2 && key.startsWith(norm))) return v;
-  }
-  return null;
+  const entries = Object.entries(KOREAN_ALIASES);
+  const exact = entries.find(([k]) => k.toLowerCase() === norm);
+  if (exact) return exact[1];
+  // 짧은 키(‘빈’·‘대만’)가 아무 데나 걸리지 않도록 부분일치는 길이 조건을 둔다
+  const prefix = norm.length >= 2 && entries.find(([k]) => k.toLowerCase().startsWith(norm));
+  if (prefix) return prefix[1];
+  const partial = entries.find(([k]) => k.length >= 3 && norm.includes(k.toLowerCase()));
+  return partial ? partial[1] : null;
 }
 
 async function searchCity(q) {
+  // 이전 요청을 취소하지 않으면 늦게 도착한 응답이 최신 후보를 덮어쓴다
+  if (searchAbort) searchAbort.abort();
+  searchAbort = new AbortController();
+  const { signal } = searchAbort;
+
+  // 한 질의로는 안 된다. language 파라미터가 라벨뿐 아니라 '매칭'에도 영향을 주기
+  // 때문이다 — "부산"은 한글 색인에서 전라남도 마을을, "Busan"은 광역시를 찾는다.
+  // 그래서 원문·별칭·로마자를 모두 던지고 결과를 합친 뒤 규모 기준으로 고른다.
+  // 라벨 언어도 두 벌 던진다 — UI가 한국어일 때 "New York"을 language=ko로 물으면
+  // 뉴욕시가 아예 후보에 없다. UI 언어 결과를 앞에 두어 라벨은 UI 언어를 우선한다.
+  const variants = [...new Set([q, resolveAlias(q), toRoman(q)].filter(Boolean))];
+  const langs = [lang, lang === "ko" ? "en" : "ko"];
+
   try {
-    let results = await geocode(q, "ko");
-    // Korean POI names (그랜드캐년 등) often miss — retry with English alias, then English search
-    if (!results.length) {
-      const alias = resolveAlias(q);
-      if (alias) results = await geocode(alias, "ko");
-    }
-    if (!results.length) results = await geocode(q, "en");
-    renderSuggestions(results);
+    const pages = await Promise.all(
+      langs.flatMap((l) => variants.map((name) => geocode(name, l, signal).catch(() => [])))
+    );
+    const results = rankResults(pages.flat());
+    if (results.length) renderSuggestions(results);
+    else renderNoMatch(q);
   } catch (err) {
-    suggestionsBox.classList.add("hidden");
+    if (err.name !== "AbortError") suggestionsBox.classList.add("hidden");
   }
 }
 
+function renderNoMatch(q) {
+  suggestionsBox.innerHTML = `<div class="suggestion-empty">${esc(t("noMatch", q))}</div>`;
+  suggestionsBox.classList.remove("hidden");
+}
+
 function renderSuggestions(results) {
-  if (!results.length) {
-    suggestionsBox.classList.add("hidden");
-    return;
-  }
   suggestionsBox.innerHTML = "";
   results.forEach((r) => {
     const div = document.createElement("div");
     div.className = "suggestion-item";
     const region = [r.admin1, r.country].filter(Boolean).join(", ");
-    div.textContent = region ? `${r.name} (${region})` : r.name;
+    // 동명 지명이 많아 규모까지 보여야 광역시와 시골 마을이 구분된다
+    // 1만 미만은 "인구 0만"으로 표시되므로 문구를 바꾼다
+    const scale = r.population >= 10000 ? t("popScale", r.population) : t("popSmall");
+    div.innerHTML = `<span class="sugg-name">${esc(r.name)}</span><span class="sugg-meta">${esc(region)} · ${scale}</span>`;
     div.addEventListener("click", () => {
       selectedCity = { name: r.name, lat: r.latitude, lon: r.longitude, country: r.country || "" };
       cityInput.value = r.name;
@@ -476,9 +1136,9 @@ photoInput.addEventListener("change", async () => {
 
   styleSelect.value = style;
   styleAnalysis.classList.remove("hidden");
+  const satLabel = t(avgSat > 0.45 ? "satHigh" : avgSat > 0.25 ? "satMid" : "satLow");
   styleAnalysis.innerHTML = `
-    사진 ${files.length}장의 색감을 분석했어요 — 뉴트럴 톤 비중 ${Math.round(neutralRatio * 100)}%, 채도 ${avgSat > 0.45 ? "높음" : avgSat > 0.25 ? "중간" : "낮음"}.
-    <strong>${STYLE_LABELS[style]}</strong> 스타일로 추천했어요. 아래에서 직접 바꿀 수 있어요.
+    ${t("photoResult", files.length, Math.round(neutralRatio * 100), satLabel, T(STYLE_LABELS[style]))}
     <div class="palette">${palette.map((c) => `<span class="swatch" style="background:${c}"></span>`).join("")}</div>
   `;
 });
@@ -632,19 +1292,23 @@ function tempBand(avgHigh) {
 
 // ---------- Rendering ----------
 
-function renderWeather(hist, forecast, cityName, seoulHist) {
+function renderWeather(hist, forecast, cityName, homeHist) {
   const box = document.getElementById("weather-summary");
   const band = tempBand(hist.avgHigh);
 
+  // D2: 비교 기준은 서울 고정이 아니라 접속 위치로 추정한 거주 도시
   let compareLine = "";
-  if (seoulHist) {
-    const diff = Math.round(hist.avgHigh - seoulHist.avgHigh);
-    if (Math.abs(diff) <= 2) {
-      compareLine = `서울의 같은 시기와 기온대가 비슷해요.`;
-    } else if (diff > 0) {
-      compareLine = `서울의 같은 시기보다 평균 최고기온이 약 ${diff}도 높아요.`;
+  if (homeHist) {
+    const diff = hist.avgHigh - homeHist.avgHigh;
+    const r = Math.round(diff);
+    const home = T(homeCity.name);
+    if (Math.abs(r) <= 2) {
+      compareLine = t("cmpSame", home);
+    } else if (r > 0) {
+      compareLine = t("cmpWarmer", home, fmtDelta(diff));
     } else {
-      compareLine = `서울의 같은 시기보다 평균 최고기온이 약 ${Math.abs(diff)}도 낮아요. 아침저녁 체감은 더 쌀쌀할 수 있어요.`;
+      compareLine = t("cmpColder", home, fmtDelta(Math.abs(diff)));
+      if (diff <= -15) compareLine += t("cmpMuchColder");
     }
   }
 
@@ -652,19 +1316,19 @@ function renderWeather(hist, forecast, cityName, seoulHist) {
   if (forecast && forecast.daily) {
     const fh = forecast.daily.temperature_2m_max;
     const fl = forecast.daily.temperature_2m_min;
-    const avgFH = Math.round(fh.reduce((a, b) => a + b, 0) / fh.length);
-    const avgFL = Math.round(fl.reduce((a, b) => a + b, 0) / fl.length);
-    forecastHtml = `<div class="forecast-note">출발이 2주 이내라 실제 예보도 확인했어요 — 예상 최고/최저 평균 ${avgFH}° / ${avgFL}°. 과거 평균과 크게 다르면 예보 쪽을 우선하세요.</div>`;
+    const avgFH = fh.reduce((a, b) => a + b, 0) / fh.length;
+    const avgFL = fl.reduce((a, b) => a + b, 0) / fl.length;
+    forecastHtml = `<div class="forecast-note">${esc(t("forecastNote", fmtTemp(avgFH), fmtTemp(avgFL)))}</div>`;
   }
 
   box.innerHTML = `
-    <p class="weather-headline">${cityName} · 최근 ${hist.sampleYears}년 평균 (${band.label})</p>
-    <p class="weather-compare">${compareLine}</p>
+    <p class="weather-headline">${esc(t("weatherHeadline", cityName, hist.sampleYears, T(band.label)))}</p>
+    <p class="weather-compare">${esc(compareLine)}</p>
     <div class="weather-grid">
-      <div class="weather-stat"><span class="label">평균 최고기온</span><span class="value">${hist.avgHigh.toFixed(1)}°C</span></div>
-      <div class="weather-stat"><span class="label">평균 최저기온</span><span class="value">${hist.avgLow.toFixed(1)}°C</span></div>
-      <div class="weather-stat"><span class="label">일교차</span><span class="value">${hist.diurnal.toFixed(1)}°C</span></div>
-      <div class="weather-stat"><span class="label">비 올 확률</span><span class="value">${hist.precipChance}%</span></div>
+      <div class="weather-stat"><span class="label">${t("statHigh")}</span><span class="value">${fmtTemp(hist.avgHigh, 1)}</span></div>
+      <div class="weather-stat"><span class="label">${t("statLow")}</span><span class="value">${fmtTemp(hist.avgLow, 1)}</span></div>
+      <div class="weather-stat"><span class="label">${t("statDiurnal")}</span><span class="value">${fmtDelta(hist.diurnal, 1)}</span></div>
+      <div class="weather-stat"><span class="label">${t("statRain")}</span><span class="value">${hist.precipChance}%</span></div>
     </div>
     ${forecastHtml}
   `;
@@ -706,40 +1370,43 @@ function renderReference(cityName, type, activity, hist) {
   const band = tempBand(hist.avgHigh);
   const w = WEATHER_SEARCH[band.key];
   const wx = w.en; // weather keywords injected into English image queries
-  const tempTag = `평균 ${Math.round(hist.avgLow)}~${Math.round(hist.avgHigh)}°`;
-  const weatherLine = `실제 기온(${tempTag}, ${band.label})을 검색어에 반영했어요 — 달력상 ${monthName}이 아니라 그 목적지가 실제로 얼마나 덥고 추운지를 기준으로 옷을 찾아요.`;
+  const bandLabel = T(band.label);
+  const act = activity ? T(activity) : T("액티비티");
+  const tempTag = t("refTempTag", Math.round(hist.avgLow), Math.round(hist.avgHigh));
+  const weatherLine = t("refWeatherLine", tempTag, bandLabel, monthName);
 
   let comment = "";
   let links = [];
 
   if (type === "activity") {
-    comment = `${cityName}은(는) 자연·액티비티형 목적지로 분류했어요. 대표 활동: ${activity || "액티비티"}. ${weatherLine}`;
+    comment = t("refActivity", cityName, act, weatherLine);
     links = [
-      { label: `Pinterest — ${cityName} ${band.label} 하이킹 룩`, sub: "옷차림 콘텐츠 위주라 결과가 가장 깨끗해요", url: pinterestUrl(`${cityName} hiking ${wx} what to wear`) },
-      { label: `구글 이미지 — ${cityName} 트레킹 복장 (${tempTag})`, sub: `기온대(${band.label}) 키워드를 넣은 필터 검색`, url: googleImagesUrl(`${cityName} ${monthName} hiking trail ${wx} ootd`) },
-      { label: `구글 — ${cityName} 트레일 옷차림 후기`, sub: "실제 다녀온 여행자들의 텍스트 후기", url: `https://www.google.com/search?q=${encodeURIComponent(cityName + " " + monthName + " trail what to wear " + w.ko + " packing tips")}` },
+      { label: t("refPinHike", cityName, bandLabel), sub: t("refSubPin"), url: pinterestUrl(`${cityName} hiking ${wx} what to wear`) },
+      { label: t("refGoogleHike", cityName, tempTag), sub: t("refSubGoogle", bandLabel), url: googleImagesUrl(`${cityName} ${monthName} hiking trail ${wx} ootd`) },
+      { label: t("refGoogleReview", cityName), sub: t("refSubReview"), url: `https://www.google.com/search?q=${encodeURIComponent(`${cityName} ${monthName} trail what to wear ${lang === "ko" ? w.ko : wx} packing tips`)}` },
     ];
   } else if (type === "mixed") {
-    comment = `${cityName}은(는) 도심 관광과 액티비티(${activity || "액티비티"})가 함께 있는 혼합형 목적지예요. ${weatherLine}`;
+    comment = t("refMixed", cityName, act, weatherLine);
     links = [
-      { label: `Pinterest — ${cityName} ${band.label} 여행 룩`, sub: "옷차림 콘텐츠 위주라 결과가 가장 깨끗해요", url: pinterestUrl(`${cityName} travel ${wx} ootd`) },
-      { label: `Pinterest — ${cityName} ${band.label} 액티비티 복장`, sub: "기온대에 맞는 하이킹·아웃도어 룩", url: pinterestUrl(`${cityName} hiking ${wx}`) },
-      { label: `구글 이미지 — ${cityName} 여행객 옷차림 (${tempTag})`, sub: `기온대(${band.label}) 키워드를 넣은 필터 검색`, url: googleImagesUrl(`${cityName} ${monthName} tourist ${wx} ootd what to wear`) },
+      { label: t("refPinTravel", cityName, bandLabel), sub: t("refSubPin"), url: pinterestUrl(`${cityName} travel ${wx} ootd`) },
+      { label: t("refPinActivity", cityName, bandLabel), sub: t("refSubPinActivity"), url: pinterestUrl(`${cityName} hiking ${wx}`) },
+      { label: t("refGoogleTourist", cityName, tempTag), sub: t("refSubGoogle", bandLabel), url: googleImagesUrl(`${cityName} ${monthName} tourist ${wx} ootd what to wear`) },
     ];
   } else {
-    comment = `${cityName}은(는) 도시형 목적지로 분류했어요. ${weatherLine}`;
+    comment = t("refCity", cityName, weatherLine);
     links = [
-      { label: `Pinterest — ${cityName} ${band.label} 여행 룩`, sub: "옷차림 콘텐츠 위주라 결과가 가장 깨끗해요", url: pinterestUrl(`${cityName} travel ${wx} ootd`) },
-      { label: `구글 이미지 — ${cityName} 여행객 옷차림 (${tempTag})`, sub: `기온대(${band.label}) 키워드를 넣은 필터 검색`, url: googleImagesUrl(`${cityName} ${monthName} tourist ${wx} ootd what to wear`) },
-      { label: `구글 이미지 — ${cityName} ${band.label} 스트릿 스냅`, sub: "현지인 분위기 참고 (런웨이·패션위크 제외)", url: googleImagesUrl(`${cityName} street style ${wx} -runway -fashionweek`) },
+      { label: t("refPinTravel", cityName, bandLabel), sub: t("refSubPin"), url: pinterestUrl(`${cityName} travel ${wx} ootd`) },
+      { label: t("refGoogleTourist", cityName, tempTag), sub: t("refSubGoogle", bandLabel), url: googleImagesUrl(`${cityName} ${monthName} tourist ${wx} ootd what to wear`) },
+      { label: t("refGoogleStreet", cityName, bandLabel), sub: t("refSubStreet"), url: googleImagesUrl(`${cityName} street style ${wx} -runway -fashionweek`) },
     ];
   }
 
   // Instagram: hashtag/location exploration (API 제약으로 직접 수집 불가 → 탐색 링크)
-  const igTag = cityName.replace(/\s/g, "") + "여행룩";
+  // 해시태그도 언어를 따라간다 — #경주여행룩 은 한국어 사용자에게만 의미가 있다.
+  const igTag = cityName.replace(/\s/g, "") + (lang === "ko" ? "여행룩" : "travel");
   links.push({
-    label: `인스타그램 — #${igTag}`,
-    sub: "위치·해시태그로 여행객 실사용 스냅 탐색 (API 제약으로 직접 수집은 불가, 탐색 링크만 제공)",
+    label: `Instagram — #${igTag}`,
+    sub: t("refSubInsta"),
     url: instagramTagUrl(igTag),
   });
 
@@ -774,12 +1441,14 @@ function renderPlan(dates, hist, forecast, stylePref) {
     const high = f ? f.high : hist.avgHigh;
     const low = f ? f.low : hist.avgLow;
     const band = tempBand(high);
+    // 노트는 완성된 문장이 아니라 {키, 값}으로 저장한다 — 언어를 바꿔도 다시
+    // 계산할 필요가 없고, 저장된 스냅샷이 특정 언어에 묶이지 않는다.
     const notes = [];
     const diurnal = high - low;
-    if (diurnal >= 10) notes.push(`일교차 ${Math.round(diurnal)}° — 아침저녁용 겉옷을 따로 챙기세요.`);
+    if (diurnal >= 10) notes.push({ k: "noteDiurnal", v: Math.round(diurnal) });
     const precip = f && f.precipProb != null ? f.precipProb : hist.precipChance;
-    if (precip >= 50) notes.push(`비 확률 ${Math.round(precip)}% — 접이식 우산과 방수 신발을 권장해요.`);
-    else if (precip >= 35) notes.push(`비 확률 ${Math.round(precip)}% — 접이식 우산을 가방에 넣어두세요.`);
+    if (precip >= 50) notes.push({ k: "noteRainHigh", v: Math.round(precip) });
+    else if (precip >= 35) notes.push({ k: "noteRainMid", v: Math.round(precip) });
 
     wardrobeState[date] = {
       activity: "관광",
@@ -795,14 +1464,29 @@ function renderPlan(dates, hist, forecast, stylePref) {
     };
     seedItems(date);
   });
+  rebuildEssentials();
   drawPlan();
 }
 
 // (Re)build the recommended chips for one day from its style/band/activity.
 function seedItems(date) {
   const d = wardrobeState[date];
-  const { items } = composeOutfit(d.stylePref, d.bandKey, d.activity, d.dayIndex);
+  const { items } = composeOutfit(d.stylePref, d.bandKey, d.activity, d.dayIndex, selectedPurposes, genderSelect.value);
   d.items = items.map((it) => ({ ...it, status: "own" }));
+}
+
+// 목적 칩이 바뀌면 준비물을 다시 만들되, 사용자가 직접 추가했거나 상태를 바꾼 항목은 보존
+function rebuildEssentials() {
+  if (!lastPlanContext) return;
+  const kept = essentialsState.filter((it) => it.custom || it.status === "buy");
+  const keptKeys = new Set(kept.map((it) => itemKey(it.name)));
+  const fresh = buildEssentials({
+    isOverseas: lastPlanContext.isOverseas,
+    nights: lastPlanContext.nights,
+    hist: lastPlanContext.hist,
+    purposes: selectedPurposes,
+  }).filter((it) => !keptKeys.has(itemKey(it.name)));
+  essentialsState = [...fresh, ...kept];
 }
 
 function esc(s) {
@@ -813,97 +1497,122 @@ function renderTips(cityName, country, hist, type, activity) {
   const box = document.getElementById("tips-content");
 
   // 1) place tips: city entry first, then country fallback, then generic
-  const cityKey = Object.keys(CITY_TIPS).find((k) => cityName.includes(k) || k.includes(cityName));
-  const countryKey = country ? Object.keys(COUNTRY_TIPS).find((k) => country.includes(k)) : null;
+  // 지오코딩이 영문 이름을 돌려주는 경우가 많아 별칭 표를 먼저 거친다
+  const cityAlias = TIP_ALIASES[cityName.toLowerCase()];
+  const cityKey = cityAlias || Object.keys(CITY_TIPS).find((k) => cityName.includes(k) || k.includes(cityName));
+  const countryAlias = country ? COUNTRY_ALIASES[country.toLowerCase()] : null;
+  const countryKey = countryAlias || (country ? Object.keys(COUNTRY_TIPS).find((k) => country.includes(k)) : null);
   let placeTips, placeTitle;
-  if (cityKey) {
+  if (cityKey && CITY_TIPS[cityKey]) {
     placeTips = CITY_TIPS[cityKey];
-    placeTitle = `${cityName} 드레스코드 · 문화 팁`;
-  } else if (countryKey) {
+    placeTitle = t("tipsCityTitle", cityName);
+  } else if (countryKey && COUNTRY_TIPS[countryKey]) {
     placeTips = COUNTRY_TIPS[countryKey];
-    placeTitle = `${country} 일반 팁 (${cityName} 상세 팁은 준비 중)`;
+    placeTitle = t("tipsCountryTitle", country, cityName);
   } else {
     placeTips = GENERIC_TIPS;
-    placeTitle = `${cityName} 상세 팁은 아직 없어요 — 일반 가이드`;
+    placeTitle = t("tipsGenericTitle", cityName);
   }
+  placeTips = placeTips.map(T);
 
   // 2) weather-driven checkpoints from the actual 10-year data
   const weatherTips = [];
   if (hist.precipChance >= 40) {
-    weatherTips.push(`이 시기 비 올 확률이 ${hist.precipChance}%로 높아요 — 방수 신발과 접이식 우산을 기본으로 챙기세요.`);
+    weatherTips.push(t("tipRainHigh", hist.precipChance));
   } else if (hist.precipChance >= 25) {
-    weatherTips.push(`이 시기 비 올 확률 ${hist.precipChance}% — 접이식 우산 하나면 충분해요.`);
+    weatherTips.push(t("tipRainMid", hist.precipChance));
   }
   if (hist.diurnal >= 10) {
-    weatherTips.push(`일교차가 평균 ${hist.diurnal.toFixed(0)}°로 커요 — 낮 기준으로 입고 아침저녁용 겉옷을 더하는 레이어링이 정답이에요.`);
+    weatherTips.push(t("tipDiurnal", fmtDelta(hist.diurnal)));
   }
   if (hist.avgHigh >= 28) {
-    weatherTips.push("한낮이 매우 더워요 — 통기성 좋은 리넨·코튼 소재와 자외선 차단(모자·선크림)을 챙기세요.");
+    weatherTips.push(T("한낮이 매우 더워요 — 통기성 좋은 리넨·코튼 소재와 자외선 차단(모자·선크림)을 챙기세요."));
   }
   if (hist.avgLow <= 5) {
-    weatherTips.push(`아침 기온이 ${hist.avgLow.toFixed(0)}°까지 떨어져요 — 보온 이너웨어가 짐 대비 효율이 가장 좋아요.`);
+    weatherTips.push(t("tipLowTemp", fmtTemp(hist.avgLow)));
   }
   if (hist.avgHigh < 3) {
-    weatherTips.push("한겨울 추위예요 — 장갑·목도리·모자가 체감온도를 크게 좌우해요.");
+    weatherTips.push(T("한겨울 추위예요 — 장갑·목도리·모자가 체감온도를 크게 좌우해요."));
   }
 
   // 3) activity gear tips
   const gearTips = [];
   if (type === "activity" || type === "mixed") {
-    gearTips.push("트레킹화는 여행 전에 미리 길들여 가세요 — 새 신발은 물집의 지름길이에요.");
-    gearTips.push(`${activity || "액티비티"} 일정에는 방풍·방수 아우터와 땀 배출 잘 되는 이너를 조합하세요.`);
-    if (type === "mixed") gearTips.push("도심 일정과 액티비티 일정의 신발을 분리해서 챙기면 짐이 크게 늘지 않아요.");
+    gearTips.push(T("트레킹화는 여행 전에 미리 길들여 가세요 — 새 신발은 물집의 지름길이에요."));
+    gearTips.push(t("tipGear", activity ? T(activity) : T("액티비티")));
+    if (type === "mixed") gearTips.push(T("도심 일정과 액티비티 일정의 신발을 분리해서 챙기면 짐이 크게 늘지 않아요."));
   }
 
   const section = (title, tips) =>
-    tips.length ? `<p class="tips-city">${title}</p><ul class="tips-list">${tips.map((t) => `<li>${t}</li>`).join("")}</ul>` : "";
+    tips.length
+      ? `<p class="tips-city">${esc(title)}</p><ul class="tips-list">${tips.map((x) => `<li>${x}</li>`).join("")}</ul>`
+      : "";
+
+  // 4) 선택한 여행 목적별 팁
+  const purposeTips = selectedPurposes
+    .filter((p) => PURPOSE_EFFECTS[p])
+    .map((p) => `<b>${esc(T(p))}</b> — ${esc(T(PURPOSE_EFFECTS[p].note))}`);
 
   box.innerHTML =
-    section(placeTitle, placeTips) +
-    section("이번 여행 날씨 체크포인트", weatherTips) +
-    section("액티비티 준비물", gearTips);
+    section(placeTitle, placeTips.map(esc)) +
+    section(t("tipsWeatherTitle"), weatherTips.map(esc)) +
+    section(t("tipsPurposeTitle"), purposeTips) +
+    section(t("tipsGearTitle"), gearTips.map(esc));
 }
 
 // ---------- Unified day plan: recommendation + editable wardrobe chips + packing list ----------
 
 const ACTIVITY_OPTIONS = ["관광", "식사·격식", "액티비티"];
 const ACTIVITY_LABELS = { "관광": "도심 관광", "식사·격식": "식사 · 격식", "액티비티": "트레킹 · 액티비티" };
-const PACK_CATEGORIES = ["의류", "신발", "악세서리", "기타"];
+// D1: 옷 중심 4분류 → 여행 준비 전반을 담는 분류로 확장
+const PACK_CATEGORIES = ["의류", "신발", "악세서리", "서류·결제", "전자기기", "상비약", "기타"];
 
 function drawPlan() {
   const list = document.getElementById("outfit-list");
-  list.innerHTML = Object.entries(wardrobeState)
+  const purposeBanner = selectedPurposes.length
+    ? `<div class="purpose-notes"><span class="purpose-notes-label">${t("purposeBannerLabel")}</span><ul>${selectedPurposes
+        .filter((p) => PURPOSE_EFFECTS[p])
+        .map((p) => `<li><b>${esc(T(p))}</b> ${esc(T(PURPOSE_EFFECTS[p].note))}</li>`)
+        .join("")}</ul></div>`
+    : "";
+  list.innerHTML = purposeBanner + Object.entries(wardrobeState)
     .map(([date, d]) => {
-      const { line, extra } = composeOutfit(d.stylePref, d.bandKey, d.activity, d.dayIndex);
-      const notes = [extra, ...d.notes].filter(Boolean).map((n) => `<span>· ${n}</span>`).join("<br/>");
+      const { line, extra } = composeOutfit(d.stylePref, d.bandKey, d.activity, d.dayIndex, selectedPurposes, genderSelect.value);
+      // 이전 버전이 남긴 문자열 노트도 그대로 그릴 수 있게 둘 다 받는다
+      const noteText = (n) => (typeof n === "string" ? n : t(n.k, n.v));
+      const notes = [extra, ...d.notes.map(noteText)]
+        .filter(Boolean)
+        .map((n) => `<span>· ${esc(n)}</span>`)
+        .join("<br/>");
       const options = ACTIVITY_OPTIONS.map(
-        (a) => `<option value="${a}" ${a === d.activity ? "selected" : ""}>${ACTIVITY_LABELS[a]}</option>`
+        (a) => `<option value="${a}" ${a === d.activity ? "selected" : ""}>${esc(T(ACTIVITY_LABELS[a]))}</option>`
       ).join("");
       const chips = d.items
         .map((it, i) => {
           if (it.editing) {
-            return `<span class="ward-chip editing"><input class="chip-input" data-date="${date}" data-idx="${i}" value="${esc(it.name)}" /></span>`;
+            // 이름을 고치면 사용자 표현이 되므로, 편집 중에는 번역된 이름을 보여준다
+            return `<span class="ward-chip editing"><input class="chip-input" data-date="${date}" data-idx="${i}" value="${esc(T(it.name))}" /></span>`;
           }
           const cls = it.status === "buy" ? "buy" : "own";
-          const badge = it.status === "buy" ? "사야 함" : "보유";
+          const badge = t(it.status === "buy" ? "badgeBuy" : "badgeOwn");
           return `<span class="ward-chip ${cls}">
-              <button class="chip-toggle" data-act="toggle" data-date="${date}" data-idx="${i}">${esc(it.name)} · ${badge}</button>
-              <button class="chip-edit" data-act="edit" data-date="${date}" data-idx="${i}" aria-label="이름 수정">✎</button>
-              <button class="chip-remove" data-act="remove" data-date="${date}" data-idx="${i}" aria-label="제거">✕</button>
+              <button class="chip-toggle" data-act="toggle" data-date="${date}" data-idx="${i}">${esc(T(it.name))} · ${badge}</button>
+              <button class="chip-edit" data-act="edit" data-date="${date}" data-idx="${i}" aria-label="${t("ariaRename")}">✎</button>
+              <button class="chip-remove" data-act="remove" data-date="${date}" data-idx="${i}" aria-label="${t("ariaRemove")}">✕</button>
             </span>`;
         })
         .join("");
       return `<div class="day-card">
           <div class="day-card-header">
             <span class="date-label">${date}</span>
-            <span class="temp-label">${Math.round(d.high)}° / ${Math.round(d.low)}° · ${d.bandLabel} (${d.source})</span>
+            <span class="temp-label">${fmtTemp(d.high)} / ${fmtTemp(d.low)} · ${esc(T(d.bandLabel))} (${esc(T(d.source))})</span>
           </div>
           <select class="ward-activity" data-date="${date}">${options}</select>
-          <div class="day-outfit"><span class="rec-label">추천</span> <strong>${line}</strong>${notes ? "<br/>" + notes : ""}</div>
+          <div class="day-outfit"><span class="rec-label">${t("recBadge")}</span> <strong>${esc(line)}</strong>${notes ? "<br/>" + notes : ""}</div>
           <div class="ward-chips">${chips}</div>
           <form class="ward-add" data-date="${date}">
-            <input type="text" placeholder="보유한 아이템 직접 추가 (예: 베이지 린넨 팬츠)" />
-            <button type="submit">+ 추가</button>
+            <input type="text" placeholder="${t("wardAddPlaceholder")}" />
+            <button type="submit">${t("addBtn")}</button>
           </form>
         </div>`;
     })
@@ -920,16 +1629,18 @@ function drawPlan() {
   }
 }
 
+// 날짜별 옷/신발 + 여행 전체 준비물을 하나의 리스트로 병합
 function buildPackingList() {
   const groups = {};
-  Object.entries(wardrobeState).forEach(([date, day]) => {
-    day.items.forEach((it) => {
-      const key = itemKey(it.name);
-      if (!groups[key]) groups[key] = { name: it.name, category: it.category, status: it.status, days: new Set() };
-      groups[key].days.add(date);
-      if (it.status === "buy") groups[key].status = "buy"; // 사야 함이 우선
-    });
-  });
+  const put = (it, date) => {
+    const key = itemKey(it.name);
+    if (!groups[key]) groups[key] = { name: it.name, category: it.category, status: it.status, days: new Set(), trip: false };
+    if (date) groups[key].days.add(date);
+    else groups[key].trip = true;
+    if (it.status === "buy") groups[key].status = "buy"; // 사야 함이 우선
+  };
+  Object.entries(wardrobeState).forEach(([date, day]) => day.items.forEach((it) => put(it, date)));
+  essentialsState.forEach((it) => put(it, null));
   return Object.values(groups);
 }
 
@@ -937,29 +1648,128 @@ function drawPackingList() {
   const box = document.getElementById("packing-list");
   const all = buildPackingList();
   const buyCount = all.filter((i) => i.status === "buy").length;
+  const catOptions = PACK_CATEGORIES.map((c) => `<option value="${esc(c)}">${esc(T(c))}</option>`).join("");
 
   const sections = PACK_CATEGORIES.map((cat) => {
     const items = all.filter((i) => i.category === cat).sort((a, b) => b.days.size - a.days.size);
     if (!items.length) return "";
     const rows = items
-      .map(
-        (i) => `<li class="pack-row ${i.status}">
-            <span class="pack-name">${i.name}</span>
-            <span class="pack-meta">${i.days.size}일 착용${i.status === "buy" ? ' · <b class="buy-tag">사야 할 옷</b>' : ""}</span>
-          </li>`
-      )
+      .map((i) => {
+        const when = i.days.size ? t("packDays", i.days.size) : t("packTrip");
+        const tag = i.status === "buy" ? ` · <b class="buy-tag">${t("packBuyTag")}</b>` : "";
+        const idx = essentialsState.findIndex((e) => itemKey(e.name) === itemKey(i.name));
+        const del = i.trip && idx >= 0 ? `<button class="pack-remove" data-pack-idx="${idx}" aria-label="${t("ariaRemove")}">✕</button>` : "";
+        return `<li class="pack-row ${i.status}" data-pack-name="${esc(i.name)}">
+            <span class="pack-name">${esc(T(i.name))}</span>
+            <span class="pack-meta">${esc(when)}${tag}</span>${del}
+          </li>`;
+      })
       .join("");
-    return `<div class="pack-group"><h4>${cat} (${items.length})</h4><ul>${rows}</ul></div>`;
+    return `<div class="pack-group"><h4>${esc(T(cat))} (${items.length})</h4><ul>${rows}</ul></div>`;
   }).join("");
 
   box.innerHTML = `
     <div class="pack-head">
-      <h3>최종 지참 리스트</h3>
-      <span class="pack-summary">총 ${all.length}개 · 사야 할 옷 <b>${buyCount}</b>개</span>
+      <h3>${t("packTitle")}</h3>
+      <span class="pack-summary">${t("packSummary", all.length, buyCount)}</span>
+      <div class="pack-actions">
+        <button type="button" id="pack-copy">${t("packCopy")}</button>
+        <button type="button" id="pack-save">${t("packSave")}</button>
+      </div>
     </div>
-    ${sections || '<p class="hint">배정된 아이템이 없어요. 위에서 아이템을 추가하거나 보유/사야 함을 표시하세요.</p>'}
+    ${sections || `<p class="hint">${t("packEmpty")}</p>`}
+    <form class="pack-add" id="pack-add">
+      <input type="text" placeholder="${t("packAddPlaceholder")}" />
+      <select>${catOptions}</select>
+      <button type="submit">${t("addBtn")}</button>
+    </form>
   `;
+  // 모든 변경(코디 수정·준비물 추가/삭제·목적 변경)은 결국 이 함수를 거치므로 여기서 스냅샷
+  persistLast();
 }
+
+// 준비물 추가/삭제 (여행 전체 단위)
+const packingBox = document.getElementById("packing-list");
+
+packingBox.addEventListener("submit", (e) => {
+  const form = e.target.closest("#pack-add");
+  if (!form) return;
+  e.preventDefault();
+  const input = form.querySelector("input");
+  const name = input.value.trim();
+  if (!name) return;
+  essentialsState.push({ name, category: form.querySelector("select").value, status: "own", custom: true });
+  input.value = "";
+  drawPackingList();
+});
+
+// 페르소나 10명 전원이 이미 자기 도구(시트·메모·카톡)를 쓰고 있었으므로,
+// 결과를 밖으로 꺼내는 경로는 최소한 텍스트 복사 하나는 있어야 한다.
+function packingListText() {
+  const c = lastPlanContext;
+  const head = c ? `[${c.cityName}] ${startDateInput.value} ~ ${endDateInput.value}` : t("packTitle");
+  const all = buildPackingList();
+  const body = PACK_CATEGORIES.map((cat) => {
+    const items = all.filter((i) => i.category === cat);
+    if (!items.length) return "";
+    const lines = items
+      .map(
+        (i) =>
+          `- ${T(i.name)} (${i.days.size ? t("packDays", i.days.size) : t("packTrip")}${
+            i.status === "buy" ? ` · ${t("packBuyTag")}` : ""
+          })`
+      )
+      .join("\n");
+    return `\n[${T(cat)}]\n${lines}`;
+  })
+    .filter(Boolean)
+    .join("\n");
+  return `${head}\n${body}\n`;
+}
+
+async function copyPackingList(btn) {
+  const text = packingListText();
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    ta.remove();
+  }
+  btn.textContent = t("packCopied");
+  setTimeout(() => drawPackingList(), 1200);
+}
+
+packingBox.addEventListener("click", (e) => {
+  const copy = e.target.closest("#pack-copy");
+  if (copy) {
+    copyPackingList(copy);
+    return;
+  }
+  const save = e.target.closest("#pack-save");
+  if (save) {
+    saveCurrentTrip();
+    save.textContent = t("packSaved");
+    setTimeout(() => drawPackingList(), 1200);
+    return;
+  }
+  const del = e.target.closest(".pack-remove");
+  if (del) {
+    essentialsState.splice(+del.dataset.packIdx, 1);
+    drawPackingList();
+    return;
+  }
+  // 항목을 누르면 보유 ↔ 사야 함 전환 (여행 단위 준비물만)
+  const row = e.target.closest(".pack-row");
+  if (!row) return;
+  const it = essentialsState.find((x) => itemKey(x.name) === itemKey(row.dataset.packName));
+  if (!it) return;
+  it.status = it.status === "buy" ? "own" : "buy";
+  drawPackingList();
+});
 
 // event delegation for the unified plan (recommendation + wardrobe chips)
 const planList = document.getElementById("outfit-list");
@@ -996,7 +1806,7 @@ planList.addEventListener("submit", (e) => {
   const input = form.querySelector("input");
   const name = input.value.trim();
   if (!name) return;
-  wardrobeState[form.dataset.date].items.push({ name, category: "기타", status: "own" });
+  wardrobeState[form.dataset.date].items.push({ name, category: "의류", status: "own" });
   input.value = "";
   drawPlan();
 });
@@ -1064,19 +1874,19 @@ submitBtn.addEventListener("click", async () => {
     // fall back to raw text if user typed but didn't pick a suggestion
     const q = cityInput.value.trim();
     if (!q) {
-      showError("여행지를 입력해 주세요.");
+      showError(t("errNoCity"));
       return;
     }
     await searchCity(q);
-    showError("목록에서 여행지를 선택해 주세요.");
+    showError(t("errPickCity"));
     return;
   }
   if (!startDateInput.value || !endDateInput.value) {
-    showError("출발일과 도착일을 모두 입력해 주세요.");
+    showError(t("errNoDates"));
     return;
   }
   if (startDateInput.value > endDateInput.value) {
-    showError("도착일은 출발일보다 뒤여야 해요.");
+    showError(t("errDateOrder"));
     return;
   }
 
@@ -1084,18 +1894,20 @@ submitBtn.addEventListener("click", async () => {
   const end = endDateInput.value;
   const stylePref = styleSelect.value;
 
-  setLoading(true, "최근 10년 날씨 데이터를 불러오는 중...");
+  setLoading(true, t("loadingText"));
   try {
-    const [hist, seoulHist, forecast] = await Promise.all([
+    // 목적지가 거주 도시와 사실상 같은 곳이면 비교 자체가 무의미하므로 건너뛴다
+    const nearHome =
+      Math.abs(selectedCity.lat - homeCity.lat) < 0.7 && Math.abs(selectedCity.lon - homeCity.lon) < 0.7;
+
+    const [hist, homeHist, forecast] = await Promise.all([
       fetchHistoricalAverage(selectedCity.lat, selectedCity.lon, start, end),
-      selectedCity.name !== REFERENCE_CITY.name
-        ? fetchHistoricalAverage(REFERENCE_CITY.lat, REFERENCE_CITY.lon, start, end)
-        : Promise.resolve(null),
+      nearHome ? Promise.resolve(null) : fetchHistoricalAverage(homeCity.lat, homeCity.lon, start, end),
       daysUntil(start) <= 14 ? fetchForecast(selectedCity.lat, selectedCity.lon, start, end) : Promise.resolve(null),
     ]);
 
     if (!hist) {
-      showError("날씨 데이터를 가져오지 못했어요. 여행지나 날짜를 다시 확인해 주세요.");
+      showError(t("errNoWeather"));
       setLoading(false);
       return;
     }
@@ -1103,17 +1915,31 @@ submitBtn.addEventListener("click", async () => {
     const dates = daysBetween(start, end);
     const detected = detectType(selectedCity.name);
     const activity = detected.activity;
+    const country = selectedCity.country || "";
+    const isOverseas = !/대한민국|South Korea|Korea/i.test(country);
 
-    renderWeather(hist, forecast, selectedCity.name, seoulHist);
+    lastPlanContext = {
+      hist,
+      forecast,
+      homeHist,
+      cityName: selectedCity.name,
+      country,
+      activity,
+      isOverseas,
+      nights: Math.max(0, dates.length - 1),
+    };
+
+    renderWeather(hist, forecast, selectedCity.name, homeHist);
     renderReference(selectedCity.name, selectedType, activity, hist);
     renderPlan(dates, hist, forecast, stylePref);
-    renderTips(selectedCity.name, selectedCity.country, hist, selectedType, activity);
+    renderTips(selectedCity.name, country, hist, selectedType, activity);
 
     resultsSection.classList.remove("hidden");
-    resultsSection.scrollIntoView({ behavior: "smooth" });
+    document.getElementById("results-empty").classList.add("hidden");
+    showView("results");
   } catch (err) {
     console.error(err);
-    showError("데이터를 불러오는 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.");
+    showError(t("errFetch"));
   } finally {
     setLoading(false);
   }
@@ -1122,6 +1948,7 @@ submitBtn.addEventListener("click", async () => {
 function showError(msg) {
   errorMsg.textContent = msg;
   errorMsg.classList.remove("hidden");
+  showView("search"); // 오류 문구는 검색 뷰에 있으므로 다른 뷰에서 실패해도 보이게 한다
 }
 
 function setLoading(on, text) {
@@ -1131,5 +1958,7 @@ function setLoading(on, text) {
 }
 
 // init default type buttons unselected
+applyStaticI18n();
 setType("city", false);
 typeHint.textContent = "";
+restoreLast();
