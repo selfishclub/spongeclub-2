@@ -1,0 +1,22 @@
+{
+  "_comment": "스폰지클럽 2기 조별 명단. 공개 레포라 Slack 사용자 ID는 넣지 않습니다(봇 작동에 불필요 — 멘션은 닉네임으로 합니다). 다른 조도 아래 형식으로 추가해서 쓰세요.",
+  "team_id": "T0AV80FCRGB",
+  "5조": {
+    "channel_id": "C0BD4Q7RK5L",
+    "channel_name": "#2기-5조-치코",
+    "members": [
+      { "nickname": "치코",     "name": "김나영", "role": "조장" },
+      { "nickname": "채리",     "name": "이채은", "role": "유닛장" },
+      { "nickname": "아람",     "name": "박상현", "role": "부조장" },
+      { "nickname": "잭",       "name": "유재현", "role": "멤버" },
+      { "nickname": "양세",     "name": "박세현", "role": "멤버" },
+      { "nickname": "그레이",   "name": "김수현", "role": "멤버" },
+      { "nickname": "툴보",     "name": "차지원", "role": "멤버" },
+      { "nickname": "카라",     "name": "최강훈", "role": "멤버" },
+      { "nickname": "리카",     "name": "심동윤", "role": "멤버" },
+      { "nickname": "챈",       "name": "이채은", "role": "멤버" },
+      { "nickname": "포비",     "name": "이지선", "role": "멤버" },
+      { "nickname": "필리줄리", "name": "안지현", "role": "멤버" }
+    ]
+  }
+}
