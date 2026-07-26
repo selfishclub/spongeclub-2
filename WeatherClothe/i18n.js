@@ -402,6 +402,8 @@ const UI = {
       "날짜별 추천 코디와 <b>여행 준비 리스트</b>예요. 각 아이템을 눌러 <b>보유</b> / <b>사야 함</b>을 전환하고, <b>✎</b>로 이름을 내 옷에 맞게 수정할 수 있어요. 여러 날 쓰는 옷은 자동 병합되고, 여권·충전기·상비약 같은 준비물은 여행 조건에 맞춰 자동으로 채워집니다.",
     resultsEmpty: "아직 만든 준비 리스트가 없어요.<br /><b>검색</b> 탭에서 여행지와 날짜를 입력해 주세요.",
     savedEmpty: "아직 저장한 여행이 없어요.<br />준비 리스트를 만든 뒤 <b>[이 리스트 저장]</b>을 누르면 여기에 쌓입니다.",
+    prdView: "📄 기획 문서(PRD) 보기",
+    prdDownload: "⬇ PRD 내려받기",
 
     // 오류
     errNoCity: "여행지를 입력해 주세요.",
@@ -539,6 +541,8 @@ const UI = {
       "Daily outfit picks and your <b>packing list</b>. Tap an item to switch between <b>Have it</b> and <b>Need to buy</b>, and use <b>✎</b> to rename it to match what you actually own. Items worn on several days are merged automatically, and essentials like your passport, charger, and medicine are filled in from your trip details.",
     resultsEmpty: "No packing list yet.<br />Enter a destination and dates in the <b>Search</b> tab.",
     savedEmpty: "Nothing saved yet.<br />Build a packing list and press <b>[Save this list]</b> to collect it here.",
+    prdView: "📄 View the product doc (PRD)",
+    prdDownload: "⬇ Download PRD",
 
     errNoCity: "Please enter a destination.",
     errPickCity: "Please pick a destination from the list.",

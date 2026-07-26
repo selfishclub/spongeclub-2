@@ -519,6 +519,17 @@ input:focus, select:focus { outline: 2px solid var(--blue); outline-offset: 1px;
   color: var(--muted); font-size: 13px; line-height: 1.8;
 }
 
+/* 기획 문서(PRD) 링크 — 과제 제출물이므로 앱에서 바로 열람·내려받을 수 있게 둔다 */
+.doc-links {
+  display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+  margin: 18px 0 0;
+}
+.doc-links a {
+  padding: 9px 14px; border: 1px solid var(--line-strong); border-radius: 999px;
+  font-size: 12px; font-weight: 700; text-decoration: none; color: inherit;
+}
+.doc-links a:hover { background: var(--ink); color: var(--bg); }
+
 .pref-toggles { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
 #lang-toggle .unit-btn { font-size: 11px; letter-spacing: 0; }
 
