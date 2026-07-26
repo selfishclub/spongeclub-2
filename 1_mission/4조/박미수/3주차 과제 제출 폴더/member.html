@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>멤버 관리 — Golf Rank</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    main { padding: 16px 20px 20px; }
+    .count-line { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+    .mem-list { display: flex; flex-direction: column; gap: 10px; }
+    .mem-card { display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow-card); cursor: pointer; }
+    .mem-card:hover { border-color: var(--green); }
+    .avatar { flex: 0 0 auto; width: 42px; height: 42px; border-radius: 50%; background: var(--green-tint); color: var(--green); display: grid; place-items: center; font-weight: 800; font-size: 16px; font-family: 'Montserrat', sans-serif; overflow: hidden; }
+    .avatar.owner { background: #FFF6E0; color: #8A5A00; }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .edit-avatar { width: 96px; height: 96px; border-radius: 50%; margin: 0 auto; background: var(--green-tint); color: var(--green); display: grid; place-items: center; font-weight: 800; font-size: 34px; font-family: 'Montserrat', sans-serif; overflow: hidden; }
+    .edit-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-btns { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
+    .avatar-btns button { padding: 8px 14px; border: 1.5px solid var(--border); background: var(--card); border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer; font-family: inherit; }
+    .avatar-btns button:hover { border-color: var(--green); }
+    .mem-body { flex: 1; min-width: 0; }
+    .mem-name { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .mem-stats { font-size: 12px; color: var(--muted); margin-top: 3px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .mem-stats b { color: var(--text); font-family: 'Montserrat', sans-serif; }
+    .mem-chev { color: var(--muted); font-size: 20px; }
+    .mem-status { font-size: 10px; font-weight: 700; color: #B26A00; background: #FFF3E0; border: 1px solid #F0C674; border-radius: 5px; padding: 2px 6px; margin-left: 4px; }
+    .mem-joined { font-size: 12px; color: var(--green); margin-left: 4px; }
+    .mem-invite { flex: 0 0 auto; background: var(--green); color: #fff; border: none; border-radius: 8px; padding: 9px 12px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .mem-invite:hover { background: var(--green-dark); }
+
+    .footer-bar { position: relative; flex: 0 0 auto; padding: 12px 20px; background: var(--bg); border-top: 1px solid var(--border); z-index: 85; }
+
+    /* 바텀시트 공통 */
+    .sheet-overlay { position: fixed; inset: 0; background: rgba(31,31,31,0.45); z-index: 200; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+    .sheet-overlay.open { opacity: 1; pointer-events: auto; }
+    .sheet { width: 100%; max-width: var(--maxw); background: var(--bg); border-radius: 24px 24px 0 0; padding: 8px 22px calc(24px + env(safe-area-inset-bottom)); transform: translateY(100%); transition: transform .3s cubic-bezier(.22,.61,.36,1); max-height: 92vh; overflow-y: auto; }
+    .sheet-overlay.open .sheet { transform: translateY(0); }
+    .grab { width: 40px; height: 4px; background: var(--border); border-radius: 99px; margin: 12px auto 16px; }
+    .sheet h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .sheet .sh-sub { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+    .fld { margin-bottom: 16px; }
+    .fld label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 7px; }
+    .fld input { width: 100%; background: #F9F9F9; border: none; border-bottom: 1.5px solid var(--border); border-radius: 8px 8px 0 0; padding: 12px; font-size: 15px; font-family: inherit; color: var(--text); }
+    .fld input:focus { outline: none; border-bottom-color: var(--green); background: #F4F9F4; }
+    .fld .row3 { display: flex; gap: 8px; }
+    .fld .row3 input { text-align: center; font-family: 'Montserrat', sans-serif; }
+    .opts { display: flex; gap: 6px; flex-wrap: wrap; }
+    .opts button { padding: 9px 14px; border: 1.5px solid var(--border); background: var(--card); border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; font-family: inherit; }
+    .opts button.on { border-color: var(--green); background: var(--green-tint); color: var(--green); }
+    .sheet-actions { display: flex; gap: 10px; margin-top: 8px; }
+    .sheet-actions button { height: 50px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; border: none; font-family: inherit; }
+    .sheet-actions .del { flex: 0 0 auto; padding: 0 18px; background: #FDECEA; color: #E53935; }
+    .sheet-actions .save { flex: 1; background: var(--green); color: #fff; }
+    .kakao-box { background: #FEE500; color: #3C1E1E; border-radius: 12px; padding: 14px; font-size: 13px; line-height: 1.6; margin-bottom: 14px; }
+    .invite-link { display: flex; gap: 8px; margin-bottom: 8px; }
+    .invite-link input { flex: 1; background: #F4F4F4; border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-size: 12px; font-family: 'Montserrat', monospace; color: var(--muted); }
+    .invite-link button { flex: 0 0 auto; padding: 0 14px; border-radius: 8px; border: none; background: var(--green); color: #fff; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .note { font-size: 12px; color: var(--muted); line-height: 1.6; }
+    .divider { height: 1px; background: var(--border); margin: 18px 0; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <button class="icon-btn" id="backBtn" aria-label="뒤로"><svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="title" id="clubTitle">멤버 관리<span class="sub" id="clubSub"></span></div>
+    </header>
+
+    <main>
+      <div class="count-line" id="countLine"></div>
+      <div class="mem-list" id="memList"></div>
+    </main>
+
+    <div class="footer-bar"><button class="btn btn-primary btn-block" id="inviteBtn">＋ 멤버 초대 / 추가</button></div>
+
+    <nav class="tabbar">
+      <a href="#" id="tabHome"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10" stroke-linecap="round" stroke-linejoin="round"/></svg>홈</a>
+      <a href="#" id="tabRank"><svg viewBox="0 0 24 24"><path d="M8 21V9M16 21V5M4 21V13M20 21V9" stroke-linecap="round"/></svg>랭킹</a>
+      <a href="#" id="tabGallery"><svg viewBox="0 0 24 24"><path d="M3 8.5A1.5 1.5 0 0 1 4.5 7H7l1.2-2h7.6L17 7h2.5A1.5 1.5 0 0 1 21 8.5v9A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.2"/></svg>갤러리</a>
+      <a href="#" class="active" id="tabMember"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5M17 11a3 3 0 0 0 0-6M21 20c0-2.5-2-4-4-4.5" stroke-linecap="round"/></svg>멤버</a>
+    </nav>
+
+    <!-- 멤버 편집 시트 -->
+    <div class="sheet-overlay" id="editOverlay">
+      <div class="sheet">
+        <div class="grab"></div>
+        <h2 id="editTitle">멤버 정보</h2>
+        <p class="sh-sub" id="editSub"></p>
+        <div class="fld">
+          <div class="edit-avatar" id="editAvatar"></div>
+          <input type="file" id="avatarFile" accept="image/*" hidden />
+          <div class="avatar-btns"><button type="button" id="avatarPick">📷 사진 선택</button><button type="button" id="avatarClear">제거</button></div>
+        </div>
+        <div class="fld"><label>닉네임 <span style="color:var(--muted);font-weight:400;">(예: 로리)</span></label><input type="text" id="fNick" maxlength="12" placeholder="예: 로리" /></div>
+        <div class="fld" id="roleField"><label>권한</label><div class="opts" id="fRole"><button data-v="member">멤버</button><button data-v="staff">운영진</button></div></div>
+        <div class="fld"><label>기준 핸디 (평균 타수)</label><input type="text" id="fHandi" inputmode="decimal" placeholder="예: 90.3" /></div>
+        <div class="fld"><label>구력 (년)</label><input type="text" id="fExp" inputmode="numeric" placeholder="예: 5" /></div>
+        <div class="fld"><label>라베 (Life Best · 최고 스코어)</label><input type="text" id="fBest" inputmode="numeric" placeholder="예: 82" /></div>
+        <div class="fld"><label>성별</label><div class="opts" id="fGender"><button data-v="남">남</button><button data-v="여">여</button></div></div>
+        <div class="fld"><label>티박스</label><div class="opts" id="fTee"><button data-v="화이트">화이트</button><button data-v="레드">레드</button><button data-v="블루">블루</button><button data-v="챔피언">챔피언</button></div></div>
+        <div class="fld"><label>목표 스코어</label><input type="text" id="fGoal" inputmode="numeric" placeholder="예: 85" /></div>
+        <div class="sheet-actions">
+          <button class="del" id="delBtn">삭제</button>
+          <button class="save" id="saveBtn">저장</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 초대/추가 시트 -->
+    <div class="sheet-overlay" id="inviteOverlay">
+      <div class="sheet">
+        <div class="grab"></div>
+        <h2>멤버 초대</h2>
+        <p class="sh-sub">카카오톡으로 초대하거나, 지금 바로 추가할 수 있어요.</p>
+        <div class="kakao-box">💬 <b>카카오톡 초대 (설계 예정)</b><br/>아래 초대 링크를 카카오톡으로 보내면, 상대가 링크로 들어와 <b>카카오 로그인 → 승인</b> 시 멤버로 합류하는 방식이에요.</div>
+        <div class="invite-link"><input type="text" id="inviteUrl" readonly /><button id="copyBtn">복사</button></div>
+        <p class="note">⚠️ 실제 카카오 로그인·승인은 서버(Supabase + 카카오 로그인) 연동 후 동작해요. 지금은 링크 형태만 미리 만들어둔 상태예요.</p>
+        <div class="divider"></div>
+        <p class="sh-sub" style="margin-bottom:12px;">지금 바로 추가 (필수 항목)</p>
+        <div class="fld"><label>이름</label><input type="text" id="aName" maxlength="10" placeholder="멤버 이름" /></div>
+        <div class="fld"><label>기준 핸디 (평균 타수) · 선택</label><input type="text" id="aHandi" inputmode="decimal" placeholder="예: 92" /></div>
+        <div class="fld"><label>구력(년) · 라베 · 선택</label><div class="row3"><input type="text" id="aExp" inputmode="numeric" placeholder="구력" /><input type="text" id="aBest" inputmode="numeric" placeholder="라베" /></div></div>
+        <div class="sheet-actions"><button class="save" id="addBtn" style="flex:1">＋ 멤버 추가</button></div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./db.js"></script>
+  <script>
+    const STORAGE_KEY='golfrank.clubs';
+    const $=(id)=>document.getElementById(id);
+    const params=new URLSearchParams(location.search);
+    const clubId=params.get('club');
+    let clubs=load(); let club=clubs.find((c)=>c.id===clubId);
+    if(club && !club.members) club.members=[{id:'me',name:'나',role:'owner'}];
+    let editIdx=-1;
+    let draft={gender:'',tee:'',avatar:null,role:'member'};
+
+    function load(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY))||[]; }catch(e){ return []; } }
+    function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(clubs)); if(club) pushClub(club); }
+    function esc(s){ return String(s).replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    let tt; function showToast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('show'),2000); }
+    const num=(v)=>{ const n=parseFloat(v); return isNaN(n)?null:n; };
+
+    if(club){ $('clubTitle').childNodes[0].nodeValue=club.name; $('clubSub').textContent='멤버 관리'; }
+
+    function render(){
+      if(!club){ document.querySelector('main').innerHTML='<div class="empty"><div class="icon">🤔</div><h3>모임을 찾을 수 없어요</h3></div>'; return; }
+      const ms=club.members||[];
+      $('countLine').textContent = `멤버 ${ms.length} / ${club.maxMembers||20}명`;
+      $('memList').innerHTML = ms.map((m,i)=>{
+        const badge = m.role==='owner'?'<span class="role-emoji" title="모임장">👑</span>':m.role==='staff'?'<span class="role-emoji" title="운영진">⭐</span>':'';
+        const stats=[];
+        stats.push(`핸디 <b>${m.handicap!=null?m.handicap:'–'}</b>`);
+        if(m.experienceYears!=null) stats.push(`구력 <b>${m.experienceYears}</b>년`);
+        if(m.lifeBest!=null) stats.push(`라베 <b>${m.lifeBest}</b>`);
+        const disp = m.nickname ? `${esc(m.nickname)} <span style="font-size:12px;font-weight:500;color:var(--muted)">${esc(m.name)}</span>` : esc(m.name);
+        const av = m.avatar ? `<img src="${m.avatar}" alt="" />` : esc(((m.nickname||m.name)||'?').charAt(0));
+        const claimed = !!m.userId || m.role==='owner';
+        const status = claimed ? '<span class="mem-joined" title="가입 완료">✓</span>' : '<span class="mem-status">미가입</span>';
+        const right = claimed ? '<span class="mem-chev">›</span>' : `<button class="mem-invite" data-invite="${m.id}">📨 초대</button>`;
+        return `<div class="mem-card" data-i="${i}">
+          <div class="avatar ${m.role==='owner'?'owner':''}">${av}</div>
+          <div class="mem-body"><div class="mem-name">${disp} ${badge} ${status}</div><div class="mem-stats">${stats.join('')}</div></div>
+          ${right}
+        </div>`;
+      }).join('');
+    }
+
+    /* 편집 */
+    function setOpts(groupId, val){ [...$(groupId).children].forEach((b)=>b.classList.toggle('on', b.dataset.v===val)); }
+    ['fGender','fTee'].forEach((g)=>$(g).addEventListener('click',(e)=>{ const b=e.target.closest('button'); if(!b) return; const key=g==='fGender'?'gender':'tee'; draft[key]=b.dataset.v; setOpts(g,b.dataset.v); }));
+    $('fRole').addEventListener('click',(e)=>{ const b=e.target.closest('button'); if(!b) return; draft.role=b.dataset.v; setOpts('fRole',b.dataset.v); });
+
+    function renderEditAvatar(){
+      const nm=(club.members[editIdx]||{}).name||'?';
+      $('editAvatar').innerHTML = draft.avatar ? `<img src="${draft.avatar}" alt="" />` : `<span>${esc(nm.charAt(0))}</span>`;
+    }
+    function openEdit(i){
+      editIdx=i; const m=club.members[i];
+      $('editTitle').textContent=m.nickname||m.name; $('editSub').textContent = m.role==='owner'?'모임장 · 권한은 고정이에요':(m.role==='staff'?'운영진':'멤버');
+      $('fNick').value = m.nickname||''; $('fHandi').value = m.handicap!=null?m.handicap:''; $('fExp').value=m.experienceYears!=null?m.experienceYears:''; $('fBest').value=m.lifeBest!=null?m.lifeBest:''; $('fGoal').value=m.goalScore!=null?m.goalScore:'';
+      draft={ gender:m.gender||'', tee:m.tee||'', avatar:m.avatar||null, role:(m.role==='owner'?'owner':(m.role||'member')) };
+      setOpts('fGender',draft.gender); setOpts('fTee',draft.tee);
+      $('roleField').style.display = m.role==='owner' ? 'none' : '';
+      if(m.role!=='owner') setOpts('fRole', draft.role);
+      renderEditAvatar();
+      $('delBtn').style.display = m.role==='owner' ? 'none' : '';
+      $('editOverlay').classList.add('open');
+    }
+    // 프로필 사진 선택/제거 (160px로 줄여 저장 → 용량 절약)
+    function fileToAvatar(file){ return new Promise((res)=>{ const img=new Image(); img.onload=()=>{ const S=160; const cv=document.createElement('canvas'); cv.width=S; cv.height=S; const ctx=cv.getContext('2d'); const sc=Math.max(S/img.width,S/img.height); const w=img.width*sc, h=img.height*sc; ctx.drawImage(img,(S-w)/2,(S-h)/2,w,h); res(cv.toDataURL('image/jpeg',0.82)); }; img.onerror=()=>res(null); img.src=URL.createObjectURL(file); }); }
+    $('avatarPick').addEventListener('click',()=>$('avatarFile').click());
+    $('avatarFile').addEventListener('change', async (e)=>{ const f=e.target.files[0]; if(!f) return; const d=await fileToAvatar(f); if(d){ draft.avatar=d; renderEditAvatar(); } $('avatarFile').value=''; });
+    $('avatarClear').addEventListener('click',()=>{ draft.avatar=null; renderEditAvatar(); });
+
+    $('saveBtn').addEventListener('click',()=>{
+      const m=club.members[editIdx];
+      m.nickname=$('fNick').value.trim()||null;
+      if(m.role!=='owner') m.role = draft.role||'member';   // 모임장은 고정
+      m.handicap=num($('fHandi').value); m.experienceYears=num($('fExp').value); m.lifeBest=num($('fBest').value); m.goalScore=num($('fGoal').value);
+      m.gender=draft.gender||null; m.tee=draft.tee||null; m.avatar=draft.avatar||null;
+      save(); $('editOverlay').classList.remove('open'); render(); showToast('저장했어요 ✅');
+    });
+    $('delBtn').addEventListener('click',()=>{
+      const m=club.members[editIdx];
+      if(!confirm(`'${m.name}' 멤버를 삭제할까요? (과거 라운드 기록은 남아요)`)) return;
+      club.members.splice(editIdx,1); club.currentMembers=club.members.length; save(); $('editOverlay').classList.remove('open'); render(); showToast('삭제했어요');
+    });
+    $('editOverlay').addEventListener('click',(e)=>{ if(e.target===$('editOverlay')) $('editOverlay').classList.remove('open'); });
+
+    /* 초대/추가 */
+    $('inviteBtn').addEventListener('click',()=>{
+      $('inviteUrl').value = `https://golfrank.app/join/${club.clubCode||'CLUB-XXXXXX'}`;
+      $('inviteOverlay').classList.add('open');
+    });
+    $('inviteOverlay').addEventListener('click',(e)=>{ if(e.target===$('inviteOverlay')) $('inviteOverlay').classList.remove('open'); });
+    $('copyBtn').addEventListener('click',async ()=>{
+      try{ await navigator.clipboard.writeText($('inviteUrl').value); showToast('초대 링크 복사됨 📋'); }
+      catch(e){ $('inviteUrl').select(); showToast('링크를 길게 눌러 복사하세요'); }
+    });
+    $('addBtn').addEventListener('click',()=>{
+      const name=$('aName').value.trim(); if(!name){ showToast('이름을 입력해주세요'); return; }
+      if((club.members||[]).some((m)=>m.name===name)){ showToast('이미 있는 이름이에요'); return; }
+      if((club.members||[]).length >= (club.maxMembers||20)){ showToast('최대 멤버 수를 초과했어요'); return; }
+      club.members.push({ id:'m_'+Date.now(), name, role:'member', handicap:num($('aHandi').value), experienceYears:num($('aExp').value), lifeBest:num($('aBest').value) });
+      club.currentMembers=club.members.length; save();
+      $('aName').value=''; $('aHandi').value=''; $('aExp').value=''; $('aBest').value='';
+      $('inviteOverlay').classList.remove('open'); render(); showToast(`'${name}' 추가됨 ✅`);
+    });
+
+    /* 네비 */
+    $('backBtn').addEventListener('click',()=>{ location.href='home.html?club='+encodeURIComponent(clubId); });
+    $('tabHome').addEventListener('click',(e)=>{ e.preventDefault(); location.href='home.html?club='+encodeURIComponent(clubId); });
+    $('tabRank').addEventListener('click',(e)=>{ e.preventDefault(); location.href='ranking.html?club='+encodeURIComponent(clubId); });
+    $('tabGallery').addEventListener('click',(e)=>{ e.preventDefault(); location.href='gallery.html?club='+encodeURIComponent(clubId); });
+    $('tabMember').addEventListener('click',(e)=>e.preventDefault());
+
+    // 멤버 카드 클릭: 초대 버튼이면 개인 링크 복사, 아니면 편집
+    $('memList').addEventListener('click',(e)=>{
+      const inv=e.target.closest('[data-invite]');
+      if(inv){ e.stopPropagation(); copyInvite(inv.dataset.invite); return; }
+      const card=e.target.closest('[data-i]');
+      if(card) openEdit(+card.dataset.i);
+    });
+    function copyInvite(memberId){
+      const base = (typeof APP_BASE!=='undefined') ? APP_BASE : location.origin;
+      const link = base + '/home.html?club=' + encodeURIComponent(clubId) + '&join=' + encodeURIComponent(memberId);
+      try{ navigator.clipboard.writeText(link).then(()=>showToast('개인 초대 링크 복사됨! 그 멤버에게 보내세요 📨')); }
+      catch(e){ prompt('이 링크를 그 멤버에게 보내세요', link); }
+    }
+
+    render();
+    (async ()=>{ const p=await pullClubIntoLocal(clubId); if(p){ club=p; if(!club.members) club.members=[]; render(); } })();
+  </script>
+</body>
+</html>

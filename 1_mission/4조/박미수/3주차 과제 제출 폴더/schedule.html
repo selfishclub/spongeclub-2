@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>일정 관리 — Golf Rank</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    main { padding: 16px 20px 20px; }
+    .sec-title { font-size: 14px; font-weight: 700; margin: 20px 0 12px; }
+    .sec-title:first-child { margin-top: 4px; }
+    .sched-list { display: flex; flex-direction: column; gap: 10px; }
+    .sched-item { display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow-card); }
+    .sched-item.past { opacity: 0.75; }
+    .sd-dday { flex: 0 0 auto; min-width: 50px; text-align: center; }
+    .sd-dday .dd { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 17px; color: var(--green); line-height: 1; }
+    .sd-dday .dd.today { color: #E53935; } .sd-dday .dd.past { color: var(--muted); }
+    .sd-body { flex: 1; min-width: 0; }
+    .sd-course { font-size: 15px; font-weight: 700; }
+    .sd-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .sd-actions { display: flex; gap: 6px; flex-direction: column; }
+    .sd-actions button { border: none; border-radius: 8px; font-size: 12px; font-weight: 700; padding: 8px 12px; cursor: pointer; font-family: inherit; white-space: nowrap; }
+    .sd-rec { background: var(--green); color: #fff; } .sd-rec:hover { background: var(--green-dark); }
+    .sd-del { background: transparent; color: #BBB; padding: 4px !important; font-size: 16px !important; }
+    .sd-del:hover { color: #E53935; }
+    .empty-mini { text-align: center; padding: 24px; color: var(--muted); font-size: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; }
+
+    .sheet-overlay { position: fixed; inset: 0; background: rgba(31,31,31,0.45); z-index: 200; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+    .sheet-overlay.open { opacity: 1; pointer-events: auto; }
+    .sheet { width: 100%; max-width: var(--maxw); background: var(--bg); border-radius: 24px 24px 0 0; padding: 8px 22px calc(24px + env(safe-area-inset-bottom)); transform: translateY(100%); transition: transform .3s cubic-bezier(.22,.61,.36,1); }
+    .sheet-overlay.open .sheet { transform: translateY(0); }
+    .grab { width: 40px; height: 4px; background: var(--border); border-radius: 99px; margin: 12px auto 16px; }
+    .sheet h2 { font-size: 20px; font-weight: 700; margin-bottom: 18px; }
+    .fld { margin-bottom: 16px; } .fld.row { display: flex; gap: 10px; } .fld.row > div { flex: 1; }
+    .fld label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 7px; }
+    .fld input { width: 100%; background: #F9F9F9; border: none; border-bottom: 1.5px solid var(--border); border-radius: 8px 8px 0 0; padding: 12px; font-size: 15px; font-family: inherit; color: var(--text); }
+    .fld input:focus { outline: none; border-bottom-color: var(--green); background: #F4F9F4; }
+    #saveSched { width: 100%; height: 52px; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <button class="icon-btn" id="backBtn" aria-label="뒤로"><svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="title" id="clubTitle">일정 관리<span class="sub" id="clubSub"></span></div>
+    </header>
+    <main id="main"></main>
+    <div class="footer-bar"><button class="btn btn-primary btn-block" id="addBtn">＋ 새 일정 추가</button></div>
+
+    <div class="sheet-overlay" id="overlay">
+      <div class="sheet">
+        <div class="grab"></div>
+        <h2>새 라운드 일정</h2>
+        <div class="fld row">
+          <div><label for="sDate">날짜</label><input type="date" id="sDate" /></div>
+          <div><label for="sTime">시간 (선택)</label><input type="time" id="sTime" /></div>
+        </div>
+        <div class="fld"><label for="sCourse">골프장</label><input type="text" id="sCourse" list="courseList" placeholder="예: 일동레이크" autocomplete="off" /><datalist id="courseList"></datalist></div>
+        <div class="fld"><label for="sMemo">메모 (선택)</label><input type="text" id="sMemo" maxlength="40" placeholder="예: 4명 · 오전 티오프" /></div>
+        <button class="btn btn-primary" id="saveSched">일정 저장</button>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./db.js"></script>
+  <script>
+    const STORAGE_KEY='golfrank.clubs';
+    const $=(id)=>document.getElementById(id);
+    const params=new URLSearchParams(location.search);
+    const clubId=params.get('club');
+    let clubs=load(); let club=clubs.find((c)=>c.id===clubId);
+    if(club && !club.schedules) club.schedules=[];
+    function load(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY))||[]; }catch(e){ return []; } }
+    function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(clubs)); if(club) pushClub(club); }
+    function esc(s){ return String(s).replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    let tt; function showToast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('show'),2000); }
+    const today=new Date(); const CUR_Y=today.getFullYear(), CUR_M=today.getMonth(), CUR_D=today.getDate();
+    const WD=['일','월','화','수','목','금','토'];
+    function todayStr(){ return `${CUR_Y}-${String(CUR_M+1).padStart(2,'0')}-${String(CUR_D).padStart(2,'0')}`; }
+    function dday(dateStr){ const d=new Date(dateStr+'T00:00:00'); const t=new Date(CUR_Y,CUR_M,CUR_D); return Math.round((d-t)/86400000); }
+    function fmt(dateStr){ const d=new Date(dateStr); return `${d.getMonth()+1}월 ${d.getDate()}일 (${WD[d.getDay()]})`; }
+
+    if(club){ $('clubTitle').childNodes[0].nodeValue=club.name; $('clubSub').textContent='일정 관리'; }
+
+    function itemHtml(s, past){
+      const dd=dday(s.date); const lbl = past?'지남':(dd===0?'D-DAY':`D-${dd}`);
+      const meta=[fmt(s.date), s.time||null, s.memo||null].filter(Boolean).join(' · ');
+      const rec = past ? `<button class="sd-rec" data-rec="${s.id}">기록하기</button>` : `<button class="sd-rec" data-rec="${s.id}">기록하기</button>`;
+      return `<div class="sched-item ${past?'past':''}">
+        <div class="sd-dday"><div class="dd ${dd===0?'today':''} ${past?'past':''}">${lbl}</div></div>
+        <div class="sd-body"><div class="sd-course">⛳ ${esc(s.course||'미정')}</div><div class="sd-meta">${esc(meta)}</div></div>
+        <div class="sd-actions">${rec}<button class="sd-del" data-del="${s.id}" aria-label="삭제">🗑</button></div>
+      </div>`;
+    }
+
+    function render(){
+      if(!club){ $('main').innerHTML='<div class="empty"><div class="icon">🤔</div><h3>모임을 찾을 수 없어요</h3></div>'; return; }
+      const t=todayStr();
+      const list=(club.schedules||[]).slice();
+      const up=list.filter((s)=>s.date>=t).sort((a,b)=> a.date<b.date?-1:1);
+      const past=list.filter((s)=>s.date<t).sort((a,b)=> a.date>b.date?-1:1);
+      let html=`<div class="sec-title">🔜 다가오는 일정 (${up.length})</div>`;
+      html += up.length ? `<div class="sched-list">${up.map((s)=>itemHtml(s,false)).join('')}</div>` : '<div class="empty-mini">예정된 라운드가 없어요.<br/>아래 버튼으로 일정을 추가하세요.</div>';
+      if(past.length){ html += `<div class="sec-title">⏳ 지난 예정 (아직 미기록)</div><div class="sched-list">${past.map((s)=>itemHtml(s,true)).join('')}</div>`; }
+      $('main').innerHTML=html;
+      $('main').querySelectorAll('[data-rec]').forEach((b)=>b.addEventListener('click',()=>recordSched(b.dataset.rec)));
+      $('main').querySelectorAll('[data-del]').forEach((b)=>b.addEventListener('click',()=>delSched(b.dataset.del)));
+    }
+
+    function recordSched(id){
+      const s=(club.schedules||[]).find((x)=>x.id===id); if(!s) return;
+      // 기록 화면으로 (날짜·코스 자동 채움, 저장 시 이 일정 소멸)
+      location.href='round.html?club='+encodeURIComponent(clubId)+'&date='+encodeURIComponent(s.date)+'&course='+encodeURIComponent(s.course||'')+'&sched='+encodeURIComponent(id);
+    }
+    function delSched(id){
+      if(!confirm('이 일정을 삭제할까요?')) return;
+      club.schedules=(club.schedules||[]).filter((x)=>x.id!==id); save(); render(); showToast('일정을 삭제했어요');
+    }
+
+    /* 추가 시트 */
+    function openSheet(){
+      const cs=[...new Set((club.rounds||[]).map((r)=>r.course).concat((club.schedules||[]).map((s)=>s.course)).filter(Boolean))];
+      $('courseList').innerHTML=cs.map((c)=>`<option value="${esc(c)}">`).join('');
+      const d=new Date(CUR_Y,CUR_M,CUR_D+7); $('sDate').value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      $('sTime').value=''; $('sCourse').value=''; $('sMemo').value='';
+      $('overlay').classList.add('open');
+    }
+    $('addBtn').addEventListener('click', openSheet);
+    $('overlay').addEventListener('click',(e)=>{ if(e.target===$('overlay')) $('overlay').classList.remove('open'); });
+    $('saveSched').addEventListener('click',()=>{
+      const date=$('sDate').value; if(!date){ showToast('날짜를 선택하세요'); return; }
+      const raw=$('sCourse').value.trim(); if(!raw){ showToast('골프장을 입력하세요'); return; }
+      const course = /CC|GC|C\.C|컨트리|골프/i.test(raw) ? raw : raw+'CC';
+      club.schedules=club.schedules||[];
+      club.schedules.push({ id:'sc_'+Date.now(), date, time:$('sTime').value||'', course, memo:$('sMemo').value.trim(), createdAt:Date.now() });
+      save(); $('overlay').classList.remove('open'); render(); showToast('일정을 추가했어요 📅');
+    });
+
+    $('backBtn').addEventListener('click',()=>{ location.href='home.html?club='+encodeURIComponent(clubId); });
+    render();
+    (async ()=>{ const p=await pullClubIntoLocal(clubId); if(p){ club=p; if(!club.schedules) club.schedules=[]; render(); } })();
+  </script>
+</body>
+</html>

@@ -88,4 +88,5 @@ Next.js 웹앱 + Claude Code 스킬로 구현.
 ## 📱 미션 4. SNS 1주차 소감
 
 > AI 도움 없이 직접 작성!
-- **인증 링크:**
+- **인증 링크:** https://www.linkedin.com/feed/update/urn:li:share:7481879391208222720/
+
