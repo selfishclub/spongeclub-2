@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WeatherClothe — 여행 옷차림 추천 서비스 PRD v1.2</title>
+</head>
+<body>
+<style>
+  :root {
+    --blue: #1a1aff;
+    --blue-soft: #ececff;
+    --pink: #ff1f6b;
+    --pink-soft: #ffe6ef;
+    --ink: #0b0b0c;
+    --muted: #64646c;
+    --paper: #ffffff;
+    --bg: #f6f6f8;
+    --line: #e4e4e6;
+    --line-strong: #0b0b0c;
+    --ok: #1a8f5a;
+    --ok-soft: #e2f4ea;
+    --warn: #b5661e;
+    --warn-soft: #fbecdb;
+    --idle: #7a7a82;
+    --idle-soft: #ededf0;
+    --font-display: "Helvetica Neue", Arial, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    --font-body: "Helvetica Neue", Arial, "Apple SD Gothic Neo", "Malgun Gothic", -apple-system, sans-serif;
+    --font-mono: "SF Mono", ui-monospace, "Consolas", "Menlo", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --blue: #6a6aff; --blue-soft: #191a35;
+      --pink: #ff5c92; --pink-soft: #351925;
+      --ink: #f3f2ee; --muted: #9a9aa2;
+      --paper: #161618; --bg: #0c0c0d;
+      --line: #2a2a2d; --line-strong: #f3f2ee;
+      --ok: #46c88a; --ok-soft: #16281f;
+      --warn: #e0a866; --warn-soft: #2c2114;
+      --idle: #8f8f96; --idle-soft: #232326;
+    }
+  }
+  :root[data-theme="dark"] {
+    --blue: #6a6aff; --blue-soft: #191a35;
+    --pink: #ff5c92; --pink-soft: #351925;
+    --ink: #f3f2ee; --muted: #9a9aa2;
+    --paper: #161618; --bg: #0c0c0d;
+    --line: #2a2a2d; --line-strong: #f3f2ee;
+    --ok: #46c88a; --ok-soft: #16281f;
+    --warn: #e0a866; --warn-soft: #2c2114;
+    --idle: #8f8f96; --idle-soft: #232326;
+  }
+  :root[data-theme="light"] {
+    --blue: #1a1aff; --blue-soft: #ececff;
+    --pink: #ff1f6b; --pink-soft: #ffe6ef;
+    --ink: #0b0b0c; --muted: #64646c;
+    --paper: #ffffff; --bg: #f6f6f8;
+    --line: #e4e4e6; --line-strong: #0b0b0c;
+    --ok: #1a8f5a; --ok-soft: #e2f4ea;
+    --warn: #b5661e; --warn-soft: #fbecdb;
+    --idle: #7a7a82; --idle-soft: #ededf0;
+  }
+
+  * { box-sizing: border-box; }
+  .prd {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    padding: 0 20px 100px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+
+  /* hero */
+  .hero {
+    background: var(--blue);
+    color: #fff;
+    border-radius: 24px;
+    padding: 40px 32px 34px;
+    margin: 24px 0 30px;
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--pink);
+    margin: 0 0 14px;
+    font-weight: 700;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(30px, 6vw, 46px);
+    line-height: 1.04;
+    letter-spacing: -0.03em;
+    margin: 0 0 6px;
+    text-wrap: balance;
+  }
+  .wordmark {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-size: clamp(22px, 4.5vw, 30px);
+    margin: 0 0 18px;
+  }
+  .wordmark::after { content: "."; color: var(--pink); }
+  .hero-meta {
+    display: flex; flex-wrap: wrap; gap: 8px 18px;
+    font-size: 13px; color: rgba(255,255,255,0.85);
+    border-top: 1px solid rgba(255,255,255,0.25);
+    padding-top: 16px;
+  }
+  .hero-meta b { color: #fff; font-weight: 700; }
+
+  /* change summary */
+  .callout {
+    border: 1px solid var(--line-strong);
+    border-radius: 16px;
+    background: var(--paper);
+    padding: 22px 24px;
+    margin: 0 0 34px;
+  }
+  .callout .tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: #fff; background: var(--pink);
+    border-radius: 6px; padding: 3px 9px; margin-bottom: 12px;
+  }
+  .callout p { margin: 0; font-size: 14.5px; }
+
+  /* sections */
+  section { margin: 0 0 40px; }
+  h2 {
+    font-family: var(--font-display);
+    font-size: 22px; font-weight: 800; letter-spacing: -0.02em;
+    margin: 0 0 6px; text-wrap: balance;
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  h2 .num {
+    font-family: var(--font-mono);
+    font-size: 15px; color: var(--blue); font-weight: 700;
+  }
+  .rule { height: 1px; background: var(--line); border: 0; margin: 0 0 18px; }
+  h3 { font-size: 15px; font-weight: 800; margin: 22px 0 4px; letter-spacing: -0.01em; }
+  p { margin: 0 0 12px; }
+  .lead { font-size: 15px; }
+  strong { font-weight: 700; }
+  blockquote {
+    margin: 14px 0;
+    padding: 12px 18px;
+    border-left: 3px solid var(--pink);
+    background: var(--pink-soft);
+    border-radius: 0 10px 10px 0;
+    font-style: italic;
+    color: var(--ink);
+  }
+  ul { margin: 0 0 12px; padding-left: 20px; }
+  li { margin: 0 0 8px; }
+  a { color: var(--blue); }
+
+  /* pull line for the "one-liner" */
+  .pull {
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--blue);
+    background: var(--paper);
+    border-radius: 0 12px 12px 0;
+    padding: 14px 18px;
+    margin: 0 0 12px;
+    font-size: 15px;
+  }
+  .pull span { display:block; font-family: var(--font-mono); font-size: 11px; letter-spacing:0.08em; text-transform:uppercase; color: var(--muted); margin-bottom: 4px; }
+
+  /* status chips */
+  .legend { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 20px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--font-mono); font-size: 11.5px; font-weight: 700;
+    letter-spacing: 0.03em; padding: 4px 10px; border-radius: 999px;
+    border: 1px solid transparent;
+  }
+  .chip.ok { color: var(--ok); background: var(--ok-soft); border-color: var(--ok); }
+  .chip.warn { color: var(--warn); background: var(--warn-soft); border-color: var(--warn); }
+  .chip.idle { color: var(--idle); background: var(--idle-soft); border-color: var(--idle); }
+
+  /* feature cards */
+  .feat {
+    border: 1px solid var(--line-strong);
+    border-radius: 14px; background: var(--paper);
+    padding: 18px 20px; margin: 0 0 12px;
+  }
+  .feat-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+  .feat-head h3 { margin: 0; font-size: 16px; }
+  .feat p { margin: 0 0 8px; font-size: 14px; }
+  .feat p:last-child { margin-bottom: 0; }
+  .feat .sub { display:flex; gap:8px; align-items:flex-start; padding:10px 12px; border-radius:10px; background: var(--blue-soft); font-size:13.5px; margin-top:10px; }
+  .feat .sub b { color: var(--blue); }
+  .star { color: var(--pink); font-weight: 800; }
+
+  /* flow diagram */
+  .flow {
+    border: 1px solid var(--line-strong);
+    border-radius: 14px; background: var(--paper);
+    overflow-x: auto; margin: 0 0 12px;
+  }
+  .flow pre {
+    margin: 0; padding: 20px;
+    font-family: var(--font-mono); font-size: 12.5px; line-height: 1.75;
+    color: var(--ink); white-space: pre;
+  }
+
+  /* two-col grid for stack/status */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 560px) { .grid2 { grid-template-columns: 1fr; } }
+  .box { border: 1px solid var(--line); border-radius: 14px; background: var(--paper); padding: 18px 20px; }
+  .box h3 { margin-top: 0; }
+  .box ul { padding-left: 18px; margin-bottom: 0; }
+  .box li { font-size: 13.5px; }
+
+  .foot {
+    margin-top: 40px; padding: 20px 22px;
+    border: 1px dashed var(--blue); border-radius: 14px;
+    background: var(--blue-soft); font-size: 14px;
+  }
+  .foot b { color: var(--blue); }
+
+  :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+</style>
+
+<div class="prd">
+<div class="wrap">
+
+  <header class="hero">
+    <p class="eyebrow">Product Requirements · v1.2</p>
+    <h1>여행 옷차림 추천 서비스</h1>
+    <p class="wordmark">WeatherClothe</p>
+    <div class="hero-meta">
+      <span>과제 1 · PRD 기획 및 구현</span>
+      <span>작성 <b>Sylvia</b></span>
+      <span>2026-07-25</span>
+      <span><b>v1.2</b> 프로토타입 구현 반영</span>
+    </div>
+  </header>
+
+  <div class="callout">
+    <span class="tag">v1.2 변경 요약</span>
+    <p>Phase 1 프로토타입을 실제 동작하는 웹앱으로 구현하며 확정·보강한 내용을 반영했다. ① 여행객 레퍼런스 검색에 <strong>실제 기온대(날씨 데이터)를 키워드로 주입</strong>해 핵심 기능을 정상화, ② '내 코디'와 '옷장 플래너'를 <strong>하나의 화면으로 통합</strong>하고 칩 편집·직접 입력 추가, ③ 사진 업로드 기반 색감 스타일 분석 구현, ④ 목적지·문화 팁 데이터 대폭 확장, ⑤ 현대카드 DIVE 스타일 디자인 시스템 적용.</p>
+  </div>
+
+  <section>
+    <h2><span class="num">①</span> 문제 정의</h2>
+    <hr class="rule" />
+    <p class="lead"><strong>누가·언제·어떤 상황에서:</strong> 해외여행을 앞둔 여행자가, 여행 확정 후부터 짐 싸기 직전까지, 목적지의 그 시기 날씨와 적절한 옷차림을 판단하지 못하고 있다. 일기예보는 출발 직전에야 유효하고, "최고 14도"라는 숫자만으로는 무엇을 입을지 감이 오지 않는다.</p>
+    <p><strong>지금은 어떻게 버티고 있는가(대체재):</strong> "3월 파리 옷차림" 블로그 검색 — 몇 년 전 글, 광고성 콘텐츠, 글마다 다른 결론. 결과적으로 불안해서 옷을 과잉으로 싸간다.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">②</span> 주요 페르소나</h2>
+    <hr class="rule" />
+    <p><strong>상황으로 정의:</strong> 스타일 기준이 뚜렷한 30대 디자이너. 여행 옷차림도 취향에 맞아야 하지만, 목적지 날씨에 대한 확신이 없어 "혹시 몰라" 옷을 계속 추가하다가 캐리어가 넘친다. 도시 여행과 그랜드캐년 같은 액티비티 여행을 모두 다닌다.</p>
+    <blockquote>"결국 옷을 너무 많이 싸가서 반은 안 입었어."</blockquote>
+  </section>
+
+  <section>
+    <h2><span class="num">③</span> 주요 가치 · 소구 방식</h2>
+    <hr class="rule" />
+    <div class="pull"><span>지키는 것 한 줄</span>추측이 아니라 근거(10년 기후 데이터 + 같은 시기 여행객들의 실제 옷차림)로 옷을 결정하게 한다.</div>
+    <div class="pull"><span>페르소나의 언어로</span>"그 시기에 거길 다녀온 사람들이 뭘 입었는지 보고 나면, 캐리어 반은 비울 수 있어."</div>
+  </section>
+
+  <section>
+    <h2><span class="num">④</span> 핵심 기능</h2>
+    <hr class="rule" />
+    <div class="legend">
+      <span class="chip ok">✅ 구현됨</span>
+      <span class="chip warn">🔶 부분 구현</span>
+      <span class="chip idle">⬜ 예정</span>
+    </div>
+
+    <div class="feat">
+      <div class="feat-head"><h3>1. 날씨 요약</h3><span class="chip ok">✅ 구현됨</span></div>
+      <p>Open-Meteo 과거 10년 데이터로 여행 구간의 평균 최고·최저 기온·강수 확률·일교차를 요약 카드로 제공. <strong>기준 도시(서울) 비교 번역</strong>("서울의 같은 시기보다 평균 최고기온이 약 4도 낮아요")을 함께 표시. 출발 D-14 이내엔 실제 예보를 병기.</p>
+    </div>
+
+    <div class="feat">
+      <div class="feat-head"><h3>2. 여행객 옷차림 레퍼런스 <span style="color:var(--pink)">(킬러 기능)</span></h3><span class="chip ok">✅ 구현됨</span></div>
+      <p>그 시기 그 목적지를 방문한 여행객들의 실제 사진 검색. 목적지 유형을 자동 판별해 도시형은 여행객/스트릿 스냅, 액티비티형(그랜드캐년 등)은 트레킹 등 해당 활동 복장을 수집.</p>
+      <div class="sub"><span class="star">★</span><div><b>실제 날씨를 검색에 반영 (v1.2 핵심 보강):</b> 10년 평균(또는 예보) 기온으로 계산한 기온대를 의류 키워드로 변환해 모든 검색어에 주입한다. 예) 헬싱키 1월(−5~−1°) → <code>winter freezing cold heavy coat puffer</code>, 방콕 4월(27~35°) → <code>hot humid summer linen shorts</code>. 달력상 '월'만으로는 남반구·고산·사막에서 빗나가므로, "그 목적지가 실제로 얼마나 덥고 추운지"를 기준으로 옷을 찾는다.</div></div>
+      <p style="margin-top:10px"><strong>소스:</strong> 핀터레스트(옷차림 콘텐츠 위주라 결과가 가장 깨끗함) 1순위 + 구글 이미지(부정 키워드·사진 전용 필터로 지도·호텔·음식 제거) + 인스타그램(해시태그·위치 탐색 링크 — API 제약으로 직접 수집 불가).</p>
+    </div>
+
+    <div class="feat">
+      <div class="feat-head"><h3>3. 날짜별 코디 추천</h3><span class="chip ok">✅ 구현됨</span></div>
+      <p>날씨 × 여행객 경향 × 내 스타일 프로필 교차. <strong>아이템 풀 조합 방식</strong>으로 같은 기온대라도 날마다 다른 코디를 제안. 일정 성격(관광/식사·격식/액티비티)을 날짜별로 선택하면 코디가 바뀐다 — 액티비티 날은 방풍·방수 아우터와 트레킹화로 교체, 격식 날은 스타일별 포인트 아이템 추가. 그날의 일교차·강수 확률도 코디 메모로 반영.</p>
+      <div class="feat-head" style="margin:12px 0 6px"><h3 style="font-size:14px">└ 내 스타일 프로필</h3><span class="chip warn">🔶 부분 구현</span></div>
+      <p>사진 여러 장을 업로드하면 <strong>색감·톤(뉴트럴 비중·채도)을 클라이언트에서 분석</strong>해 4가지 스타일(미니멀/캐주얼/클래식/스트릿) 중 하나를 자동 추천하고 대표 팔레트를 표시. Phase 2에서 Claude 비전으로 실루엣·무드까지 분석 예정.</p>
+    </div>
+
+    <div class="feat">
+      <div class="feat-head"><h3>4. 옷장 플래너 &amp; 실시간 지참 리스트</h3><span class="chip ok">✅ 구현됨</span></div>
+      <p><strong>'내 코디' 화면에 통합.</strong> 날짜별 추천 코디의 각 아이템이 칩으로 표시되고, 사용자가 <strong>보유 / 사야 함</strong>을 클릭으로 전환, <strong>✎ 로 칩 이름을 내 옷에 맞게 수정</strong>(예: '와이드 린넨 팬츠' → '베이지 와이드 린넨 팬츠' — 같은 이름은 모든 날짜에 함께 반영돼 병합 카운팅 유지), <strong>보유 아이템을 직접 입력해 추가</strong>할 수 있다.</p>
+      <p>여러 날짜에 배정된 같은 옷은 자동 병합되어, 최종 지참 리스트(의류·신발·악세서리·기타 분류, '사야 할 옷' 배지, 착용 일수 표기)가 실시간 갱신된다. 성공 기준 1번(과잉 패킹 감소)을 직접 달성.</p>
+    </div>
+
+    <div class="feat">
+      <div class="feat-head"><h3>5. 드레스코드 · 문화 팁</h3><span class="chip ok">✅ 구현됨</span></div>
+      <p>도시별 큐레이션(20개 도시) + <strong>국가 단위 폴백</strong> + <strong>실제 날씨 데이터 기반 체크포인트 자동 생성</strong>(비 확률·일교차·더위·추위에 맞춘 준비물) + 액티비티 준비물 안내로 3단계 구성. 종교시설 복장, 레스토랑 드레스코드, 돌길·냉방 등 현지 맥락 포함.</p>
+    </div>
+
+    <h3>넣고 싶었지만 뺀 것</h3>
+    <ul>
+      <li>AI 자동 생성형 패킹 리스트 — 뻔한 결과물. 사용자가 확정한 계획에서 리스트가 <em>도출</em>되는 옷장 플래너로 대체.</li>
+      <li>부족 아이템 쇼핑 제안 — 추천의 순수성 훼손 + 커머스 복잡도. '사야 할 옷' 입력·표시까지만, 구매 연결은 안 함.</li>
+      <li>실시간 예보 중심 UI — 기존 날씨 앱과 중복.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">⑤</span> 성공 기준</h2>
+    <hr class="rule" />
+    <p>"좋아요"가 아니라 행동으로 관찰한다. 다음 두 가지가 관찰되면 성공:</p>
+    <ul>
+      <li><strong>안 입고 돌아온 옷이 지난 여행보다 줄어든다.</strong> (여행 후 캐리어 리뷰 — 과잉 패킹의 직접 지표)</li>
+      <li><strong>추천 코디를 실제로 입은 날이 여행 일수의 절반 이상.</strong> (추천이 "참고"가 아니라 "결정"으로 쓰였다는 증거)</li>
+    </ul>
+    <p><strong>보조 관찰:</strong> 계획(D-30)·준비(D-7)·짐싸기(D-1) 세 시점에 다시 열어보는지, 옷장 플래너에서 날짜별 옷 배정을 실제로 완료하는지(계획 완성률).</p>
+  </section>
+
+  <section>
+    <h2><span class="num">⑥</span> 만들지 않을 것 (범위 밖)</h2>
+    <hr class="rule" />
+    <ul>
+      <li>다중 사용자·계정 시스템 — 1차 타겟은 나 한 명. 개인 도구로 검증이 먼저.</li>
+      <li>AI 자동 패킹 리스트, 쇼핑·커머스 연계(구매·결제). 단, 사용자 주도 옷장 플래너와 도출 리스트는 범위 안(④-4).</li>
+      <li>자체 스트릿 스냅 수집 파이프라인 — Phase 3 이후 검토.</li>
+      <li>SNS·커뮤니티 기능, 실시간 예보 앱 기능 전반.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">⑦</span> 데이터 · API 설계</h2>
+    <hr class="rule" />
+    <ul>
+      <li><strong>날씨 (Open-Meteo · 구현됨):</strong> Geocoding(도시명→좌표, 한글 검색 + 실패 시 영문 별칭·영어 재검색 폴백), Historical Weather(10년 평균), Forecast(D-14 예보 병기). 무료·키 불필요.</li>
+      <li><strong>여행객 이미지 (단계적):</strong> Phase 1은 검색 링크 방식 — 핀터레스트/구글/인스타 링크에 목적지 유형 + <strong>실제 기온대 키워드</strong> 결합. 구글은 부정 키워드·사진 전용 필터로 정제. Phase 2에서 Claude 비전 필터링 후 앱 내 인라인 표시.</li>
+      <li><strong>AI 레이어 (Claude API):</strong> (0) 유형 판별 — 현재 규칙 기반, Phase 2 Claude 분류. (1) 스타일 — 색감 휴리스틱 → Claude 비전. (2) 코디 — 규칙 기반 풀 → Claude 생성. (3) 팁 — 큐레이션+날씨 규칙 → 웹 검색 요약.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">⑧</span> 시스템 플로우</h2>
+    <hr class="rule" />
+    <div class="flow"><pre>[도시·날짜·유형·스타일 입력]
+      │
+      ▼
+[Geocoding(한글→영문 폴백)] → [Historical + (D-14 예보)] → 10년 평균 요약 + 서울 비교
+      │
+      ├─→ [기온대 키워드 주입] → [핀터레스트/구글(필터)/인스타] → 여행객 옷차림 레퍼런스
+      │
+      ├─→ [사진 업로드 → 색감 분석] → 스타일 프로필(미니멀/캐주얼/클래식/스트릿)
+      │
+      ▼
+[날씨 × 기온대 × 스타일 × 일정성격] → 날짜별 코디 + 편집형 옷장 플래너 → 실시간 지참 리스트
+      │
+      ▼
+[도시/국가 팁 + 날씨 기반 체크포인트] → 드레스코드·문화 팁</pre></div>
+  </section>
+
+  <section>
+    <h2><span class="num">⑨</span> 화면 구성 (IA)</h2>
+    <hr class="rule" />
+    <p><strong>입력 카드:</strong> 여행지(자동완성)·출발/도착일·목적지 유형(자동 판별)·스타일(사진 업로드 분석 또는 선택).</p>
+    <p><strong>결과 탭 4개:</strong></p>
+    <ul>
+      <li><strong>날씨</strong> — 기후 요약 카드(대형 숫자 그리드) + 서울 비교.</li>
+      <li><strong>여행객 룩</strong> — 기온대 반영 검색 링크(핀터레스트/구글/인스타) + AI 코멘트.</li>
+      <li><strong>내 코디</strong> — 날짜별 추천 코디 + 편집형 옷장 플래너 + 하단 실시간 지참 리스트.</li>
+      <li><strong>팁</strong> — 도시/국가 드레스코드 + 이번 여행 날씨 체크포인트 + 액티비티 준비물.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">⑩</span> 로드맵</h2>
+    <hr class="rule" />
+    <div class="feat">
+      <div class="feat-head"><h3>Phase 1 — 프로토타입</h3><span class="chip ok">✅ 완료</span></div>
+      <p>입력 → 날씨 요약(서울 비교·D-14 예보) → 기온대 반영 레퍼런스 → 사진 색감 스타일 분석 → 규칙 기반 날짜별 코디 → 편집형 옷장 플래너·실시간 지참 리스트 → 도시/날씨 기반 팁. 핵심 경험 유용성 본인 검증 충족.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-head"><h3>Phase 2 — 개인 도구 완성</h3><span class="chip warn">🔶 진행 중</span></div>
+      <p>Claude 비전 스타일 프로필, 이미지 검색 결과 AI 필터링 및 앱 내 인라인 표시, 스타일 프로필 저장, 유형·코디·팁의 Claude 생성 전환, 3개 시점(A/B/C) 화면 분화.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-head"><h3>Phase 3 — 확장 검토</h3><span class="chip idle">⬜ 예정</span></div>
+      <p>실사용 데이터를 근거로 외부 공개 여부 판단. 자체 이미지 데이터 파이프라인, 패킹 리스트·쇼핑 연계 등 보류 기능 재검토.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">⑪</span> 리스크와 열린 질문</h2>
+    <hr class="rule" />
+    <ul>
+      <li><strong>이미지 품질·권리:</strong> 검색 결과는 시기·품질이 들쭉날쭉하고 저작권 이슈가 있다. 개인 도구는 <strong>링크 표시 방식으로 회피</strong>(외부 공개 시 재검토). 인스타는 탐색 링크만, 외부 사이트 로그인은 앱이 관여하지 않는다.</li>
+      <li><strong>스타일 분석의 주관성:</strong> Phase 1 색감 분석은 실루엣·무드를 못 본다. 언제든 수정 가능하게 했고 Phase 2 Claude 비전으로 정교화.</li>
+      <li><strong>기후 평균의 한계:</strong> 이상기후 시 평균이 빗나갈 수 있어 D-14 이내엔 예보 병기. 현재 기간 평균 기온으로 검색 — 변동이 큰 경우 날짜별 분리 검색 검토.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">⑫</span> 구현 현황 (v1.2)</h2>
+    <hr class="rule" />
+    <div class="grid2">
+      <div class="box">
+        <h3>스택</h3>
+        <ul>
+          <li>정적 웹앱 (HTML/CSS/Vanilla JS)</li>
+          <li>Open-Meteo API (키 불필요)</li>
+          <li>로컬 dev 서버 · 개인 도구로 실행</li>
+        </ul>
+      </div>
+      <div class="box">
+        <h3>디자인 시스템</h3>
+        <ul>
+          <li>현대카드 DIVE / Space·Culture 무드</li>
+          <li>일렉트릭 블루 + 핫핑크 + 블랙&amp;화이트 에디토리얼</li>
+          <li>Pretendard(본문) + Anton(디스플레이), 라이트/다크 대응</li>
+        </ul>
+      </div>
+    </div>
+    <div class="box" style="margin-top:12px">
+      <h3>구현 완료 항목</h3>
+      <ul>
+        <li>여행지 자동완성(한글→영문 별칭 36곳·활동형 30곳), 목적지 유형 자동 판별</li>
+        <li>10년 평균 날씨 + 서울 비교 + D-14 예보 병기</li>
+        <li>기온대 키워드를 주입한 여행객 룩 검색(핀터레스트·구글·인스타)</li>
+        <li>사진 업로드 색감 기반 스타일 분석(팔레트 표시)</li>
+        <li>아이템 풀 조합 날짜별 코디(일정 성격·날씨 반영)</li>
+        <li>통합 옷장 플래너: 보유/사야함 토글, ✎ 이름 수정(일괄 반영), 직접 추가, 실시간 병합 지참 리스트</li>
+        <li>도시 20곳 + 국가 폴백 + 날씨 기반 체크포인트 팁</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="foot">
+    <b>다음 단계 제안</b> — v1.2 프로토타입을 실제 여행 1회에 사용 → 성공 기준(과잉 패킹 감소·추천 착용률) 관찰 → Phase 2(Claude 비전·이미지 인라인) 착수 → v1.3 개정.
+  </div>
+
+</div>
+</div>
+</body>
+</html>

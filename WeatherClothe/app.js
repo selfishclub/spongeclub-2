@@ -292,8 +292,13 @@ function composeOutfit(stylePref, bandKey, activity, dayIndex) {
     extra = "도보 이동이 많다면 신발은 편한 쪽을 우선하세요.";
   }
 
-  const parts = [outer, top, bottom].filter(Boolean).join(" + ");
-  return { line: `${parts}, ${shoes}`, extra };
+  const clothing = [outer, top, bottom].filter(Boolean);
+  const items = [
+    ...clothing.map((name) => ({ name, category: "의류" })),
+    { name: shoes, category: "신발" },
+  ];
+  const parts = clothing.join(" + ");
+  return { line: `${parts}, ${shoes}`, extra, items };
 }
 
 // ---------- State ----------
@@ -301,6 +306,11 @@ function composeOutfit(stylePref, bandKey, activity, dayIndex) {
 let selectedCity = null; // { name, lat, lon, country }
 let selectedType = "city";
 let geocodeTimer = null;
+
+// wardrobe planner state: date -> { activity, stylePref, bandKey, dayIndex, items:[{name,category,status}] }
+// status: "own" (보유) | "buy" (사야 함); item.editing = true while renaming inline
+let wardrobeState = {};
+let editingFocus = null; // { date, idx } to refocus after a redraw
 
 // ---------- DOM ----------
 
@@ -673,36 +683,65 @@ function googleImagesUrl(query) {
   return `https://www.google.com/search?tbm=isch&tbs=itp:photos&q=${encodeURIComponent(query + " " + GOOGLE_NEGATIVES)}`;
 }
 
+function instagramTagUrl(tag) {
+  return `https://www.instagram.com/explore/tags/${encodeURIComponent(tag)}/`;
+}
+
+// The KILLER feature: reference searches must reflect the ACTUAL temperature band
+// (from 10-yr avg / forecast), not just the calendar month — month is unreliable
+// for the southern hemisphere, high altitude, deserts, etc. These keywords are
+// injected into every image query so results match how warm/cold it really is.
+const WEATHER_SEARCH = {
+  freezing: { en: "winter freezing cold heavy coat puffer outfit", ko: "겨울 두꺼운 패딩 코트" },
+  cold: { en: "cold weather coat wool layered outfit", ko: "쌀쌀한 코트 레이어드" },
+  cool: { en: "autumn fall light jacket layered outfit", ko: "간절기 자켓 레이어드" },
+  mild: { en: "mild spring light layers outfit", ko: "봄가을 가벼운 옷" },
+  warm: { en: "warm summer breathable outfit", ko: "더운 여름 옷" },
+  hot: { en: "hot humid summer linen shorts outfit", ko: "무더운 여름 린넨 반팔" },
+};
+
 function renderReference(cityName, type, activity, hist) {
   const box = document.getElementById("reference-content");
   const monthName = new Date(startDateInput.value + "T00:00:00Z").toLocaleString("en-US", { month: "long" });
   const band = tempBand(hist.avgHigh);
+  const w = WEATHER_SEARCH[band.key];
+  const wx = w.en; // weather keywords injected into English image queries
+  const tempTag = `평균 ${Math.round(hist.avgLow)}~${Math.round(hist.avgHigh)}°`;
+  const weatherLine = `실제 기온(${tempTag}, ${band.label})을 검색어에 반영했어요 — 달력상 ${monthName}이 아니라 그 목적지가 실제로 얼마나 덥고 추운지를 기준으로 옷을 찾아요.`;
 
   let comment = "";
   let links = [];
 
   if (type === "activity") {
-    comment = `${cityName}은(는) 자연·액티비티형 목적지로 분류했어요. 대표 활동: ${activity || "액티비티"}. 이 시기 평균 기온대(${band.label})를 감안하면 여행객들은 레이어드와 기능성 아우터를 기본으로 챙기는 경우가 많아요.`;
+    comment = `${cityName}은(는) 자연·액티비티형 목적지로 분류했어요. 대표 활동: ${activity || "액티비티"}. ${weatherLine}`;
     links = [
-      { label: `Pinterest — ${cityName} 하이킹 룩`, sub: "옷차림 콘텐츠 위주라 결과가 가장 깨끗해요", url: pinterestUrl(`${cityName} hiking outfit what to wear`) },
-      { label: `구글 이미지 — ${cityName} ${monthName} 트레킹 복장`, sub: "지도·호텔·음식 이미지를 제외한 필터 검색", url: googleImagesUrl(`${cityName} ${monthName} hiking trail outfit ootd`) },
-      { label: `구글 — ${cityName} 트레일 옷차림 후기`, sub: "실제 다녀온 여행자들의 텍스트 후기", url: `https://www.google.com/search?q=${encodeURIComponent(cityName + " trail what to wear packing tips")}` },
+      { label: `Pinterest — ${cityName} ${band.label} 하이킹 룩`, sub: "옷차림 콘텐츠 위주라 결과가 가장 깨끗해요", url: pinterestUrl(`${cityName} hiking ${wx} what to wear`) },
+      { label: `구글 이미지 — ${cityName} 트레킹 복장 (${tempTag})`, sub: `기온대(${band.label}) 키워드를 넣은 필터 검색`, url: googleImagesUrl(`${cityName} ${monthName} hiking trail ${wx} ootd`) },
+      { label: `구글 — ${cityName} 트레일 옷차림 후기`, sub: "실제 다녀온 여행자들의 텍스트 후기", url: `https://www.google.com/search?q=${encodeURIComponent(cityName + " " + monthName + " trail what to wear " + w.ko + " packing tips")}` },
     ];
   } else if (type === "mixed") {
-    comment = `${cityName}은(는) 도심 관광과 액티비티(${activity || "액티비티"})가 함께 있는 혼합형 목적지예요. 일정 성격에 따라 코디를 나눠 준비하는 걸 추천해요.`;
+    comment = `${cityName}은(는) 도심 관광과 액티비티(${activity || "액티비티"})가 함께 있는 혼합형 목적지예요. ${weatherLine}`;
     links = [
-      { label: `Pinterest — ${cityName} ${monthName} 여행 룩`, sub: "옷차림 콘텐츠 위주라 결과가 가장 깨끗해요", url: pinterestUrl(`${cityName} ${monthName} travel outfit ootd`) },
-      { label: `Pinterest — ${cityName} 액티비티 복장`, sub: "하이킹·아웃도어 룩 참고", url: pinterestUrl(`${cityName} hiking outfit`) },
-      { label: `구글 이미지 — ${cityName} ${monthName} 여행객 옷차림`, sub: "지도·호텔·음식 이미지를 제외한 필터 검색", url: googleImagesUrl(`${cityName} ${monthName} tourist outfit ootd what to wear`) },
+      { label: `Pinterest — ${cityName} ${band.label} 여행 룩`, sub: "옷차림 콘텐츠 위주라 결과가 가장 깨끗해요", url: pinterestUrl(`${cityName} travel ${wx} ootd`) },
+      { label: `Pinterest — ${cityName} ${band.label} 액티비티 복장`, sub: "기온대에 맞는 하이킹·아웃도어 룩", url: pinterestUrl(`${cityName} hiking ${wx}`) },
+      { label: `구글 이미지 — ${cityName} 여행객 옷차림 (${tempTag})`, sub: `기온대(${band.label}) 키워드를 넣은 필터 검색`, url: googleImagesUrl(`${cityName} ${monthName} tourist ${wx} ootd what to wear`) },
     ];
   } else {
-    comment = `${cityName}은(는) 도시형 목적지로 분류했어요. 이 시기(${band.label}) 여행객들은 레이어드를 기본으로 하고, 현지 분위기에 맞추려면 신발이 포인트가 되는 경우가 많아요.`;
+    comment = `${cityName}은(는) 도시형 목적지로 분류했어요. ${weatherLine}`;
     links = [
-      { label: `Pinterest — ${cityName} ${monthName} 여행 룩`, sub: "옷차림 콘텐츠 위주라 결과가 가장 깨끗해요", url: pinterestUrl(`${cityName} ${monthName} travel outfit ootd`) },
-      { label: `구글 이미지 — ${cityName} ${monthName} 여행객 옷차림`, sub: "지도·호텔·음식 이미지를 제외한 필터 검색", url: googleImagesUrl(`${cityName} ${monthName} tourist outfit ootd what to wear`) },
-      { label: `구글 이미지 — ${cityName} 스트릿 스냅`, sub: "현지인 분위기 참고 (런웨이·패션위크 제외)", url: googleImagesUrl(`${cityName} street style ${monthName} -runway -fashionweek`) },
+      { label: `Pinterest — ${cityName} ${band.label} 여행 룩`, sub: "옷차림 콘텐츠 위주라 결과가 가장 깨끗해요", url: pinterestUrl(`${cityName} travel ${wx} ootd`) },
+      { label: `구글 이미지 — ${cityName} 여행객 옷차림 (${tempTag})`, sub: `기온대(${band.label}) 키워드를 넣은 필터 검색`, url: googleImagesUrl(`${cityName} ${monthName} tourist ${wx} ootd what to wear`) },
+      { label: `구글 이미지 — ${cityName} ${band.label} 스트릿 스냅`, sub: "현지인 분위기 참고 (런웨이·패션위크 제외)", url: googleImagesUrl(`${cityName} street style ${wx} -runway -fashionweek`) },
     ];
   }
+
+  // Instagram: hashtag/location exploration (API 제약으로 직접 수집 불가 → 탐색 링크)
+  const igTag = cityName.replace(/\s/g, "") + "여행룩";
+  links.push({
+    label: `인스타그램 — #${igTag}`,
+    sub: "위치·해시태그로 여행객 실사용 스냅 탐색 (API 제약으로 직접 수집은 불가, 탐색 링크만 제공)",
+    url: instagramTagUrl(igTag),
+  });
 
   box.innerHTML = `
     <p class="ref-comment">${comment}</p>
@@ -714,10 +753,9 @@ function renderReference(cityName, type, activity, hist) {
   `;
 }
 
-function renderOutfits(dates, hist, forecast, stylePref) {
-  const list = document.getElementById("outfit-list");
-  list.innerHTML = "";
-
+// Seeds per-day plan state (weather + recommended items) from the data, then draws.
+function renderPlan(dates, hist, forecast, stylePref) {
+  wardrobeState = {};
   const forecastMap = {};
   if (forecast && forecast.daily) {
     forecast.daily.time.forEach((t, idx) => {
@@ -732,50 +770,43 @@ function renderOutfits(dates, hist, forecast, stylePref) {
   }
 
   dates.forEach((date, dayIndex) => {
-    const dayForecast = forecastMap[date];
-    const high = dayForecast ? dayForecast.high : hist.avgHigh;
-    const low = dayForecast ? dayForecast.low : hist.avgLow;
+    const f = forecastMap[date];
+    const high = f ? f.high : hist.avgHigh;
+    const low = f ? f.low : hist.avgLow;
     const band = tempBand(high);
-    const source = dayForecast ? "실제 예보" : "과거 평균";
-
-    const weatherNotes = [];
+    const notes = [];
     const diurnal = high - low;
-    if (diurnal >= 10) {
-      weatherNotes.push(`일교차 ${Math.round(diurnal)}° — 아침저녁용 겉옷을 따로 챙기세요.`);
-    }
-    const precipProb = dayForecast && dayForecast.precipProb != null ? dayForecast.precipProb : hist.precipChance;
-    if (precipProb >= 50) {
-      weatherNotes.push(`비 확률 ${Math.round(precipProb)}% — 접이식 우산과 방수 신발을 권장해요.`);
-    } else if (precipProb >= 35) {
-      weatherNotes.push(`비 확률 ${Math.round(precipProb)}% — 접이식 우산을 가방에 넣어두세요.`);
-    }
+    if (diurnal >= 10) notes.push(`일교차 ${Math.round(diurnal)}° — 아침저녁용 겉옷을 따로 챙기세요.`);
+    const precip = f && f.precipProb != null ? f.precipProb : hist.precipChance;
+    if (precip >= 50) notes.push(`비 확률 ${Math.round(precip)}% — 접이식 우산과 방수 신발을 권장해요.`);
+    else if (precip >= 35) notes.push(`비 확률 ${Math.round(precip)}% — 접이식 우산을 가방에 넣어두세요.`);
 
-    const card = document.createElement("div");
-    card.className = "day-card";
-    card.innerHTML = `
-      <div class="day-card-header">
-        <span class="date-label">${date}</span>
-        <span class="temp-label">${Math.round(high)}° / ${Math.round(low)}° · ${band.label} (${source})</span>
-      </div>
-      <select class="activity-select" data-date="${date}">
-        <option value="관광">도심 관광</option>
-        <option value="식사·격식">식사 · 격식 있는 자리</option>
-        <option value="액티비티">트레킹 · 액티비티</option>
-      </select>
-      <div class="day-outfit" data-outfit-for="${date}"></div>
-    `;
-    list.appendChild(card);
-
-    const select = card.querySelector(".activity-select");
-    const outfitDiv = card.querySelector(".day-outfit");
-    const updateOutfit = () => {
-      const { line, extra } = composeOutfit(stylePref, band.key, select.value, dayIndex);
-      const notes = [extra, ...weatherNotes].map((n) => `<span>· ${n}</span>`).join("<br/>");
-      outfitDiv.innerHTML = `<strong>${line}</strong><br/>${notes}`;
+    wardrobeState[date] = {
+      activity: "관광",
+      stylePref,
+      bandKey: band.key,
+      bandLabel: band.label,
+      dayIndex,
+      high,
+      low,
+      source: f ? "실제 예보" : "과거 평균",
+      notes,
+      items: [],
     };
-    select.addEventListener("change", updateOutfit);
-    updateOutfit();
+    seedItems(date);
   });
+  drawPlan();
+}
+
+// (Re)build the recommended chips for one day from its style/band/activity.
+function seedItems(date) {
+  const d = wardrobeState[date];
+  const { items } = composeOutfit(d.stylePref, d.bandKey, d.activity, d.dayIndex);
+  d.items = items.map((it) => ({ ...it, status: "own" }));
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 }
 
 function renderTips(cityName, country, hist, type, activity) {
@@ -832,6 +863,186 @@ function renderTips(cityName, country, hist, type, activity) {
     section("이번 여행 날씨 체크포인트", weatherTips) +
     section("액티비티 준비물", gearTips);
 }
+
+// ---------- Unified day plan: recommendation + editable wardrobe chips + packing list ----------
+
+const ACTIVITY_OPTIONS = ["관광", "식사·격식", "액티비티"];
+const ACTIVITY_LABELS = { "관광": "도심 관광", "식사·격식": "식사 · 격식", "액티비티": "트레킹 · 액티비티" };
+const PACK_CATEGORIES = ["의류", "신발", "악세서리", "기타"];
+
+function drawPlan() {
+  const list = document.getElementById("outfit-list");
+  list.innerHTML = Object.entries(wardrobeState)
+    .map(([date, d]) => {
+      const { line, extra } = composeOutfit(d.stylePref, d.bandKey, d.activity, d.dayIndex);
+      const notes = [extra, ...d.notes].filter(Boolean).map((n) => `<span>· ${n}</span>`).join("<br/>");
+      const options = ACTIVITY_OPTIONS.map(
+        (a) => `<option value="${a}" ${a === d.activity ? "selected" : ""}>${ACTIVITY_LABELS[a]}</option>`
+      ).join("");
+      const chips = d.items
+        .map((it, i) => {
+          if (it.editing) {
+            return `<span class="ward-chip editing"><input class="chip-input" data-date="${date}" data-idx="${i}" value="${esc(it.name)}" /></span>`;
+          }
+          const cls = it.status === "buy" ? "buy" : "own";
+          const badge = it.status === "buy" ? "사야 함" : "보유";
+          return `<span class="ward-chip ${cls}">
+              <button class="chip-toggle" data-act="toggle" data-date="${date}" data-idx="${i}">${esc(it.name)} · ${badge}</button>
+              <button class="chip-edit" data-act="edit" data-date="${date}" data-idx="${i}" aria-label="이름 수정">✎</button>
+              <button class="chip-remove" data-act="remove" data-date="${date}" data-idx="${i}" aria-label="제거">✕</button>
+            </span>`;
+        })
+        .join("");
+      return `<div class="day-card">
+          <div class="day-card-header">
+            <span class="date-label">${date}</span>
+            <span class="temp-label">${Math.round(d.high)}° / ${Math.round(d.low)}° · ${d.bandLabel} (${d.source})</span>
+          </div>
+          <select class="ward-activity" data-date="${date}">${options}</select>
+          <div class="day-outfit"><span class="rec-label">추천</span> <strong>${line}</strong>${notes ? "<br/>" + notes : ""}</div>
+          <div class="ward-chips">${chips}</div>
+          <form class="ward-add" data-date="${date}">
+            <input type="text" placeholder="보유한 아이템 직접 추가 (예: 베이지 린넨 팬츠)" />
+            <button type="submit">+ 추가</button>
+          </form>
+        </div>`;
+    })
+    .join("");
+  drawPackingList();
+
+  if (editingFocus) {
+    const el = list.querySelector(`.chip-input[data-date="${editingFocus.date}"][data-idx="${editingFocus.idx}"]`);
+    if (el) {
+      el.focus();
+      el.setSelectionRange(el.value.length, el.value.length);
+    }
+    editingFocus = null;
+  }
+}
+
+function buildPackingList() {
+  const groups = {};
+  Object.entries(wardrobeState).forEach(([date, day]) => {
+    day.items.forEach((it) => {
+      const key = itemKey(it.name);
+      if (!groups[key]) groups[key] = { name: it.name, category: it.category, status: it.status, days: new Set() };
+      groups[key].days.add(date);
+      if (it.status === "buy") groups[key].status = "buy"; // 사야 함이 우선
+    });
+  });
+  return Object.values(groups);
+}
+
+function drawPackingList() {
+  const box = document.getElementById("packing-list");
+  const all = buildPackingList();
+  const buyCount = all.filter((i) => i.status === "buy").length;
+
+  const sections = PACK_CATEGORIES.map((cat) => {
+    const items = all.filter((i) => i.category === cat).sort((a, b) => b.days.size - a.days.size);
+    if (!items.length) return "";
+    const rows = items
+      .map(
+        (i) => `<li class="pack-row ${i.status}">
+            <span class="pack-name">${i.name}</span>
+            <span class="pack-meta">${i.days.size}일 착용${i.status === "buy" ? ' · <b class="buy-tag">사야 할 옷</b>' : ""}</span>
+          </li>`
+      )
+      .join("");
+    return `<div class="pack-group"><h4>${cat} (${items.length})</h4><ul>${rows}</ul></div>`;
+  }).join("");
+
+  box.innerHTML = `
+    <div class="pack-head">
+      <h3>최종 지참 리스트</h3>
+      <span class="pack-summary">총 ${all.length}개 · 사야 할 옷 <b>${buyCount}</b>개</span>
+    </div>
+    ${sections || '<p class="hint">배정된 아이템이 없어요. 위에서 아이템을 추가하거나 보유/사야 함을 표시하세요.</p>'}
+  `;
+}
+
+// event delegation for the unified plan (recommendation + wardrobe chips)
+const planList = document.getElementById("outfit-list");
+
+planList.addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-act]");
+  if (!btn) return;
+  const { act, date, idx } = btn.dataset;
+  const day = wardrobeState[date];
+  if (!day) return;
+  const it = day.items[+idx];
+  if (act === "toggle") it.status = it.status === "buy" ? "own" : "buy";
+  else if (act === "remove") day.items.splice(+idx, 1);
+  else if (act === "edit") {
+    it.editing = true;
+    editingFocus = { date, idx };
+  }
+  drawPlan();
+});
+
+planList.addEventListener("change", (e) => {
+  const sel = e.target.closest(".ward-activity");
+  if (!sel) return;
+  const day = wardrobeState[sel.dataset.date];
+  day.activity = sel.value;
+  seedItems(sel.dataset.date); // 일정 성격이 바뀌면 그 날 추천 아이템을 새로 구성
+  drawPlan();
+});
+
+planList.addEventListener("submit", (e) => {
+  const form = e.target.closest(".ward-add");
+  if (!form) return;
+  e.preventDefault();
+  const input = form.querySelector("input");
+  const name = input.value.trim();
+  if (!name) return;
+  wardrobeState[form.dataset.date].items.push({ name, category: "기타", status: "own" });
+  input.value = "";
+  drawPlan();
+});
+
+// normalized key so "와이드 린넨 팬츠" and "와이드린넨팬츠" merge as one item
+function itemKey(name) {
+  return name.replace(/\s/g, "").toLowerCase();
+}
+
+// inline chip name editing — renaming propagates to ALL same-named items across
+// every day, so they stay merged (e.g. 스니커즈 2일 착용 keeps counting as one).
+function commitEdit(input) {
+  const { date, idx } = input.dataset;
+  const it = wardrobeState[date] && wardrobeState[date].items[+idx];
+  if (!it || !it.editing) return;
+  const v = input.value.trim();
+  if (v && v !== it.name) {
+    const oldKey = itemKey(it.name);
+    Object.values(wardrobeState).forEach((day) => {
+      day.items.forEach((other) => {
+        if (other !== it && itemKey(other.name) === oldKey) other.name = v;
+      });
+    });
+    it.name = v;
+  }
+  it.editing = false;
+  drawPlan();
+}
+
+planList.addEventListener("keydown", (e) => {
+  const input = e.target.closest(".chip-input");
+  if (!input) return;
+  if (e.key === "Enter") {
+    e.preventDefault();
+    commitEdit(input);
+  } else if (e.key === "Escape") {
+    const { date, idx } = input.dataset;
+    wardrobeState[date].items[+idx].editing = false;
+    drawPlan();
+  }
+});
+
+planList.addEventListener("focusout", (e) => {
+  const input = e.target.closest(".chip-input");
+  if (input) commitEdit(input);
+});
 
 // ---------- Tabs ----------
 
@@ -895,7 +1106,7 @@ submitBtn.addEventListener("click", async () => {
 
     renderWeather(hist, forecast, selectedCity.name, seoulHist);
     renderReference(selectedCity.name, selectedType, activity, hist);
-    renderOutfits(dates, hist, forecast, stylePref);
+    renderPlan(dates, hist, forecast, stylePref);
     renderTips(selectedCity.name, selectedCity.country, hist, selectedType, activity);
 
     resultsSection.classList.remove("hidden");
