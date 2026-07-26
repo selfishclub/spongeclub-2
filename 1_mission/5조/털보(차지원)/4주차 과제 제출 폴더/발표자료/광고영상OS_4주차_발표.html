@@ -38,6 +38,15 @@
   td b { font-size: clamp(22px, 2.3vw, 28px); }
   .stack3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 26px; }
   @media (max-width: 900px) { .cols, .stack3 { grid-template-columns: 1fr; } }
+  /* 상단 네비게이션 목차 */
+  .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; justify-content: center; gap: 4px; padding: 10px 12px; background: rgba(255,255,255,0.94); border-bottom: 1px solid #eee; overflow-x: auto; backdrop-filter: blur(4px); }
+  .nav a { text-decoration: none; color: #999; font-size: 13.5px; font-weight: 600; padding: 6px 11px; border-radius: 4px; white-space: nowrap; transition: all 0.15s; }
+  .nav a:hover { color: #111; background: #f0f0f0; }
+  .nav a.active { background: #111; color: #e8f230; }
+  .nav a .n { font-size: 11px; opacity: 0.6; margin-right: 4px; }
+  .progress { position: fixed; top: 0; left: 0; height: 3px; background: #111; z-index: 101; transition: width 0.2s; }
+  .slide { padding-top: 11vh; }
+  html { scroll-behavior: smooth; }
 </style>
 </head>
 <body>
@@ -269,5 +278,50 @@
   <p class="note" style="margin-top: 44px;">감사합니다 — 5조 털보(차지원)</p>
 </section>
 
+<script>
+(function () {
+  var labels = ["표지", "무엇을 만드나", "PRD 헌법", "기각 사례", "축적 장치 3종", "가장 큰 발견",
+                "개편① 대본", "개편② 순서", "세부 수리", "숫자", "유저 피드백", "교훈", "다음 주"];
+  var slides = Array.prototype.slice.call(document.querySelectorAll(".slide"));
+
+  var bar = document.createElement("div");
+  bar.className = "progress";
+  document.body.appendChild(bar);
+
+  var nav = document.createElement("nav");
+  nav.className = "nav";
+  slides.forEach(function (s, i) {
+    s.id = "s" + (i + 1);
+    var a = document.createElement("a");
+    a.href = "#s" + (i + 1);
+    a.innerHTML = '<span class="n">' + (i + 1) + '</span>' + (labels[i] || "");
+    nav.appendChild(a);
+  });
+  document.body.appendChild(nav);
+  var links = nav.querySelectorAll("a");
+
+  function setActive(idx) {
+    links.forEach(function (l, i) { l.classList.toggle("active", i === idx); });
+    bar.style.width = (((idx + 1) / slides.length) * 100) + "%";
+    var el = links[idx];
+    if (el && el.scrollIntoView) el.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+  }
+
+  function currentIndex() {
+    var mid = window.scrollY + window.innerHeight / 2;
+    var idx = 0;
+    slides.forEach(function (s, i) { if (s.offsetTop <= mid) idx = i; });
+    return idx;
+  }
+  var lastIdx = -1;
+  function onScroll() {
+    var idx = currentIndex();
+    if (idx !== lastIdx) { lastIdx = idx; setActive(idx); }
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll);
+  onScroll();
+})();
+</script>
 </body>
 </html>
