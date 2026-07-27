@@ -32,7 +32,7 @@ export function renderGuide(root, ctx) {
         el('strong', { text: p.name }),
         el('span', { class: 'hint', text: ' — ' + p.hint }),
       ))),
-      el('p', { class: 'hint', text: 'Lv.2 이상의 타점은 "타점 레벨"에서 볼 수 있습니다.' }),
+      el('p', { class: 'hint', text: 'Lv.2 이상의 태핑은 "태핑 레벨"에서 볼 수 있습니다.' }),
     ),
 
     el('div', { class: 'row' },

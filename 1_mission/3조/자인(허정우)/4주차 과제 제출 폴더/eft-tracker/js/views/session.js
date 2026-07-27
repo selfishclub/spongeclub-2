@@ -1,346 +1,320 @@
 import { el } from '../util.js';
 import {
   SHAPE_FIELDS,
-  SITUATION_EXAMPLES,
-  BODY_LOCATION_EXAMPLES,
   TAP_LEVELS,
+  EVAL_LEVELS,
   BRAIN_TUNING_INTRO,
   BRAIN_TUNING_STEPS,
+  HUGYE_TAP_GUIDE,
   REAPPRAISAL_GUIDE,
+  REAPPRAISAL_NOTE,
   TROUBLESHOOTING_STEPS,
   SETUP_AFFIRMATION_TEMPLATE,
   SETUP_AFFIRMATION_EXAMPLES,
+  MUSIC_YOUTUBE_ID,
+  POSITIVE_EMOTION_CATEGORIES,
 } from '../data.js';
 import { nrsDelta, improvementRate } from '../scoring.js';
 import { createEmotionPicker } from '../emotionPicker.js';
+import { mediaSlot, youtubeEmbed } from '../media.js';
+import { hugyeImage, TAP_IMAGE_BY_LEVEL } from '../tapImages.js';
 
-const TOTAL = 12;
-
-// 이미지·영상·음악이 들어갈 자리. 자산을 받으면 이 자리를 실제 미디어로 교체한다.
-function mediaSlot(label) {
-  return el('div', { class: 'media-slot' }, el('span', { text: `🎬 ${label} — 자료 준비 중` }));
-}
-
-function levelById(id) {
-  return TAP_LEVELS.find((l) => l.id === id);
-}
+const tapLevel = (id) => TAP_LEVELS.find((l) => l.id === id);
+const evalLevel = (id) => EVAL_LEVELS.find((l) => l.id === id);
 
 export function renderSession(root, ctx) {
-  const state = ctx.store.load();
-  const lastCheck = state.dailyChecks[state.dailyChecks.length - 1];
+  let cycleLevel = 'lv1'; // lv1 → lv2 → lv3
+  runCycle();
 
-  const draft = {
-    situation: '',
-    emotions: [],
-    chosenEmotion: '',
-    before: 5,
-    after: 5,
-    bodyLocation: '',
-    shape: { size: '', weight: '', temperature: '', color: '', form: '', texture: '' },
-    affirmationPhrase: '',
-    level: 'lv1',
-  };
+  function runCycle() {
+    root.innerHTML = '';
+    const state = ctx.store.load();
+    const lastCheck = state.dailyChecks[state.dailyChecks.length - 1];
 
-  let step = 1;
-  const container = el('section', { class: 'view session' });
-  root.appendChild(container);
-  render();
+    const draft = {
+      situation: lastCheck?.situation || '',
+      emotions: lastCheck?.emotions ? [...lastCheck.emotions] : [],
+      chosenEmotion: lastCheck?.chosenEmotion || '',
+      emotionNoun: lastCheck?.chosenEmotion || '',
+      before: lastCheck?.before ?? 5,
+      bodyLocation: lastCheck?.bodyLocation || '',
+      shape: { size: '', weight: '', temperature: '', color: '', form: '', texture: '' },
+      positiveEmotion: '',
+      positiveImagery: '',
+      affirmationPhrase: '',
+      after: 5,
+      shapeChange: '',
+      emotionChange: '',
+      record: '',
+    };
 
-  function render() {
-    container.innerHTML = '';
-    container.appendChild(el('div', { class: 'stepbar', text: `EFT 실천 · ${step} / ${TOTAL} 단계` }));
-    container.appendChild(stepBody());
-    container.appendChild(controls());
-    container.scrollIntoView({ block: 'start' });
-  }
-
-  function controls() {
-    const row = el('div', { class: 'row' });
-    if (step > 1) {
-      row.appendChild(el('button', { class: 'ghost', onClick: () => { step -= 1; render(); }, text: '이전' }));
+    // shape_* 를 draft.shape 로 미러링 (textField 가 draft[key] 를 읽고 쓰므로)
+    for (const f of SHAPE_FIELDS) {
+      Object.defineProperty(draft, `shape_${f.key}`, {
+        get() { return draft.shape[f.key]; },
+        set(v) { draft.shape[f.key] = v; },
+        enumerable: false,
+        configurable: true,
+      });
     }
-    if (step < TOTAL) {
-      row.appendChild(el('button', {
-        class: 'primary',
-        onClick: () => { if (validate()) { step += 1; render(); } },
-        text: '다음',
-      }));
+
+    const steps = buildSteps(cycleLevel, draft, lastCheck);
+    let idx = 0;
+
+    const container = el('section', { class: 'view session' });
+    root.appendChild(container);
+    render();
+
+    function render() {
+      container.innerHTML = '';
+      const lv = evalLevel(cycleLevel);
+      container.appendChild(el('div', { class: 'stepbar', text: `${lv.name} 사이클 · ${idx + 1} / ${steps.length}` }));
+      container.appendChild(steps[idx].render());
+      container.appendChild(controls());
+      window.scrollTo(0, 0);
     }
-    return row;
-  }
 
-  // 감정 목록은 관형형("억울한", "화가 나는")이라 "하지만"을 그대로 붙이면
-  // "억울한하지만"이 된다. 어떤 형태든 자연스러운 "~ 마음이 들지만"으로 만들어 두고,
-  // 사용자가 "억울하지만"처럼 직접 다듬을 수 있게 한다.
-  function defaultAffirmationPhrase() {
-    const emotion = draft.chosenEmotion.trim();
-    if (!emotion) return '';
-    return `${emotion} 마음이 들지만`;
-  }
-
-  function fullAffirmation(phrase) {
-    const body = phrase.trim() || '○○하지만';
-    const withComma = body.endsWith(',') ? body : `${body},`;
-    return `나는 지금 비록 ${withComma} 이런 내 자신을 온전히 받아들이고 사랑합니다.`;
-  }
-
-  function validate() {
-    if (step === 2 && !draft.chosenEmotion.trim()) {
-      alert('가장 큰 감정 하나를 골라주세요.');
-      return false;
+    function controls() {
+      const row = el('div', { class: 'row' });
+      if (idx > 0) row.appendChild(el('button', { class: 'ghost', onClick: () => { idx -= 1; render(); }, text: '이전' }));
+      if (idx < steps.length - 1) {
+        row.appendChild(el('button', {
+          class: 'primary',
+          onClick: () => { if (steps[idx].validate ? steps[idx].validate() : true) { idx += 1; render(); } },
+          text: '다음',
+        }));
+      }
+      return row;
     }
-    return true;
-  }
 
-  function slider(key, onInput) {
-    const out = el('output', { text: String(draft[key]) });
-    const input = el('input', { type: 'range', min: '0', max: '10', step: '1', value: String(draft[key]) });
-    input.addEventListener('input', () => {
-      draft[key] = Number(input.value);
-      out.textContent = input.value;
-      if (onInput) onInput();
-    });
-    return el('div', { class: 'nrs' }, el('span', { text: '0' }), input, el('span', { text: '10' }), out);
-  }
+    // ── 공통 헬퍼 ──────────────────────────────────────
+    function slider(key, onInput) {
+      const out = el('output', { text: String(draft[key]) });
+      const input = el('input', { type: 'range', min: '0', max: '10', step: '1', value: String(draft[key]) });
+      input.addEventListener('input', () => { draft[key] = Number(input.value); out.textContent = input.value; if (onInput) onInput(); });
+      return el('div', { class: 'nrs' }, el('span', { text: '0' }), input, el('span', { text: '10' }), out);
+    }
 
-  function textField(label, get, set, placeholder = '') {
-    const input = el('input', { type: 'text', value: get(), placeholder });
-    input.addEventListener('input', () => set(input.value));
-    return el('label', { class: 'field' }, el('span', { text: label }), input);
-  }
+    function textField(label, key, placeholder = '') {
+      const input = el('input', { type: 'text', value: draft[key], placeholder });
+      input.addEventListener('input', () => { draft[key] = input.value; });
+      return el('label', { class: 'field' }, el('span', { text: label }), input);
+    }
 
-  function chipRow(values, onPick) {
-    return el('div', { class: 'chips' }, ...values.map((v) => {
-      const b = el('button', { class: 'chip ghost-chip', type: 'button', text: v });
-      b.addEventListener('click', () => onPick(v));
-      return b;
-    }));
-  }
+    function textArea(label, key, placeholder = '') {
+      const ta = el('textarea', { rows: '3', placeholder });
+      ta.value = draft[key];
+      ta.addEventListener('input', () => { draft[key] = ta.value; });
+      return el('label', { class: 'field' }, el('span', { text: label }), ta);
+    }
 
-  function tapPointList(level) {
-    return el('ol', { class: 'tap-list' }, ...level.points.map((p) => el('li', {},
-      el('strong', { text: p.name }),
-      el('span', { class: 'hint', text: ' — ' + p.hint }),
-    )));
-  }
+    function defaultAffirmationPhrase() {
+      const e = draft.chosenEmotion.trim();
+      return e ? `${e} 마음이 들지만` : '';
+    }
+    function fullAffirmation(phrase) {
+      const body = (phrase || '').trim() || '○○하지만';
+      const withComma = body.endsWith(',') ? body : `${body},`;
+      return `나는 지금 비록 ${withComma} 이런 내 자신을 온전히 받아들이고 사랑합니다.`;
+    }
 
-  function stepBody() {
-    switch (step) {
-      // 1. 상황
-      case 1: {
-        const ta = el('textarea', { rows: '3', placeholder: `예: ${SITUATION_EXAMPLES[0]}` });
-        ta.value = draft.situation;
-        ta.addEventListener('input', () => { draft.situation = ta.value; });
+    function tapCard(levelId, extra = []) {
+      const lv = tapLevel(levelId);
+      const noun = (draft.emotionNoun || draft.chosenEmotion || '이 감정').trim();
+      return el('div', { class: 'card' },
+        el('h2', { text: `태핑 ${lv.name} — ${lv.title}` }),
+        el('p', { class: 'hint', text: `"이 ${noun}" 이라고 입으로 되뇌이면서, 각 혈자리를 검지·중지로 가볍게 두드립니다.` }),
+        TAP_IMAGE_BY_LEVEL[levelId](),
+        el('ol', { class: 'tap-list' }, ...lv.points.map((p) => el('li', {},
+          el('strong', { text: p.name }), el('span', { class: 'hint', text: ' — ' + p.hint })))),
+        ...extra,
+      );
+    }
 
-        const card = el('div', { class: 'card' },
-          el('h2', { text: '1. 어떤 상황인가요?' }),
-          el('p', { class: 'hint', text: '최근 감정이 불편하거나 힘들었던 상황 혹은 그렇게 만든 사람을 구체적으로 떠올려 보세요.' }),
-          el('label', { class: 'field' }, ta),
-          el('div', { class: 'examples' },
-            el('span', { class: 'hint', text: '예시를 눌러 채울 수 있어요' }),
-            chipRow(SITUATION_EXAMPLES, (v) => { ta.value = v; draft.situation = v; }),
-          ),
-        );
+    // ── 스텝 정의 ──────────────────────────────────────
+    function buildSteps(level) {
+      const evalHead = evalHeadSteps(level);
+      const tail = [
+        { // 호흡
+          render: () => el('div', { class: 'card' },
+            el('h2', { text: '호흡하기' }),
+            el('p', { text: '그 감정이 있는 곳을 마음속으로 바라보며, 깊은 호흡을 천천히 3회 반복하세요.' }),
+            el('p', { class: 'emphasis', text: '의식을 집중할수록 효과가 배가됩니다.' })),
+        },
+        { // 수용확언
+          render: () => {
+            if (!draft.affirmationPhrase) draft.affirmationPhrase = defaultAffirmationPhrase();
+            const phrase = el('input', { type: 'text', value: draft.affirmationPhrase, placeholder: '예: 억울하지만' });
+            const preview = el('p', { class: 'affirm mine', text: fullAffirmation(draft.affirmationPhrase) });
+            phrase.addEventListener('input', () => { draft.affirmationPhrase = phrase.value; preview.textContent = fullAffirmation(phrase.value); });
+            return el('div', { class: 'card' },
+              el('h2', { text: '수용확언 만들기' }),
+              el('p', { class: 'affirm', text: SETUP_AFFIRMATION_TEMPLATE }),
+              el('p', { text: '이 문장을 되뇌이면서 한 손의 후계혈(손날 타점)을 반대측 손 검지·중지로 가볍게 두드립니다. 방향은 상관없고, 편한 한쪽만 하셔도 됩니다.' }),
+              hugyeImage(),
+              el('label', { class: 'field' }, el('span', { text: '○○ 에 들어갈 말 (자연스럽게 다듬어 보세요)' }), phrase),
+              preview,
+              el('ul', { class: 'guide-steps' }, ...SETUP_AFFIRMATION_EXAMPLES.map((e) => el('li', { text: e }))),
+              el('p', { class: 'note', text: '※ 신체적 증상에도 두루 효과가 있지만, 처음엔 감정·의식적 영역으로 시작하시길 권장드립니다.' }));
+          },
+        },
+        { // 후계혈 소리내어 태핑
+          render: () => el('div', { class: 'card' },
+            el('h2', { text: '후계혈 소리내어 태핑' }),
+            hugyeImage(),
+            el('ul', { class: 'guide-steps' }, ...HUGYE_TAP_GUIDE.map((g) => el('li', { text: g }))),
+            el('p', { class: 'affirm mine', text: fullAffirmation(draft.affirmationPhrase) }),
+            youtubeEmbed(MUSIC_YOUTUBE_ID),
+            mediaSlot('후계혈 두드리기 시연 영상')),
+        },
+        { render: () => tapCard('lv1', [mediaSlot('태핑 시연 영상 (손가락 2·3지로 가볍게)')]) },
+        { render: () => tapCard('lv2') },
+        { render: () => tapCard('lv3') },
+        { // 뇌조율
+          render: () => el('div', { class: 'card' },
+            el('h2', { text: '뇌조율 과정' }),
+            el('p', { text: BRAIN_TUNING_INTRO.meaning }),
+            el('p', { class: 'hint', text: BRAIN_TUNING_INTRO.principle }),
+            el('p', { text: BRAIN_TUNING_INTRO.howto }),
+            el('ol', { class: 'tap-list' }, ...BRAIN_TUNING_STEPS.map((s) => el('li', { text: s }))),
+            mediaSlot('뇌조율 동작 이미지·영상')),
+        },
+        { // 심호흡
+          render: () => el('div', { class: 'card' },
+            el('h2', { text: '심호흡 2번' }),
+            el('p', { text: '천천히, 깊게 두 번 호흡합니다.' })),
+        },
+        { // 재평가
+          render: () => {
+            const result = el('p', { class: 'hint', text: '' });
+            const upd = () => { result.textContent = `개선율 약 ${improvementRate(draft.before, draft.after)}%`; };
+            const s = slider('after', upd); upd();
+            return el('div', { class: 'card' },
+              el('h2', { text: '재평가' }),
+              el('p', { text: '다시 느껴보고 감정과 에너지의 강도를 확인해보세요.' }),
+              el('p', { class: 'hint', text: `처음엔 ${draft.before}점이었어요. 지금은?` }),
+              s, result,
+              textArea('에너지 형상은 어떻게 변했나요?', 'shapeChange', '예: 뾰족하던 게 둥글고 작아졌다'),
+              textArea('감정은 어떻게 변했나요?', 'emotionChange', '예: 분노 대신 약간의 연민이 느껴진다'),
+              ...REAPPRAISAL_GUIDE.map((g) => el('p', { class: 'guide-line', text: g })),
+              el('p', { class: 'note', text: REAPPRAISAL_NOTE }));
+          },
+        },
+        { // 기록
+          render: () => el('div', { class: 'card' },
+            el('h2', { text: '변화 기록하기' }),
+            el('p', { class: 'hint', text: 'EFT 실천 전과 후의 변화를 자신만의 언어로 상세히 기록해보세요.' }),
+            el('p', { class: 'hint', text: '예: 감정 레벨이 9→4로 줄었다 · 장면이 멀리 작아졌다 · 원망스럽던 상대가 조금 이해되기 시작했다 · 분노 대신 약간의 연민이 느껴졌다' }),
+            textArea('나의 변화 기록', 'record', '느낀 그대로 자유롭게 적어보세요'),
+            el('button', { class: 'primary big', onClick: saveSession, text: '기록 저장' })),
+        },
+      ];
+      return [...evalHead, ...tail];
+    }
 
-        if (lastCheck) {
-          const btn = el('button', { class: 'ghost wide', type: 'button', text: '오늘 자가진단 기록 불러오기' });
-          btn.addEventListener('click', () => {
-            draft.situation = lastCheck.situation || '';
-            draft.emotions = [...(lastCheck.emotions || [])];
-            ta.value = draft.situation;
+    function evalHeadSteps(level) {
+      if (level === 'lv1') {
+        return [{
+          validate: () => {
+            if (!draft.chosenEmotion) { alert('먼저 자가평가에서 감정을 기록해주세요.'); return false; }
+            return true;
+          },
+          render: () => {
+            if (!draft.chosenEmotion) {
+              return el('div', { class: 'card' },
+                el('h2', { text: '평가 Lv.1 — 기본 평가' }),
+                el('p', { class: 'empty', text: '아직 자가평가 기록이 없어요. 먼저 상황과 감정을 평가해주세요.' }),
+                el('button', { class: 'primary big', onClick: () => ctx.navigate('daily'), text: '자가평가 하러 가기' }));
+            }
+            return el('div', { class: 'card' },
+              el('h2', { text: '평가 Lv.1 — 기본 평가' }),
+              el('p', { text: `상황: ${draft.situation || '(적지 않음)'}` }),
+              el('p', { text: `주된 감정: ${draft.chosenEmotion}` }),
+              el('p', { text: `몸의 위치: ${draft.bodyLocation || '(적지 않음)'}` }),
+              el('p', { class: 'hint', text: '지금 이 감정의 강도를 다시 확인해주세요.' }),
+              slider('before'),
+              textField('감정을 한 단어(명사)로', 'emotionNoun', '예: 억울함, 짜증'));
+          },
+        }];
+      }
+      if (level === 'lv2') {
+        return [{
+          render: () => el('div', { class: 'card' },
+            el('h2', { text: '평가 Lv.2 — 에너지 형상화' }),
+            el('p', { class: 'hint', text: evalLevel('lv2').description }),
+            el('p', { class: 'hint', text: '다 채우지 않고, 잘 느껴지는 항목만 적으시면 됩니다.' }),
+            ...SHAPE_FIELDS.map((f) => textField(f.label, `shape_${f.key}`, f.placeholder)
+              // shape.* 를 draft.shape 에 반영
+              ),
+            slider('before')),
+        }];
+      }
+      // lv3
+      return [{
+        render: () => {
+          const picker = createEmotionPicker({
+            multi: false,
+            categories: POSITIVE_EMOTION_CATEGORIES,
+            initial: draft.positiveEmotion ? [draft.positiveEmotion] : [],
+            onChange: (sel) => { draft.positiveEmotion = sel[0] || ''; },
           });
-          card.appendChild(btn);
-        }
-        return card;
-      }
-
-      // 2. 대표 감정
-      case 2: {
-        const picker = createEmotionPicker({
-          multi: false,
-          initial: draft.chosenEmotion ? [draft.chosenEmotion] : [],
-          onChange: (sel) => { draft.chosenEmotion = sel[0] || ''; },
-        });
-        const card = el('div', { class: 'card' },
-          el('h2', { text: '2. 가장 큰 감정 하나를 고르세요' }),
-          el('p', { class: 'hint', text: '여러 감정 중 지금 가장 크게 느껴지는 것 하나만 고릅니다.' }),
-        );
-        if (draft.emotions.length) {
-          card.appendChild(el('div', { class: 'recall' },
-            el('span', { class: 'hint', text: '자가진단에서 고른 감정: ' }),
-            chipRow(draft.emotions, (v) => {
-              draft.chosenEmotion = v;
-              render();
-            }),
-          ));
-        }
-        card.appendChild(picker.element);
-        return card;
-      }
-
-      // 3. 강도 (before)
-      case 3:
-        return el('div', { class: 'card' },
-          el('h2', { text: '3. 지금 그 감정은 얼마나 강한가요?' }),
-          el('p', { class: 'hint', text: '0(전혀) ~ 10(매우 강함)' }),
-          slider('before'),
-        );
-
-      // 4. 몸의 위치 (형상화보다 앞)
-      case 4: {
-        const input = el('input', { type: 'text', value: draft.bodyLocation, placeholder: '예: 가슴 중앙, 명치, 복부' });
-        input.addEventListener('input', () => { draft.bodyLocation = input.value; });
-        return el('div', { class: 'card' },
-          el('h2', { text: '4. 그 느낌은 몸의 어디에 있나요?' }),
-          el('label', { class: 'field' }, el('span', { text: '몸의 위치' }), input),
-          chipRow(BODY_LOCATION_EXAMPLES, (v) => { draft.bodyLocation = v; input.value = v; }),
-        );
-      }
-
-      // 5. 형상화
-      case 5:
-        return el('div', { class: 'card' },
-          el('h2', { text: '5. 그 감정을 몸의 느낌으로 그려보세요' }),
-          el('p', { class: 'hint', text: '구체적이고 생생하게 상상할수록 효과가 커집니다.' }),
-          el('p', { class: 'hint', text: '다 채우지 않고, 잘 느껴지는 항목만 적으시면 됩니다.' }),
-          ...SHAPE_FIELDS.map((f) => textField(
-            f.label,
-            () => draft.shape[f.key],
-            (v) => { draft.shape[f.key] = v; },
-            f.placeholder,
-          )),
-        );
-
-      // 6. 호흡
-      case 6:
-        return el('div', { class: 'card' },
-          el('h2', { text: '6. 호흡하기' }),
-          el('p', { text: '그 감정이 있는 곳을 마음속으로 바라보며, 깊은 호흡을 천천히 3회 반복하세요.' }),
-          el('p', { class: 'emphasis', text: '의식을 집중할수록 효과가 배가됩니다.' }),
-        );
-
-      // 7. 수용확언
-      case 7: {
-        if (!draft.affirmationPhrase) draft.affirmationPhrase = defaultAffirmationPhrase();
-        const phrase = el('input', { type: 'text', value: draft.affirmationPhrase, placeholder: '예: 억울하지만' });
-        const preview = el('p', { class: 'affirm mine', text: fullAffirmation(draft.affirmationPhrase) });
-        phrase.addEventListener('input', () => {
-          draft.affirmationPhrase = phrase.value;
-          preview.textContent = fullAffirmation(phrase.value);
-        });
-
-        return el('div', { class: 'card' },
-          el('h2', { text: '7. 수용확언 만들기' }),
-          el('p', { class: 'affirm', text: SETUP_AFFIRMATION_TEMPLATE }),
-          el('p', { text: '이 문장을 되뇌이면서 한 손의 후계혈(손날 타점)을 반대측 손 검지·중지로 가볍게 두드립니다. 방향은 상관없고, 자신이 편한 한쪽만 하셔도 됩니다.' }),
-          mediaSlot('후계혈 두드리는 이미지·영상'),
-          el('p', { class: 'hint', text: '○○ 부분에는 앞에서 찾은 힘든 감정이나 불편한 상태를 넣으시면 됩니다. (신체적·정신적 영역 모두 가능)' }),
-          el('label', { class: 'field' }, el('span', { text: '○○ 에 들어갈 말 (자연스럽게 다듬어 보세요)' }), phrase),
-          preview,
-          el('p', { class: 'hint', text: '이렇게 적으시면 됩니다:' }),
-          el('ul', { class: 'guide-steps' }, ...SETUP_AFFIRMATION_EXAMPLES.map((e) => el('li', { text: e }))),
-          el('p', { class: 'note', text: '※ 신체적 증상에도 두루 효과가 있지만, 처음엔 감정·의식적 영역으로 시작하시길 권장드립니다.' }),
-        );
-      }
-
-      // 8. 타점 두드리기 Lv.1
-      case 8: {
-        const lv1 = levelById('lv1');
-        return el('div', { class: 'card' },
-          el('h2', { text: `8. EFT 타점 두드리기 ${lv1.name} (${lv1.title})` }),
-          mediaSlot('배경 음악'),
-          el('p', { class: 'hint', text: '각 타점을 검지·중지로 30회씩 두드리며, 그 감정과 에너지에 집중하세요.' }),
-          tapPointList(lv1),
-          el('p', { class: 'hint', text: '양 체간 좌우 대칭으로 진행합니다.' }),
-          mediaSlot('타점 위치 안내 이미지'),
-          mediaSlot('두드리기·문지르기 시연 영상 (속도·횟수 참고용)'),
-        );
-      }
-
-      // 9. 뇌조율
-      case 9:
-        return el('div', { class: 'card' },
-          el('h2', { text: '9. 뇌조율 과정' }),
-          el('p', { text: BRAIN_TUNING_INTRO.meaning }),
-          el('p', { class: 'hint', text: BRAIN_TUNING_INTRO.principle }),
-          el('p', { text: BRAIN_TUNING_INTRO.howto }),
-          el('ol', { class: 'tap-list' }, ...BRAIN_TUNING_STEPS.map((s) => el('li', { text: s }))),
-          mediaSlot('뇌조율 동작 이미지·영상'),
-        );
-
-      // 10. 심호흡
-      case 10:
-        return el('div', { class: 'card' },
-          el('h2', { text: '10. 심호흡 2번' }),
-          el('p', { text: '천천히, 깊게 두 번 호흡합니다.' }),
-        );
-
-      // 11. 재평가
-      case 11: {
-        const result = el('p', { class: 'hint', text: '' });
-        function updateResult() {
-          const rate = improvementRate(draft.before, draft.after);
-          result.textContent = `개선율 약 ${rate}%`;
-        }
-        const s = slider('after', updateResult);
-        updateResult();
-        return el('div', { class: 'card' },
-          el('h2', { text: '11. 재평가' }),
-          el('p', { text: '다시 느껴보고 감정과 에너지의 강도를 확인해보세요.' }),
-          el('p', { class: 'hint', text: `처음엔 ${draft.before}점이었어요. 지금은?` }),
-          s,
-          result,
-          ...REAPPRAISAL_GUIDE.map((g) => el('p', { class: 'guide-line', text: g })),
-          el('button', { class: 'primary big', onClick: saveSession, text: '기록 저장' }),
-        );
-      }
-
-      // 12. 효과가 미비할 경우
-      case 12:
-        return el('div', { class: 'card' },
-          el('h2', { text: '12. 효과가 미비할 경우' }),
-          el('ol', { class: 'guide-steps' }, ...TROUBLESHOOTING_STEPS.map((t) => el('li', { text: t }))),
-          el('button', { class: 'ghost wide', onClick: () => ctx.navigate('levels'), text: 'Lv.2 · Lv.3 · Lv.4 보기' }),
-          el('button', { class: 'primary big', onClick: () => ctx.navigate('dashboard'), text: '홈으로' }),
-        );
-
-      default:
-        return el('div', {});
+          return el('div', { class: 'card' },
+            el('h2', { text: '평가 Lv.3 — 긍정 감정·에너지 강화' }),
+            el('ul', { class: 'guide-steps' }, ...evalLevel('lv3').guide.map((g) => el('li', { text: g }))),
+            el('p', { class: 'hint', text: '문제가 해결됐을 때 느끼고 싶은 긍정 감정을 하나 고르세요.' }),
+            picker.element,
+            textArea('그때의 에너지 형상을 그려보세요', 'positiveImagery', '예: 가슴이 따뜻하고 환한 빛으로 가득 찬다'),
+            el('p', { class: 'hint', text: '지금 그 긍정 상태가 얼마나 생생한지(0~10) 표시해주세요. 태핑 후 더 강해지는 걸 목표로 합니다.' }),
+            slider('before'));
+        },
+      }];
     }
-  }
 
-  function saveSession() {
-    ctx.store.addSession({
-      datetime: new Date().toISOString(),
-      situation: draft.situation,
-      emotions: draft.emotions,
-      chosenEmotion: draft.chosenEmotion,
-      before: draft.before,
-      after: draft.after,
-      bodyLocation: draft.bodyLocation,
-      shape: { ...draft.shape },
-      affirmation: fullAffirmation(draft.affirmationPhrase),
-      level: draft.level,
-    });
+    function saveSession() {
+      ctx.store.addSession({
+        datetime: new Date().toISOString(),
+        cycleLevel,
+        situation: draft.situation,
+        emotions: draft.emotions,
+        chosenEmotion: draft.chosenEmotion,
+        before: draft.before,
+        after: draft.after,
+        bodyLocation: draft.bodyLocation,
+        shape: { ...draft.shape },
+        positiveEmotion: draft.positiveEmotion,
+        positiveImagery: draft.positiveImagery,
+        affirmation: fullAffirmation(draft.affirmationPhrase),
+        shapeChange: draft.shapeChange,
+        emotionChange: draft.emotionChange,
+        record: draft.record,
+      });
 
-    const delta = nrsDelta(draft.before, draft.after);
-    const rate = improvementRate(draft.before, draft.after);
-    const deltaText = delta > 0 ? `-${delta}` : delta < 0 ? `+${-delta}` : '0';
-    const verdict = rate >= 50
-      ? '충분히 효과를 잘 보셨습니다.'
-      : rate >= 30
-        ? '변화가 있었습니다. 한 번 더 해보시면 더 좋아질 수 있어요.'
-        : '아직 변화가 크지 않네요. 다음 단계의 해결법을 확인해보세요.';
+      const delta = nrsDelta(draft.before, draft.after);
+      const rate = improvementRate(draft.before, draft.after);
+      const deltaText = delta > 0 ? `-${delta}` : delta < 0 ? `+${-delta}` : '0';
+      const verdict = rate >= 50 ? '충분히 효과를 잘 보셨습니다.'
+        : rate >= 30 ? '변화가 있었습니다. 한 번 더 해보시면 더 좋아질 수 있어요.'
+          : '아직 변화가 크지 않네요. 다음 단계를 참고해보세요.';
 
-    container.innerHTML = '';
-    container.appendChild(el('div', { class: 'card result' },
-      el('h2', { text: '기록됐어요' }),
-      el('p', { class: 'delta', text: `${draft.chosenEmotion}: ${draft.before} → ${draft.after} (${deltaText})` }),
-      el('p', { class: 'hint', text: `개선율 약 ${rate}% · ${verdict}` }),
-      el('div', { class: 'row' },
-        el('button', { class: 'ghost', onClick: () => { step = 12; render(); }, text: '효과가 미비하다면' }),
-        el('button', { class: 'primary', onClick: () => ctx.navigate('dashboard'), text: '홈으로' }),
-      ),
-    ));
+      const nextBtn = cycleLevel === 'lv1'
+        ? el('button', { class: 'primary', onClick: () => { cycleLevel = 'lv2'; runCycle(); }, text: '평가 Lv.2 사이클 (형상화 강화)' })
+        : cycleLevel === 'lv2'
+          ? el('button', { class: 'primary', onClick: () => { cycleLevel = 'lv3'; runCycle(); }, text: '평가 Lv.3 사이클 (긍정 강화)' })
+          : null;
+
+      container.innerHTML = '';
+      container.appendChild(el('div', { class: 'card result' },
+        el('h2', { text: '기록됐어요' }),
+        el('p', { class: 'delta', text: `${draft.chosenEmotion || '감정'}: ${draft.before} → ${draft.after} (${deltaText})` }),
+        el('p', { class: 'hint', text: `개선율 약 ${rate}% · ${verdict}` }),
+        el('div', { class: 'card soft' },
+          el('p', { class: 'hint', text: '효과가 미비하거나 더 강화하고 싶다면:' }),
+          el('ol', { class: 'guide-steps' }, ...TROUBLESHOOTING_STEPS.map((t) => el('li', { text: t }))),
+        ),
+        el('div', { class: 'row' },
+          nextBtn,
+          el('button', { class: nextBtn ? 'ghost' : 'primary', onClick: () => ctx.navigate('dashboard'), text: '홈으로' }),
+        )));
+    }
   }
 }

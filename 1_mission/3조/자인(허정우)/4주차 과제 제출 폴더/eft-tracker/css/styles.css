@@ -171,3 +171,13 @@ button.ghost.small[disabled] { opacity: .5; cursor: not-allowed; }
 .legend .key.before { background: #b9c9c3; }
 .legend .key.after { background: var(--brand); }
 .session-item.column { flex-direction: column; align-items: stretch; gap: 4px; }
+
+/* ── v3 추가: 태핑 도식 · 유튜브 ────────────────────── */
+.tap-img { display: flex; justify-content: center; margin: 10px 0; }
+.tap-img svg { width: 100%; max-width: 240px; height: auto; }
+.tap-img .body { fill: #eef3f1; stroke: #9fb3ac; stroke-width: 1.4; }
+.tap-img .mid { stroke: #cdd9d4; stroke-width: 1; stroke-dasharray: 3 3; }
+.tap-img .pt { fill: var(--bad); stroke: #fff; stroke-width: 1; }
+.tap-img .pt-label { font-size: 6.5px; fill: var(--ink); }
+.yt { margin: 10px 0; }
+.yt iframe { border-radius: 8px; }

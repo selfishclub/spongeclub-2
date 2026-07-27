@@ -66,18 +66,18 @@ export function renderDashboard(root, ctx) {
   const streak = computeStreak(state.dailyChecks, todayStr());
   section.appendChild(el('div', { class: 'stats' },
     stat('연속 실천', `${streak}일`),
-    stat('자가진단', `${state.dailyChecks.length}회`),
+    stat('자가평가', `${state.dailyChecks.length}회`),
     stat('EFT 세션', `${state.eftSessions.length}회`),
   ));
 
   section.appendChild(el('div', { class: 'row cta' },
-    el('button', { class: 'primary', onClick: () => ctx.navigate('daily'), text: '오늘 자가진단' }),
+    el('button', { class: 'primary', onClick: () => ctx.navigate('daily'), text: '오늘 자가평가' }),
     el('button', { class: 'primary', onClick: () => ctx.navigate('session'), text: 'EFT 실천하기' }),
   ));
 
   section.appendChild(el('div', { class: 'row cta' },
     el('button', { class: 'ghost', onClick: () => ctx.navigate('learn'), text: 'EFT 알아보기' }),
-    el('button', { class: 'ghost', onClick: () => ctx.navigate('levels'), text: '타점 레벨' }),
+    el('button', { class: 'ghost', onClick: () => ctx.navigate('levels'), text: '태핑 레벨' }),
   ));
 
   // EFT 전후 변화 추이
@@ -105,10 +105,10 @@ export function renderDashboard(root, ctx) {
     section.appendChild(list);
   }
 
-  // 최근 자가진단 기록
-  section.appendChild(el('h2', { text: '최근 자가진단' }));
+  // 최근 자가평가 기록
+  section.appendChild(el('h2', { text: '최근 자가평가' }));
   if (state.dailyChecks.length === 0) {
-    section.appendChild(el('p', { class: 'empty', text: '아직 자가진단 기록이 없어요.' }));
+    section.appendChild(el('p', { class: 'empty', text: '아직 자가평가 기록이 없어요.' }));
   } else {
     const list = el('div', { class: 'session-list' });
     state.dailyChecks.slice(-7).reverse().forEach((c) => {

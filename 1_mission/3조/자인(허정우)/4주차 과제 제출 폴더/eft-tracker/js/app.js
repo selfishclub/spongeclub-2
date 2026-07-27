@@ -31,7 +31,7 @@ function renderNav(current) {
   topnav.innerHTML = '';
   const items = [
     ['dashboard', '홈'],
-    ['daily', '자가진단'],
+    ['daily', '자가평가'],
     ['session', 'EFT 실천'],
     ['learn', '알아보기'],
   ];

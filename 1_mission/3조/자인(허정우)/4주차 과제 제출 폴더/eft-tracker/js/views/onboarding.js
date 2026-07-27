@@ -40,7 +40,7 @@ export function renderOnboarding(root, ctx) {
     el('div', { class: 'card' },
       el('h2', { text: '어떻게 쓰나요?' }),
       el('ol', { class: 'howto' },
-        el('li', { text: '오늘 힘들었던 상황과 감정을 자가진단에 기록합니다.' }),
+        el('li', { text: '오늘 힘들었던 상황과 감정을 자가평가에 기록합니다.' }),
         el('li', { text: 'EFT 단계를 따라가며 그 감정을 다스립니다.' }),
         el('li', { text: '전후 변화가 숫자로 기록되고, 추이가 그래프로 쌓입니다.' }),
       ),
