@@ -8,7 +8,7 @@ function mediaSlot(label) {
 
 export function renderLearn(root, ctx) {
   const section = el('section', { class: 'view learn' },
-    el('h1', { text: 'EFT 알아보기' }),
+    el('h1', { text: 'EFT란?' }),
     el('p', { class: 'lead', text: '읽고 싶은 것만 골라 보셔도 됩니다.' }),
   );
 
@@ -39,7 +39,7 @@ export function renderLearn(root, ctx) {
 
   section.appendChild(el('button', {
     class: 'primary big',
-    onClick: () => ctx.navigate('dashboard'),
+    onClick: () => ctx.navigate('home'),
     text: '홈으로',
   }));
 

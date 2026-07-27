@@ -1,6 +1,5 @@
 import { el, todayStr } from '../util.js';
 import { computeStreak } from '../streak.js';
-import { MOTIVATION_PROMPT, SHARE_MESSAGE } from '../data.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 
@@ -53,31 +52,13 @@ export function renderDashboard(root, ctx) {
   const state = ctx.store.load();
   const section = el('section', { class: 'view dashboard' });
 
-  const greeting = state.nickname ? `${state.nickname}님, 오늘 마음은 어떠세요?` : '오늘 마음은 어떠세요?';
-  section.appendChild(el('h1', { class: 'greeting', text: greeting }));
-
-  if (!state.eftGuideSeen) {
-    section.appendChild(el('div', { class: 'card banner' },
-      el('span', { text: 'EFT가 처음이신가요? 먼저 방법을 볼 수 있어요.' }),
-      el('button', { class: 'ghost', onClick: () => ctx.navigate('guide'), text: '방법 보기' }),
-    ));
-  }
+  section.appendChild(el('h1', { text: '진도표' }));
 
   const streak = computeStreak(state.dailyChecks, todayStr());
   section.appendChild(el('div', { class: 'stats' },
     stat('연속 실천', `${streak}일`),
-    stat('자가평가', `${state.dailyChecks.length}회`),
+    stat('감정평가', `${state.dailyChecks.length}회`),
     stat('EFT 세션', `${state.eftSessions.length}회`),
-  ));
-
-  section.appendChild(el('div', { class: 'row cta' },
-    el('button', { class: 'primary', onClick: () => ctx.navigate('daily'), text: '오늘 자가평가' }),
-    el('button', { class: 'primary', onClick: () => ctx.navigate('session'), text: 'EFT 실천하기' }),
-  ));
-
-  section.appendChild(el('div', { class: 'row cta' },
-    el('button', { class: 'ghost', onClick: () => ctx.navigate('learn'), text: 'EFT 알아보기' }),
-    el('button', { class: 'ghost', onClick: () => ctx.navigate('levels'), text: '태핑 레벨' }),
   ));
 
   // EFT 전후 변화 추이
@@ -105,10 +86,10 @@ export function renderDashboard(root, ctx) {
     section.appendChild(list);
   }
 
-  // 최근 자가평가 기록
-  section.appendChild(el('h2', { text: '최근 자가평가' }));
+  // 최근 감정평가 기록
+  section.appendChild(el('h2', { text: '최근 감정평가' }));
   if (state.dailyChecks.length === 0) {
-    section.appendChild(el('p', { class: 'empty', text: '아직 자가평가 기록이 없어요.' }));
+    section.appendChild(el('p', { class: 'empty', text: '아직 감정평가 기록이 없어요.' }));
   } else {
     const list = el('div', { class: 'session-list' });
     state.dailyChecks.slice(-7).reverse().forEach((c) => {
@@ -123,10 +104,8 @@ export function renderDashboard(root, ctx) {
     section.appendChild(list);
   }
 
-  // 동기부여 · 공유 (후속 기능 자리)
+  // 후속 기능 자리
   section.appendChild(el('div', { class: 'card soft' },
-    el('p', { class: 'quote', text: MOTIVATION_PROMPT }),
-    el('p', { class: 'hint', text: SHARE_MESSAGE }),
     el('div', { class: 'row' },
       el('button', { class: 'ghost small', disabled: 'true', text: '사례 올리기 (준비 중)' }),
       el('button', { class: 'ghost small', disabled: 'true', text: '챌린지 (준비 중)' }),
@@ -134,5 +113,6 @@ export function renderDashboard(root, ctx) {
     ),
   ));
 
+  section.appendChild(el('button', { class: 'primary big', onClick: () => ctx.navigate('home'), text: '홈으로' }));
   root.appendChild(section);
 }

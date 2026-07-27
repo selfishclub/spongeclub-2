@@ -12,7 +12,7 @@ export function renderOnboarding(root, ctx) {
     const nickname = nicknameInput.value.trim();
     if (nickname) ctx.store.setNickname(nickname);
     ctx.store.setOnboardingDone();
-    ctx.navigate('dashboard');
+    ctx.navigate('home');
   }
 
   nicknameInput.addEventListener('keydown', (e) => {
@@ -21,7 +21,7 @@ export function renderOnboarding(root, ctx) {
 
   root.appendChild(el('section', { class: 'view onboarding' },
     el('h1', { text: APP_TITLE }),
-    el('p', { class: 'lead', text: '침 없이, 손끝으로 타점을 두드려 감정과 에너지를 다스리는 오픈소스 자가치유법(EFT)입니다.' }),
+    el('p', { class: 'lead', text: '침 없이, 손끝으로 타점을 두드려 감정과 에너지를 다스리는 자가치유법입니다.' }),
 
     el('div', { class: 'card' },
       el('h2', { text: '어떻게 부를까요?' }),
@@ -49,7 +49,7 @@ export function renderOnboarding(root, ctx) {
     el('button', { class: 'primary big', onClick: start, text: '시작하기' }),
     el('button', {
       class: 'ghost wide',
-      onClick: () => ctx.navigate('learn'),
+      onClick: () => { if (nicknameInput.value.trim()) ctx.store.setNickname(nicknameInput.value.trim()); ctx.store.setOnboardingDone(); ctx.navigate('learn'); },
       text: 'EFT가 뭔지 먼저 알아보기',
     }),
   ));

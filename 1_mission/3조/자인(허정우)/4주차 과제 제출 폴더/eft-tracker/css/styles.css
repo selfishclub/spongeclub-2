@@ -181,3 +181,26 @@ button.ghost.small[disabled] { opacity: .5; cursor: not-allowed; }
 .tap-img .pt-label { font-size: 6.5px; fill: var(--ink); }
 .yt { margin: 10px 0; }
 .yt iframe { border-radius: 8px; }
+
+/* ── v4: 대문 · 홈 메뉴 · 가운데 정렬 탭 ────────────── */
+.topbar { justify-content: center; }
+.brand { display: none; }
+.topnav { justify-content: center; flex-wrap: wrap; }
+
+.splash { min-height: 68vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 22px; }
+.splash-title { font-size: clamp(22px, 6vw, 40px); font-weight: 800; letter-spacing: .5px; line-height: 1.35; }
+.splash-title span { transition: color .3s; }
+.splash-sub { color: var(--muted); margin: 0; }
+.splash .primary.big { width: auto; padding: 14px 40px; }
+
+.home .greeting, .home h1 { text-align: center; }
+.menu-list { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.menu-item {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+  padding: 16px; cursor: pointer; font: inherit; color: var(--ink);
+}
+.menu-item:hover { border-color: var(--brand); }
+.menu-title { font-size: 16px; font-weight: 700; }
+.menu-sub { font-size: 12px; color: var(--muted); }
+.quote.big { font-size: 17px; }

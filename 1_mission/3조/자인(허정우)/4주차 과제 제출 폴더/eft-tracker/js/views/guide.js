@@ -2,7 +2,7 @@ import { el } from '../util.js';
 import { TAP_LEVELS, SETUP_AFFIRMATION_TEMPLATE } from '../data.js';
 
 const GUIDE_STEPS = [
-  'EFT는 침 없이 손끝으로 특정 지점(타점)을 가볍게 두드리며 감정과 에너지를 다스리는 오픈소스 자가치유법입니다.',
+  'EFT는 침 없이 손끝으로 특정 지점(타점)을 가볍게 두드리며 감정과 에너지를 다스리는 자가치유법입니다.',
   '먼저 힘들었던 상황과 그때의 감정을 떠올리고, 그 강도를 0~10으로 체크합니다.',
   '그 느낌이 몸의 어디에 있는지 찾고, 크기·무게·온도·색깔·모양·촉감으로 생생하게 그려봅니다.',
   '수용확언을 되뇌이며 손날(후계혈)을 두드린 뒤, 타점을 순서대로 두드립니다.',
@@ -36,11 +36,11 @@ export function renderGuide(root, ctx) {
     ),
 
     el('div', { class: 'row' },
-      el('button', { class: 'ghost', onClick: () => ctx.navigate('dashboard'), text: '나중에' }),
+      el('button', { class: 'ghost', onClick: () => ctx.navigate('home'), text: '홈으로' }),
       el('button', {
         class: 'primary',
-        onClick: () => { ctx.store.setEftGuideSeen(); ctx.navigate('session'); },
-        text: '이해했어요, EFT 시작',
+        onClick: () => { ctx.store.setEftGuideSeen(); ctx.navigate('eval1'); },
+        text: '감정평가 시작',
       }),
     ),
   ));

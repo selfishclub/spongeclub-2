@@ -1,13 +1,18 @@
 import { createStore } from './storage.js';
 import { el } from './util.js';
 import { APP_TITLE } from './data.js';
+import { renderSplash } from './views/splash.js';
+import { renderHome } from './views/home.js';
 import { renderOnboarding } from './views/onboarding.js';
 import { renderGuide } from './views/guide.js';
 import { renderLearn } from './views/learn.js';
-import { renderLevels } from './views/levels.js';
-import { renderDailyCheck } from './views/dailyCheck.js';
-import { renderSession } from './views/session.js';
+import { renderNecessity } from './views/necessity.js';
 import { renderDashboard } from './views/dashboard.js';
+import { renderEvalMenu } from './views/evalMenu.js';
+import { renderTapMenu } from './views/tapMenu.js';
+import { renderEval1 } from './views/eval1.js';
+import { renderEval2 } from './views/eval2.js';
+import { renderTapCycle } from './views/tapCycle.js';
 
 const store = createStore(window.localStorage);
 const root = document.getElementById('app');
@@ -18,26 +23,42 @@ if (brand) brand.textContent = APP_TITLE;
 document.title = APP_TITLE;
 
 const views = {
+  splash: renderSplash,
+  home: renderHome,
   onboarding: renderOnboarding,
   guide: renderGuide,
   learn: renderLearn,
-  levels: renderLevels,
-  daily: renderDailyCheck,
-  session: renderSession,
-  dashboard: renderDashboard,
+  necessity: renderNecessity,
+  progress: renderDashboard,
+  evalmenu: renderEvalMenu,
+  tapmenu: renderTapMenu,
+  eval1: renderEval1,
+  eval2: renderEval2,
+  tap1: (r, c) => renderTapCycle(r, c, 1),
+  tap2: (r, c) => renderTapCycle(r, c, 2),
+  tap3: (r, c) => renderTapCycle(r, c, 3),
+};
+
+// 상단 탭이 가리키는 라우트 → 활성 표시를 위한 그룹 매핑
+const NAV = [
+  ['home', '홈'],
+  ['learn', 'EFT란?'],
+  ['progress', '진도표'],
+  ['evalmenu', '감정평가'],
+  ['tapmenu', 'EFT태핑'],
+];
+const NAV_GROUP = {
+  eval1: 'evalmenu', eval2: 'evalmenu',
+  tap1: 'tapmenu', tap2: 'tapmenu', tap3: 'tapmenu',
+  necessity: 'learn', guide: 'learn',
 };
 
 function renderNav(current) {
   topnav.innerHTML = '';
-  const items = [
-    ['dashboard', '홈'],
-    ['daily', '자가평가'],
-    ['session', 'EFT 실천'],
-    ['learn', '알아보기'],
-  ];
-  for (const [name, label] of items) {
+  const active = NAV_GROUP[current] || current;
+  for (const [name, label] of NAV) {
     topnav.appendChild(el('button', {
-      class: 'navbtn' + (name === current ? ' active' : ''),
+      class: 'navbtn' + (name === active ? ' active' : ''),
       onClick: () => navigate(name),
       text: label,
     }));
@@ -46,13 +67,12 @@ function renderNav(current) {
 
 function navigate(name) {
   root.innerHTML = '';
-  const showNav = name !== 'onboarding';
-  topnav.style.display = showNav ? '' : 'none';
-  if (showNav) renderNav(name);
+  const bare = name === 'splash' || name === 'onboarding';
+  topnav.style.display = bare ? 'none' : '';
+  if (!bare) renderNav(name);
   const ctx = { store, navigate };
-  (views[name] || views.dashboard)(root, ctx);
+  (views[name] || views.home)(root, ctx);
   window.scrollTo(0, 0);
 }
 
-const state = store.load();
-navigate(state.onboardingDone ? 'dashboard' : 'onboarding');
+navigate('splash');
