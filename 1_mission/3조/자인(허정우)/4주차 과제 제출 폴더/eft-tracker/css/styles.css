@@ -246,3 +246,25 @@ button.ghost.small[disabled] { opacity: .5; cursor: not-allowed; }
 .loc-btn.on { background: var(--accent); border-color: var(--accent); color: var(--brand-ink); }
 .point-img:not(:empty) { margin-top: 6px; }
 .acupoint-photo { max-width: 100%; border-radius: 8px; border: 1px solid var(--line); display: block; }
+
+/* ── v8: 예쁜 메뉴 박스 · 메뉴 텍스트 가운데 정렬 ──── */
+.home h1, .home .greeting, .home .lead, .menu-list { text-align: center; }
+.menu-item {
+  border-radius: 22px;
+  background: linear-gradient(135deg, #fffdfa 0%, #fbeee3 100%);
+  border: 1px solid #f1e3d7;
+  box-shadow: 0 3px 10px rgba(168,124,102,.10);
+  padding: 20px 16px;
+  text-align: center;
+  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease, background .16s ease;
+}
+.menu-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(168,124,102,.18);
+  border-color: var(--accent2);
+  background: linear-gradient(135deg, #fffdf7 0%, #fdf6ea 100%);
+}
+.menu-title { color: var(--brand-ink); }
+.menu-row .menu-item { border-radius: 20px; padding: 18px 10px; }
+/* EFT란? 마무리 문단은 읽기 편하게 좌측 정렬 유지 */
+.closing p { text-align: left; margin: 8px 0; }

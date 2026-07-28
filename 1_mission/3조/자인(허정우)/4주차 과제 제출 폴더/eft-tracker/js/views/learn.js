@@ -1,5 +1,13 @@
 import { el } from '../util.js';
-import { LEARN_SECTIONS, MOTIVATION_PROMPT, SHARE_MESSAGE } from '../data.js';
+import { LEARN_SECTIONS } from '../data.js';
+
+const CLOSING_LINES = [
+  '내가 사랑하는 부모님, 자녀, 친구들의 건강이 안 좋아지면 어떤 느낌이 드실까요?',
+  '많이 슬프고 속상하실 거에요.',
+  '마찬가지로 내가 건강을 잃으면 그 분들도 슬프고 속상하시겠죠?',
+  '그래서 나의 몸과 마음을 돌보는 일이, 내가 사랑하는 사람들을 위하는 일이기도 합니다.',
+  '그러니 EFT를 통해 여러분께서 먼저 건강해지시고, 그 다음 사랑하는 사람들의 건강을 돌보는 시간이 되시길 바랍니다.',
+];
 
 // 링크·영상이 들어갈 자리. 자료를 받으면 이 자리를 실제 콘텐츠로 교체한다.
 function mediaSlot(label) {
@@ -30,12 +38,8 @@ export function renderLearn(root, ctx) {
     section.appendChild(el('div', { class: 'card acc' }, toggle, body));
   }
 
-  section.appendChild(el('div', { class: 'card soft' },
-    el('h2', { text: '왜 꾸준히 해야 할까요?' }),
-    el('p', { class: 'quote big', text: MOTIVATION_PROMPT }),
-    el('p', { text: '한국 사람은 흔히 내 필요보다 관계에서 오는 필요에 더 민감하게 반응합니다. 나를 돌보는 일이 곧 나를 사랑하는 사람들을 돌보는 일입니다.' }),
-    el('p', { class: 'hint', text: SHARE_MESSAGE }),
-    mediaSlot('앱 소개 링크 공유'),
+  section.appendChild(el('div', { class: 'card soft closing' },
+    ...CLOSING_LINES.map((line) => el('p', { text: line })),
   ));
 
   section.appendChild(el('button', {
