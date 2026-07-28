@@ -11,7 +11,7 @@ import {
   SETUP_AFFIRMATION_EXAMPLES,
 } from '../data.js';
 import { nrsDelta, improvementRate } from '../scoring.js';
-import { mediaSlot, audioPlayer } from '../media.js';
+import { mediaSlot } from '../media.js';
 import { hugyeImage, TAP_IMAGE_BY_LEVEL } from '../tapImages.js';
 
 const tapLevelById = (n) => TAP_LEVELS.find((l) => l.id === `lv${n}`);
@@ -141,9 +141,8 @@ export function renderTapCycle(root, ctx, tapStage) {
 
   let idx = 0;
   const section = el('section', { class: 'view session' });
-  const audioBar = audioPlayer(); // 사이클 내내 유지되어 단계가 바뀌어도 계속 재생됨
   const inner = el('div', { class: 'session-inner' });
-  section.append(audioBar, inner);
+  section.append(inner);
   root.appendChild(section);
   render();
 

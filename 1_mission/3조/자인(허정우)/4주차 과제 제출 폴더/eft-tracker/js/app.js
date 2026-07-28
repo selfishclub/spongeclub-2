@@ -6,14 +6,12 @@ import { renderHome } from './views/home.js';
 import { renderOnboarding } from './views/onboarding.js';
 import { renderGuide } from './views/guide.js';
 import { renderLearn } from './views/learn.js';
-import { renderNecessity } from './views/necessity.js';
 import { renderDashboard } from './views/dashboard.js';
 import { renderEvalMenu } from './views/evalMenu.js';
 import { renderTapMenu } from './views/tapMenu.js';
 import { renderEval1 } from './views/eval1.js';
 import { renderEval2 } from './views/eval2.js';
 import { renderTapCycle } from './views/tapCycle.js';
-import { renderEffect } from './views/effect.js';
 import { renderShare } from './views/share.js';
 
 const store = createStore(window.localStorage);
@@ -30,7 +28,6 @@ const views = {
   onboarding: renderOnboarding,
   guide: renderGuide,
   learn: renderLearn,
-  necessity: renderNecessity,
   progress: renderDashboard,
   evalmenu: renderEvalMenu,
   tapmenu: renderTapMenu,
@@ -39,7 +36,6 @@ const views = {
   tap1: (r, c) => renderTapCycle(r, c, 1),
   tap2: (r, c) => renderTapCycle(r, c, 2),
   tap3: (r, c) => renderTapCycle(r, c, 3),
-  effect: renderEffect,
   share: renderShare,
 };
 
@@ -50,13 +46,12 @@ const NAV = [
   ['progress', '진도표'],
   ['evalmenu', '감정평가'],
   ['tapmenu', 'EFT태핑'],
-  ['effect', 'EFT효과'],
   ['share', '나누기'],
 ];
 const NAV_GROUP = {
   eval1: 'evalmenu', eval2: 'evalmenu',
   tap1: 'tapmenu', tap2: 'tapmenu', tap3: 'tapmenu',
-  necessity: 'learn', guide: 'learn',
+  guide: 'learn',
 };
 
 function renderNav(current) {
