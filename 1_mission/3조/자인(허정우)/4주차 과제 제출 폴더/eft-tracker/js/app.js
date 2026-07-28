@@ -13,6 +13,8 @@ import { renderTapMenu } from './views/tapMenu.js';
 import { renderEval1 } from './views/eval1.js';
 import { renderEval2 } from './views/eval2.js';
 import { renderTapCycle } from './views/tapCycle.js';
+import { renderEffect } from './views/effect.js';
+import { renderShare } from './views/share.js';
 
 const store = createStore(window.localStorage);
 const root = document.getElementById('app');
@@ -37,6 +39,8 @@ const views = {
   tap1: (r, c) => renderTapCycle(r, c, 1),
   tap2: (r, c) => renderTapCycle(r, c, 2),
   tap3: (r, c) => renderTapCycle(r, c, 3),
+  effect: renderEffect,
+  share: renderShare,
 };
 
 // 상단 탭이 가리키는 라우트 → 활성 표시를 위한 그룹 매핑
@@ -46,6 +50,8 @@ const NAV = [
   ['progress', '진도표'],
   ['evalmenu', '감정평가'],
   ['tapmenu', 'EFT태핑'],
+  ['effect', 'EFT효과'],
+  ['share', '나누기'],
 ];
 const NAV_GROUP = {
   eval1: 'evalmenu', eval2: 'evalmenu',
@@ -75,4 +81,6 @@ function navigate(name) {
   window.scrollTo(0, 0);
 }
 
-navigate('splash');
+const initial = store.load();
+if (initial.splashSeen) navigate(initial.onboardingDone ? 'home' : 'onboarding');
+else navigate('splash');

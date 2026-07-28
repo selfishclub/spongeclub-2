@@ -3,6 +3,7 @@ import { STORAGE_KEY } from './data.js';
 export function defaultState() {
   return {
     nickname: '',
+    splashSeen: false,
     onboardingDone: false,
     eftGuideSeen: false,
     dailyChecks: [],
@@ -36,6 +37,7 @@ export function createStore(backend) {
     load,
     save,
     setNickname(nickname) { return update((s) => { s.nickname = nickname; }); },
+    setSplashSeen() { return update((s) => { s.splashSeen = true; }); },
     setOnboardingDone() { return update((s) => { s.onboardingDone = true; }); },
     setEftGuideSeen() { return update((s) => { s.eftGuideSeen = true; }); },
     addDailyCheck(check) { return update((s) => { s.dailyChecks.push(check); }); },

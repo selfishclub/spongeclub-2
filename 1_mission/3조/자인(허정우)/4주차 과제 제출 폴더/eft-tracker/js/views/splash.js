@@ -23,13 +23,14 @@ function gradientTitle(text) {
 
 export function renderSplash(root, ctx) {
   const state = ctx.store.load();
+  const enter = () => {
+    ctx.store.setSplashSeen(); // 한 번 보면 다음부턴 이 화면을 건너뜀
+    ctx.navigate(state.onboardingDone ? 'home' : 'onboarding');
+  };
   root.appendChild(el('section', { class: 'view splash' },
     gradientTitle(TITLE),
     el('p', { class: 'splash-sub', text: '손끝으로 감정을 다스리는 자가치유' }),
-    el('button', {
-      class: 'primary big',
-      onClick: () => ctx.navigate(state.onboardingDone ? 'home' : 'onboarding'),
-      text: '들어가기',
-    }),
+    el('button', { class: 'primary big', onClick: enter, text: '들어가기' }),
+    el('button', { class: 'ghost skip', onClick: enter, text: '건너뛰기 (다음부터 바로 시작)' }),
   ));
 }

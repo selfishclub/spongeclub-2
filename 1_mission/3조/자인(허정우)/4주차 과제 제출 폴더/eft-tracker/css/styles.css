@@ -1,14 +1,16 @@
 :root {
-  --bg: #f5f7f6;
-  --card: #ffffff;
-  --ink: #23302c;
-  --muted: #6b7a74;
-  --brand: #3f7d6e;
-  --brand-ink: #2c5a4f;
-  --accent: #c98a5e;
-  --good: #2e8b57;
-  --bad: #c0554a;
-  --line: #e3e9e6;
+  /* 따듯하고 편안한 톤: 분홍빛 도는 베이지 메인 + 노랑·연두 포인트 */
+  --bg: #faf3ec;
+  --card: #fffdfa;
+  --ink: #4c403a;
+  --muted: #a08d82;
+  --brand: #cf9b8b;        /* 분홍빛 베이지 (메인) */
+  --brand-ink: #a56b5b;    /* 진한 로즈베이지 (글자) */
+  --accent: #f2c94c;       /* 노랑 포인트 */
+  --accent2: #a8c66c;      /* 연두 포인트 */
+  --good: #7bab5e;
+  --bad: #d98a6a;
+  --line: #ecdfd4;
 }
 * { box-sizing: border-box; }
 body {
@@ -134,14 +136,14 @@ button.ghost.small[disabled] { opacity: .5; cursor: not-allowed; }
 /* 안내 문구 */
 .emphasis { color: var(--brand-ink); font-weight: 600; }
 .affirm {
-  background: #f0f5f3; border-left: 3px solid var(--brand);
+  background: #f7efe8; border-left: 3px solid var(--brand);
   padding: 10px 12px; border-radius: 0 8px 8px 0; font-weight: 600;
 }
-.affirm.mine { background: #fdf4ec; border-left-color: var(--accent); }
+.affirm.mine { background: #fdf6e6; border-left-color: var(--accent); }
 .note { font-size: 13px; color: var(--muted); }
 .guide-line { font-size: 14px; color: var(--ink); margin: 6px 0; }
 .quote { font-style: italic; color: var(--brand-ink); }
-.card.soft { background: #f7faf9; }
+.card.soft { background: #fbf4ea; }
 
 /* 아코디언 (알아보기) */
 .card.acc { padding: 0; overflow: hidden; }
@@ -204,3 +206,22 @@ button.ghost.small[disabled] { opacity: .5; cursor: not-allowed; }
 .menu-title { font-size: 16px; font-weight: 700; }
 .menu-sub { font-size: 12px; color: var(--muted); }
 .quote.big { font-size: 17px; }
+
+/* ── v5: 음원 재생기 · 포인트 컬러 · skip ────────────── */
+.audio-bar {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 12px; padding: 8px 12px; margin-bottom: 12px;
+}
+.audio-label { font-size: 12px; color: var(--brand-ink); white-space: nowrap; }
+.audio-bar audio { height: 34px; flex: 1; min-width: 0; }
+.splash .skip { width: auto; padding: 8px 18px; font-size: 13px; }
+
+/* 노랑·연두 포인트 */
+.stat-value { color: var(--brand-ink); }
+.stats .stat:nth-child(1) { border-top: 3px solid var(--accent); }
+.stats .stat:nth-child(2) { border-top: 3px solid var(--accent2); }
+.stats .stat:nth-child(3) { border-top: 3px solid var(--brand); }
+.navbtn.active { background: var(--accent); color: var(--brand-ink); }
+.menu-item:hover { border-color: var(--accent2); background: #fbfaf2; }
+.chip.on { background: var(--brand); border-color: var(--brand); color: #fff; }

@@ -22,6 +22,8 @@ export function renderHome(root, ctx) {
       item('태핑 1단계', null, 'tap1'),
       item('태핑 2단계', null, 'tap2'),
       item('태핑 3단계', null, 'tap3'),
+      item('EFT효과', null, 'effect'),
+      item('나누기', null, 'share'),
     ),
   ));
 }

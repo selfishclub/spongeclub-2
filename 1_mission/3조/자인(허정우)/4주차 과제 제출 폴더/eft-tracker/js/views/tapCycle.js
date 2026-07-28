@@ -11,7 +11,7 @@ import {
   SETUP_AFFIRMATION_EXAMPLES,
 } from '../data.js';
 import { nrsDelta, improvementRate } from '../scoring.js';
-import { mediaSlot } from '../media.js';
+import { mediaSlot, audioPlayer } from '../media.js';
 import { hugyeImage, TAP_IMAGE_BY_LEVEL } from '../tapImages.js';
 
 const tapLevelById = (n) => TAP_LEVELS.find((l) => l.id === `lv${n}`);
@@ -93,7 +93,6 @@ export function renderTapCycle(root, ctx, tapStage) {
       hugyeImage(),
       el('ul', { class: 'guide-steps' }, ...HUGYE_TAP_GUIDE.map((g) => el('li', { text: g }))),
       el('p', { class: 'affirm mine', text: fullAffirmation(draft.affirmationPhrase) }),
-      mediaSlot('배경 음원 (준비 중)'),
       mediaSlot('후계혈 두드리기 시연 영상')) },
 
     { render: () => {
@@ -141,15 +140,18 @@ export function renderTapCycle(root, ctx, tapStage) {
   ];
 
   let idx = 0;
-  const container = el('section', { class: 'view session' });
-  root.appendChild(container);
+  const section = el('section', { class: 'view session' });
+  const audioBar = audioPlayer(); // 사이클 내내 유지되어 단계가 바뀌어도 계속 재생됨
+  const inner = el('div', { class: 'session-inner' });
+  section.append(audioBar, inner);
+  root.appendChild(section);
   render();
 
   function render() {
-    container.innerHTML = '';
-    container.appendChild(el('div', { class: 'stepbar', text: `${cycleTitle} · ${idx + 1} / ${steps.length}` }));
-    container.appendChild(steps[idx].render());
-    container.appendChild(controls());
+    inner.innerHTML = '';
+    inner.appendChild(el('div', { class: 'stepbar', text: `${cycleTitle} · ${idx + 1} / ${steps.length}` }));
+    inner.appendChild(steps[idx].render());
+    inner.appendChild(controls());
     window.scrollTo(0, 0);
   }
 
@@ -183,8 +185,8 @@ export function renderTapCycle(root, ctx, tapStage) {
     const others = [1, 2, 3].filter((n) => n !== tapStage)
       .map((n) => el('button', { class: 'primary', onClick: () => ctx.navigate(`tap${n}`), text: `태핑 ${n}단계` }));
 
-    container.innerHTML = '';
-    container.appendChild(el('div', { class: 'card result' },
+    inner.innerHTML = '';
+    inner.appendChild(el('div', { class: 'card result' },
       el('h2', { text: '기록됐어요' }),
       el('p', { class: 'delta', text: `${focusEmotion}: ${draft.before} → ${draft.after} (${deltaText})` }),
       el('p', { class: 'hint', text: `개선율 약 ${rate}% · ${verdict}` }),

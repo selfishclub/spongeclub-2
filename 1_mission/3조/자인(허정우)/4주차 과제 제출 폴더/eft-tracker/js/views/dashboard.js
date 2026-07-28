@@ -104,15 +104,6 @@ export function renderDashboard(root, ctx) {
     section.appendChild(list);
   }
 
-  // 후속 기능 자리
-  section.appendChild(el('div', { class: 'card soft' },
-    el('div', { class: 'row' },
-      el('button', { class: 'ghost small', disabled: 'true', text: '사례 올리기 (준비 중)' }),
-      el('button', { class: 'ghost small', disabled: 'true', text: '챌린지 (준비 중)' }),
-      el('button', { class: 'ghost small', disabled: 'true', text: '공유하기 (준비 중)' }),
-    ),
-  ));
-
   section.appendChild(el('button', { class: 'primary big', onClick: () => ctx.navigate('home'), text: '홈으로' }));
   root.appendChild(section);
 }
