@@ -238,3 +238,11 @@ button.ghost.small[disabled] { opacity: .5; cursor: not-allowed; }
 .menu-row { display: flex; gap: 10px; }
 .menu-row .menu-item { flex: 1; padding: 14px 10px; }
 .menu-row .menu-title { font-size: 15px; }
+
+/* ── v7: 혈자리 위치 버튼·이미지 ─────────────────── */
+.tap-list li .pt-row { display: block; }
+.loc-wrap { margin: 4px 0 2px; }
+.loc-btn { padding: 4px 10px; font-size: 12px; }
+.loc-btn.on { background: var(--accent); border-color: var(--accent); color: var(--brand-ink); }
+.point-img:not(:empty) { margin-top: 6px; }
+.acupoint-photo { max-width: 100%; border-radius: 8px; border: 1px solid var(--line); display: block; }

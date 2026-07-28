@@ -30,10 +30,11 @@ export function renderLearn(root, ctx) {
     section.appendChild(el('div', { class: 'card acc' }, toggle, body));
   }
 
-  section.appendChild(el('div', { class: 'card' },
+  section.appendChild(el('div', { class: 'card soft' },
     el('h2', { text: '왜 꾸준히 해야 할까요?' }),
-    el('p', { class: 'quote', text: MOTIVATION_PROMPT }),
-    el('p', { text: SHARE_MESSAGE }),
+    el('p', { class: 'quote big', text: MOTIVATION_PROMPT }),
+    el('p', { text: '한국 사람은 흔히 내 필요보다 관계에서 오는 필요에 더 민감하게 반응합니다. 나를 돌보는 일이 곧 나를 사랑하는 사람들을 돌보는 일입니다.' }),
+    el('p', { class: 'hint', text: SHARE_MESSAGE }),
     mediaSlot('앱 소개 링크 공유'),
   ));
 

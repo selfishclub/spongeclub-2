@@ -13,6 +13,7 @@ import {
 import { nrsDelta, improvementRate } from '../scoring.js';
 import { mediaSlot } from '../media.js';
 import { hugyeImage, TAP_IMAGE_BY_LEVEL } from '../tapImages.js';
+import { pointLocation } from '../pointImages.js';
 
 const tapLevelById = (n) => TAP_LEVELS.find((l) => l.id === `lv${n}`);
 
@@ -102,7 +103,9 @@ export function renderTapCycle(root, ctx, tapStage) {
         el('p', { class: 'hint', text: `"이 ${noun}" 이라고 입으로 되뇌이면서, 각 혈자리를 검지·중지로 가볍게 두드립니다.` }),
         TAP_IMAGE_BY_LEVEL[`lv${tapStage}`](),
         el('ol', { class: 'tap-list' }, ...lv.points.map((p) => el('li', {},
-          el('strong', { text: p.name }), el('span', { class: 'hint', text: ' — ' + p.hint })))),
+          el('div', { class: 'pt-row' },
+            el('strong', { text: p.name }), el('span', { class: 'hint', text: ' — ' + p.hint })),
+          pointLocation(p.name, () => TAP_IMAGE_BY_LEVEL[`lv${tapStage}`]())))),
         mediaSlot('태핑 시연 영상 (손가락 2·3지로 가볍게)')); } },
 
     { render: () => el('div', { class: 'card' },
