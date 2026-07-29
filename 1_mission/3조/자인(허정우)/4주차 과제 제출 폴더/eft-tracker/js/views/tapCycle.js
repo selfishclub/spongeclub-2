@@ -17,6 +17,14 @@ import { pointLocation } from '../pointImages.js';
 
 const tapLevelById = (n) => TAP_LEVELS.find((l) => l.id === `lv${n}`);
 
+// 관형형 감정을 되뇌이기 좋은 명사형으로 다듬는다. (예: 긴장한→긴장, 두려운→두려움)
+function toNoun(word) {
+  const s = (word || '').trim();
+  if (s.endsWith('한')) return s.slice(0, -1);       // 긴장한→긴장, 불안한→불안
+  if (s.endsWith('운')) return s.slice(0, -1) + '움'; // 두려운→두려움, 외로운→외로움
+  return s;
+}
+
 // tapStage: 1 | 2 | 3
 export function renderTapCycle(root, ctx, tapStage) {
   const state = ctx.store.load();
@@ -40,7 +48,7 @@ export function renderTapCycle(root, ctx, tapStage) {
   const draft = {
     affirmationPhrase: '',
     affirmationText: evalRec.affirmation || '', // 긍정 확언 전체(3단계)
-    emotionNoun: focusEmotion,
+    emotionNoun: toNoun(focusEmotion),
     before: evalRec.before ?? 5,
     after: evalRec.before ?? 5,
     shapeChange: '',
@@ -239,6 +247,7 @@ export function renderTapCycle(root, ctx, tapStage) {
         el('ol', { class: 'guide-steps' }, ...TROUBLESHOOTING_STEPS.map((t) => el('li', { text: t })))),
       el('p', { class: 'hint', text: '다른 태핑 단계로 이어가기:' }),
       el('div', { class: 'row' }, ...others),
+      el('button', { class: 'ghost wide', onClick: () => { idx = steps.length - 1; render(); }, text: '이전 단계로' }),
       el('button', { class: 'ghost wide', onClick: () => ctx.navigate('home'), text: '홈으로' })));
   }
 }

@@ -28,7 +28,7 @@ export function renderGuide(root, ctx) {
     ),
 
     el('div', { class: 'card' },
-      el('h2', { text: `기본 타점 (${lv1.name} · ${lv1.title})` }),
+      el('h2', { text: `기본 타점 (1단계 · ${lv1.title})` }),
       el('p', { class: 'hint', text: lv1.description }),
       el('ol', { class: 'tap-list' }, ...lv1.points.map((p) => el('li', {},
         el('div', { class: 'pt-row' },
@@ -36,7 +36,7 @@ export function renderGuide(root, ctx) {
           el('span', { class: 'hint', text: ' — ' + p.hint })),
         pointLocation(p.name, () => TAP_IMAGE_BY_LEVEL.lv1()),
       ))),
-      el('p', { class: 'hint', text: 'Lv.2 이상의 태핑은 "태핑 레벨"에서 볼 수 있습니다.' }),
+      el('p', { class: 'hint', text: '2단계 이상의 태핑은 "EFT태핑" 메뉴에서 볼 수 있습니다.' }),
     ),
 
     el('div', { class: 'row' },
