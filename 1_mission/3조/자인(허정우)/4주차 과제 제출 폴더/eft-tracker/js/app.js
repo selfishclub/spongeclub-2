@@ -45,9 +45,9 @@ const views = {
 const NAV = [
   ['home', '홈'],
   ['learn', 'EFT란?'],
-  ['progress', '진도표'],
   ['evalmenu', '감정평가'],
   ['tapmenu', 'EFT태핑'],
+  ['progress', '진도표'],
   ['share', '나누기'],
 ];
 const NAV_GROUP = {

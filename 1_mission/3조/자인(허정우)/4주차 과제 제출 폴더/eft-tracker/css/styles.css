@@ -275,3 +275,11 @@ button.ghost.small[disabled] { opacity: .5; cursor: not-allowed; }
 .period-tabs { margin: 4px 0 12px; }
 .dashboard-dyn h2 { margin-top: 18px; }
 .point-img.always { margin: 8px 0; }
+
+/* ── v10: 링크 버튼(외부 커뮤니티) ─────────────────── */
+.link-btn {
+  display: block; width: 100%; text-align: center; text-decoration: none;
+  background: var(--brand); color: #fff; border-radius: 10px;
+  padding: 12px; margin-top: 8px; font-size: 15px; box-sizing: border-box;
+}
+.link-btn:hover { filter: brightness(1.05); }

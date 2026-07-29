@@ -15,7 +15,6 @@ export function renderHome(root, ctx) {
     el('h1', { class: 'greeting', text: greeting }),
     el('div', { class: 'menu-list' },
       item('EFT란?', null, 'learn'),
-      item('진도표', null, 'progress'),
       el('div', { class: 'menu-row' },
         item('감정평가 1단계', '줄이고 싶은 부정적 감정', 'eval1'),
         item('감정평가 2단계', '감정 에너지 형상화', 'eval2'),
@@ -26,6 +25,7 @@ export function renderHome(root, ctx) {
         item('태핑 2단계', null, 'tap2'),
         item('태핑 3단계', null, 'tap3'),
       ),
+      item('진도표', null, 'progress'),
       item('나누기', null, 'share'),
     ),
   ));
