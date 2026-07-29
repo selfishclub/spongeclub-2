@@ -11,6 +11,7 @@ import { renderEvalMenu } from './views/evalMenu.js';
 import { renderTapMenu } from './views/tapMenu.js';
 import { renderEval1 } from './views/eval1.js';
 import { renderEval2 } from './views/eval2.js';
+import { renderEval3 } from './views/eval3.js';
 import { renderTapCycle } from './views/tapCycle.js';
 import { renderShare } from './views/share.js';
 
@@ -33,6 +34,7 @@ const views = {
   tapmenu: renderTapMenu,
   eval1: renderEval1,
   eval2: renderEval2,
+  eval3: renderEval3,
   tap1: (r, c) => renderTapCycle(r, c, 1),
   tap2: (r, c) => renderTapCycle(r, c, 2),
   tap3: (r, c) => renderTapCycle(r, c, 3),
@@ -49,7 +51,7 @@ const NAV = [
   ['share', '나누기'],
 ];
 const NAV_GROUP = {
-  eval1: 'evalmenu', eval2: 'evalmenu',
+  eval1: 'evalmenu', eval2: 'evalmenu', eval3: 'evalmenu',
   tap1: 'tapmenu', tap2: 'tapmenu', tap3: 'tapmenu',
   guide: 'learn',
 };

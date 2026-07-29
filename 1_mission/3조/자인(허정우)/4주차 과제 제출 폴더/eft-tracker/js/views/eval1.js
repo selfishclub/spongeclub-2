@@ -1,16 +1,13 @@
 import { el, todayStr } from '../util.js';
-import { SITUATION_EXAMPLES, BODY_LOCATION_EXAMPLES, SHAPE_FIELDS } from '../data.js';
+import { SITUATION_EXAMPLES } from '../data.js';
 import { createEmotionPicker } from '../emotionPicker.js';
 
 // 감정평가 1단계 — 줄이고 싶은 부정적 감정
-// 상황 → 감정 모두 → 주된 감정 → 강도 → 몸의 위치 → 에너지 형상화
+// 상황 → 감정 모두 → 주된 감정 → 강도
 export function renderEval1(root, ctx) {
-  const draft = {
-    situation: '', emotions: [], chosenEmotion: '', before: 5, bodyLocation: '',
-    shape: { size: '', weight: '', temperature: '', color: '', form: '', texture: '' },
-  };
+  const draft = { situation: '', emotions: [], chosenEmotion: '', before: 5 };
   let step = 1;
-  const TOTAL = 6;
+  const TOTAL = 4;
 
   const container = el('section', { class: 'view daily' });
   root.appendChild(container);
@@ -53,12 +50,6 @@ export function renderEval1(root, ctx) {
     return el('div', { class: 'nrs' }, el('span', { text: '0' }), input, el('span', { text: '10' }), out);
   }
 
-  function shapeField(f) {
-    const input = el('input', { type: 'text', value: draft.shape[f.key], placeholder: f.placeholder });
-    input.addEventListener('input', () => { draft.shape[f.key] = input.value; });
-    return el('label', { class: 'field' }, el('span', { text: f.label }), input);
-  }
-
   function body() {
     switch (step) {
       case 1: {
@@ -93,20 +84,6 @@ export function renderEval1(root, ctx) {
         return el('div', { class: 'card' },
           el('h2', { text: '4. 지금 그 감정은 얼마나 강한가요?' }),
           el('p', { class: 'hint', text: '0(전혀) ~ 10(매우 강함)' }), slider());
-      case 5: {
-        const input = el('input', { type: 'text', value: draft.bodyLocation, placeholder: '예: 가슴 중앙, 명치, 복부' });
-        input.addEventListener('input', () => { draft.bodyLocation = input.value; });
-        return el('div', { class: 'card' },
-          el('h2', { text: '5. 그 느낌은 몸의 어디에 있나요?' }),
-          el('label', { class: 'field' }, el('span', { text: '몸의 위치' }), input),
-          chipRow(BODY_LOCATION_EXAMPLES, (v) => { draft.bodyLocation = v; input.value = v; }));
-      }
-      case 6:
-        return el('div', { class: 'card' },
-          el('h2', { text: '6. 그 감정을 몸의 느낌으로 그려보세요' }),
-          el('p', { class: 'hint', text: '구체적이고 생생하게 상상할수록 효과가 커집니다.' }),
-          el('p', { class: 'hint', text: '다 채우지 않고, 잘 느껴지는 항목만 적으시면 됩니다.' }),
-          ...SHAPE_FIELDS.map(shapeField));
       default:
         return el('div', {});
     }
@@ -121,18 +98,17 @@ export function renderEval1(root, ctx) {
       emotions: draft.emotions,
       chosenEmotion: draft.chosenEmotion,
       before: draft.before,
-      bodyLocation: draft.bodyLocation,
-      shape: { ...draft.shape },
     });
     container.innerHTML = '';
     container.appendChild(el('div', { class: 'card result' },
       el('h2', { text: '평가가 저장됐어요' }),
       el('p', { text: `주된 감정: ${draft.chosenEmotion} (강도 ${draft.before})` }),
-      el('p', { class: 'hint', text: '이제 태핑 단계를 선택해 실천하세요.' }),
+      el('p', { class: 'hint', text: '이제 태핑 단계를 선택해 실천하세요. (감정평가 2단계로 더 깊이 들어갈 수도 있어요.)' }),
       el('div', { class: 'row' },
         el('button', { class: 'primary', onClick: () => ctx.navigate('tap1'), text: '태핑 1단계' }),
         el('button', { class: 'primary', onClick: () => ctx.navigate('tap2'), text: '태핑 2단계' }),
         el('button', { class: 'primary', onClick: () => ctx.navigate('tap3'), text: '태핑 3단계' })),
+      el('button', { class: 'ghost wide', onClick: () => ctx.navigate('eval2'), text: '감정평가 2단계 (형상화)' }),
       el('button', { class: 'ghost wide', onClick: () => ctx.navigate('home'), text: '홈으로' })));
   }
 }

@@ -41,6 +41,19 @@ function beforeAfterChart(sessions) {
   return svg;
 }
 
+// EFT 세션을 날짜(하루)별로 묶는다. 하루에 여러 번 해도 그날의 시작 전(before)과
+// 마지막 후(after)로 한 칸만 표시 → 진행한 날짜 수만큼만 막대가 생긴다.
+function byDay(sessions) {
+  const map = new Map();
+  for (const s of sessions) {
+    const day = (s.datetime || '').slice(0, 10);
+    if (!day) continue;
+    if (!map.has(day)) map.set(day, { datetime: day, before: s.before, after: s.after });
+    else map.get(day).after = s.after; // 그날 마지막 세션의 after 로 갱신
+  }
+  return [...map.values()].sort((a, b) => a.datetime.localeCompare(b.datetime));
+}
+
 function stat(label, value) {
   return el('div', { class: 'stat' },
     el('div', { class: 'stat-value', text: value }),
@@ -61,12 +74,12 @@ export function renderDashboard(root, ctx) {
     stat('EFT 세션', `${state.eftSessions.length}회`),
   ));
 
-  // EFT 전후 변화 추이
+  // EFT 전후 변화 추이 — 실제 실천한 날짜 수만큼만 표시 (하루 하면 하루, 이틀 하면 이틀)
   section.appendChild(el('h2', { text: 'EFT 전후 변화 추이' }));
   if (state.eftSessions.length === 0) {
     section.appendChild(el('p', { class: 'empty', text: '아직 EFT 기록이 없어요.' }));
   } else {
-    section.appendChild(beforeAfterChart(state.eftSessions.slice(-12)));
+    section.appendChild(beforeAfterChart(byDay(state.eftSessions).slice(-14)));
     section.appendChild(el('div', { class: 'legend' },
       el('span', { class: 'key before' }), el('span', { class: 'hint', text: '실천 전' }),
       el('span', { class: 'key after' }), el('span', { class: 'hint', text: '실천 후' }),
