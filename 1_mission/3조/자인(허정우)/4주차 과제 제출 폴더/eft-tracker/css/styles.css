@@ -268,3 +268,10 @@ button.ghost.small[disabled] { opacity: .5; cursor: not-allowed; }
 .menu-row .menu-item { border-radius: 20px; padding: 18px 10px; }
 /* EFT란? 마무리 문단은 읽기 편하게 좌측 정렬 유지 */
 .closing p { text-align: left; margin: 8px 0; }
+
+/* ── v9: 예시 라벨 · 기록 f/w · 기간 탭 ─────────────── */
+.ex-label { font-weight: 700; color: var(--brand-ink); margin: 10px 0 2px; }
+.record-note { font-size: 13px; color: var(--ink); background: #fbf4ea; border-radius: 8px; padding: 6px 10px; margin: 4px 0 0; }
+.period-tabs { margin: 4px 0 12px; }
+.dashboard-dyn h2 { margin-top: 18px; }
+.point-img.always { margin: 8px 0; }

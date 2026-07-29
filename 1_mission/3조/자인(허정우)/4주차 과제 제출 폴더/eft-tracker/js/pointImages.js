@@ -5,7 +5,23 @@ import { el } from './util.js';
 export function slugFor(name) {
   const m = /\(([^)]+)\)/.exec(name);
   const base = m ? m[1] : name;
-  return base.replace(/[·\s]/g, '');
+  // 괄호 안에 여러 이름(예: "인중,수구")이 있으면 첫 번째를 파일명으로 쓴다.
+  return base.split(',')[0].replace(/[·\s]/g, '');
+}
+
+// 항상 보이는 혈자리 사진 (파일 없으면 fallback 도식으로 대체)
+export function acupointPhoto(slug, fallbackFactory, alt = '') {
+  const box = el('div', { class: 'point-img always' });
+  const img = document.createElement('img');
+  img.className = 'acupoint-photo';
+  img.alt = alt;
+  img.src = `assets/acupoints/${slug}.jpg`;
+  img.addEventListener('error', () => {
+    box.innerHTML = '';
+    if (fallbackFactory) box.appendChild(fallbackFactory());
+  });
+  box.appendChild(img);
+  return box;
 }
 
 // 각 혈자리 옆의 "혈자리 위치" 토글 버튼.

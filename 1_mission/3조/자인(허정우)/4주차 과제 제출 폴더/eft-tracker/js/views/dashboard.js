@@ -3,7 +3,6 @@ import { computeStreak } from '../streak.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 
-// EFT 세션의 before → after 를 세션별로 나란히 그린다. (NRS 0~10)
 function beforeAfterChart(sessions) {
   const W = 320, H = 130, pad = 20, MAX = 10;
   const n = sessions.length;
@@ -41,15 +40,14 @@ function beforeAfterChart(sessions) {
   return svg;
 }
 
-// EFT 세션을 날짜(하루)별로 묶는다. 하루에 여러 번 해도 그날의 시작 전(before)과
-// 마지막 후(after)로 한 칸만 표시 → 진행한 날짜 수만큼만 막대가 생긴다.
+// 하루에 여러 번 해도 그날의 before/after 한 칸으로 → 진행한 날짜 수만큼만 표시
 function byDay(sessions) {
   const map = new Map();
   for (const s of sessions) {
     const day = (s.datetime || '').slice(0, 10);
     if (!day) continue;
     if (!map.has(day)) map.set(day, { datetime: day, before: s.before, after: s.after });
-    else map.get(day).after = s.after; // 그날 마지막 세션의 after 로 갱신
+    else map.get(day).after = s.after;
   }
   return [...map.values()].sort((a, b) => a.datetime.localeCompare(b.datetime));
 }
@@ -61,9 +59,24 @@ function stat(label, value) {
   );
 }
 
+// N일 전 날짜(YYYY-MM-DD). null 이면 전체.
+function cutoff(days) {
+  if (!days) return null;
+  const d = new Date();
+  d.setDate(d.getDate() - (days - 1));
+  return todayStr(d);
+}
+
+const PERIODS = [
+  { id: 'week', label: '주간', days: 7 },
+  { id: 'month', label: '월간', days: 30 },
+  { id: 'all', label: '전체', days: 0 },
+];
+
 export function renderDashboard(root, ctx) {
   const state = ctx.store.load();
   const section = el('section', { class: 'view dashboard' });
+  let period = 'all';
 
   section.appendChild(el('h1', { text: '진도표' }));
 
@@ -74,49 +87,88 @@ export function renderDashboard(root, ctx) {
     stat('EFT 세션', `${state.eftSessions.length}회`),
   ));
 
-  // EFT 전후 변화 추이 — 실제 실천한 날짜 수만큼만 표시 (하루 하면 하루, 이틀 하면 이틀)
-  section.appendChild(el('h2', { text: 'EFT 전후 변화 추이' }));
-  if (state.eftSessions.length === 0) {
-    section.appendChild(el('p', { class: 'empty', text: '아직 EFT 기록이 없어요.' }));
-  } else {
-    section.appendChild(beforeAfterChart(byDay(state.eftSessions).slice(-14)));
-    section.appendChild(el('div', { class: 'legend' },
-      el('span', { class: 'key before' }), el('span', { class: 'hint', text: '실천 전' }),
-      el('span', { class: 'key after' }), el('span', { class: 'hint', text: '실천 후' }),
-    ));
+  // 기간 선택 (주간 / 월간 / 전체)
+  const tabs = el('div', { class: 'tabs period-tabs' });
+  const dyn = el('div', { class: 'dashboard-dyn' });
 
-    const list = el('div', { class: 'session-list' });
-    state.eftSessions.slice().reverse().forEach((s) => {
-      const delta = s.before - s.after;
-      const cls = delta > 0 ? 'good' : delta < 0 ? 'bad' : '';
-      const deltaText = delta > 0 ? `-${delta}` : delta < 0 ? `+${-delta}` : '0';
-      list.appendChild(el('div', { class: 'session-item' },
-        el('span', { class: 'emotion', text: s.chosenEmotion || '(감정)' }),
-        el('span', { class: 'ba', text: `${s.before} → ${s.after}` }),
-        el('span', { class: `delta ${cls}`.trim(), text: deltaText }),
-      ));
-    });
-    section.appendChild(list);
+  function inPeriod(datetime) {
+    const co = cutoff(PERIODS.find((p) => p.id === period).days);
+    if (!co) return true;
+    return (datetime || '').slice(0, 10) >= co;
   }
 
-  // 최근 감정평가 기록
-  section.appendChild(el('h2', { text: '최근 감정평가' }));
-  if (state.dailyChecks.length === 0) {
-    section.appendChild(el('p', { class: 'empty', text: '아직 감정평가 기록이 없어요.' }));
-  } else {
-    const list = el('div', { class: 'session-list' });
-    state.dailyChecks.slice(-7).reverse().forEach((c) => {
-      list.appendChild(el('div', { class: 'session-item column' },
-        el('div', { class: 'row-between' },
-          el('span', { class: 'emotion', text: (c.emotions || []).slice(0, 3).join(', ') || '(감정)' }),
-          el('span', { class: 'ba', text: c.date }),
-        ),
-        c.situation ? el('span', { class: 'hint', text: c.situation }) : null,
-      ));
-    });
-    section.appendChild(list);
+  function renderDynamic() {
+    for (const b of tabs.children) b.classList.toggle('active', b.dataset.p === period);
+    dyn.innerHTML = '';
+
+    const sessions = state.eftSessions.filter((s) => inPeriod(s.datetime));
+    const checks = state.dailyChecks.filter((c) => inPeriod(c.datetime || c.date));
+
+    // EFT 전후 변화 추이
+    dyn.appendChild(el('h2', { text: 'EFT 전후 변화 추이' }));
+    if (sessions.length === 0) {
+      dyn.appendChild(el('p', { class: 'empty', text: '이 기간에는 EFT 기록이 없어요.' }));
+    } else {
+      dyn.appendChild(beforeAfterChart(byDay(sessions).slice(-31)));
+      dyn.appendChild(el('div', { class: 'legend' },
+        el('span', { class: 'key before' }), el('span', { class: 'hint', text: '실천 전' }),
+        el('span', { class: 'key after' }), el('span', { class: 'hint', text: '실천 후' })));
+    }
+
+    // 나의 기록 (자유 기록 follow-up 포함)
+    dyn.appendChild(el('h2', { text: '나의 기록' }));
+    if (sessions.length === 0) {
+      dyn.appendChild(el('p', { class: 'empty', text: '이 기간에는 기록이 없어요.' }));
+    } else {
+      const list = el('div', { class: 'session-list' });
+      sessions.slice().reverse().forEach((s) => {
+        const delta = s.before - s.after;
+        const isPos = s.evalStage === 3;
+        const cls = isPos ? (delta < 0 ? 'good' : '') : (delta > 0 ? 'good' : delta < 0 ? 'bad' : '');
+        const deltaText = isPos
+          ? `+${Math.max(0, s.after - s.before)}`
+          : (delta > 0 ? `-${delta}` : delta < 0 ? `+${-delta}` : '0');
+        list.appendChild(el('div', { class: 'session-item column' },
+          el('div', { class: 'row-between' },
+            el('span', { class: 'emotion', text: s.chosenEmotion || '(감정)' }),
+            el('span', { class: 'ba', text: (s.datetime || '').slice(0, 10) })),
+          el('div', { class: 'row-between' },
+            el('span', { class: 'hint', text: `${s.before} → ${s.after}${s.tapStage ? ` · 태핑 ${s.tapStage}단계` : ''}` }),
+            el('span', { class: `delta ${cls}`.trim(), text: deltaText })),
+          s.record ? el('p', { class: 'record-note', text: `“${s.record}”` }) : null,
+        ));
+      });
+      dyn.appendChild(list);
+    }
+
+    // 감정평가 기록
+    dyn.appendChild(el('h2', { text: '감정평가 기록' }));
+    if (checks.length === 0) {
+      dyn.appendChild(el('p', { class: 'empty', text: '이 기간에는 감정평가 기록이 없어요.' }));
+    } else {
+      const list = el('div', { class: 'session-list' });
+      checks.slice().reverse().forEach((c) => {
+        list.appendChild(el('div', { class: 'session-item column' },
+          el('div', { class: 'row-between' },
+            el('span', { class: 'emotion', text: (c.emotions || []).slice(0, 3).join(', ') || c.chosenEmotion || '(감정)' }),
+            el('span', { class: 'ba', text: c.date })),
+          c.situation ? el('span', { class: 'hint', text: c.situation }) : null,
+        ));
+      });
+      dyn.appendChild(list);
+    }
   }
 
+  for (const p of PERIODS) {
+    const b = el('button', { class: 'tab', type: 'button', text: p.label });
+    b.dataset.p = p.id;
+    b.addEventListener('click', () => { period = p.id; renderDynamic(); });
+    tabs.appendChild(b);
+  }
+
+  section.appendChild(tabs);
+  section.appendChild(dyn);
   section.appendChild(el('button', { class: 'primary big', onClick: () => ctx.navigate('home'), text: '홈으로' }));
   root.appendChild(section);
+  renderDynamic();
 }

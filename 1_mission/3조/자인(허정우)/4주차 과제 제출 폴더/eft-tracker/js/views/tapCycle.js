@@ -13,16 +13,29 @@ import {
 import { nrsDelta, improvementRate } from '../scoring.js';
 import { mediaSlot } from '../media.js';
 import { hugyeImage, TAP_IMAGE_BY_LEVEL } from '../tapImages.js';
-import { pointLocation } from '../pointImages.js';
+import { pointLocation, acupointPhoto } from '../pointImages.js';
 
 const tapLevelById = (n) => TAP_LEVELS.find((l) => l.id === `lv${n}`);
 
-// 관형형 감정을 되뇌이기 좋은 명사형으로 다듬는다. (예: 긴장한→긴장, 두려운→두려움)
+// 관형형 감정을 되뇌이기 좋은 명사형으로 다듬는다.
+// 예: 걱정되는→걱정, 짜증나는→짜증, 긴장한→긴장, 두려운→두려움, 슬픈→슬픔
 function toNoun(word) {
-  const s = (word || '').trim();
-  if (s.endsWith('한')) return s.slice(0, -1);       // 긴장한→긴장, 불안한→불안
-  if (s.endsWith('운')) return s.slice(0, -1) + '움'; // 두려운→두려움, 외로운→외로움
-  return s;
+  let s = (word || '').trim();
+  const rules = [
+    [/스러운$/, '스러움'],
+    [/로운$/, '로움'],
+    [/되는$/, ''],   // 걱정되는→걱정
+    [/나는$/, ''],   // 짜증나는→짜증, 화가 나는→화가
+    [/치미는$/, ''], // 울화가 치미는→울화가
+    [/운$/, '움'],   // 두려운→두려움
+    [/픈$/, '픔'],   // 슬픈→슬픔
+    [/쁜$/, '쁨'],   // 기쁜→기쁨
+    [/한$/, ''],     // 긴장한→긴장
+  ];
+  for (const [re, rep] of rules) {
+    if (re.test(s)) { s = s.replace(re, rep); break; }
+  }
+  return s.trim();
 }
 
 // tapStage: 1 | 2 | 3
@@ -100,7 +113,6 @@ export function renderTapCycle(root, ctx, tapStage) {
         return el('div', { class: 'card' },
           el('h2', { text: '긍정 확언' }),
           el('p', { text: '이 문장을 되뇌이면서 한 손의 후계혈(손날 타점)을 가볍게 두드립니다.' }),
-          hugyeImage(),
           el('label', { class: 'field' }, el('span', { text: '확언 문장 (자연스럽게 다듬어 보세요)' }), input),
           preview);
       }
@@ -111,15 +123,15 @@ export function renderTapCycle(root, ctx, tapStage) {
       return el('div', { class: 'card' },
         el('h2', { text: '수용확언 만들기' }),
         el('p', { class: 'affirm', text: SETUP_AFFIRMATION_TEMPLATE }),
-        hugyeImage(),
         el('label', { class: 'field' }, el('span', { text: '○○ 에 들어갈 말 (자연스럽게 다듬어 보세요)' }), phrase),
         preview,
+        el('p', { class: 'hint ex-label', text: '예시' }),
         el('ul', { class: 'guide-steps' }, ...SETUP_AFFIRMATION_EXAMPLES.map((e) => el('li', { text: e }))),
         el('p', { class: 'note', text: '※ 처음엔 감정·의식적 영역으로 시작하시길 권장드립니다.' })); } },
 
     { render: () => el('div', { class: 'card' },
-      el('h2', { text: '후계혈 소리내어 태핑' }),
-      hugyeImage(),
+      el('h2', { text: '후계혈(손날 타점) 소리내어 태핑' }),
+      acupointPhoto('후계', hugyeImage, '후계혈(손날 타점)'),
       el('ul', { class: 'guide-steps' }, ...HUGYE_TAP_GUIDE.map((g) => el('li', { text: g }))),
       el('p', { class: 'affirm mine', text: currentAffirmation() }),
       mediaSlot('후계혈 두드리기 시연 영상')) },
@@ -129,7 +141,6 @@ export function renderTapCycle(root, ctx, tapStage) {
       return el('div', { class: 'card' },
         el('h2', { text: `태핑 ${tapStage}단계 — ${lv.title}` }),
         el('p', { class: 'hint', text: `"이 ${noun}" 이라고 입으로 되뇌이면서, 각 혈자리를 검지·중지로 가볍게 두드립니다.` }),
-        TAP_IMAGE_BY_LEVEL[`lv${tapStage}`](),
         el('ol', { class: 'tap-list' }, ...lv.points.map((p) => el('li', {},
           el('div', { class: 'pt-row' },
             el('strong', { text: p.name }), el('span', { class: 'hint', text: ' — ' + p.hint })),
