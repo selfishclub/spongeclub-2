@@ -4,7 +4,7 @@ import { APP_TITLE } from '../data.js';
 export function renderOnboarding(root, ctx) {
   const nicknameInput = el('input', {
     type: 'text',
-    placeholder: '예: 자인',
+    placeholder: '예: 홍길동',
     maxlength: '20',
   });
 

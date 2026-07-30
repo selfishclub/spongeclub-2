@@ -38,6 +38,15 @@ function toNoun(word) {
   return s.trim();
 }
 
+// 주격 조사 이/가 (받침 여부로 결정). 예: 긴장→긴장이, 분노→분노가
+function withGa(word) {
+  const s = (word || '').trim();
+  if (!s) return s;
+  const c = s.charCodeAt(s.length - 1);
+  const hasBatchim = c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 !== 0;
+  return s + (hasBatchim ? '이' : '가');
+}
+
 // tapStage: 1 | 2 | 3
 export function renderTapCycle(root, ctx, tapStage) {
   const state = ctx.store.load();
@@ -137,10 +146,18 @@ export function renderTapCycle(root, ctx, tapStage) {
       mediaSlot('후계혈 두드리기 시연 영상')) },
 
     { render: () => {
-      const noun = (draft.emotionNoun || focusEmotion).trim();
+      const instr = el('p', { class: 'hint', text: '' });
+      const nounInput = el('input', { type: 'text', value: (draft.emotionNoun || focusEmotion) });
+      const upd = () => {
+        const w = (draft.emotionNoun || '').trim() || focusEmotion;
+        instr.textContent = `"이 ${w}" 이라고 입으로 되뇌이면서, 각 혈자리를 검지·중지로 가볍게 두드립니다.`;
+      };
+      nounInput.addEventListener('input', () => { draft.emotionNoun = nounInput.value; upd(); });
+      upd();
       return el('div', { class: 'card' },
         el('h2', { text: `태핑 ${tapStage}단계 — ${lv.title}` }),
-        el('p', { class: 'hint', text: `"이 ${noun}" 이라고 입으로 되뇌이면서, 각 혈자리를 검지·중지로 가볍게 두드립니다.` }),
+        instr,
+        el('label', { class: 'field' }, el('span', { text: '되뇌일 감정 단어 (필요하면 고쳐주세요)' }), nounInput),
         el('ol', { class: 'tap-list' }, ...lv.points.map((p) => el('li', {},
           el('div', { class: 'pt-row' },
             el('strong', { text: p.name }), el('span', { class: 'hint', text: ' — ' + p.hint })),
@@ -171,9 +188,22 @@ export function renderTapCycle(root, ctx, tapStage) {
         el('h2', { text: '재평가' }),
         el('p', { text: isPositive ? '다시 느껴보고, 그 긍정 감정이 얼마나 충만해졌는지 확인해보세요.' : '다시 느껴보고 감정과 에너지의 강도를 확인해보세요.' }),
         el('p', { class: 'hint', text: `처음엔 ${draft.before}점이었어요. 지금은?` }),
-        s, result,
-        textArea('에너지 형상은 어떻게 변했나요?', 'shapeChange', '예: 둥글고 환한 빛으로 커졌다'),
-        textArea('감정은 어떻게 변했나요?', 'emotionChange', isPositive ? '예: 더 따뜻하고 충만해졌다' : '예: 분노 대신 약간의 연민이 느껴진다'));
+        s, result);
+      // 감정 변화 예문 — 앞에서 고른 감정을 명사형으로 넣어 만든다.
+      const w = (draft.emotionNoun || focusEmotion || '감정').trim();
+      const g = withGa(w);
+      const emoEx = isPositive
+        ? `예: ${g} 더 충만해졌다 · ${g} 더 생생해졌다`
+        : `예: ${g} 누그러졌다 · ${g} 편안해졌다 · ${g} 다른 감정으로 바뀌었다`;
+      // 형상 변화 예문 — 감정평가 2단계에서 고른 형상이 있으면 그것을 앞에 놓는다.
+      const shapeVals = evalRec.shape
+        ? [evalRec.shape.form, evalRec.shape.color, evalRec.shape.size, evalRec.shape.weight, evalRec.shape.temperature, evalRec.shape.texture].filter((v) => v && v.trim())
+        : [];
+      const shapeEx = shapeVals.length
+        ? `예: '${shapeVals[0]}'이던 것이 반대되는 형태(둥글고 부드럽고 밝은)로 변했다`
+        : '예: 뾰족하던 게 둥글고 작아졌다';
+      card.appendChild(textArea('에너지 형상은 어떻게 변했나요? (감정평가 2단계를 진행했을 경우)', 'shapeChange', shapeEx));
+      card.appendChild(textArea('감정은 어떻게 변했나요?', 'emotionChange', emoEx));
       if (isPositive) {
         card.appendChild(el('p', { class: 'note', text: '긍정 감정이 더 충만하고 생생해졌다면 잘 하신 거예요.' }));
       } else {

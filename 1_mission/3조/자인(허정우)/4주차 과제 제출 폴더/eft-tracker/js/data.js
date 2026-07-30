@@ -72,6 +72,7 @@ export const TAP_LEVELS = [
     points: [
       { name: '중부', hint: '쇄골 바깥 아래 오목한 곳' },
       { name: '수부', hint: '쇄골 안쪽 아래' },
+      { name: '쇄골(결분)', hint: '쇄골 아래 오목한 곳' },
       { name: '전중', hint: '가슴 정중앙, 양 젖꼭지 사이' },
       { name: '거궐', hint: '명치 부위' },
       { name: '일월', hint: '갈비뼈 아래 옆쪽' },
@@ -90,7 +91,6 @@ export const TAP_LEVELS = [
       { name: '눈 밑(승읍)', hint: '눈 아래 뼈' },
       { name: '코 밑(인중,수구)', hint: '코와 윗입술 사이' },
       { name: '턱(승장)', hint: '아랫입술과 턱 사이' },
-      { name: '쇄골(결분)', hint: '쇄골 아래 오목한 곳' },
     ],
   },
   {
