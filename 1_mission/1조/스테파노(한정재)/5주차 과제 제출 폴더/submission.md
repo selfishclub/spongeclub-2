@@ -96,4 +96,4 @@ date: 2026-08-02
   ② i_Note 안드로이드 스토어 배포 (릴리스 서명까지 완료)
   ③ i_Boksa를 다른 성당 복사단에 건네보기 — "내가 없어도 도는지"가 진짜 시험
 
-- **SNS 인증 링크:** 🟡 업로드 후 첨부 예정
+- **SNS 인증 링크:** https://www.instagram.com/p/DbgWxx_EyDa/
