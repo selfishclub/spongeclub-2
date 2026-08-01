@@ -3,7 +3,7 @@ member: 신진영
 조: 2
 week: 4
 type: weekly
-title: 
+title: 사주앤코
 date: 
 ---
 
