@@ -3,7 +3,7 @@ member: 신진영
 조: 2
 week: 2
 type: weekly
-title: 
+title: 체크월
 date: 
 ---
 
