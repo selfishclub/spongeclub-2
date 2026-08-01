@@ -40,11 +40,10 @@ date:
 - **🚀 실제 배포 URL:**
   아직 없음 — 지금은 로컬에서 여는 HTML 프로토타입 단계이고, 실제 서버 배포는 진행하지 않았습니다.
 - **결과물 (링크·스크린샷 — 이미지는 `이미지첨부/` 폴더에):**
-  - `90s-flow-prototype.html` (아침 세션 + 서재)
-  - `conflict-mode-prototype.html` (갈등 자기공감 모드)
-  - `PRD_모닝챕터_v0.2.md`
-  - `storybook-prompt.md` / `conflict-mode-prompt.md`
-  - 프로토타입 화면은 직접 열어서 캡처한 스크린샷을 `이미지첨부` 폴더에 넣으면 될 것 같습니다.
+  - [`90s-flow-prototype.html`](이미지첨부/90s-flow-prototype.html) (아침 세션 + 서재)
+  - [`conflict-mode-prototype.html`](이미지첨부/conflict-mode-prototype.html) (갈등 자기공감 모드)
+  - [`PRD_모닝챕터_v0.2.html`](이미지첨부/PRD_모닝챕터_v0.2.html)
+  - [`storybook-prompt.html`](이미지첨부/storybook-prompt.html) / [`conflict-mode-prompt.html`](이미지첨부/conflict-mode-prompt.html)
 - **받은 유저 피드백:**
   아직 없음 — 현재는 가상 페르소나로 시나리오를 시뮬레이션하며 검증하는 단계까지 진행했고, 실제 유저 피드백은 아직 못 받았습니다. 과제에 나온 스폰지클럽 유저피드백 모집을 활용해볼 계획입니다.
 

@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>아침 카드 — 알람 + 세션 플로우</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#0B0A16; --lavender:#6E5A8C; --apricot:#E5A87B;
+  --blush:#EFC3C7; --paper:#F6F2EC; --ink:#211D33;
+  --serif:'Gowun Batang', serif;
+  --sans:-apple-system,'Apple SD Gothic Neo','Pretendard','Malgun Gothic',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:var(--sans); background:var(--night); color:var(--paper);
+  display:flex;flex-direction:column;align-items:center;
+  padding:32px 16px 64px; transition:background 1.8s ease;
+  -webkit-font-smoothing:antialiased; min-height:100%;
+}
+body[data-sky="night"]  {background:radial-gradient(120% 90% at 50% 100%, #17122B 0%, #0B0A16 60%)}
+body[data-sky="dusk"]   {background:radial-gradient(120% 90% at 50% 100%, #3A2A4E 0%, #12102A 65%)}
+body[data-sky="dawn"]   {background:radial-gradient(130% 100% at 50% 100%, #C98A78 0%, #57406B 45%, #1A1533 100%)}
+body[data-sky="morning"]{background:radial-gradient(130% 100% at 50% 100%, #EFD8C4 0%, #C9D8E4 45%, #8FA5BE 100%)}
+
+header{text-align:center;margin-bottom:22px;max-width:440px}
+header .eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;opacity:.5;margin-bottom:8px}
+header h1{font-family:var(--serif);font-size:23px;font-weight:400;line-height:1.5;opacity:.92}
+header p{font-size:12.5px;opacity:.5;margin-top:6px;line-height:1.6}
+
+.phone{
+  width:min(390px,100%);height:760px;border-radius:42px;
+  border:1px solid rgba(255,255,255,.14);background:#0A0813;
+  overflow:hidden;position:relative;
+  box-shadow:0 40px 90px -30px rgba(0,0,0,.9), 0 0 0 8px rgba(255,255,255,.03);
+}
+.screen{position:absolute;inset:0;transition:background 1.4s ease}
+.screen[data-tone="alarm"]  {background:linear-gradient(180deg,#191330,#08070F)}
+.screen[data-tone="card"]   {background:linear-gradient(180deg,#2A2044,#0F0B1E)}
+.screen[data-tone="speak"]  {background:linear-gradient(180deg,#3E2E56,#16112C)}
+.screen[data-tone="dawn"]   {background:linear-gradient(180deg,#5A4270,#241B3E)}
+.screen[data-tone="warm"]   {background:linear-gradient(180deg,#96697A,#3D2C52)}
+.screen[data-tone="morning"]{background:linear-gradient(180deg,#E7D3C2,#BFCEDD)}
+
+/* 진행 표시는 시간이 아니라 단계다 */
+.steps{position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:6;
+  display:flex;gap:6px;opacity:0;transition:opacity .6s}
+.steps.on{opacity:1}
+.steps i{width:16px;height:2px;border-radius:2px;background:rgba(255,255,255,.16);transition:.5s}
+.steps i.f{background:var(--blush)}
+.gear{position:absolute;top:12px;left:14px;z-index:6;background:none;border:none;
+  color:inherit;opacity:.3;cursor:pointer;padding:8px;font-size:15px;line-height:1}
+.gear:hover{opacity:.75}
+.gear:focus-visible{outline:2px solid var(--blush);outline-offset:2px;opacity:.9}
+.book-icon{position:absolute;top:12px;right:14px;z-index:6;background:none;border:none;
+  color:inherit;opacity:.3;cursor:pointer;padding:8px;font-size:15px;line-height:1}
+.book-icon:hover{opacity:.75}
+.book-icon:focus-visible{outline:2px solid var(--blush);outline-offset:2px;opacity:.9}
+.home-tag{position:absolute;top:15px;left:50%;transform:translateX(-50%);z-index:6;
+  font-size:10.5px;letter-spacing:.14em;opacity:.3}
+
+.stage{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:34px 28px;
+  opacity:0;pointer-events:none;transition:opacity .6s ease}
+.stage.on{opacity:1;pointer-events:auto}
+.hint{font-size:12.5px;opacity:.42;line-height:1.7;text-align:center}
+.stage[data-dark] .hint{color:var(--ink);opacity:.55}
+.stage[data-dark] .linkbtn{color:var(--ink);opacity:.55}
+.stage[data-dark] .linkbtn:hover{opacity:.9}
+.stage[data-dark] .btn.ghost{color:var(--ink);border-color:rgba(33,29,51,.3)}
+.gear[data-dark]{color:var(--ink);opacity:.4}
+
+/* 마이페이지 */
+.mp{align-items:stretch !important;justify-content:flex-start !important;padding-top:64px !important}
+.mp h2{font-family:var(--serif);font-size:22px;font-weight:400;color:var(--ink);margin-bottom:4px}
+.mp .mp-sub{font-size:12px;color:rgba(33,29,51,.5);margin-bottom:26px}
+.shelf{display:flex;flex-direction:column;gap:10px}
+.book{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;
+  background:rgba(255,255,255,.44);border:1px solid rgba(33,29,51,.09);cursor:pointer;
+  transition:.2s;text-align:left;font-family:var(--sans)}
+.book:hover{background:rgba(255,255,255,.68)}
+.book:focus-visible{outline:2px solid #6E5A8C;outline-offset:2px}
+.book .spine{width:5px;height:38px;border-radius:3px;background:var(--lavender);flex:none}
+.book.b2 .spine{background:var(--apricot)} .book.b3 .spine{background:var(--blush)}
+.book.wip .spine{background:rgba(33,29,51,.16)}
+.book b{display:block;font-family:var(--serif);font-size:14.5px;font-weight:400;
+  color:var(--ink);line-height:1.5;margin-bottom:3px}
+.book small{font-size:11px;color:rgba(33,29,51,.5)}
+.mp-week{display:flex;gap:8px;margin:26px 0 8px}
+.mp-week i{width:9px;height:9px;border-radius:50%;background:rgba(33,29,51,.18)}
+.mp-week i.f{background:#6E5A8C}
+.mp-foot{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:4px}
+.ep-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.ep-hint{font-size:11.5px;color:rgba(33,29,51,.45)}
+.btn.small{padding:9px 16px;font-size:12.5px}
+.btn.ghost:disabled{opacity:.3;cursor:default}
+.episode{display:flex;align-items:flex-start;gap:11px;padding:13px 14px;border-radius:11px;
+  background:rgba(255,255,255,.4);border:1px solid rgba(33,29,51,.08);cursor:pointer;
+  transition:.2s;text-align:left;font-family:var(--sans);margin-bottom:8px;width:100%}
+.episode:hover{background:rgba(255,255,255,.6)}
+.episode.checked{background:rgba(110,90,140,.14);border-color:rgba(110,90,140,.4)}
+.ep-check{width:16px;height:16px;border-radius:5px;border:1.4px solid rgba(33,29,51,.28);
+  flex:none;margin-top:2px;position:relative}
+.episode.checked .ep-check{background:#6E5A8C;border-color:#6E5A8C}
+.episode.checked .ep-check::after{content:'✓';position:absolute;inset:0;display:flex;
+  align-items:center;justify-content:center;color:#fff;font-size:11px}
+.ep-body b{display:block;font-family:var(--serif);font-size:13.5px;font-weight:400;
+  color:var(--ink);line-height:1.5;margin-bottom:2px}
+.ep-body small{font-size:10.5px;color:rgba(33,29,51,.48)}
+.books-made{margin-top:18px}
+.books-made .book{margin-bottom:9px}
+.compiled-flash{padding:14px 16px;border-radius:12px;background:rgba(110,90,140,.14);
+  border:1px solid rgba(110,90,140,.32);text-align:center;margin-bottom:14px;
+  animation:flashIn .5s ease}
+@keyframes flashIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.compiled-flash b{display:block;font-family:var(--serif);font-size:14px;color:var(--ink);
+  font-weight:400;margin-bottom:3px}
+.compiled-flash small{font-size:11px;color:rgba(33,29,51,.55)}
+.compiled-flash{cursor:pointer;transition:.2s}
+.compiled-flash:hover{background:rgba(110,90,140,.2)}
+
+/* 챕터 리더 */
+.reader{align-items:flex-start !important;justify-content:flex-start !important;
+  padding:56px 30px 30px !important;overflow-y:auto}
+.reader-back{position:absolute;top:12px;left:14px;z-index:6;background:none;border:none;
+  color:var(--ink);opacity:.4;cursor:pointer;padding:8px;font-size:13px}
+.reader-back:hover{opacity:.8}
+.reader h3{font-family:var(--serif);font-size:20px;font-weight:400;color:var(--ink);
+  line-height:1.5;margin-bottom:18px}
+.reader .r-body{font-family:var(--serif);font-size:14.5px;line-height:2;color:var(--ink);
+  opacity:.88;text-align:left;white-space:pre-line;margin-bottom:26px}
+.r-divider{width:100%;height:1px;background:rgba(33,29,51,.14);margin:6px 0 20px}
+.r-label{font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:rgba(33,29,51,.4);margin-bottom:10px}
+.r-reflect{font-size:13px;line-height:1.9;color:rgba(33,29,51,.72);margin-bottom:20px}
+.r-reflect div{margin-bottom:4px}
+.r-reflect .met{color:#4A6B52}
+.r-foot{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px}
+.r-need{font-size:12px;padding:8px 13px;border-radius:999px;background:rgba(255,255,255,.5);
+  border:1px solid rgba(33,29,51,.12);color:rgba(33,29,51,.75)}
+.r-need b{color:var(--ink)}
+
+/* 진행 중인 책 (누적형) */
+.the-book{display:flex;align-items:center;gap:14px;padding:16px 17px;border-radius:13px;
+  background:linear-gradient(135deg,rgba(110,90,140,.16),rgba(239,195,199,.12));
+  border:1px solid rgba(110,90,140,.3);cursor:pointer;transition:.2s;text-align:left;
+  width:100%;font-family:var(--sans);margin-bottom:18px}
+.the-book:hover{background:linear-gradient(135deg,rgba(110,90,140,.24),rgba(239,195,199,.18))}
+.the-book .spine{width:6px;height:44px;border-radius:3px;
+  background:linear-gradient(180deg,var(--lavender),var(--blush));flex:none}
+.the-book b{display:block;font-family:var(--serif);font-size:15px;font-weight:400;
+  color:var(--ink);margin-bottom:3px}
+.the-book small{font-size:11px;color:rgba(33,29,51,.55)}
+.the-book.empty{opacity:.5;cursor:default}
+.the-book.pulse{animation:bookPulse .6s ease}
+@keyframes bookPulse{0%{transform:scale(1)}40%{transform:scale(1.035)}100%{transform:scale(1)}}
+.ep-toolbar + .the-book{margin-top:2px}
+.chapter-block{margin-bottom:28px;padding-bottom:22px;border-bottom:1px solid rgba(33,29,51,.1)}
+.chapter-block:last-child{border-bottom:none}
+.chapter-block .c-no{font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:rgba(33,29,51,.35);margin-bottom:6px}
+
+/* 알람 */
+.ring{width:74px;height:74px;border-radius:50%;border:1px solid rgba(239,195,199,.4);
+  display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:34px;
+  animation:ring 2.4s ease-in-out infinite}
+@keyframes ring{0%,100%{box-shadow:0 0 0 0 rgba(239,195,199,.28)}50%{box-shadow:0 0 0 22px rgba(239,195,199,0)}}
+.time-big{font-family:var(--serif);font-size:66px;letter-spacing:-.02em;opacity:.94;line-height:1}
+.date-sm{font-size:12.5px;opacity:.4;margin-top:8px;letter-spacing:.06em}
+
+.btn{font-family:var(--sans);font-size:15px;padding:15px 30px;border-radius:999px;
+  border:none;background:var(--paper);color:var(--ink);cursor:pointer;
+  letter-spacing:-.01em;transition:transform .18s ease,opacity .18s ease}
+.btn:hover{transform:translateY(-1px)}
+.btn:focus-visible{outline:2px solid var(--blush);outline-offset:3px}
+.btn.ghost{background:transparent;color:var(--paper);border:1px solid rgba(255,255,255,.3)}
+.btn.rec{background:var(--blush);color:#3A2233;min-width:152px}
+.linkbtn{background:none;border:none;color:inherit;font-family:var(--sans);
+  font-size:12.5px;opacity:.4;cursor:pointer;text-decoration:underline;
+  text-underline-offset:4px;padding:8px}
+.linkbtn:hover{opacity:.85}
+.linkbtn:focus-visible{outline:2px solid var(--blush);outline-offset:2px;opacity:.9}
+.stack{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:26px}
+
+/* ── 카드 부채꼴: 5장 중 한 장을 고른다 ── */
+.fan{position:relative;width:290px;height:330px;margin-bottom:6px}
+.fcard{position:absolute;bottom:0;left:50%;width:150px;height:224px;margin-left:-75px;
+  transform-origin:50% 118%;cursor:pointer;
+  transition:transform .75s cubic-bezier(.2,.8,.25,1), opacity .55s ease}
+.fcard:hover{transform:var(--t) translateY(-14px)}
+.fcard-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;
+  transition:transform 1s cubic-bezier(.2,.75,.25,1)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;
+  padding:20px 17px;display:flex;box-shadow:0 22px 46px -20px rgba(0,0,0,.8);
+  background-image:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 1px,transparent 1px 3px),
+    repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,transparent 1px 3px)}
+.face.back{align-items:center;justify-content:center;background-color:#4B3A63;background-blend-mode:overlay}
+.face.back span{font-size:9.5px;letter-spacing:.3em;opacity:.4}
+.face.front{transform:rotateY(180deg);align-items:flex-start;
+  background-color:var(--lavender);
+  background-image:
+    linear-gradient(175deg,#B9A2C9 0%,#E7DCEC 46%,#F3EDF6 100%),
+    repeating-linear-gradient(0deg,rgba(0,0,0,.035) 0 1px,transparent 1px 3px)}
+.face.front q{font-family:var(--serif);font-size:14.5px;line-height:1.8;color:#463357;quotes:none}
+/* 고른 뒤 */
+.fan.done .fcard{pointer-events:none}
+.fan.done .fcard:not(.sel){opacity:0;transform:var(--t) translateY(46px) scale(.86)}
+.fcard.sel{transform:translateY(-46px) scale(1.42);z-index:5}
+.fcard.sel:hover{transform:translateY(-46px) scale(1.42)}
+.fcard.sel .fcard-inner{transform:rotateY(180deg)}
+.fcard.sel .face{box-shadow:0 30px 70px -22px rgba(0,0,0,.85)}
+
+/* 발화 */
+.speak-q{font-family:var(--serif);font-size:16px;line-height:1.85;text-align:center;
+  opacity:.66;max-width:286px;margin-bottom:34px}
+.wave{display:flex;align-items:center;gap:5px;height:52px;margin-bottom:16px;opacity:.22;transition:opacity .4s}
+.wave.live{opacity:1}
+.wave i{width:3px;height:8px;border-radius:2px;background:var(--blush)}
+.wave.live i{animation:pulse 1.15s ease-in-out infinite}
+@keyframes pulse{0%,100%{height:8px}50%{height:42px}}
+.count{font-family:var(--serif);font-size:32px;opacity:.3;font-variant-numeric:tabular-nums;margin-bottom:24px}
+
+/* 칩 */
+.prompt{font-family:var(--serif);font-size:19px;line-height:1.6;text-align:center;margin-bottom:6px}
+.sub{font-size:12px;opacity:.45;text-align:center;margin-bottom:26px}
+.chip-group{display:flex;flex-direction:column;align-items:center;gap:12px;max-width:292px}
+.chips{display:flex;flex-wrap:wrap;gap:9px;justify-content:center}
+.chip{font-family:var(--sans);font-size:14.5px;padding:11px 17px;border-radius:999px;
+  border:1px solid rgba(255,255,255,.26);background:transparent;color:var(--paper);
+  cursor:pointer;transition:all .22s ease;letter-spacing:-.01em}
+.chip[aria-pressed="true"]{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.chip:focus-visible{outline:2px solid var(--blush);outline-offset:3px}
+
+/* 완료 */
+.done-title{font-family:var(--serif);font-size:24px;color:var(--ink);line-height:1.6;text-align:center}
+.dots{display:flex;gap:9px;margin:24px 0 8px}
+.dots i{width:9px;height:9px;border-radius:50%;background:rgba(33,29,51,.18)}
+.dots i.f{background:#6E5A8C}
+.teaser{margin-top:24px;padding:16px 20px;border-radius:12px;background:rgba(255,255,255,.42);
+  border:1px solid rgba(33,29,51,.09);max-width:280px;text-align:center}
+.teaser b{font-family:var(--serif);font-size:14px;color:var(--ink);font-weight:400;display:block;margin-bottom:5px}
+.teaser small{font-size:11.5px;color:rgba(33,29,51,.62);line-height:1.65;display:block}
+
+/* 알람 설정 시트 */
+.sheet{position:absolute;inset:0;z-index:20;background:rgba(6,5,14,.84);
+  backdrop-filter:blur(14px);padding:30px 26px;display:flex;flex-direction:column;
+  transform:translateY(101%);transition:transform .5s cubic-bezier(.3,.9,.3,1)}
+.sheet.on{transform:translateY(0)}
+.sheet h2{font-family:var(--serif);font-size:19px;font-weight:400;margin-bottom:20px;opacity:.9}
+.set-time{font-family:var(--serif);font-size:52px;text-align:center;margin:4px 0 22px;letter-spacing:-.02em}
+.days{display:flex;gap:6px;margin-bottom:6px}
+.days b{width:31px;height:31px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:12px;font-weight:400;
+  border:1px solid rgba(255,255,255,.18);opacity:.4;cursor:pointer}
+.days b.on{background:var(--blush);color:#3A2233;border-color:var(--blush);opacity:1}
+.row{display:flex;justify-content:space-between;align-items:center;
+  padding:15px 0;border-top:1px solid rgba(255,255,255,.1);font-size:13.5px}
+.row span.k{opacity:.62}
+.row span.v{opacity:.95}
+.toggle{width:44px;height:25px;border-radius:999px;background:rgba(255,255,255,.16);
+  position:relative;cursor:pointer;transition:.25s;border:none}
+.toggle.on{background:var(--blush)}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:19px;height:19px;
+  border-radius:50%;background:var(--paper);transition:.25s}
+.toggle.on::after{left:22px;background:#3A2233}
+.note{font-size:11.5px;opacity:.42;line-height:1.65;margin-top:14px}
+
+/* 하단 패널 */
+.panel{width:min(390px,100%);margin-top:26px}
+.controls{display:flex;gap:8px;margin-bottom:16px}
+.controls button{flex:1;font-family:var(--sans);font-size:12.5px;padding:11px;border-radius:9px;
+  border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);
+  color:var(--paper);cursor:pointer;transition:.2s}
+.controls button:hover{background:rgba(255,255,255,.13)}
+.controls button:focus-visible{outline:2px solid var(--blush);outline-offset:2px}
+.spec{width:100%;border-collapse:collapse;font-size:12px}
+.spec th{text-align:left;font-weight:400;font-size:10px;letter-spacing:.18em;
+  text-transform:uppercase;opacity:.35;padding:0 0 9px}
+.spec td{padding:9px 0;border-top:1px solid rgba(255,255,255,.09);opacity:.5;transition:.3s}
+.spec tr.cur td{opacity:1}
+.spec tr.cur td:first-child{color:var(--blush)}
+.foot{font-size:11.5px;opacity:.4;line-height:1.7;margin-top:14px}
+body[data-sky="morning"] .spec td, body[data-sky="morning"] .spec th,
+body[data-sky="morning"] .foot,
+body[data-sky="morning"] header h1, body[data-sky="morning"] header p,
+body[data-sky="morning"] header .eyebrow{color:var(--ink)}
+body[data-sky="morning"] .controls button{color:var(--ink);border-color:rgba(33,29,51,.2)}
+
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms !important;animation-duration:.01ms !important}}
+@media (max-width:430px){.phone{height:74vh;min-height:640px}}
+</style>
+</head>
+<body data-sky="night">
+
+<header>
+  <div class="eyebrow">아침 카드 · 알람 프로토타입</div>
+  <h1>당신의 매일의 상상이<br>당신의 스토리가 됩니다</h1>
+  <p>알람을 끄면 카드가 나타납니다. 뽑아도 되고, 넘어가도 됩니다.<br>어떤 단계도 저절로 넘어가지 않습니다.</p>
+</header>
+
+<div class="phone">
+  <div class="screen" id="screen" data-tone="alarm"></div>
+  <div class="steps" id="steps"></div>
+  <button class="gear" id="gearBtn" aria-label="알람 설정">⚙</button>
+  <button class="book-icon" id="bookBtn" aria-label="내 서재">📖</button>
+
+  <!-- 0. 알람 -->
+  <div class="stage on" id="s0">
+    <div class="ring">◔</div>
+    <div class="time-big">6:40</div>
+    <div class="date-sm">7월 31일 금요일</div>
+    <div class="stack" style="margin-top:50px">
+      <button class="btn" id="offBtn">알람 끄기</button>
+      <button class="linkbtn" id="snoozeBtn">5분만 더 (스누즈)</button>
+    </div>
+  </div>
+
+  <!-- 1. 카드 고르기 → 읽기 -->
+  <div class="stage" id="s1">
+    <div class="home-tag" id="homeTag" style="display:none">오늘의 카드</div>
+    <div class="hint" id="fanHint" style="margin-bottom:20px">오늘의 카드를 한 장 고르세요</div>
+    <div class="fan" id="fan"></div>
+    <div class="stack" id="afterPick" style="display:none">
+      <button class="btn" id="toSpeak">내 생각 말하기</button>
+      <button class="linkbtn" id="skipBtn">오늘은 그냥 카드만</button>
+    </div>
+    <div class="stack" id="beforePick">
+      <button class="linkbtn" id="laterBtn">나중에 할게요</button>
+    </div>
+  </div>
+
+  <!-- 2. 발화 -->
+  <div class="stage" id="s2">
+    <div class="speak-q" id="speakQ"></div>
+    <div class="wave" id="wave"></div>
+    <div class="count" id="speakCount">0:00</div>
+    <div class="stack" style="margin-top:0">
+      <button class="btn rec" id="recBtn">말하기 시작</button>
+      <button class="linkbtn" id="doneSpeak" style="display:none">다 말했어요</button>
+    </div>
+  </div>
+
+  <!-- 3. 느낌 -->
+  <div class="stage" id="s3">
+    <div class="prompt">말씀하신 걸 들으니<br>이런 느낌이었을까요?</div>
+    <div class="sub">아니면 빼고, 맞으면 그대로 두세요</div>
+    <div class="chip-group">
+      <div class="chips" id="feelChips"></div>
+      <button class="linkbtn" id="moreFeel">다른 느낌 보기</button>
+    </div>
+    <div class="stack">
+      <button class="btn ghost" id="feelNext">다음</button>
+    </div>
+  </div>
+
+  <!-- 4. 욕구 -->
+  <div class="stage" id="s4">
+    <div class="prompt">그 느낌 아래에는<br>무엇이 있었을까요?</div>
+    <div class="sub">지금 당신에게 필요한 것</div>
+    <div class="chip-group">
+      <div class="chips" id="needChips"></div>
+      <button class="linkbtn" id="moreNeed">다른 것도 보기</button>
+    </div>
+    <div class="stack">
+      <button class="btn ghost" id="needNext">오늘 마치기</button>
+    </div>
+  </div>
+
+  <!-- 5. 완료 -->
+  <div class="stage" id="s5" data-dark>
+    <div class="done-title">오늘 카드가<br>당신의 이야기에 담겼어요</div>
+    <div class="dots"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i></div>
+    <div class="hint">이번 주 다섯 번째</div>
+    <div class="teaser">
+      <b>일요일 아침, 한 권이 됩니다</b>
+      <small>이번 주 당신이 가장 자주 찾은 것<br>쉼 · 3회 &nbsp;|&nbsp; 자율성 · 2회</small>
+    </div>
+    <div class="stack">
+      <button class="btn ghost" id="toMy">내 서재 보기</button>
+      <button class="linkbtn" id="restart">처음부터 다시 보기</button>
+    </div>
+  </div>
+
+  <!-- 6. 마이페이지 · 내 서재 -->
+  <div class="stage mp" id="s6" data-dark>
+    <h2>내 서재</h2>
+    <div class="mp-sub">매일의 에피소드가 쌓입니다. 원할 때 책으로 엮으세요</div>
+
+    <div class="ep-toolbar">
+      <span class="ep-hint" id="epHint">엮을 에피소드를 골라보세요</span>
+      <button class="btn ghost small" id="compileBtn" disabled>책으로 엮기</button>
+    </div>
+
+    <button class="the-book empty" id="theBook">
+      <span class="spine"></span>
+      <span><b id="bookTitle">아직 시작되지 않은 책</b><small id="bookMeta">에피소드를 골라 첫 챕터를 엮어보세요</small></span>
+    </button>
+
+    <div class="shelf" id="episodeShelf"></div>
+    <div class="mp-foot">
+      <button class="linkbtn" id="restart2">처음부터 다시 보기</button>
+    </div>
+  </div>
+
+  <!-- 7. 챕터 읽기 -->
+  <div class="stage reader" id="s7" data-dark>
+    <button class="reader-back" id="readerBack">← 서재로</button>
+    <h3 id="rTitle"></h3>
+    <div class="r-body" id="rBody"></div>
+    <div class="r-divider"></div>
+    <div class="r-label">되비추는 쪽</div>
+    <div class="r-reflect" id="rReflect"></div>
+    <div class="r-label">이번 챕터의 욕구</div>
+    <div class="r-foot" id="rFoot"></div>
+  </div>
+
+  <!-- 알람 설정 -->
+  <div class="sheet" id="sheet">
+    <h2>알람</h2>
+    <div class="row" style="border-top:none;padding-top:0">
+      <span class="k">알람 사용</span>
+      <button class="toggle on" id="alarmOnToggle" aria-pressed="true" aria-label="알람 사용">
+      </button>
+    </div>
+    <div class="set-time" id="setTime">6:40</div>
+    <div class="days"><b class="on">월</b><b class="on">화</b><b class="on">수</b><b class="on">목</b><b class="on">금</b><b>토</b><b>일</b></div>
+    <div class="row"><span class="k">깨우는 방식</span><span class="v">빛 → 소리 (3분에 걸쳐)</span></div>
+    <div class="row"><span class="k">소리</span><span class="v">물소리 ›</span></div>
+    <div class="row"><span class="k">무음모드일 때</span><span class="v">진동만</span></div>
+    <div class="row"><span class="k">스누즈</span><span class="v">제한 없음</span></div>
+    <div class="row"><span class="k">펼치는 카드 수</span><span class="v">5장</span></div>
+    <div class="row"><span class="k">일요일 긴 카드</span><span class="v">8:00</span></div>
+    <div class="row">
+      <span class="k">알람 끈 뒤 카드 보여주기</span>
+      <button class="toggle on" id="showToggle" aria-pressed="true" aria-label="알람 끈 뒤 카드 보여주기"></button>
+    </div>
+    <div class="note" id="alarmNote">
+      카드는 알람을 끈 다음에 나타납니다. 뽑지 않고 나가도 알람은 이미 꺼져 있습니다.
+    </div>
+    <div class="note" style="margin-top:2px">
+      알람을 꺼두어도 카드는 언제든 홈 화면에서 뽑을 수 있어요.
+    </div>
+    <div class="stack" style="margin-top:auto"><button class="btn" id="sheetClose">닫기</button></div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="controls">
+    <button id="homeOpen">알람 없이 홈 화면 열기</button>
+    <button id="sheetOpen">알람 설정 열기</button>
+    <button id="resetBtn">리셋</button>
+  </div>
+  <table class="spec">
+    <thead><tr><th>구간</th><th>사용자가 하는 일</th><th>넘어가는 방법</th></tr></thead>
+    <tbody>
+      <tr data-step="0"><td>알람</td><td>알람 끄기</td><td>버튼</td></tr>
+      <tr data-step="1"><td>카드 고르기</td><td>5장 중 1장 선택 · 읽기</td><td>버튼</td></tr>
+      <tr data-step="2"><td>상상 발화</td><td>시작 · 멈춤 직접 조작</td><td>버튼</td></tr>
+      <tr data-step="3"><td>느낌 확인</td><td>칩 탭 · 기본 3개 선택됨</td><td>버튼</td></tr>
+      <tr data-step="4"><td>욕구 확인</td><td>칩 탭 · 기본 2개 선택됨</td><td>버튼</td></tr>
+    </tbody>
+  </table>
+  <div class="foot">
+    자동 전진 없음 · 카운트다운 없음 · 남은 시간 표시 없음.<br>
+    진행 표시는 시간이 아니라 단계이고, 배경 하늘이 밤에서 아침으로 밝아집니다.<br>
+    카드 화면은 홈이기도 합니다 — 알람 없이도 언제든 열 수 있고,<br>
+    상단 좌우에 알람 설정 · 내 서재가 항상 있습니다.
+  </div>
+</div>
+
+<script>
+(function(){
+  const CARDS=[
+    '당신이 마지막으로<br>아무것도 하지 않아도 괜찮았던<br>그곳은 어디인가요?',
+    '오늘 하루가 아무 계획 없이<br>주어진다면<br>당신은 어디로 갈까요?',
+    '요즘 당신을<br>조용히 기다려주고 있는 것은<br>무엇인가요?',
+    '아무에게도 설명하지 않아도 되는<br>일을 한다면<br>무엇을 하고 싶나요?',
+    '지금 당신 곁에 남아 있는<br>오래된 소리는<br>무엇인가요?'
+  ];
+  const FEEL={base:[['담담한',1],['그리운',1],['뒤숭숭한',1],['설레는',0],['무거운',0],['안심이 되는',0]],
+              more:[['막막한',0],['홀가분한',0],['느긋한',0]]};
+  const NEED={base:[['쉼',1],['자율성',1],['연결',0],['예측 가능성',0],['자기표현',0]],
+              more:[['안정성',0],['의미',0],['놀이 · 재미',0]]};
+  const SKY =['night','night','dusk','dawn','dawn','morning','morning','morning'];
+  const TONE=['alarm','card','speak','dawn','warm','morning','morning','morning'];
+
+  const $=s=>document.querySelector(s);
+  const stages=[...document.querySelectorAll('.stage')];
+  let step=0, rec=false, secs=0, tmr=null;
+
+  // 진행 점 5개
+  const stepsEl=$('#steps');
+  for(let i=0;i<5;i++) stepsEl.appendChild(document.createElement('i'));
+
+  // 파형
+  const wave=$('#wave');
+  for(let i=0;i<22;i++){const b=document.createElement('i');
+    b.style.animationDelay=(i*0.07)+'s';
+    b.style.animationDuration=(0.9+Math.random()*0.6)+'s';wave.appendChild(b);}
+
+  // 부채꼴 카드
+  const fan=$('#fan');
+  function buildFan(){
+    fan.className='fan';fan.innerHTML='';
+    const order=[...CARDS].sort(()=>Math.random()-0.5);
+    const deg=[-26,-13,0,13,26];
+    order.forEach((q,i)=>{
+      const c=document.createElement('div');
+      c.className='fcard';
+      const t='rotate('+deg[i]+'deg)';
+      c.style.setProperty('--t',t);
+      c.style.transform=t;
+      c.style.zIndex=i;
+      c.innerHTML='<div class="fcard-inner">'+
+        '<div class="face back"><span>오늘</span></div>'+
+        '<div class="face front"><q>'+q+'</q></div></div>';
+      c.onclick=()=>pick(c,q);
+      fan.appendChild(c);
+    });
+  }
+  function pick(el,q){
+    if(fan.classList.contains('done')) return;
+    fan.classList.add('done');
+    el.classList.add('sel');
+    $('#speakQ').innerHTML=q;
+    $('#fanHint').textContent='읽고 나면 눌러주세요';
+    $('#beforePick').style.display='none';
+    setTimeout(()=>{$('#afterPick').style.display='flex';},700);
+  }
+
+  function chips(host,set){
+    host.innerHTML='';
+    set.forEach(([label,on])=>{
+      const b=document.createElement('button');
+      b.className='chip';b.textContent=label;
+      b.setAttribute('aria-pressed',on?'true':'false');
+      b.onclick=()=>b.setAttribute('aria-pressed',
+        b.getAttribute('aria-pressed')==='true'?'false':'true');
+      host.appendChild(b);
+    });
+  }
+
+  function paint(){
+    stages.forEach((el,i)=>el.classList.toggle('on',i===step));
+    document.body.dataset.sky=SKY[step];
+    $('#screen').dataset.tone=TONE[step];
+    stepsEl.classList.toggle('on', step>0 && step<5);
+    [...stepsEl.children].forEach((d,i)=>d.classList.toggle('f', i<step));
+    [...document.querySelectorAll('.spec tr')].forEach(tr=>
+      tr.classList.toggle('cur', tr.dataset.step===String(step)));
+    const g=$('#gearBtn');
+    g.style.display=(step===0||step===6)?'block':'none';
+    if(step===6) g.setAttribute('data-dark',''); else g.removeAttribute('data-dark');
+  }
+  function go(n){ if(rec) stopRec(); step=n; paint(); }
+
+  const fmt=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+  function startRec(){
+    rec=true;wave.classList.add('live');
+    const b=$('#recBtn');b.textContent='멈추기';b.classList.remove('rec');b.classList.add('ghost');
+    tmr=setInterval(()=>{secs++;$('#speakCount').textContent=fmt(secs);},1000);
+  }
+  function stopRec(){
+    rec=false;clearInterval(tmr);wave.classList.remove('live');
+    const b=$('#recBtn');b.textContent='이어서 말하기';b.classList.add('rec');b.classList.remove('ghost');
+    if(secs>0) $('#doneSpeak').style.display='block';
+  }
+
+  $('#offBtn').onclick=()=>{ $('#homeTag').style.display='none'; go(1); };
+  $('#snoozeBtn').onclick=function(){
+    this.textContent='좋아요, 5분 뒤에 다시 울릴게요';
+    setTimeout(()=>{ this.textContent='5분만 더 (스누즈)'; }, 1400);
+  };
+  $('#laterBtn').onclick=()=>go(5);
+  $('#toSpeak').onclick=()=>go(2);
+  $('#skipBtn').onclick=()=>go(5);
+  $('#recBtn').onclick=()=>rec?stopRec():startRec();
+  $('#doneSpeak').onclick=()=>go(3);
+  $('#feelNext').onclick=()=>go(4);
+  $('#needNext').onclick=()=>go(5);
+  $('#moreFeel').onclick=e=>{chips($('#feelChips'),FEEL.base.concat(FEEL.more));e.target.style.display='none';};
+  $('#moreNeed').onclick=e=>{chips($('#needChips'),NEED.base.concat(NEED.more));e.target.style.display='none';};
+
+  const sheet=$('#sheet');
+  const openSheet=()=>sheet.classList.add('on');
+  $('#gearBtn').onclick=openSheet;
+  $('#sheetOpen').onclick=openSheet;
+  $('#sheetClose').onclick=()=>sheet.classList.remove('on');
+  $('#showToggle').onclick=function(){
+    const on=this.classList.toggle('on');
+    this.setAttribute('aria-pressed',on?'true':'false');
+  };
+  document.querySelectorAll('.days b').forEach(d=>d.onclick=()=>d.classList.toggle('on'));
+
+  function reset(){
+    if(rec) stopRec();
+    step=0;secs=0;
+    buildFan();
+    $('#fanHint').textContent='오늘의 카드를 한 장 고르세요';
+    $('#afterPick').style.display='none';
+    $('#beforePick').style.display='flex';
+    $('#doneSpeak').style.display='none';
+    $('#speakCount').textContent='0:00';
+    const b=$('#recBtn');b.textContent='말하기 시작';b.classList.add('rec');b.classList.remove('ghost');
+    chips($('#feelChips'),FEEL.base);chips($('#needChips'),NEED.base);
+    $('#moreFeel').style.display='';$('#moreNeed').style.display='';
+    sheet.classList.remove('on');
+    paint();
+  }
+  $('#homeOpen').onclick=()=>{ $('#homeTag').style.display='block'; go(1); };
+  $('#toMy').onclick=()=>go(6);
+  $('#bookBtn').onclick=()=>go(6);
+  $('#restart').onclick=reset;
+  $('#restart2').onclick=reset;
+  $('#resetBtn').onclick=reset;
+
+  // ── 알람 온/오프 ──
+  const alarmToggle=$('#alarmOnToggle');
+  alarmToggle.onclick=function(){
+    const on=this.classList.toggle('on');
+    this.setAttribute('aria-pressed',on?'true':'false');
+    document.querySelectorAll('#sheet .row, #sheet .days, #setTime, #alarmNote')
+      .forEach(el=>{ if(el!==this.closest('.row')) el.style.opacity = on?'1':'.32'; });
+  };
+
+  // ── 에피소드 서재 + 책으로 엮기 ──
+  const EPISODES=[
+    {id:1,date:'7월 30일',title:'물가에 두고 온 신발 한 짝',need:'쉼'},
+    {id:2,date:'7월 29일',title:'아무도 모르는 골목의 이름',need:'자율성'},
+    {id:3,date:'7월 28일',title:'창문 너머로 들리던 라디오',need:'연결'},
+    {id:4,date:'7월 27일',title:'아무것도 하지 않아도 되는 오후',need:'쉼'},
+    {id:5,date:'7월 26일',title:'기다려주고 있던 것들',need:'예측 가능성'}
+  ];
+  const compiled=[];
+  const shelf=$('#episodeShelf');
+  const compileBtn=$('#compileBtn');
+  const epHint=$('#epHint');
+
+  function renderEpisodes(){
+    shelf.innerHTML='';
+    EPISODES.forEach(ep=>{
+      const b=document.createElement('button');
+      b.className='episode';
+      b.dataset.id=ep.id;
+      b.innerHTML='<span class="ep-check"></span>'+
+        '<span class="ep-body"><b>'+ep.title+'</b><small>'+ep.date+' · '+ep.need+'</small></span>';
+      b.onclick=()=>{
+        b.classList.toggle('checked');
+        updateCompileBtn();
+      };
+      shelf.appendChild(b);
+    });
+  }
+  function checkedIds(){
+    return [...shelf.querySelectorAll('.episode.checked')].map(e=>e.dataset.id);
+  }
+  function updateCompileBtn(){
+    const n=checkedIds().length;
+    compileBtn.disabled = n<2;
+    epHint.textContent = n<2 ? '엮을 에피소드를 골라보세요' : n+'개를 골랐어요';
+  }
+  // 하나의 책이 챕터를 흡수하며 자란다 (별개의 책 여러 권이 아니라)
+  const BOOK={ title:null, chapters:[] };
+  const EP_BODY={
+    1:'그는 물가에 쭈그려 앉아 신발 한 짝을 벗어두었다. 파도가 밀려올 때마다 신발은 조금씩 젖었지만, 그는 굳이 옮기지 않았다.',
+    2:'아무도 그 골목의 이름을 모른다는 게 그는 마음에 들었다. 이름이 없어야 아무도 그를 찾을 수 없을 것 같았다.',
+    3:'옆집 창문 너머로 낡은 라디오 소리가 들려왔다. 무슨 노래인지는 알 수 없었지만, 그는 걸음을 늦추고 잠시 서 있었다.',
+    4:'아무 계획도 없는 오후였다. 그는 소파에 눕지도, 무엇을 하지도 않은 채 그저 창밖의 나뭇잎이 흔들리는 것을 보았다.',
+    5:'누군가 그를 기다리고 있다는 감각이 오래도록 남아 있었다. 정확히 누구인지는 그도 알지 못했다.'
+  };
+  function makeChapter(picked){
+    const title = picked[0].title;
+    const body = picked.map(p=>EP_BODY[p.id]).join('\n\n');
+    const needCounts={};
+    picked.forEach(p=>{ needCounts[p.need]=(needCounts[p.need]||0)+1; });
+    const needList=Object.entries(needCounts).map(([need,count],i)=>
+      ({need,count,state: i===0?'미충족':'충족'}));
+    const obs = picked.length>=2
+      ? ['장면이 총 '+picked.length+'번 있었어요.', '혼자 있는 장면이 '+Math.max(1,picked.length-1)+'번 있었어요.']
+      : ['장면이 '+picked.length+'번 있었어요.'];
+    return {
+      title, body, needList,
+      reflection:{observations:obs, met:'스스로 걸음을 늦춘 순간이 한 번 있었어요.'}
+    };
+  }
+  function renderReader(){
+    $('#rTitle').textContent = BOOK.title || '아직 제목 없는 책';
+    const rb=$('#rBody'); rb.innerHTML='';
+    BOOK.chapters.forEach((ch,i)=>{
+      const block=document.createElement('div'); block.className='chapter-block';
+      const no=document.createElement('div'); no.className='c-no'; no.textContent='챕터 '+(i+1);
+      const body=document.createElement('div'); body.style.whiteSpace='pre-line'; body.textContent=ch.body;
+      block.appendChild(no); block.appendChild(body);
+      rb.appendChild(block);
+    });
+    const last=BOOK.chapters[BOOK.chapters.length-1];
+    const rr=$('#rReflect'); rr.innerHTML='';
+    last.reflection.observations.forEach(o=>{const d=document.createElement('div');d.textContent=o;rr.appendChild(d);});
+    const met=document.createElement('div'); met.className='met'; met.textContent=last.reflection.met; rr.appendChild(met);
+    const rf=$('#rFoot'); rf.innerHTML='';
+    const merged={};
+    BOOK.chapters.forEach(ch=>ch.needList.forEach(n=>{
+      merged[n.need]=merged[n.need]||{need:n.need,count:0,state:n.state};
+      merged[n.need].count+=n.count;
+    }));
+    Object.values(merged).forEach(n=>{
+      const s=document.createElement('span'); s.className='r-need';
+      s.innerHTML='<b>'+n.need+'</b> · '+n.count+'회 · '+n.state;
+      rf.appendChild(s);
+    });
+  }
+  const theBookEl=$('#theBook');
+  function renderBookCard(justAdded){
+    if(BOOK.chapters.length===0){
+      theBookEl.classList.add('empty');
+      $('#bookTitle').textContent='아직 시작되지 않은 책';
+      $('#bookMeta').textContent='에피소드를 골라 첫 챕터를 엮어보세요';
+      return;
+    }
+    theBookEl.classList.remove('empty');
+    $('#bookTitle').textContent=BOOK.title;
+    $('#bookMeta').textContent='총 '+BOOK.chapters.length+'개 챕터 · 눌러서 읽기';
+    if(justAdded){
+      theBookEl.classList.remove('pulse'); void theBookEl.offsetWidth;
+      theBookEl.classList.add('pulse');
+    }
+  }
+  theBookEl.onclick=()=>{ if(BOOK.chapters.length){ renderReader(); go(7); } };
+
+  compileBtn.onclick=()=>{
+    const ids=checkedIds();
+    if(ids.length<2) return;
+    const picked=EPISODES.filter(e=>ids.includes(String(e.id)));
+    const chapter=makeChapter(picked);
+    if(!BOOK.title) BOOK.title = chapter.title;   // 첫 챕터의 제목이 책 제목이 된다
+    BOOK.chapters.push(chapter);
+    renderBookCard(true);
+
+    [...shelf.querySelectorAll('.episode.checked')].forEach(e=>e.remove());
+    updateCompileBtn();
+  };
+  $('#readerBack').onclick=()=>go(6);
+  renderEpisodes();
+  updateCompileBtn();
+  renderBookCard(false);
+  reset();
+})();
+</script>
+</body>
+</html>

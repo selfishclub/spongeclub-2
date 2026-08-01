@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>갈등 자기공감 모드 — 프로토타입</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#211D33; --lavender:#6E5A8C; --blush:#EFC3C7; --sage:#7C9885;
+  --paper:#F6F2EC; --warn:#C97B6B;
+  --serif:'Gowun Batang', serif;
+  --sans:-apple-system,'Apple SD Gothic Neo','Pretendard','Malgun Gothic',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:var(--sans); background:#EFEAE2; color:var(--ink);
+  display:flex;flex-direction:column;align-items:center;
+  padding:32px 16px 64px; -webkit-font-smoothing:antialiased; min-height:100%;
+}
+header{text-align:center;margin-bottom:22px;max-width:440px}
+header .eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;opacity:.45;margin-bottom:8px}
+header h1{font-family:var(--serif);font-size:22px;font-weight:400;line-height:1.5}
+header p{font-size:12.5px;opacity:.55;margin-top:6px;line-height:1.65}
+
+.phone{
+  width:min(390px,100%);height:760px;border-radius:42px;
+  border:1px solid rgba(0,0,0,.08);background:var(--paper);
+  overflow:hidden;position:relative;box-shadow:0 40px 90px -34px rgba(0,0,0,.28);
+}
+.topbar{position:absolute;top:0;left:0;right:0;height:56px;display:flex;
+  align-items:center;justify-content:space-between;padding:0 18px;z-index:5}
+.topbar{transition:opacity .3s}
+.topbar.hide{opacity:0;pointer-events:none}
+.topbar button{background:none;border:none;color:var(--ink);opacity:.4;
+  font-size:12.5px;cursor:pointer;padding:8px}
+.topbar button:hover{opacity:.8}
+.steps{display:flex;gap:5px}
+.steps i{width:14px;height:2px;border-radius:2px;background:rgba(33,29,51,.14);transition:.4s}
+.steps i.f{background:var(--lavender)}
+
+.stage{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:70px 28px 30px;
+  opacity:0;pointer-events:none;transition:opacity .5s ease;text-align:center}
+.stage.on{opacity:1;pointer-events:auto}
+.stage.left{align-items:flex-start;text-align:left;overflow-y:auto}
+
+h2{font-family:var(--serif);font-size:20px;font-weight:400;line-height:1.6;margin-bottom:8px}
+.sub{font-size:12.5px;opacity:.5;line-height:1.7;margin-bottom:26px}
+
+.btn{font-family:var(--sans);font-size:14.5px;padding:14px 28px;border-radius:999px;
+  border:none;background:var(--ink);color:var(--paper);cursor:pointer;transition:.18s}
+.btn:hover{transform:translateY(-1px)}
+.btn.outline{background:transparent;border:1px solid rgba(33,29,51,.26);color:var(--ink)}
+.btn.rec{background:var(--blush);color:#3A2233;min-width:150px}
+.btn:disabled{opacity:.35;cursor:default;transform:none}
+.linkbtn{background:none;border:none;color:var(--ink);opacity:.42;font-size:12.5px;
+  cursor:pointer;text-decoration:underline;text-underline-offset:4px;padding:8px}
+.linkbtn:hover{opacity:.8}
+.stack{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:24px}
+
+/* 0단계 자칼쇼 */
+.jackal-badge{font-size:10.5px;letter-spacing:.12em;color:var(--warn);
+  background:rgba(201,123,107,.12);padding:5px 11px;border-radius:999px;margin-bottom:16px}
+.wave{display:flex;align-items:center;gap:5px;height:48px;margin:20px 0 14px;opacity:.2;transition:.4s}
+.wave.live{opacity:1}
+.wave i{width:3px;height:8px;border-radius:2px;background:var(--warn)}
+.wave.live i{animation:pulse 1.1s ease-in-out infinite}
+@keyframes pulse{0%,100%{height:8px}50%{height:38px}}
+.count{font-family:var(--serif);font-size:28px;opacity:.35;margin-bottom:20px}
+
+/* 카드형 단계 (관찰/느낌/욕구) */
+.card{width:100%;background:#fff;border-radius:14px;padding:20px 20px;margin-bottom:14px;
+  box-shadow:0 8px 26px -14px rgba(0,0,0,.18);border:1px solid rgba(0,0,0,.05)}
+.card .k{font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.4;margin-bottom:8px}
+.card .v{font-family:var(--serif);font-size:16px;line-height:1.7}
+.editable{width:100%;border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:12px 14px;
+  font-family:var(--serif);font-size:14.5px;line-height:1.7;background:#fff;resize:vertical;
+  min-height:64px}
+
+.gapcheck{width:100%;background:rgba(110,90,140,.08);border:1px solid rgba(110,90,140,.24);
+  border-radius:12px;padding:16px 18px;margin-bottom:16px;font-size:13px;line-height:1.7}
+
+.chips{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:8px}
+.chip{font-size:14px;padding:10px 16px;border-radius:999px;border:1px solid rgba(33,29,51,.2);
+  background:transparent;color:var(--ink);cursor:pointer;transition:.2s}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+/* 결과 탭 */
+.tabs{display:flex;gap:6px;margin-bottom:16px;width:100%}
+.tab{flex:1;font-size:12.5px;padding:10px;border-radius:9px;border:1px solid rgba(33,29,51,.15);
+  background:transparent;color:var(--ink);opacity:.5;cursor:pointer}
+.tab.on{opacity:1;background:#fff;border-color:rgba(0,0,0,.08)}
+.result-panel{width:100%;display:none}
+.result-panel.on{display:block}
+.summary-line{display:flex;gap:8px;padding:10px 0;border-top:1px solid rgba(0,0,0,.07);font-size:13px}
+.summary-line .k2{opacity:.45;min-width:52px}
+.letter{font-family:var(--serif);font-size:15px;line-height:2;background:#fff;border-radius:12px;
+  padding:20px;border:1px solid rgba(0,0,0,.06)}
+
+/* 안전 전환 화면 */
+.safety{background:#3A2A2A;color:#F3E9E4}
+.safety .icon{font-size:30px;margin-bottom:18px;opacity:.8}
+.safety h2{color:#F3E9E4}
+.safety .sub{color:#F3E9E4;opacity:.72}
+.res-card{width:100%;background:rgba(255,255,255,.08);border-radius:12px;padding:16px 18px;
+  margin-bottom:12px;text-align:left}
+.res-card b{display:block;font-family:var(--serif);font-size:14.5px;margin-bottom:3px}
+.res-card small{font-size:11.5px;opacity:.7}
+
+.foot{font-size:11.5px;opacity:.45;line-height:1.7;margin-top:14px;text-align:center;
+  width:min(390px,100%)}
+
+/* 연락처 접근 동의 */
+.consent{position:absolute;inset:0;z-index:30;background:var(--paper);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:78px 30px 30px;text-align:center;opacity:0;pointer-events:none;
+  visibility:hidden;transition:opacity .3s, visibility 0s .3s}
+.consent.on{opacity:1;pointer-events:auto;visibility:visible;transition:opacity .3s}
+.consent .cicon{width:52px;height:52px;border-radius:16px;background:rgba(110,90,140,.12);
+  display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:20px}
+.consent h2{font-family:var(--serif);font-size:19px;font-weight:400;margin-bottom:10px;line-height:1.45}
+.consent .why{font-size:12.5px;opacity:.6;line-height:1.75;margin-bottom:20px;max-width:290px}
+.consent .scope{width:100%;background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:12px;
+  padding:6px 16px;margin-bottom:22px;text-align:left}
+.consent .scope div{display:flex;flex-direction:column;gap:2px;
+  padding:11px 0;border-top:1px solid rgba(0,0,0,.05)}
+.consent .scope div:first-child{border-top:none}
+.consent .scope div b{font-size:10.5px;letter-spacing:.04em;opacity:.48;font-weight:500}
+.consent .scope div span{font-size:12.5px;opacity:.82;line-height:1.5}
+
+/* 받는 사람 */
+.recipient{width:100%;margin-bottom:14px}
+.recipient .k{font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.4;margin-bottom:8px}
+.recipient-picked{display:flex;align-items:center;justify-content:space-between;
+  background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:11px;padding:11px 14px;
+  font-size:13.5px;position:relative;z-index:15}
+.recipient-picked .change{font-size:11.5px;color:var(--lavender);cursor:pointer;
+  text-decoration:underline;text-underline-offset:3px;background:none;border:none}
+.recipient-empty{width:100%;background:#fff;border:1px dashed rgba(0,0,0,.16);border-radius:11px;
+  padding:12px 14px;display:flex;align-items:center;position:relative;z-index:15}
+.recipient-empty span{margin-right:8px}
+.recipient-empty input{flex:1;border:none;outline:none;font-size:13.5px;font-family:var(--sans);
+  background:transparent}
+
+/* 연락처 드롭다운 */
+.contact-list{width:100%;margin-top:8px;display:none;position:relative;z-index:15;
+  background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;
+  padding:4px 8px;box-shadow:0 10px 26px -14px rgba(0,0,0,.22)}
+.contact-list.on{display:block}
+.contact-item{display:flex;align-items:center;padding:11px 6px;cursor:pointer;
+  border-radius:9px;font-size:13.5px;border-bottom:1px solid rgba(0,0,0,.05)}
+.contact-item:last-child{border-bottom:none}
+.contact-item:hover{background:rgba(0,0,0,.04)}
+.contact-item .avatar{width:26px;height:26px;border-radius:50%;background:var(--lavender);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:11.5px;
+  font-family:var(--serif);flex:none;margin-right:10px}
+.contact-item .nm{margin-right:auto}
+.contact-item .num{opacity:.4;font-size:11.5px;margin-left:10px}
+
+/* 거부 시 대안: 복사해서 보내기 */
+.copy-fallback{width:100%}
+.copy-fallback .name-input{width:100%;border:1px solid rgba(0,0,0,.12);border-radius:10px;
+  padding:12px 14px;font-family:var(--sans);font-size:13.5px;margin-bottom:14px}
+.copy-fallback .hint2{font-size:11.5px;opacity:.45;margin-bottom:14px;line-height:1.6}
+
+@media (max-width:430px){.phone{height:76vh;min-height:640px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">갈등 자기공감 모드 · 프로토타입</div>
+  <h1>정리가 필요한 순간, 아무 때나</h1>
+  <p>사람 대신이 아니라 틀 대신입니다. 화자는 끝까지 "나"예요.</p>
+</header>
+
+<div class="phone">
+  <div class="topbar">
+    <button id="backBtn">← 뒤로</button>
+    <div class="steps" id="steps"></div>
+    <button id="safetyDemo" title="안전 전환 데모">⚠︎</button>
+  </div>
+
+  <!-- 연락처 접근 동의 -->
+  <div class="consent" id="consentScreen">
+    <div class="cicon">🔍</div>
+    <h2>이 문장을 보내려면<br>연락처 검색이 필요해요</h2>
+    <div class="why">받는 사람을 고를 때만 사용해요.<br>그 외의 용도로는 쓰지 않아요.</div>
+    <div class="scope">
+      <div><b>사용 범위</b><span>이름 검색 결과만 화면에 표시</span></div>
+      <div><b>저장 여부</b><span>연락처 정보는 저장하지 않아요</span></div>
+      <div><b>공유 여부</b><span>외부로 전송·공유하지 않아요</span></div>
+    </div>
+    <div class="stack" style="margin-top:0">
+      <button class="btn" id="consentAllow">허용하고 검색하기</button>
+      <button class="linkbtn" id="consentDeny">허용하지 않고 계속하기</button>
+    </div>
+  </div>
+
+  <!-- 0. 진입 -->
+  <div class="stage on" id="c0">
+    <h2>오늘 힘든 일이 있었나요?</h2>
+    <div class="sub">판단이어도, 억울함이어도 괜찮아요.<br>먼저 있는 그대로 말해보세요.</div>
+    <button class="btn" id="startBtn">시작할게요</button>
+  </div>
+
+  <!-- 1. 자칼 쇼 -->
+  <div class="stage" id="c1">
+    <div class="jackal-badge">있는 그대로, 판단이어도 괜찮아요</div>
+    <div class="sub" style="margin-bottom:6px">지금 느낀 걸 그대로 말해보세요</div>
+    <div class="wave" id="wave"></div>
+    <div class="count" id="cnt">0:00</div>
+    <div class="stack" style="margin-top:0">
+      <button class="btn rec" id="recBtn">말하기 시작</button>
+      <button class="linkbtn" id="doneRec" style="display:none">다 말했어요</button>
+    </div>
+  </div>
+
+  <!-- 2. 관찰 확인 -->
+  <div class="stage left" id="c2">
+    <h2 style="align-self:flex-start">사실만 남겨봤어요</h2>
+    <div class="sub" style="align-self:flex-start">판단은 걷어내고, 있었던 일만요</div>
+    <div class="card">
+      <div class="k">관찰</div>
+      <textarea class="editable" id="obsText">3일간 답이 없었다.</textarea>
+    </div>
+    <div class="stack" style="align-self:center">
+      <button class="btn" id="obsNext">이렇게 정리할게요</button>
+      <button class="linkbtn" id="obsRedo">다시 말할게요</button>
+    </div>
+  </div>
+
+  <!-- 2.5 가짜 느낌 되묻기 -->
+  <div class="stage left" id="c25">
+    <h2 style="align-self:flex-start">잠깐만요</h2>
+    <div class="gapcheck">
+      "무시당한 기분"은 그 사람이 한 일에 대한<br>생각에 더 가까울 수 있어요.<br><br>
+      그 순간 몸에서는 어떤 게 느껴졌나요?<br>(답답함, 조여옴, 무거움 같은 거요)
+    </div>
+    <div class="stack" style="align-self:center">
+      <button class="btn" id="gapNext">그런 것 같아요</button>
+      <button class="linkbtn" id="gapSkip">그래도 이 말이 맞아요</button>
+    </div>
+  </div>
+
+  <!-- 3. 느낌 -->
+  <div class="stage left" id="c3">
+    <h2 style="align-self:flex-start">그때 느낌이 어땠나요</h2>
+    <div class="sub" style="align-self:flex-start">해당하는 걸 골라보세요 (여러 개 가능)</div>
+    <div class="chips" id="feelChips"></div>
+    <button class="linkbtn" id="moreFeel2">다른 느낌 보기</button>
+    <div class="stack" style="align-self:center;margin-top:22px">
+      <button class="btn" id="feelNext2">다음</button>
+    </div>
+  </div>
+
+  <!-- 4. 욕구 -->
+  <div class="stage left" id="c4">
+    <h2 style="align-self:flex-start">무엇이 중요했을까요</h2>
+    <div class="sub" style="align-self:flex-start">"연락해주는 것" 같은 방법 말고, 그 아래 있는 것</div>
+    <div class="chips" id="needChips2"></div>
+    <button class="linkbtn" id="moreNeed2">다른 것도 보기</button>
+    <div class="stack" style="align-self:center;margin-top:22px">
+      <button class="btn" id="needNext2">다음</button>
+      <button class="linkbtn" id="needSkip2">여기까지만 정리할게요</button>
+    </div>
+  </div>
+
+  <!-- 5. 상대 추측 (선택) -->
+  <div class="stage left" id="c5">
+    <h2 style="align-self:flex-start">그 사람은 어땠을까요</h2>
+    <div class="sub" style="align-self:flex-start">넘어가셔도 됩니다. 추측이어도 괜찮아요</div>
+    <textarea class="editable" id="otherGuess" placeholder="예: 그 사람도 바빠서 여유가 없었을 수 있어요"></textarea>
+    <div class="stack" style="align-self:center;margin-top:22px">
+      <button class="btn" id="guessNext">다음</button>
+      <button class="linkbtn" id="guessSkip">넘어갈게요</button>
+    </div>
+  </div>
+
+  <!-- 6. 부탁 문장 (선택) -->
+  <div class="stage left" id="c6">
+    <h2 style="align-self:flex-start">부탁해볼까요</h2>
+    <div class="sub" style="align-self:flex-start">거절해도 괜찮은 부탁이어야 해요. 넘어가도 됩니다</div>
+    <textarea class="editable" id="reqText" placeholder="예: 언제쯤 답을 줄 수 있을지 미리 알려줄 수 있을까요?"></textarea>
+    <div class="stack" style="align-self:center;margin-top:22px">
+      <button class="btn" id="reqNext">정리 완료</button>
+      <button class="linkbtn" id="reqSkip">부탁 없이 넘어갈게요</button>
+    </div>
+  </div>
+
+  <!-- 7. 결과 -->
+  <div class="stage left" id="c7">
+    <h2 style="align-self:flex-start">정리됐어요</h2>
+    <div class="tabs">
+      <button class="tab on" id="tabMine">나만 보기</button>
+      <button class="tab" id="tabSend">보낼 문장</button>
+    </div>
+    <div class="result-panel on" id="panelMine">
+      <div class="summary-line"><span class="k2">관찰</span><span id="rvObs"></span></div>
+      <div class="summary-line"><span class="k2">느낌</span><span id="rvFeel"></span></div>
+      <div class="summary-line"><span class="k2">욕구</span><span id="rvNeed"></span></div>
+      <div class="summary-line" id="rvGuessRow"><span class="k2">그 사람</span><span id="rvGuess"></span></div>
+    </div>
+    <div class="result-panel" id="panelSend">
+      <div class="recipient">
+        <div class="k">받는 사람</div>
+        <div class="recipient-empty" id="recipientEmpty">
+          <span>🔍</span>
+          <input type="text" id="contactSearch" placeholder="이름으로 검색">
+        </div>
+        <div class="copy-fallback" id="copyFallback" style="display:none">
+          <input type="text" class="name-input" id="manualName" placeholder="누구에게 보낼 문장인가요? (이름, 저장 안 됨)">
+          <div class="hint2">연락처 없이 이 문장을 복사해서 문자·메신저에 직접 붙여넣을 수 있어요.</div>
+        </div>
+        <div class="recipient-picked" id="recipientPicked" style="display:none">
+          <span id="recipientName"></span>
+          <button class="change" id="changeRecipient">변경</button>
+        </div>
+        <div class="contact-list" id="contactList"></div>
+      </div>
+      <div class="letter" id="letterText"></div>
+      <div class="stack" style="align-self:center;margin-top:18px">
+        <button class="btn" id="sendBtn" disabled>받는 사람을 먼저 골라주세요</button>
+        <div class="sub" style="margin:8px 0 0">보내기는 확인을 한 번 더 거쳐요</div>
+      </div>
+    </div>
+    <div class="stack" style="align-self:center;margin-top:20px">
+      <button class="linkbtn" id="restartC">처음부터 다시 보기</button>
+    </div>
+  </div>
+
+  <!-- 안전 전환 화면 -->
+  <div class="stage safety" id="cSafe">
+    <div class="icon">◐</div>
+    <h2>여기서 잠시 멈출게요</h2>
+    <div class="sub">지금 이야기하신 내용이라면, 정리보다<br>먼저 사람과 이야기하는 게 더 도움이 될 수 있어요.</div>
+    <div class="res-card">
+      <b>자살예방상담전화 109</b>
+      <small>24시간 연결 가능, 전국 어디서나</small>
+    </div>
+    <div class="res-card">
+      <b>정신건강 위기상담 1577-0199</b>
+      <small>24시간 연결 가능</small>
+    </div>
+    <div class="res-card">
+      <b>긴급한 위험이 있다면 112</b>
+      <small>즉시 도움이 필요한 상황</small>
+    </div>
+    <button class="linkbtn" id="safetyBack" style="opacity:.75;margin-top:6px;color:#F3E9E4;text-decoration-color:rgba(243,233,228,.5)">홈으로 돌아가기</button>
+  </div>
+</div>
+
+<div class="foot">
+  ⚠︎ 아이콘은 안전 전환 화면 데모용입니다. 실제 서비스에서는 자해·폭력 신호가<br>
+  감지될 때만 자동으로 전환되고, 정리·조언 없이 이 화면으로만 이어집니다.
+</div>
+
+<script>
+(function(){
+  const $=s=>document.querySelector(s);
+  const stages=[...document.querySelectorAll('.stage')];
+  const ORDER=['c0','c1','c2','c25','c3','c4','c5','c6','c7'];
+  let idx=0, rec=false, secs=0, tmr=null, skipGap=false;
+
+  const stepsEl=$('#steps');
+  for(let i=0;i<7;i++) stepsEl.appendChild(document.createElement('i'));
+
+  const wave=$('#wave');
+  for(let i=0;i<20;i++){const b=document.createElement('i');
+    b.style.animationDelay=(i*0.08)+'s';b.style.animationDuration=(0.9+Math.random()*0.5)+'s';
+    wave.appendChild(b);}
+
+  const FEEL=[['답답한',0],['서운한',0],['불안한',0],['화가 나는',0],['외로운',0],['지친',0]];
+  const FEEL_MORE=[['혼란스러운',0],['걱정되는',0],['속상한',0]];
+  const NEED=[['연결',0],['예측 가능성',0],['존중',0],['안정성',0],['이해받음',0]];
+  const NEED_MORE=[['자율성',0],['배려',0],['신뢰',0]];
+
+  function chips(host,set){
+    host.innerHTML='';
+    set.forEach(([label])=>{
+      const b=document.createElement('button');
+      b.className='chip';b.textContent=label;b.setAttribute('aria-pressed','false');
+      b.onclick=()=>b.setAttribute('aria-pressed', b.getAttribute('aria-pressed')==='true'?'false':'true');
+      host.appendChild(b);
+    });
+  }
+  function checked(host){ return [...host.querySelectorAll('[aria-pressed="true"]')].map(b=>b.textContent); }
+
+  function paint(){
+    stages.forEach(s=>s.classList.remove('on'));
+    $('#'+ORDER[idx]).classList.add('on');
+    const stepNo = ORDER[idx]==='c25' ? 2 : ORDER.indexOf(ORDER[idx]);
+    [...stepsEl.children].forEach((d,i)=>d.classList.toggle('f', i < Math.min(7, stepNo)));
+    stepsEl.style.display = (ORDER[idx]==='c0') ? 'none' : 'flex';
+  }
+  function go(name){ idx=ORDER.indexOf(name); paint(); }
+  function next(){ idx=Math.min(idx+1, ORDER.length-1); paint(); }
+  function back(){
+    if(idx===0){ return; }
+    idx=Math.max(idx-1,0); paint();
+  }
+
+  $('#backBtn').onclick=back;
+  $('#startBtn').onclick=()=>go('c1');
+
+  function fmt(s){return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
+  function startRec(){
+    rec=true;secs=0;wave.classList.add('live');
+    $('#recBtn').textContent='멈추기';
+    tmr=setInterval(()=>{secs++;$('#cnt').textContent=fmt(secs);},1000);
+  }
+  function stopRec(){
+    rec=false;clearInterval(tmr);wave.classList.remove('live');
+    $('#recBtn').textContent='이어서 말하기';
+    if(secs>0) $('#doneRec').style.display='block';
+  }
+  $('#recBtn').onclick=()=>rec?stopRec():startRec();
+  $('#doneRec').onclick=()=>go('c2');
+
+  $('#obsNext').onclick=()=>go('c3');
+  $('#obsRedo').onclick=()=>go('c1');
+  $('#gapNext').onclick=()=>go('c3');
+  $('#gapSkip').onclick=()=>go('c3');
+
+  // 데모: 3단계 진입 전에 가짜느낌 체크 화면을 보여주고 싶다면 c2 다음 c25 경유
+  $('#obsNext').onclick=()=>go('c25');
+
+  chips($('#feelChips'), FEEL);
+  $('#moreFeel2').onclick=e=>{chips($('#feelChips'), FEEL.concat(FEEL_MORE)); e.target.style.display='none';};
+  $('#feelNext2').onclick=()=>go('c4');
+
+  chips($('#needChips2'), NEED);
+  $('#moreNeed2').onclick=e=>{chips($('#needChips2'), NEED.concat(NEED_MORE)); e.target.style.display='none';};
+  $('#needNext2').onclick=()=>go('c5');
+  $('#needSkip2').onclick=()=>finish();
+
+  $('#guessNext').onclick=()=>go('c6');
+  $('#guessSkip').onclick=()=>go('c6');
+  $('#reqNext').onclick=finish;
+  $('#reqSkip').onclick=finish;
+
+  function finish(){
+    $('#rvObs').textContent = $('#obsText').value || '—';
+    const f=checked($('#feelChips')); $('#rvFeel').textContent = f.length?f.join(' · '):'—';
+    const n=checked($('#needChips2')); $('#rvNeed').textContent = n.length?n.join(' · '):'—';
+    const g=$('#otherGuess').value.trim();
+    $('#rvGuessRow').style.display = g? 'flex':'none';
+    $('#rvGuess').textContent = g;
+
+    const req=$('#reqText').value.trim();
+    const obsRaw=($('#obsText').value||'그 일이 있었').trim().replace(/\.$/,'');
+    const feelPart = f.length ? f.join('하고 ')+'했어요.' : '그런 느낌이었어요.';
+    const needPart = '나에게 '+(n.length?n.join('과 '):'그것')+'이 중요해서요.';
+    const reqPart = req ? req : '괜찮다면 이 부분에 대해 이야기 나눠볼 수 있을까요?';
+    const letter = ['나는 '+obsRaw+'을 때 '+feelPart, needPart, reqPart].join('\n');
+    $('#letterText').textContent = letter;
+
+    go('c7');
+  }
+
+  $('#tabMine').onclick=()=>{ $('#tabMine').classList.add('on'); $('#tabSend').classList.remove('on');
+    $('#panelMine').classList.add('on'); $('#panelSend').classList.remove('on'); };
+  $('#tabSend').onclick=()=>{ $('#tabSend').classList.add('on'); $('#tabMine').classList.remove('on');
+    $('#panelSend').classList.add('on'); $('#panelMine').classList.remove('on');
+    // 동의 화면 임시 비활성화 — 항상 허용 상태로 간주하고 검색 UI 바로 표시
+    contactPermission = true;
+    applyPermissionUI(); };
+
+  // ── 연락처 접근 동의 ──
+  let contactPermission=null; // null=미결정, true=허용, false=거부
+  const consentScreen=$('#consentScreen');
+  function maybeShowConsent(){
+    if(contactPermission===null){ showConsentScreen(); }
+    else applyPermissionUI();
+  }
+  function applyPermissionUI(){
+    if(contactPermission){
+      $('#recipientEmpty').style.display='flex';
+      $('#copyFallback').style.display='none';
+    } else {
+      $('#recipientEmpty').style.display='none';
+      $('#copyFallback').style.display='block';
+    }
+  }
+  const topbarEl=document.querySelector('.topbar');
+  function showConsentScreen(){ consentScreen.classList.add('on'); topbarEl.classList.add('hide'); }
+  function hideConsentScreen(){ consentScreen.classList.remove('on'); topbarEl.classList.remove('hide'); }
+  $('#consentAllow').onclick=()=>{ contactPermission=true; hideConsentScreen(); applyPermissionUI(); };
+  $('#consentDeny').onclick=()=>{ contactPermission=false; hideConsentScreen(); applyPermissionUI(); };
+
+  // ── 받는 사람 검색 ──
+  const CONTACTS=[
+    {name:'민지', num:'010-****-1234'},
+    {name:'서준', num:'010-****-5678'},
+    {name:'하은', num:'010-****-9012'},
+    {name:'지훈', num:'010-****-3456'}
+  ];
+  const contactSearch=$('#contactSearch');
+  const contactList=$('#contactList');
+  const sendBtn=$('#sendBtn');
+  let recipient=null;
+
+  $('#manualName').oninput=function(){
+    const v=this.value.trim();
+    sendBtn.disabled = !v;
+    sendBtn.textContent = v ? (v+'님께 보낼 문장 복사하기') : '이름을 먼저 적어주세요';
+  };
+
+  function renderContacts(q){
+    contactList.innerHTML='';
+    const list = q ? CONTACTS.filter(c=>c.name.includes(q)) : CONTACTS;
+    if(!list.length){
+      const d=document.createElement('div');
+      d.className='sub'; d.style.padding='8px 6px'; d.textContent='검색 결과가 없어요';
+      contactList.appendChild(d);
+    }
+    list.forEach(c=>{
+      const item=document.createElement('div');
+      item.className='contact-item';
+      item.innerHTML='<span class="avatar">'+c.name[0]+'</span><span class="nm">'+c.name+'</span><span class="num">'+c.num+'</span>';
+      item.onclick=()=>pickRecipient(c);
+      contactList.appendChild(item);
+    });
+  }
+  function pickRecipient(c){
+    recipient=c;
+    contactList.classList.remove('on');
+    contactList.innerHTML='';
+    $('#recipientEmpty').style.display='none';
+    $('#recipientPicked').style.display='flex';
+    $('#recipientName').textContent=c.name;
+    sendBtn.disabled=false;
+    sendBtn.textContent='이 문장 보내기';
+  }
+  contactSearch.oninput=()=>{ contactList.classList.add('on'); renderContacts(contactSearch.value.trim()); };
+  contactSearch.onfocus=()=>{ contactList.classList.add('on'); renderContacts(contactSearch.value.trim()); };
+  $('#changeRecipient').onclick=()=>{
+    recipient=null;
+    contactList.classList.remove('on');
+    $('#recipientPicked').style.display='none';
+    $('#recipientEmpty').style.display='flex';
+    contactSearch.value='';
+    sendBtn.disabled=true;
+    sendBtn.textContent='받는 사람을 먼저 골라주세요';
+    setTimeout(()=>contactSearch.focus(), 50);
+  };
+
+  sendBtn.onclick=function(){
+    if(contactPermission===false){
+      const name=$('#manualName').value.trim();
+      if(!name) return;
+      if(this.textContent.includes('복사하기')){
+        this.textContent='복사됐어요 — 붙여넣기 해주세요';
+        this.disabled=true;
+      }
+      return;
+    }
+    if(!recipient) return;
+    if(this.textContent==='이 문장 보내기'){
+      this.textContent=recipient.name+'님께 정말 보낼까요? (한 번 더 탭)';
+    } else {
+      this.textContent=recipient.name+'님께 보냈어요';
+      this.disabled=true;
+    }
+  };
+
+  $('#restartC').onclick=()=>{
+    idx=0; rec=false; clearInterval(tmr); secs=0;
+    $('#obsText').value='3일간 답이 없었다.';
+    $('#otherGuess').value=''; $('#reqText').value='';
+    chips($('#feelChips'), FEEL); chips($('#needChips2'), NEED);
+    $('#moreFeel2').style.display=''; $('#moreNeed2').style.display='';
+    $('#recBtn').textContent='말하기 시작'; $('#doneRec').style.display='none'; $('#cnt').textContent='0:00';
+    $('#tabMine').classList.add('on'); $('#tabSend').classList.remove('on');
+    $('#panelMine').classList.add('on'); $('#panelSend').classList.remove('on');
+    recipient=null; contactPermission=null;
+    hideConsentScreen();
+    $('#recipientEmpty').style.display='flex';
+    $('#copyFallback').style.display='none';
+    $('#manualName').value='';
+    $('#recipientPicked').style.display='none';
+    contactList.classList.remove('on'); contactSearch.value='';
+    $('#sendBtn').textContent='받는 사람을 먼저 골라주세요'; $('#sendBtn').disabled=true;
+    paint();
+  };
+
+  $('#safetyDemo').onclick=()=>{ stages.forEach(s=>s.classList.remove('on')); $('#cSafe').classList.add('on'); };
+  $('#safetyBack').onclick=()=>{ idx=0; paint(); };
+
+  paint();
+})();
+</script>
+</body>
+</html>
