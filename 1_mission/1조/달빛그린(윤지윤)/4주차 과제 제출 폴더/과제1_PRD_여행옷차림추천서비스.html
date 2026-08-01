@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>WeatherClothe — 여행 옷차림 추천 서비스 PRD v1.2</title>
+<title>WeatherClothe — 날씨 기반 여행 준비 서비스 PRD v1.3</title>
 </head>
 <body>
 <style>
@@ -235,20 +235,26 @@
 <div class="wrap">
 
   <header class="hero">
-    <p class="eyebrow">Product Requirements · v1.2</p>
-    <h1>여행 옷차림 추천 서비스</h1>
+    <p class="eyebrow">Product Requirements · v1.3</p>
+    <h1>날씨 기반 여행 준비 서비스</h1>
     <p class="wordmark">WeatherClothe</p>
     <div class="hero-meta">
       <span>과제 1 · PRD 기획 및 구현</span>
       <span>작성 <b>Sylvia</b></span>
-      <span>2026-07-25</span>
-      <span><b>v1.2</b> 프로토타입 구현 반영</span>
+      <span>2026-07-26</span>
+      <span><b>v1.3</b> 페르소나 검증 반영</span>
+      <span><a href="https://weatherclothe.vercel.app" style="color:inherit">weatherclothe.vercel.app</a></span>
     </div>
   </header>
 
   <div class="callout">
-    <span class="tag">v1.2 변경 요약</span>
-    <p>Phase 1 프로토타입을 실제 동작하는 웹앱으로 구현하며 확정·보강한 내용을 반영했다. ① 여행객 레퍼런스 검색에 <strong>실제 기온대(날씨 데이터)를 키워드로 주입</strong>해 핵심 기능을 정상화, ② '내 코디'와 '옷장 플래너'를 <strong>하나의 화면으로 통합</strong>하고 칩 편집·직접 입력 추가, ③ 사진 업로드 기반 색감 스타일 분석 구현, ④ 목적지·문화 팁 데이터 대폭 확장, ⑤ 현대카드 DIVE 스타일 디자인 시스템 적용.</p>
+    <span class="tag">v1.3 변경 요약 — 포지션 전환</span>
+    <p>가상 페르소나 10인(아웃바운드 5 · 인바운드 5)에게 v1.2 프로토타입을 사용시켜 검증한 결과, <strong>10명 중 6명의 준비물 1순위가 옷이 아니었다.</strong> 옷차림은 목적이 아니라 준비의 한 레이어였다. 이에 따라 제품을 <strong>'여행 옷차림 추천' → '여행 준비'</strong>로 재정의하고 다음을 반영했다. ① 지참 리스트를 <strong>여행 준비 리스트</strong>로 확장(여권·충전기·상비약 자동 생성), ② 비교 기준 도시와 온도 단위를 <strong>사용자 기준으로 자동 판정</strong>(서울·섭씨 하드코딩 제거), ③ <strong>여행 목적 칩 13종</strong> 도입, ④ 성별 입력·저장 리스트·텍스트 복사, ⑤ <strong>한국어/English 전환</strong>(인바운드 대응), ⑥ 목적지 검색 정확도 재설계, ⑦ 화면 3분할(검색·준비 리스트·저장), ⑧ Vercel 프로덕션 배포.</p>
+  </div>
+
+  <div class="callout">
+    <span class="tag">v1.2 요약 (이전)</span>
+    <p>Phase 1 프로토타입 구현. ① 레퍼런스 검색에 실제 기온대 키워드 주입, ② 코디·옷장 플래너 화면 통합, ③ 사진 색감 스타일 분석, ④ 목적지·문화 팁 확장, ⑤ DIVE 스타일 디자인 시스템.</p>
   </div>
 
   <section>
@@ -263,6 +269,15 @@
     <hr class="rule" />
     <p><strong>상황으로 정의:</strong> 스타일 기준이 뚜렷한 30대 디자이너. 여행 옷차림도 취향에 맞아야 하지만, 목적지 날씨에 대한 확신이 없어 "혹시 몰라" 옷을 계속 추가하다가 캐리어가 넘친다. 도시 여행과 그랜드캐년 같은 액티비티 여행을 모두 다닌다.</p>
     <blockquote>"결국 옷을 너무 많이 싸가서 반은 안 입었어."</blockquote>
+
+    <div class="feat-head" style="margin:18px 0 6px"><h3>v1.3 — 두 축으로 재설정</h3><span class="chip ok">검증 완료</span></div>
+    <p>단일 페르소나로는 이 제품의 실패 지점이 드러나지 않았다. <strong>아웃바운드(국내→해외)</strong>와 <strong>인바운드(해외→국내)</strong> 두 축으로 10인 패널을 다시 구성해 프로토타입을 사용시켰다.</p>
+    <ul>
+      <li><strong>아웃바운드</strong> — 도톤보리 미식 여행자(23), 랜드마크 도장깨기(33), 제주 가족 여행(45), 부산 감성 기록(36), 기장 숲길(50)</li>
+      <li><strong>인바운드</strong> — 스프레드시트로 벚꽃을 설계하는 싱가포르인(20), 파타고니아를 다녀온 미국인 연구자(29), 여행을 프로젝트처럼 다루는 싱가포르인(39)</li>
+    </ul>
+    <p>여기서 v1.2가 <strong>"서울에 살고, 사계절 옷장을 갖췄고, 섭씨로 사고하는 사람"</strong>을 암묵적 기준 사용자로 가정하고 있었다는 것이 드러났다. 인바운드 페르소나에게 추천 4벌은 전부 미보유 항목이라 리스트가 패킹이 아니라 <strong>쇼핑 목록</strong>이 되었고, 미국인 페르소나는 "12°C"가 추운지 선선한지 판단하지 못했다.</p>
+    <blockquote>"싱가포르보다 평균 최고 24도 낮아요. 지금 옷장에 있는 옷으로는 대응할 수 없는 온도예요." — 이 앱이 인바운드 사용자에게 해야 할 한 문장</blockquote>
   </section>
 
   <section>
@@ -283,7 +298,8 @@
 
     <div class="feat">
       <div class="feat-head"><h3>1. 날씨 요약</h3><span class="chip ok">✅ 구현됨</span></div>
-      <p>Open-Meteo 과거 10년 데이터로 여행 구간의 평균 최고·최저 기온·강수 확률·일교차를 요약 카드로 제공. <strong>기준 도시(서울) 비교 번역</strong>("서울의 같은 시기보다 평균 최고기온이 약 4도 낮아요")을 함께 표시. 출발 D-14 이내엔 실제 예보를 병기.</p>
+      <p>Open-Meteo 과거 10년 데이터로 여행 구간의 평균 최고·최저 기온·강수 확률·일교차를 요약 카드로 제공. 출발 D-14 이내엔 실제 예보를 병기.</p>
+      <div class="sub"><span class="star">★</span><div><b>기준점을 사용자로 옮김 (v1.3):</b> 비교 기준 도시가 <code>서울</code> 하드코딩이었다. 제주 사는 사람에게는 무의미하고 서울 가는 사람에겐 동어반복이며, 인바운드 사용자에게는 아무 의미가 없다. 이제 <strong>IANA 타임존으로 거주 도시를 추정</strong>(25개 도시)해 비교하고, 목적지가 거주지와 사실상 같으면 비교 자체를 생략한다. 온도 단위도 <strong>로케일로 °C/°F를 자동 판정</strong>하고 토글로 바꿀 수 있다. 거주지·옷장 보유 여부를 <em>묻지는</em> 않는다 — 입력 단계를 늘리지 않고 감지로 해결한다.</div></div>
     </div>
 
     <div class="feat">
@@ -301,13 +317,58 @@
     </div>
 
     <div class="feat">
-      <div class="feat-head"><h3>4. 옷장 플래너 &amp; 실시간 지참 리스트</h3><span class="chip ok">✅ 구현됨</span></div>
-      <p><strong>'내 코디' 화면에 통합.</strong> 날짜별 추천 코디의 각 아이템이 칩으로 표시되고, 사용자가 <strong>보유 / 사야 함</strong>을 클릭으로 전환, <strong>✎ 로 칩 이름을 내 옷에 맞게 수정</strong>(예: '와이드 린넨 팬츠' → '베이지 와이드 린넨 팬츠' — 같은 이름은 모든 날짜에 함께 반영돼 병합 카운팅 유지), <strong>보유 아이템을 직접 입력해 추가</strong>할 수 있다.</p>
-      <p>여러 날짜에 배정된 같은 옷은 자동 병합되어, 최종 지참 리스트(의류·신발·악세서리·기타 분류, '사야 할 옷' 배지, 착용 일수 표기)가 실시간 갱신된다. 성공 기준 1번(과잉 패킹 감소)을 직접 달성.</p>
+      <div class="feat-head"><h3>4. 여행 준비 리스트 <span style="color:var(--pink)">(v1.3 재정의)</span></h3><span class="chip ok">✅ 구현됨</span></div>
+      <p>v1.2의 '지참 리스트'는 옷 리스트였다. 페르소나의 실제 준비물 1순위는 <em>가게 목록·현금·아이 여벌옷·등산화 상태·카메라 배터리</em>였고 옷은 다섯 번째 줄이었다. 그래서 리스트를 <strong>여행 준비 전반</strong>으로 확장하고, 옷차림 추천은 그중 '의류' 섹션을 자동으로 채우는 엔진으로 위치를 바꿨다.</p>
+      <ul>
+        <li><strong>자동 생성 준비물</strong> — 해외/국내 여부에 따라 여권(유효기간 6개월)·항공권·해외 결제 카드·현지 통화·보험·멀티어댑터 또는 신분증·예약 확인. 여기에 충전기, 2박 이상이면 보조배터리, 상비약, 세면도구.</li>
+        <li><strong>날씨 조건부</strong> — 강수 확률 35% 이상이면 접이식 우산, 평균 최고 26° 이상이면 자외선 차단제, 최저 5° 이하면 보온 이너, 일교차 10° 이상이면 얇은 겉옷.</li>
+        <li><strong>분류 7종</strong> — 의류·신발·악세서리·서류·결제·전자기기·상비약·기타. 사용자 직접 추가 시 분류를 고를 수 있다(v1.2에선 전부 '기타'로 떨어졌다).</li>
+        <li><strong>편집</strong> — 보유/사야 함 토글, ✎ 이름 수정(같은 이름은 전 날짜 일괄 반영), 직접 추가·삭제. 여러 날 쓰는 옷은 자동 병합되고 착용 일수가 표기된다.</li>
+      </ul>
     </div>
 
     <div class="feat">
-      <div class="feat-head"><h3>5. 드레스코드 · 문화 팁</h3><span class="chip ok">✅ 구현됨</span></div>
+      <div class="feat-head"><h3>5. 여행 목적 칩 <span style="color:var(--pink)">(v1.3 신규)</span></h3><span class="chip ok">✅ 구현됨</span></div>
+      <p>지형 3분류(도시형/자연·액티비티형/혼합형)로는 여행의 <strong>목적</strong>이 표현되지 않았다. 감성 기록 여행, 미식 여행, 저강도 숲길 산책(트레킹화 추천은 과했다), 한옥·온천·단풍 촬영이 전부 '도시형'으로 뭉쳤다. 상위 3유형은 유지하되 아래에 <strong>다중선택 목적 칩 13종</strong>을 두었다(한 여행에 2~3개 선택 상정).</p>
+      <div class="grid2">
+        <div class="box">
+          <h3>목적 (그룹핑)</h3>
+          <ul>
+            <li><b>도시형</b> — 미식 / 감성·기록 / 쇼핑 / 전시·문화 / 야경·나이트</li>
+            <li><b>자연·액티비티형</b> — 트레킹·등산 / 숲길·산책 / 해변·물놀이 / 캠핑</li>
+            <li><b>혼합·휴양형</b> — 온천·스파 / 리조트·호캉스 / 로컬 체험 / 격식·이벤트</li>
+          </ul>
+        </div>
+        <div class="box">
+          <h3>실제 반영 방식</h3>
+          <ul>
+            <li>신발·아우터를 덮어씀 — 해변·물놀이 → 샌들, 트레킹·등산 → 트레킹화 + 방풍</li>
+            <li>준비물 추가 — 캠핑 → 경량 패딩·헤드랜턴, 미식 → 물티슈</li>
+            <li>주의 문구 — 미식은 좌식 대응·냄새 배는 소재 회피 등</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="feat">
+      <div class="feat-head"><h3>6. 성별 · 저장 리스트 · 내보내기 <span style="color:var(--pink)">(v1.3 신규)</span></h3><span class="chip ok">✅ 구현됨</span></div>
+      <p><strong>동행 기능은 만들지 않았다.</strong> 앱은 1인 기준을 유지하되, 가족 여행은 <em>기준을 바꿔 다시 검색하고 저장하는</em> 방식으로 푼다.</p>
+      <ul>
+        <li><strong>성별 입력</strong>(남/여/선택 안 함) — 추천 아이템 풀만 넓힌다. 나이대는 받지 않는다(스타일 프로필이 그 역할을 대신함).</li>
+        <li><strong>저장 리스트</strong> — 검색 결과를 저장·불러오기·<strong>삭제</strong>. 아이 기준으로 한 번 더 검색해 따로 저장하면 가족 여행이 커버된다.</li>
+        <li><strong>마지막 결과 자동 보존</strong> — 저장 버튼을 누르지 않아도 마지막 준비 리스트는 남는다. 날씨 응답까지 스냅샷하므로 복원 시 네트워크 요청이 없다.</li>
+        <li><strong>텍스트 복사</strong> — 페르소나 10인 <em>전원</em>이 이미 시트·메모·카톡 같은 대체재를 쓰고 있었고, 한 명은 리스트를 자기 시트로 옮기려다 손으로 받아 적었다. 큰 기능 대신 복사 버튼 하나로 워크플로 밖으로 밀려나지 않게 했다.</li>
+      </ul>
+    </div>
+
+    <div class="feat">
+      <div class="feat-head"><h3>7. 한국어 / English <span style="color:var(--pink)">(v1.3 신규)</span></h3><span class="chip ok">✅ 구현됨</span></div>
+      <p>인바운드 페르소나는 링크가 열려도 검색어(<code>경주여행룩</code>)와 결과가 한국어라 읽지 못했다. UI뿐 아니라 <strong>추천 아이템명·팁·목적까지 전부 번역</strong>하고, 레퍼런스 검색어와 인스타 해시태그도 언어를 따라가게 했다. 기본값은 브라우저 언어 자동 감지.</p>
+      <p>설계상 핵심은 <strong>상태에는 한국어를 저장하고 렌더 시점에만 번역</strong>하는 것이다. 저장한 리스트와 스냅샷이 특정 언어에 묶이지 않고, 언어를 바꿔도 재조회 없이 즉시 다시 그려진다.</p>
+    </div>
+
+    <div class="feat">
+      <div class="feat-head"><h3>8. 드레스코드 · 문화 팁</h3><span class="chip ok">✅ 구현됨</span></div>
       <p>도시별 큐레이션(20개 도시) + <strong>국가 단위 폴백</strong> + <strong>실제 날씨 데이터 기반 체크포인트 자동 생성</strong>(비 확률·일교차·더위·추위에 맞춘 준비물) + 액티비티 준비물 안내로 3단계 구성. 종교시설 복장, 레스토랑 드레스코드, 돌길·냉방 등 현지 맥락 포함.</p>
     </div>
 
@@ -345,7 +406,15 @@
     <h2><span class="num">⑦</span> 데이터 · API 설계</h2>
     <hr class="rule" />
     <ul>
-      <li><strong>날씨 (Open-Meteo · 구현됨):</strong> Geocoding(도시명→좌표, 한글 검색 + 실패 시 영문 별칭·영어 재검색 폴백), Historical Weather(10년 평균), Forecast(D-14 예보 병기). 무료·키 불필요.</li>
+      <li><strong>날씨 (Open-Meteo · 구현됨):</strong> Geocoding(도시명→좌표), Historical Weather(10년 평균), Forecast(D-14 예보 병기). 무료·키 불필요.</li>
+      <li><strong>목적지 검색 재설계 (v1.3):</strong> v1.2의 한글→영문 폴백은 실패율이 높았다. 원인은 <strong>Open-Meteo(GeoNames)의 주 색인이 로마자</strong>라는 것 — <code>language=ko</code>는 결과 <em>라벨</em>만 번역할 뿐 한글로 검색되게 해주지 않는다. 그 결과 '서울'·'제주'·'경주'는 0건, '대구'·'전주'는 북한 지명이 올라왔다. 게다가 <code>language</code> 파라미터는 라벨뿐 아니라 <strong>매칭에도</strong> 영향을 준다(<code>language=ko</code>로 "New York"을 물으면 뉴욕시가 후보에 없다). 그래서 다음과 같이 바꿨다.
+        <ul>
+          <li><strong>원문 · 별칭사전 · 로마자 변환</strong>(개정 로마자 표기법 음절 분해)을 <strong>두 언어로 동시에 조회</strong>한 뒤 결과를 합쳐 순위를 매긴다</li>
+          <li><strong>인구 규모를 행정등급보다 우선</strong> — 인구 7,864명의 York(영국식 PPLA2)가 인구 880만 뉴욕시를 이기고, 이름이 겹치는 벽지 지명이 광역시를 밀어내던 문제</li>
+          <li>북한(KP) 결과 제외, 좌표 기준 중복 제거, 이전 요청 취소(AbortController)로 응답 경합 해소</li>
+          <li>해외 도시 별칭 80여 개 추가 — 음절 자동 변환만으로는 '교토'가 Kyoto가 아니라 발음이 비슷한 툰드라 마을로 잡힌다</li>
+        </ul>
+      </li>
       <li><strong>여행객 이미지 (단계적):</strong> Phase 1은 검색 링크 방식 — 핀터레스트/구글/인스타 링크에 목적지 유형 + <strong>실제 기온대 키워드</strong> 결합. 구글은 부정 키워드·사진 전용 필터로 정제. Phase 2에서 Claude 비전 필터링 후 앱 내 인라인 표시.</li>
       <li><strong>AI 레이어 (Claude API):</strong> (0) 유형 판별 — 현재 규칙 기반, Phase 2 Claude 분류. (1) 스타일 — 색감 휴리스틱 → Claude 비전. (2) 코디 — 규칙 기반 풀 → Claude 생성. (3) 팁 — 큐레이션+날씨 규칙 → 웹 검색 요약.</li>
     </ul>
@@ -373,14 +442,13 @@
   <section>
     <h2><span class="num">⑨</span> 화면 구성 (IA)</h2>
     <hr class="rule" />
-    <p><strong>입력 카드:</strong> 여행지(자동완성)·출발/도착일·목적지 유형(자동 판별)·스타일(사진 업로드 분석 또는 선택).</p>
-    <p><strong>결과 탭 4개:</strong></p>
+    <p><strong>v1.3 — 3개 뷰로 분리.</strong> v1.2는 입력·결과·저장이 한 페이지에 쌓여 모바일 스크롤이 지나치게 길었다. 하단 내비게이션 기반 3분할로 바꾸고, 검색 뷰 밖에서는 히어로 헤더를 한 줄 바로 축소했다(세로 약 130px 회수).</p>
     <ul>
-      <li><strong>날씨</strong> — 기후 요약 카드(대형 숫자 그리드) + 서울 비교.</li>
-      <li><strong>여행객 룩</strong> — 기온대 반영 검색 링크(핀터레스트/구글/인스타) + AI 코멘트.</li>
-      <li><strong>내 코디</strong> — 날짜별 추천 코디 + 편집형 옷장 플래너 + 하단 실시간 지참 리스트.</li>
-      <li><strong>팁</strong> — 도시/국가 드레스코드 + 이번 여행 날씨 체크포인트 + 액티비티 준비물.</li>
+      <li><strong>🔍 검색</strong> — 여행지(자동완성)·출발/도착일·목적지 유형(자동 판별)·<strong>여행 목적 칩</strong>·<strong>성별</strong>·스타일. 헤더에 언어(한국어/EN)·단위(°C/°F) 토글.</li>
+      <li><strong>🧳 준비 리스트</strong> — 결과 탭 4개: <em>날씨</em>(요약 카드 + 거주지 비교) / <em>여행객 룩</em>(기온대 반영 검색 링크) / <em>여행 준비</em>(날짜별 코디 + 여행 준비 리스트 + 복사·저장) / <em>팁</em>.</li>
+      <li><strong>🔖 저장</strong> — 저장한 여행 목록(불러오기·삭제), 미확인 개수 뱃지.</li>
     </ul>
+    <p>검색이 끝나면 준비 리스트 뷰로 자동 이동하고, 오류는 오류 문구가 있는 검색 뷰로 되돌린다.</p>
   </section>
 
   <section>
@@ -389,6 +457,10 @@
     <div class="feat">
       <div class="feat-head"><h3>Phase 1 — 프로토타입</h3><span class="chip ok">✅ 완료</span></div>
       <p>입력 → 날씨 요약(서울 비교·D-14 예보) → 기온대 반영 레퍼런스 → 사진 색감 스타일 분석 → 규칙 기반 날짜별 코디 → 편집형 옷장 플래너·실시간 지참 리스트 → 도시/날씨 기반 팁. 핵심 경험 유용성 본인 검증 충족.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-head"><h3>Phase 1.5 — 페르소나 검증 반영 (v1.3)</h3><span class="chip ok">✅ 완료</span></div>
+      <p>가상 페르소나 10인 패널 → 제품 가정의 문제 7가지 도출 → 여행 준비 앱으로 포지션 전환, 기준점 자동 판정, 목적 칩, 성별·저장·복사, 한/영 지원, 검색 정확도 재설계, 화면 3분할, <strong>Vercel 프로덕션 배포</strong>. 남은 항목은 날짜 후보 비교 뷰(주차별 기온 스트립).</p>
     </div>
     <div class="feat">
       <div class="feat-head"><h3>Phase 2 — 개인 도구 완성</h3><span class="chip warn">🔶 진행 중</span></div>
@@ -411,15 +483,16 @@
   </section>
 
   <section>
-    <h2><span class="num">⑫</span> 구현 현황 (v1.2)</h2>
+    <h2><span class="num">⑫</span> 구현 현황 (v1.3)</h2>
     <hr class="rule" />
     <div class="grid2">
       <div class="box">
-        <h3>스택</h3>
+        <h3>스택 · 배포</h3>
         <ul>
-          <li>정적 웹앱 (HTML/CSS/Vanilla JS)</li>
+          <li>정적 웹앱 (HTML/CSS/Vanilla JS · 빌드 없음)</li>
           <li>Open-Meteo API (키 불필요)</li>
-          <li>로컬 dev 서버 · 개인 도구로 실행</li>
+          <li><b>Vercel 프로덕션 배포</b> — <a href="https://weatherclothe.vercel.app">weatherclothe.vercel.app</a></li>
+          <li>저장은 전부 브라우저 localStorage (서버·DB·계정 없음)</li>
         </ul>
       </div>
       <div class="box">
@@ -434,19 +507,23 @@
     <div class="box" style="margin-top:12px">
       <h3>구현 완료 항목</h3>
       <ul>
-        <li>여행지 자동완성(한글→영문 별칭 36곳·활동형 30곳), 목적지 유형 자동 판별</li>
-        <li>10년 평균 날씨 + 서울 비교 + D-14 예보 병기</li>
-        <li>기온대 키워드를 주입한 여행객 룩 검색(핀터레스트·구글·인스타)</li>
+        <li><b>목적지 검색</b> — 원문·별칭(120곳+)·로마자를 두 언어로 동시 조회 후 규모 기준 순위. 북한 제외, 요청 경합 해소. 서울·부산·제주·경주·강릉·속초·교토·도쿄·뉴욕·파리·런던 및 영문 입력 검증 완료</li>
+        <li><b>날씨</b> — 10년 평균 + 거주지 자동 판정 비교 + D-14 예보 병기, °C/°F 토글</li>
+        <li>기온대 키워드를 주입한 여행객 룩 검색(핀터레스트·구글·인스타), 검색어 언어 연동</li>
         <li>사진 업로드 색감 기반 스타일 분석(팔레트 표시)</li>
-        <li>아이템 풀 조합 날짜별 코디(일정 성격·날씨 반영)</li>
-        <li>통합 옷장 플래너: 보유/사야함 토글, ✎ 이름 수정(일괄 반영), 직접 추가, 실시간 병합 지참 리스트</li>
-        <li>도시 20곳 + 국가 폴백 + 날씨 기반 체크포인트 팁</li>
+        <li>아이템 풀 조합 날짜별 코디(일정 성격·날씨·<b>목적 칩·성별</b> 반영)</li>
+        <li><b>여행 준비 리스트</b> — 7개 분류 자동 생성, 보유/사야함, ✎ 이름 수정, 직접 추가·삭제, 병합·착용 일수, 텍스트 복사</li>
+        <li><b>저장 리스트</b> — localStorage 영속, 불러오기·삭제, 마지막 결과 자동 보존</li>
+        <li><b>한국어/English</b> — UI + 아이템명·팁·목적까지 번역(용어 300여 개), 상태는 언어 비의존</li>
+        <li><b>화면 3분할</b> + 하단 내비, 모바일 밀도 조정</li>
+        <li>도시 20곳 + 국가 폴백 + 날씨 기반 체크포인트 팁 (영문 지명 별칭으로 조회 정확도 개선)</li>
       </ul>
     </div>
   </section>
 
   <div class="foot">
-    <b>다음 단계 제안</b> — v1.2 프로토타입을 실제 여행 1회에 사용 → 성공 기준(과잉 패킹 감소·추천 착용률) 관찰 → Phase 2(Claude 비전·이미지 인라인) 착수 → v1.3 개정.
+    <b>다음 단계 제안</b> — v1.3을 실제 여행 1회에 사용 → 성공 기준(과잉 패킹 감소·추천 착용률) 관찰 → 날짜 후보 비교 뷰(주차별 기온 스트립) 추가 → Phase 2(Claude 비전·이미지 인라인) 착수 → v1.4 개정.<br />
+    인바운드 가설 검증도 함께 — 해외 사용자에게 "당신의 옷장으로는 대응할 수 없는 온도"를 알려주는 것이 이 제품의 가장 큰 기회인지.
   </div>
 
 </div>

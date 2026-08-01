@@ -22,6 +22,9 @@
 .env
 node_modules/
 
+# Vercel CLI 로컬 링크 정보(프로젝트 ID 등) — 로컬 전용
+.vercel/
+
 # 로컬 전용 폴더 (푸시하지 않음)
 presentation-timer/
 10_원본/
