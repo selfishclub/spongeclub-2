@@ -6,8 +6,11 @@
 .idea/
 .obsidian/
 
-# Claude Code 로컬 설정 (로컬 전용 설정 및 스킬 모두 무시)
-.claude/
+# Claude Code — 기본은 무시하되, 클럽 공용 '제출' 스킬만 추적
+.claude/*
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/제출/
 
 # oh-my-claudecode 로컬 상태 (로컬 전용)
 .omc/

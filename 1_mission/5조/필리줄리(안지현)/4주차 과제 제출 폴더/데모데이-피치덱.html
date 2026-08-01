@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>공주님 픽셀 성 — 데모데이 피치</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap">
+<style>
+  :root{
+    --paper:#f4f2ed; --white:#fbfaf7; --ink:#11110f;
+    --line:rgba(17,17,15,0.25); --line-soft:rgba(17,17,15,0.12);
+    --green:#153c31; --red:#a2382d; --acid:#d9f100;
+    --mut:#55524a;
+    --sans:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    --serif:"Nanum Myeongjo",Georgia,"Times New Roman",serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{background:#0b0b0a;color:var(--ink);font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;line-height:1.5;overflow:hidden;height:100vh}
+
+  .util{font-size:clamp(9px,.85vw,12px);font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+  .disp{font-weight:800;letter-spacing:-.078em;line-height:.86}
+  .serif{font-family:var(--serif)}
+
+  /* ---- deck stage ---- */
+  .stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+  .slide{position:absolute;inset:0;background:var(--paper);opacity:0;visibility:hidden;
+    transition:opacity .5s ease;display:flex;flex-direction:column;
+    padding:clamp(28px,4.4vw,74px) clamp(30px,5.5vw,96px)}
+  .slide.on{opacity:1;visibility:visible;z-index:2}
+  .slide.dark{background:var(--ink);color:var(--paper)}
+  .slide.green{background:var(--green);color:#eef3ee}
+  .slide .top{display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+    border-bottom:1px solid var(--line);padding-bottom:14px;flex:0 0 auto}
+  .slide.dark .top,.slide.green .top{border-color:rgba(238,243,238,.28)}
+  .slide .top .sn{color:var(--red)}
+  .slide.dark .top .sn,.slide.green .top .sn{color:var(--acid)}
+  .slide .top .brand{color:var(--mut);font-weight:700}
+  .slide.dark .top .brand,.slide.green .top .brand{color:#8f8b80}
+  .body{flex:1 1 auto;display:flex;flex-direction:column;justify-content:center;min-height:0;
+    padding:clamp(14px,2.4vw,40px) 0}
+
+  h1.title{font-size:clamp(48px,10.5vw,168px)}
+  .lead{font-family:var(--serif);font-size:clamp(17px,2.05vw,30px);line-height:1.48;max-width:30ch}
+  .lead b{font-weight:400;background:linear-gradient(transparent 60%,rgba(217,241,0,.6) 60%)}
+  h2.head{font-size:clamp(34px,6.4vw,104px)}
+  .sub{font-family:var(--serif);color:var(--mut);font-size:clamp(15px,1.7vw,23px);
+    line-height:1.5;max-width:50ch;margin-top:clamp(16px,2vw,30px)}
+  .slide.dark .sub,.slide.green .sub{color:#a9a49a}
+  em.acid{font-style:normal;color:var(--red)}
+  .slide.dark em.acid,.slide.green em.acid{color:var(--acid)}
+
+  /* cover */
+  .cover-grid{display:grid;grid-template-columns:1.5fr .5fr;gap:clamp(24px,4vw,64px);
+    align-items:end;height:100%}
+  .cover-qr{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:12px}
+  .cover-qr img{width:min(26vh,180px);height:auto;border:1px solid var(--line);background:#fff;padding:8px}
+  .cover-qr .cap{text-align:center;color:var(--mut);font-size:clamp(10px,1vw,13px);line-height:1.4}
+  .cover-qr .cap b{color:var(--ink);font-weight:800}
+  .kick{color:var(--red);margin-bottom:clamp(16px,2.2vw,30px)}
+  .urlline{font-weight:800;letter-spacing:-.03em;font-size:clamp(16px,2.3vw,30px);
+    word-break:break-all;margin-top:clamp(14px,1.8vw,24px)}
+  .urlline .go{color:var(--red)}
+
+  /* two-col generic */
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,4vw,64px);align-items:center;height:100%}
+  .two.asym{grid-template-columns:1.15fr .85fr}
+  .pivot-old,.pivot-new{padding:clamp(18px,2vw,30px);border:1px solid var(--line)}
+  .pivot-old{opacity:.62}
+  .pivot-new{border-color:var(--ink);border-width:2px}
+  .pivot-tag{font-weight:800;letter-spacing:-.02em;font-size:clamp(15px,1.5vw,21px);margin-bottom:10px}
+  .pivot-old .pivot-tag{color:var(--mut)}
+  .pivot-new .pivot-tag{color:var(--red)}
+  .pivot p{font-family:var(--serif);font-size:clamp(13px,1.35vw,18px);line-height:1.5;color:#3a382f}
+  .arrowbig{font-weight:800;font-size:clamp(30px,4vw,58px);text-align:center;color:var(--red);letter-spacing:-.05em}
+
+  /* declaration (dark) */
+  .decl{font-weight:800;letter-spacing:-.06em;line-height:1.0;font-size:clamp(30px,5.6vw,88px);max-width:18ch}
+  .decl em{font-style:normal;color:var(--acid)}
+  .by{margin-top:clamp(20px,2.6vw,40px);color:#8f8b80;font-family:var(--serif);font-style:italic;
+    font-size:clamp(14px,1.5vw,20px)}
+
+  /* stats */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);border-left:1px solid var(--line);
+    border-top:1px solid var(--line)}
+  .stats .cell{border-right:1px solid var(--line);border-bottom:1px solid var(--line);
+    padding:clamp(16px,1.8vw,28px);display:flex;flex-direction:column;justify-content:space-between;gap:16px}
+  .stats .n{font-weight:800;letter-spacing:-.06em;font-size:clamp(30px,4.4vw,66px);line-height:.9}
+  .stats .n small{font-size:.4em;letter-spacing:0;font-weight:800}
+  .stats .n.it{font-family:var(--serif);font-style:italic;font-weight:400;font-size:clamp(24px,3.2vw,46px)}
+  .stats .cap{color:var(--mut);font-size:clamp(11px,1.05vw,14px);line-height:1.4}
+  .stats .util{color:var(--red)}
+  .pullbox{display:grid;grid-template-columns:1.2fr .8fr;gap:clamp(24px,3vw,52px);
+    align-items:start;margin-top:clamp(20px,2.4vw,40px)}
+  .pull{font-family:var(--serif);font-size:clamp(20px,3vw,46px);line-height:1.24;letter-spacing:-.01em}
+  .pull .mk{color:var(--red)}
+  .pullnote p{font-size:clamp(12px,1.15vw,15.5px);line-height:1.55;color:#3a382f;margin-bottom:12px}
+  .pullnote p b{color:var(--ink)}
+  .pullnote .util{color:var(--red);margin-top:14px}
+
+  /* survey table */
+  .personas{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:clamp(16px,2vw,26px)}
+  .pchip{border:1px solid var(--line);padding:8px 12px;font-size:clamp(10px,1vw,13px)}
+  .pchip b{font-weight:700}.pchip span{color:var(--mut)}
+  table.rej{width:100%;border-collapse:collapse;border-top:1px solid var(--line)}
+  table.rej th,table.rej td{text-align:left;border-bottom:1px solid var(--line);
+    padding:clamp(8px,1vw,15px) clamp(8px,1vw,14px);vertical-align:top}
+  table.rej th{font-size:clamp(9px,.85vw,11px);font-weight:700;letter-spacing:.11em;
+    text-transform:uppercase;color:var(--mut)}
+  table.rej td.num{font-family:var(--serif);font-style:italic;font-size:clamp(15px,1.6vw,21px);
+    color:var(--red);width:40px}
+  table.rej td.rea{font-size:clamp(12px,1.25vw,16px);line-height:1.4;font-weight:600}
+  table.rej td.who{font-size:clamp(10px,1vw,13px);color:var(--mut);white-space:nowrap}
+  table.rej td.kind{font-size:clamp(10px,1vw,13px);color:#3a382f;line-height:1.35}
+  .caveat{border:1px solid var(--red);padding:clamp(14px,1.6vw,24px);margin-top:clamp(14px,1.8vw,26px);
+    display:grid;grid-template-columns:.28fr 1.72fr;gap:20px;align-items:center}
+  .caveat .util{color:var(--red)}
+  .caveat p{font-family:var(--serif);font-size:clamp(12px,1.3vw,17px);line-height:1.5}
+  .caveat p b{font-weight:700}
+
+  /* fix + honest split */
+  .fixgrid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,3.4vw,60px);height:100%;align-items:center}
+  .fixlist{border-top:1px solid var(--line)}
+  .fixrow{display:grid;grid-template-columns:.4fr 1.6fr;gap:16px;padding:clamp(12px,1.5vw,22px) 0;
+    border-bottom:1px solid var(--line)}
+  .fixrow .claim{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:clamp(12px,1.2vw,16px)}
+  .fixrow .arrow{font-weight:800;letter-spacing:-.03em;font-size:clamp(13px,1.5vw,20px);line-height:1.2}
+  .fixrow .arrow b{background:linear-gradient(transparent 58%,rgba(217,241,0,.55) 58%)}
+  .honest .tag{font-weight:800;letter-spacing:-.02em;font-size:clamp(16px,1.7vw,24px);margin-bottom:12px}
+  .honest .yes .tag{color:var(--green)}
+  .honest .no .tag{color:var(--red)}
+  .honest .block{border-left:2px solid var(--line);padding-left:20px;margin-bottom:clamp(16px,2vw,28px)}
+  .honest .yes.block{border-color:var(--green)}
+  .honest .no.block{border-color:var(--red)}
+  .honest p{font-family:var(--serif);font-size:clamp(12px,1.3vw,17px);line-height:1.5;color:#3a382f}
+
+  /* close */
+  .close-grid{display:grid;grid-template-columns:1fr .8fr;gap:clamp(28px,4vw,72px);
+    align-items:center;height:100%}
+  .close-qr{display:flex;flex-direction:column;align-items:center;gap:16px}
+  .close-qr img{width:min(46vh,320px);height:auto;background:#fff;padding:14px;border:1px solid rgba(238,243,238,.3)}
+  .close-qr .cap{color:var(--acid);font-weight:800;letter-spacing:.04em;font-size:clamp(11px,1.1vw,15px);text-align:center}
+  .close-cta .big{font-weight:800;letter-spacing:-.07em;font-size:clamp(36px,6.2vw,104px);line-height:.9}
+  .close-cta .foot{margin-top:clamp(20px,2.6vw,42px);color:#8f8b80;font-size:clamp(11px,1.1vw,15px);
+    line-height:1.6;border-top:1px solid rgba(238,243,238,.28);padding-top:18px}
+  .close-cta .foot b{color:var(--acid);font-weight:800}
+
+  /* ---- chrome: progress, hint, notes ---- */
+  .progress{position:fixed;left:0;bottom:0;height:3px;background:var(--acid);z-index:40;transition:width .4s ease}
+  .counter{position:fixed;right:16px;bottom:14px;z-index:40;font-size:11px;font-weight:800;
+    letter-spacing:.12em;color:var(--mut);mix-blend-mode:difference}
+  .hint{position:fixed;left:16px;bottom:12px;z-index:40;font-size:10.5px;letter-spacing:.06em;
+    color:var(--mut);mix-blend-mode:difference;opacity:.85}
+  .hint b{font-weight:800}
+  .navbtn{position:fixed;top:50%;transform:translateY(-50%);z-index:40;width:44px;height:44px;
+    border:1px solid var(--line);background:rgba(244,242,237,.7);cursor:pointer;font-size:18px;
+    color:var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;
+    backdrop-filter:blur(4px);transition:.15s}
+  .navbtn:hover{background:var(--ink);color:var(--acid)}
+  .navbtn.prev{left:12px}.navbtn.next{right:12px}
+
+  .notes{position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(11,11,10,.95);
+    color:#f4f2ed;padding:20px clamp(24px,4vw,60px) 30px;transform:translateY(102%);
+    transition:transform .3s ease;border-top:2px solid var(--acid);max-height:44vh;overflow-y:auto}
+  .notes.on{transform:translateY(0)}
+  .notes .nlab{color:var(--acid);font-weight:800;letter-spacing:.14em;font-size:11px;
+    text-transform:uppercase;margin-bottom:10px}
+  .notes p{font-family:var(--serif);font-size:clamp(14px,1.5vw,19px);line-height:1.55;max-width:80ch}
+  .notes .n2{margin-top:10px;color:#b8b3a8;font-size:clamp(12px,1.3vw,15px)}
+
+  @media (max-width:820px){
+    .cover-grid,.two,.two.asym,.fixgrid,.close-grid{grid-template-columns:1fr;gap:22px}
+    .cover-qr{align-items:flex-start}
+    .stats{grid-template-columns:1fr 1fr}
+    .pullbox{grid-template-columns:1fr}
+    .navbtn{display:none}
+    .slide{padding:24px 22px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+
+  <!-- 1 · COVER -->
+  <section class="slide on" data-notes="인사 한 문장 뒤 바로: '지금 폰 꺼내서 이 QR 스캔해 주세요. 5초 뒤 이 게임이 여러분 손에서 돕니다.' — 심사위원이 실제로 스캔하게 만드는 게 이 피치의 승부처입니다. 스캔하는 동안 다음 장으로.|N2:다른 팀은 대부분 스샷·영상. 이건 지금 손에서 열리는 유일한 실배포 게임.">
+    <div class="top"><span class="util sn">데모데이 · 스폰지클럽 2기</span><span class="util brand">JULIE OS · @ansafety_design</span></div>
+    <div class="body cover-grid">
+      <div>
+        <div class="util kick">배포된 MVP · 두 겹으로 검증됨</div>
+        <h1 class="title disp">공주님<br>픽셀 성</h1>
+        <div class="urlline"><span class="go">▶</span> gongju-castle-show.netlify.app</div>
+      </div>
+      <div class="cover-qr">
+        <img id="qr1" alt="게임 QR 코드">
+        <div class="cap"><b>지금 스캔하세요</b><br>5초 뒤 여러분 폰에서 플레이됩니다</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · PIVOT -->
+  <section class="slide" data-notes="정직하게 시작합니다: '제 1주차 계획은 전화 자동화 에이전트였습니다. 버렸습니다.' 왜 버렸는지 한 문장 — 목적은 전화가 아니라 결과물이었고, 더 정직하고 더 완성도 높은 걸 만들 수 있었기 때문. 실패를 숨기지 않는 게 판단력의 증거라는 걸 심사위원이 느끼게.|N2:이름 5번·카루셀 2번 엎었다는 것도 한 줄. '내 가설보다 실측을 믿었다.'">
+    <div class="top"><span class="util sn">01 — 시작은 피벗이었다</span><span class="util brand">판단력의 증거</span></div>
+    <div class="body">
+      <h2 class="head disp">계획을 버린 게<br>이 프로젝트의 첫 결정이었다</h2>
+      <div class="two asym" style="height:auto;margin-top:clamp(20px,3vw,44px)">
+        <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:clamp(12px,2vw,28px);align-items:center">
+          <div class="pivot pivot-old">
+            <div class="pivot-tag">버린 것 — 전화 자동화</div>
+            <p>1주차 가설: 전화를 대신 걸어주는 에이전트. 만들다 깨달았다 — 목적은 전화가 아니라 <b>결과물</b>이었다.</p>
+          </div>
+          <div class="arrowbig">→</div>
+          <div class="pivot pivot-new">
+            <div class="pivot-tag">택한 것 — 끝까지 흐르는 실물</div>
+            <p>실제 일 하나(내 아이가 놀 게임)를 <b>처음부터 끝까지</b> 통과시켰다. 배포·검증까지.</p>
+          </div>
+        </div>
+        <div>
+          <p class="sub" style="margin-top:0">이름을 5번, 카루셀을 2번 엎었다. 멋진 계획을 지키는 대신
+            <em class="acid">내 가설보다 실측이 이기게</em> 뒀다. 심사위원이 볼 것은 완성도 이전에 이 판단의 궤적이다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · WHAT / LIVE DEMO -->
+  <section class="slide" data-notes="여기서 라이브 데모. 폰을 들거나 미러링해서 직접: ①주사위 굴려 성 한 칸 이동 → ②퀴즈쇼 하나 풀고(틀려도 응원) → ③패션쇼로 옷 갈아입기. 30초 안에. 말보다 손이 증거입니다.|N2:'놀이가 연료고, 퀴즈가 그 연료 안에 들어있습니다. 애는 공부하는 줄 모릅니다.' 곱셈을 덧셈으로 풀어주는 것 한 번 보여주면 강력.">
+    <div class="top"><span class="util sn">02 — 무엇을 만들었나 · 라이브</span><span class="util brand">▶ 지금 화면에서 플레이</span></div>
+    <div class="body two asym">
+      <div>
+        <h2 class="head disp">지지 않는 게임 속에서<br>스스로 배운다</h2>
+        <p class="sub">모노폴리처럼 <em class="acid">주사위로 내 성을 키우고</em>, 듀오링고처럼 잘게 쪼갠
+          즉시피드백 퀴즈가 놀이의 연료로 들어간다. 파산·탈락·시간압박 없음. 틀리면 벌이 아니라 응원, 틀린 문제는 복습으로 다시.</p>
+      </div>
+      <div class="shows" style="border-left:1px solid var(--line);border-top:1px solid var(--line)">
+        <style>.shows .r2{display:grid;grid-template-columns:.5fr 1.5fr;border-bottom:1px solid var(--line)}
+          .shows .r2>div{border-right:1px solid var(--line);padding:clamp(9px,1.1vw,15px) clamp(10px,1.2vw,18px)}
+          .shows .r2 .k{font-family:var(--serif);font-style:italic;font-size:clamp(13px,1.3vw,17px);color:var(--red)}
+          .shows .r2 .v{font-size:clamp(11px,1.1vw,14px);line-height:1.4}</style>
+        <div class="r2"><div class="k">여정</div><div class="v">100단계 보드 → 여왕 대관식 피날레</div></div>
+        <div class="r2"><div class="k">퀴즈쇼</div><div class="v">국·수·영·동물 — 적응형 난이도 + 복습 루프</div></div>
+        <div class="r2"><div class="k">교육 설계</div><div class="v">곱셈을 덧셈으로(3×3→3+3+3) · 국어 21문항 예문 힌트</div></div>
+        <div class="r2"><div class="k">드레스업</div><div class="v">공주 옷 갈아입기 · 패션쇼 별점</div></div>
+        <div class="r2"><div class="k">탕후루 먹방</div><div class="v">아이가 직접 요청 · 음원 0·이미지 0, 전부 합성</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · MVP REDEFINITION (dark) -->
+  <section class="slide dark" data-notes="잠깐 멈추고 톤을 낮춥니다. 'MVP를 기능 개수로 세지 않았습니다. 실제 일 하나가 끝까지 흐르며 수작업을 없앴는지로 셌습니다.' 이 문장을 천천히 — 이게 심사위원에게 남길 한 문장.|N2:이 정의가 나머지 슬라이드(증거·피벗·봉인)를 하나로 묶습니다.">
+    <div class="top"><span class="util sn">MVP를 다시 정의하다</span><span class="util brand">2주차에 내가 쓴 문장</span></div>
+    <div class="body">
+      <p class="decl">MVP는 기능이 많은 작은 제품이 아니라,<br>실제 일 하나가 끝까지 흐르며<br><em>수작업을 없애는 증거다.</em></p>
+      <p class="by">— 시스템이 준비하고, Julie가 승인한다.</p>
+    </div>
+  </section>
+
+  <!-- 5 · EVIDENCE 1 · KIDS -->
+  <section class="slide" data-notes="'제 아이 둘에게 튜토리얼 없이 그냥 쥐여줬습니다.' 26단계·막힘 0. 그리고 반전: 제가 공들인 건 퀴즈였는데 애들이 빠진 건 패션쇼였다 — '내 데모를 내가 검증하면 안 된다'를 강조. 실측이 가설을 이겼다는 증거.|N2:'더 하고 싶다'는 재접속 신호. 그래서 로드맵을 뒤집었다고 연결.">
+    <div class="top"><span class="util sn">03 — 증거 ① · 실제 아이들</span><span class="util brand">막힘 0</span></div>
+    <div class="body">
+      <h2 class="head disp">"이걸로 끝나면 안 돼"</h2>
+      <div class="stats" style="margin-top:clamp(16px,2.2vw,34px)">
+        <div class="cell"><span class="util">몰입 깊이</span><div class="n">26<small>단계</small></div><div class="cap">두 아이 모두 튜토리얼 없이 도달</div></div>
+        <div class="cell"><span class="util">막힌 지점</span><div class="n">0</div><div class="cap">온보딩·조작에서 걸림 없음</div></div>
+        <div class="cell"><span class="util">1위로 꼽은 것</span><div class="n it">패션쇼</div><div class="cap">내 가설(퀴즈·성 성장)이 아니었다</div></div>
+        <div class="cell"><span class="util">공통 반응</span><div class="n it">더 하고 싶다</div><div class="cap">= 재접속·깊이 요구 신호</div></div>
+      </div>
+      <div class="pullbox">
+        <p class="pull"><span class="mk">"</span>너무 재밌다 — 이걸로 끝나면 안 된다.<span class="mk">"</span></p>
+        <div class="pullnote">
+          <p><b>내 가설보다 실측이 이겼다.</b> 공들인 건 퀴즈였는데, 아이들이 빠진 건 꾸미기와 요리였다.
+            그래서 로드맵을 뒤집고, "끝나면 안 된다"엔 <b>여왕 대관식 피날레</b>로 답했다.</p>
+          <p class="util">내 데모를 내가 검증하면 안 된다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · EVIDENCE 2 · SURVEY -->
+  <section class="slide" data-notes="'실제 부모는 아직 못 만났습니다. 그래서 가상으로, 안 쓸 이유부터 캤습니다.' 5개 거절 이유를 빠르게. 핵심은 1번 — 애만 재밌고 부모는 깜깜이. 그리고 한계도 정직하게: AI 검증은 내 질문 범위를 못 벗어난다, 진짜 부모 1명이 필요.|N2:가장 뼈아픈 한마디 인용. '공부되는 게임이라 믿고 태블릿을 더 줘버린다' — 교육 포지셔닝이 배신하는 방향.">
+    <div class="top"><span class="util sn">03 — 증거 ② · 가상 고객 서베이</span><span class="util brand">"안 쓸 이유"부터</span></div>
+    <div class="body">
+      <div class="personas">
+        <div class="pchip"><b>신은경</b> <span>35·전업주부</span></div>
+        <div class="pchip"><b>박유하</b> <span>32·창업준비</span></div>
+        <div class="pchip"><b>박호철</b> <span>44·보험상담</span></div>
+        <div class="pchip"><b>송순근</b> <span>49·정보보안</span></div>
+      </div>
+      <table class="rej">
+        <thead><tr><th></th><th>부모가 안 쓰겠다는 이유</th><th>누가</th><th>성격</th></tr></thead>
+        <tbody>
+          <tr><td class="num">1</td><td class="rea">"공부된다"를 부모가 확인할 방법이 없다 — 애만 재밌고 부모는 깜깜이</td><td class="who">신은경·박유하</td><td class="kind">치명적. 교육 포지셔닝 전체가 걸림</td></tr>
+          <tr><td class="num">2</td><td class="rea">낯선 링크의 신뢰 공백 — 만든 사람·심사·근거가 없다</td><td class="who">박유하·송순근</td><td class="kind">유통(공유)의 병목</td></tr>
+          <tr><td class="num">3</td><td class="rea">저장이 날아갈 위험 — 기기 초기화·캐시 삭제</td><td class="who">신은경·송순근</td><td class="kind">터지면 재설치가 아니라 이탈</td></tr>
+          <tr><td class="num">4</td><td class="rea">콘텐츠 고갈 — 문제 수가 며칠이면 바닥날 것 같다</td><td class="who">신은경</td><td class="kind">교육 주장을 스스로 무너뜨림</td></tr>
+          <tr><td class="num">5</td><td class="rea">스크린타임 규칙과 충돌 — "공부니까 더"가 집 규칙을 깬다</td><td class="who">박호철</td><td class="kind">아빠 쪽 반대의 실제 형태</td></tr>
+        </tbody>
+      </table>
+      <div class="caveat">
+        <div class="util">가상 검증의 한계</div>
+        <p>합성 페르소나 4명이 아무도 못 짚은 걸 실제 사람 1명이 한마디로 짚을 수 있다.
+          AI 검증은 내가 던진 질문의 범위를 못 벗어난다 — <b>발행은 진짜 부모 한 명에게 링크를 보내는 것으로만 확인된다.</b></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · FIX + HONEST LINE -->
+  <section class="slide" data-notes="'그래서 다음 수는 하나 — 주장을 증거로 바꿉니다.' 부모용 오늘 배운 것 요약, 정직한 문항 수, 백업 코드 동선. 전부 코인 0. 그리고 오른쪽: 안 파는 이유 — 무료 공유로 브랜드·신뢰를 잡고 유료화는 봉인. 확장을 참는 것도 판단이라는 걸.|N2:'좋은 시스템은 나를 대신하는 도구가 아니라, 내가 아닌 일을 대신한다.' 이 문장으로 넘어가기.">
+    <div class="top"><span class="util sn">04 — 다음 수 · 주장 → 증거 · 정직한 선</span><span class="util brand">확장을 참는 것도 판단</span></div>
+    <div class="body fixgrid">
+      <div>
+        <h2 class="head disp" style="font-size:clamp(28px,4.6vw,64px)">부모에게<br>증거를 보인다</h2>
+        <div class="fixlist" style="margin-top:clamp(16px,2vw,30px)">
+          <div class="fixrow"><div class="claim">"공부돼요"<br>(주장)</div><div class="arrow">부모용 <b>"오늘 배운 것" 요약</b> — 곱셈 3단계·관용구 5개·새 단어 4개·복습 2문제 🌟 <span style="font-weight:400;color:var(--mut);font-size:.8em">· 코인 0</span></div></div>
+          <div class="fixrow"><div class="claim">"며칠이면<br>바닥나요"</div><div class="arrow"><b>정직한 문항 수</b> 노출 — 병목은 레벨1의 28문항. → 확충은 <b>레벨1부터</b></div></div>
+          <div class="fixrow"><div class="claim">"저장이<br>날아가요"</div><div class="arrow">백업 코드를 <b>요약 화면 하단 한 줄</b>로 — 기능이 아니라 동선 문제</div></div>
+        </div>
+      </div>
+      <div class="honest">
+        <div class="yes block">
+          <div class="tag">한다 — 무료로 공유</div>
+          <p>광고 0·결제 0·실패 0 학습 게임은 맘카페가 믿고 나른다. 지금 잡을 가치는 앱 판매값이 아니라 <b>브랜드·신뢰·포트폴리오</b>.</p>
+        </div>
+        <div class="no block">
+          <div class="tag">봉인 — 유료 판매</div>
+          <p>"돈 받고 파는 교육 게임"은 다른 제품이다 — 앱스토어·환불·검증이 급상승. 부동산·한국 체류·비전 확장 금지와 충돌. 지금 단계가 아니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · CLOSE -->
+  <section class="slide dark" data-notes="다시 QR을 크게. '아직 안 스캔하셨으면 지금이 마지막 기회입니다. 그리고 마음에 드셨다면 @ansafety_design.' 투표 유도로 마감. 짧고 자신 있게.|N2:엄마→딸 서사로 한 문장 닫아도 좋음 — '딸에게 주려고 만들었고, 지금 여러분 손에 있습니다.'">
+    <div class="top"><span class="util sn">05 — 직접 해보세요</span><span class="util brand">스폰지클럽 2기 · 데모데이</span></div>
+    <div class="body close-grid">
+      <div class="close-cta">
+        <div class="big disp">직접<br>해보세요.</div>
+        <div class="foot">딸에게 주려고 만들었고, 지금 여러분 폰에서 돕니다.<br>
+          <b>gongju-castle-show.netlify.app</b><br>
+          @ansafety_design · JULIE OS · 개인이 AI로 만든 게임 · 개인정보 수집 0</div>
+      </div>
+      <div class="close-qr">
+        <img id="qr2" alt="게임 QR 코드">
+        <div class="cap">스캔 → 5초 → 플레이</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<button class="navbtn prev" id="prev" aria-label="이전">‹</button>
+<button class="navbtn next" id="next" aria-label="다음">›</button>
+<div class="progress" id="progress"></div>
+<div class="counter" id="counter">01 / 08</div>
+<div class="hint"><b>←→</b> 넘기기 · <b>F</b> 풀스크린 · <b>N</b> 발표노트</div>
+
+<div class="notes" id="notes">
+  <div class="nlab">발표자 노트 — 화면엔 안 보임 (N으로 토글)</div>
+  <p id="notesText"></p>
+  <p class="n2" id="notesText2"></p>
+</div>
+
+<script>
+  // QR embedded as data URI (game link)
+  var QR = "data:image/png;base64,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";
+  document.getElementById('qr1').src = QR;
+  document.getElementById('qr2').src = QR;
+
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var i = 0, N = slides.length;
+  var counter = document.getElementById('counter');
+  var progress = document.getElementById('progress');
+  var notes = document.getElementById('notes');
+  var notesText = document.getElementById('notesText');
+  var notesText2 = document.getElementById('notesText2');
+  function pad(n){return (n<10?'0':'')+n;}
+  function render(){
+    slides.forEach(function(s,idx){ s.classList.toggle('on', idx===i); });
+    counter.textContent = pad(i+1)+' / '+pad(N);
+    progress.style.width = ((i+1)/N*100)+'%';
+    var raw = slides[i].getAttribute('data-notes') || '';
+    var parts = raw.split('|N2:');
+    notesText.textContent = parts[0] || '';
+    notesText2.textContent = parts[1] || '';
+    document.body.style.background = slides[i].classList.contains('dark') ? '#0b0b0a'
+      : slides[i].classList.contains('green') ? '#0e2a22' : '#e7e4dc';
+  }
+  function go(n){ i = Math.max(0, Math.min(N-1, n)); render(); }
+  function next(){ go(i+1); } function prev(){ go(i-1); }
+  document.getElementById('next').onclick = next;
+  document.getElementById('prev').onclick = prev;
+  document.addEventListener('keydown', function(e){
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){ e.preventDefault(); next(); }
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); prev(); }
+    else if(e.key==='Home'){ go(0); } else if(e.key==='End'){ go(N-1); }
+    else if(e.key==='f'||e.key==='F'){ toggleFs(); }
+    else if(e.key==='n'||e.key==='N'){ notes.classList.toggle('on'); }
+    else if(/^[1-8]$/.test(e.key)){ go(parseInt(e.key,10)-1); }
+  });
+  function toggleFs(){
+    if(!document.fullscreenElement){ (document.documentElement.requestFullscreen||function(){})(); }
+    else{ (document.exitFullscreen||function(){})(); }
+  }
+  // touch swipe
+  var tx=0;
+  document.addEventListener('touchstart',function(e){ tx=e.changedTouches[0].clientX; },{passive:true});
+  document.addEventListener('touchend',function(e){
+    var dx=e.changedTouches[0].clientX-tx;
+    if(Math.abs(dx)>50){ dx<0?next():prev(); }
+  },{passive:true});
+  render();
+</script>
+</body>
+</html>
