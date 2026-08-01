@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>라운드 기록 — Golf Rank</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    main { padding: 20px 20px 20px; }
+
+    .meta-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 18px; box-shadow: var(--shadow-card); }
+    .meta-row { display: flex; gap: 12px; }
+    .meta-row .field { flex: 1; }
+    .field { margin-bottom: 14px; }
+    .field:last-child { margin-bottom: 0; }
+    .field label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+    .field input { width: 100%; background: #F9F9F9; border: none; border-bottom: 1.5px solid var(--border); border-radius: 8px 8px 0 0; padding: 11px 12px; font-size: 15px; font-family: inherit; color: var(--text); }
+    .field input:focus { outline: none; border-bottom-color: var(--green); background: #F4F9F4; }
+    .field input[readonly] { color: var(--muted); background: #F4F4F4; }
+    .field .field-hint { font-size: 11px; color: var(--muted); margin-top: 5px; }
+    .course-field { position: relative; }
+    .course-suggest { position: absolute; left: 0; right: 0; top: calc(100% - 2px); background: #fff; border: 1px solid var(--border); border-top: none; border-radius: 0 0 12px 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.12); z-index: 30; max-height: 220px; overflow-y: auto; }
+    .course-suggest .cs-item { display: block; width: 100%; text-align: left; background: none; border: none; padding: 12px 14px; font-size: 14px; font-family: inherit; color: var(--text); cursor: pointer; border-bottom: 1px solid #F0F0F0; }
+    .course-suggest .cs-item:last-child { border-bottom: none; }
+    .course-suggest .cs-item:hover { background: var(--green-tint); color: var(--green); }
+
+    /* 라운드 미디어 */
+    .media-box { margin-bottom: 18px; }
+    .media-head { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+    .media-head .mh-hint { font-size: 11px; font-weight: 500; color: var(--muted); }
+    .media-thumbs { display: flex; gap: 10px; flex-wrap: wrap; }
+    .media-thumb { position: relative; width: 90px; height: 90px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); background: #000; }
+    .media-thumb img, .media-thumb video { width: 100%; height: 100%; object-fit: cover; }
+    .media-thumb .m-rm { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border-radius: 50%; border: none; background: rgba(0,0,0,0.6); color: #fff; font-size: 13px; cursor: pointer; display: grid; place-items: center; }
+    .media-thumb .m-vtag { position: absolute; bottom: 4px; left: 4px; font-size: 10px; background: rgba(0,0,0,0.55); color: #fff; padding: 1px 5px; border-radius: 4px; }
+    .media-add { width: 90px; height: 90px; border-radius: 12px; border: 1.5px dashed var(--border); background: var(--card); color: var(--green); font-size: 26px; cursor: pointer; display: grid; place-items: center; }
+    .media-add:hover { border-color: var(--green); background: var(--green-tint); }
+    #roundDate { font-family: 'Montserrat', 'Pretendard Variable', sans-serif; font-weight: 600; }
+
+    .edit-banner { background: #FFF3E0; border: 1px solid var(--gold); color: #8A5A00; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; font-size: 13px; font-weight: 600; }
+    .mode-bar { display: flex; align-items: center; justify-content: space-between; background: var(--green-tint); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; color: #2E5A32; }
+    .mode-bar b { color: var(--green); }
+    .mode-bar button { background: #fff; border: 1px solid var(--green); color: var(--green); border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
+
+    .block-title { font-size: 15px; font-weight: 700; margin: 4px 0 12px; }
+
+    /* 참여자 선택 */
+    .roster { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .guest-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    .guest-row input { flex: 1; background: #F9F9F9; border: none; border-bottom: 1.5px solid var(--border); border-radius: 8px 8px 0 0; padding: 11px 12px; font-size: 14px; font-family: inherit; }
+    .guest-row input:focus { outline: none; border-bottom-color: var(--green); }
+    .guest-row .btn { flex: 0 0 auto; padding: 0 14px; border-radius: 8px; height: auto; font-size: 13px; }
+    .guests { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
+
+    /* 칩 (참여자/선수 전환) */
+    .player-chip { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 999px; border: 1.5px solid var(--border); background: var(--card); font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; transition: all .15s ease; }
+    .player-chip.active { border-color: var(--green); background: var(--green-tint); color: var(--green); }
+    .player-chip.guest.active { border-color: #BDBDBD; background: #F0F0F0; color: #555; }
+    .player-chip .chip-total { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 12px; opacity: 0.9; }
+    .player-chip .chk { color: var(--green); font-weight: 800; }
+    .player-chip .rm { color: #999; font-size: 15px; line-height: 1; margin-left: 2px; }
+    .player-chip .rm:hover { color: #E53935; }
+    .subtle { font-size: 12px; color: var(--muted); margin: -6px 0 12px; }
+
+    .active-player { display: flex; align-items: center; gap: 8px; margin: 16px 0 8px; font-size: 15px; font-weight: 700; }
+
+    /* 스코어카드 */
+    .scorecard { display: flex; flex-direction: column; gap: 8px; }
+    .nine-label { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.4px; margin: 10px 0 2px; text-transform: uppercase; }
+    .hole-row { display: flex; align-items: center; justify-content: space-between; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; }
+    .hole-info { display: flex; flex-direction: column; }
+    .hole-info .hole-no { font-size: 14px; font-weight: 700; }
+    .hole-info .hole-par { font-size: 11px; color: var(--muted); }
+    .stepper { display: flex; align-items: center; gap: 12px; }
+    .stepper button { width: 38px; height: 38px; border: 1px solid var(--border); background: #fff; border-radius: 10px; font-size: 22px; color: var(--green); cursor: pointer; display: grid; place-items: center; font-family: 'Montserrat', sans-serif; line-height: 1; transition: background .15s ease; }
+    .stepper button:hover { background: var(--green-tint); }
+    .stepper button:disabled { color: #CCC; cursor: not-allowed; }
+    .stepper .hole-score { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 22px; min-width: 34px; text-align: center; }
+    .hole-score.under { color: var(--green); }
+    .hole-score.over  { color: #E53935; }
+
+    .total-bar { position: relative; flex: 0 0 auto; padding: 8px 20px 0; display: flex; align-items: center; justify-content: flex-end; z-index: 91; pointer-events: none; }
+    .total-pill { background: var(--text); color: #fff; border-radius: 999px; padding: 8px 18px; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.18); }
+    .total-pill .t-label { font-size: 12px; opacity: 0.8; }
+    .total-pill .t-val { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 22px; }
+    .total-pill .t-diff { font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700; opacity: 0.9; }
+
+    /* 총 스코어만 */
+    .total-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+    .tr-nm { flex: 1; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .tr-total { width: 100px; background: var(--green-tint); border: 1px solid var(--border); border-radius: 8px; padding: 11px 12px; font-size: 16px; font-weight: 700; font-family: 'Montserrat', sans-serif; text-align: center; color: var(--green); }
+    .tr-total:focus { outline: none; border-color: var(--green); }
+
+    /* OCR */
+    .ocr-intro { font-size: 13px; color: #2E5A32; line-height: 1.6; margin-bottom: 16px; background: var(--green-tint); border-radius: 10px; padding: 12px 14px; }
+    .upload-zone { display: block; border: 2px dashed var(--border); border-radius: 16px; background: var(--card); padding: 30px 20px; text-align: center; cursor: pointer; transition: all .15s ease; }
+    .upload-zone.drag { border-color: var(--green); background: var(--green-tint); }
+    .uz-icon { font-size: 40px; margin-bottom: 10px; }
+    .uz-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .uz-sub { font-size: 12px; color: var(--muted); word-break: break-all; }
+    .ocr-preview { width: 100%; border-radius: 14px; margin-top: 14px; border: 1px solid var(--border); }
+    #recognizeBtn { margin-top: 14px; }
+    .ocr-progress { margin-top: 16px; }
+    .ocr-progress .bar { height: 8px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .ocr-progress .bar-fill { height: 100%; width: 0%; background: var(--green); border-radius: 99px; transition: width .3s ease; }
+    .ocr-status { font-size: 12px; color: var(--muted); margin-top: 8px; text-align: center; }
+    .ocr-results { margin-top: 22px; }
+    .hint-inline { font-size: 12px; font-weight: 500; color: var(--muted); }
+    .ocr-empty { font-size: 13px; color: var(--muted); line-height: 1.7; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+    .ocr-addrow { width: 100%; padding: 12px; border: 1.5px dashed var(--border); border-radius: 12px; background: transparent; color: var(--green); font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; margin-bottom: 14px; }
+    #applyBtn { margin-top: 4px; }
+    .ss-hint { font-size: 12px; color: var(--muted); line-height: 1.6; margin: 2px 0 12px; }
+    .ss-table { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--card); padding: 10px; margin-bottom: 12px; -webkit-overflow-scrolling: touch; }
+    .ss-grid { display: grid; grid-template-columns: 76px repeat(9, 38px) 46px 46px 58px 26px; gap: 4px; align-items: center; min-width: max-content; }
+    .ss-head { font-size: 11px; font-weight: 700; color: var(--muted); text-align: center; font-family: 'Montserrat', sans-serif; }
+    .ss-head.name-h { text-align: left; padding-left: 4px; }
+    .ss-head.agg { color: #1565C0; }
+    .ss-head.total-h { color: var(--green); }
+    .ss-par { font-size: 10px; color: #B0B0B0; text-align: center; font-family: 'Montserrat', sans-serif; }
+    .ss-name { width: 100%; background: #fff; border: 1px solid var(--border); border-radius: 7px; padding: 7px 6px; font-size: 13px; font-weight: 600; font-family: inherit; color: var(--text); min-width: 0; }
+    .ss-in { width: 100%; height: 34px; text-align: center; border: 1px solid var(--border); border-radius: 7px; background: #fff; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 13px; padding: 0; color: var(--text); }
+    .ss-in.agg { background: #EAF2FB; color: #1565C0; }
+    .ss-in.total { background: var(--green-tint); color: var(--green); font-weight: 800; font-size: 15px; }
+    .ss-in:focus, .ss-name:focus { outline: none; border-color: var(--green); }
+    .ss-rm { width: 26px; height: 26px; border: none; background: transparent; color: #BBB; font-size: 18px; cursor: pointer; padding: 0; }
+    .ss-rm:hover { color: #E53935; }
+
+    /* 등록 방식 모달 */
+    .mode-overlay { position: fixed; inset: 0; background: rgba(31,31,31,0.45); z-index: 200; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+    .mode-overlay.open { opacity: 1; pointer-events: auto; }
+    .mode-sheet { width: 100%; max-width: var(--maxw); background: var(--bg); border-radius: 24px 24px 0 0; padding: 8px 24px calc(28px + env(safe-area-inset-bottom)); transform: translateY(100%); transition: transform .3s cubic-bezier(.22,.61,.36,1); }
+    .mode-overlay.open .mode-sheet { transform: translateY(0); }
+    .mode-sheet .grab { width: 40px; height: 4px; background: var(--border); border-radius: 99px; margin: 12px auto 18px; }
+    .mode-sheet h2 { font-size: 21px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 4px; }
+    .sheet-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+    .mode-opt { width: 100%; display: flex; align-items: center; gap: 14px; padding: 16px; margin-bottom: 10px; border: 1.5px solid var(--border); border-radius: 14px; background: var(--card); cursor: pointer; text-align: left; font-family: inherit; transition: all .15s ease; }
+    .mode-opt:hover { border-color: var(--green); background: var(--green-tint); }
+    .mode-opt .mo-ico { font-size: 26px; }
+    .mode-opt .mo-txt { flex: 1; display: flex; flex-direction: column; }
+    .mode-opt .mo-txt b { font-size: 15px; font-weight: 700; color: var(--text); }
+    .mode-opt .mo-txt small { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .mode-opt .mo-arrow { font-size: 22px; color: var(--muted); }
+    .sheet-back { background: none; border: none; color: var(--muted); font-size: 14px; cursor: pointer; padding: 0; margin-bottom: 12px; font-family: inherit; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <button class="icon-btn" id="backBtn" aria-label="뒤로">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="title" id="clubTitle">라운드 기록<span class="sub" id="clubSub"></span></div>
+    </header>
+
+    <main>
+      <div class="edit-banner" id="editBanner" hidden>✏️ 이전 라운드를 수정하고 있어요</div>
+
+      <div class="meta-card">
+        <div class="meta-row">
+          <div class="field">
+            <label for="roundDate">📅 라운드 날짜</label>
+            <input type="date" id="roundDate" />
+          </div>
+          <div class="field" style="flex:0 0 84px;">
+            <label for="roundPar">Par</label>
+            <input type="text" id="roundPar" value="72" inputmode="numeric" maxlength="2" />
+          </div>
+        </div>
+        <div class="field course-field">
+          <label for="roundCourse">골프장 이름</label>
+          <input type="text" id="roundCourse" placeholder="예: 일동레이크" autocomplete="off" />
+          <div class="course-suggest" id="courseSuggest" hidden></div>
+          <div class="field-hint">예전에 간 곳은 <b>앞글자만</b> 쳐도 아래 목록에서 고를 수 있어요.</div>
+        </div>
+      </div>
+
+      <!-- 라운드 사진/영상 -->
+      <div class="media-box">
+        <div class="media-head">📸 라운드 사진·영상 <span class="mh-hint">최대 2개 · 짧은 클립 권장</span></div>
+        <div class="media-thumbs" id="mediaThumbs"></div>
+        <input type="file" id="mediaFile" accept="image/*,video/*" hidden />
+      </div>
+
+      <div class="mode-bar" id="modeBar" hidden>
+        <span>등록 방식: <b id="modeLabel">—</b></span>
+        <button type="button" id="changeMode">방식 변경</button>
+      </div>
+
+      <!-- 참여자 선택 (총스코어 / 직접입력 공통) -->
+      <div id="participantPanel" hidden>
+        <div class="block-title">참여자 선택</div>
+        <div class="roster" id="rosterChips"></div>
+        <div class="guest-row">
+          <input type="text" id="guestName" placeholder="게스트 이름" maxlength="10" autocomplete="off" />
+          <button type="button" class="btn btn-secondary" id="guestAdd">+ 게스트</button>
+        </div>
+        <div class="guests" id="guestChips"></div>
+        <div class="subtle">멤버는 탭해서 참여 여부를 켜고 끌 수 있어요. 명단에 없는 사람은 게스트로 추가하세요.</div>
+      </div>
+
+      <!-- ① 총 스코어만 -->
+      <div id="totalPanel" hidden>
+        <div class="block-title">참여자별 총 스코어 (합계)</div>
+        <div id="totalRows"></div>
+      </div>
+
+      <!-- ② 직접 입력 -->
+      <div id="manualPanel" hidden>
+        <div class="block-title">선수 전환</div>
+        <div class="roster" id="players"></div>
+        <div class="active-player" id="activePlayerLabel"></div>
+        <div class="scorecard" id="scorecard"></div>
+      </div>
+
+      <!-- ③ 사진 인식 -->
+      <div id="ocrPanel" hidden>
+        <div class="ocr-intro">
+          📸 <b>스마트스코어(SmartScore)</b> 스코어카드 사진을 올리면 이름·전반·후반·<b>합계</b>를 읽어와요.<br/>
+          OCR은 100% 정확하지 않아요 — 사진과 비교해 표에서 <b>꼭 검수·수정</b> 후 저장하세요.
+        </div>
+        <label class="upload-zone" id="uploadZone">
+          <input type="file" id="fileInput" accept="image/*" hidden />
+          <div id="uzInner">
+            <div class="uz-icon">📸</div>
+            <div class="uz-title">사진 선택 또는 여기로 드래그</div>
+            <div class="uz-sub">JPG · PNG</div>
+          </div>
+        </label>
+        <img id="preview" class="ocr-preview" alt="미리보기" hidden />
+        <button class="btn btn-primary btn-block" id="recognizeBtn" hidden>🔍 인식 시작</button>
+        <div class="ocr-progress" id="ocrProgress" hidden>
+          <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+          <div class="ocr-status" id="ocrStatus">준비 중...</div>
+        </div>
+        <div class="ocr-results" id="ocrResults" hidden>
+          <div class="block-title">인식 결과 <span class="hint-inline">· 표에서 수정하세요</span></div>
+          <div id="ocrTable"></div>
+          <button class="btn btn-primary btn-block" id="applyBtn">✅ 이 결과로 라운드 저장하기</button>
+        </div>
+      </div>
+    </main>
+
+    <div class="total-bar" id="totalBar" style="display:none;">
+      <div class="total-pill">
+        <span class="t-label">합계</span>
+        <span class="t-val" id="totalVal">72</span>
+        <span class="t-diff" id="totalDiff">E</span>
+      </div>
+    </div>
+
+    <div class="footer-bar" id="footerBar" style="display:none;">
+      <button class="btn btn-primary btn-block" id="saveBtn">라운드 저장하기</button>
+    </div>
+
+    <!-- 등록 방식 선택 모달 -->
+    <div class="mode-overlay" id="modeOverlay">
+      <div class="mode-sheet">
+        <div class="grab"></div>
+        <div id="modeStep1">
+          <h2>어떻게 등록할까요?</h2>
+          <p class="sheet-sub">라운드 스코어 등록 방식을 선택하세요.</p>
+          <button type="button" class="mode-opt" data-choose="total">
+            <span class="mo-ico">🏁</span>
+            <span class="mo-txt"><b>총 스코어만</b><small>이름 + 합계(총타수)만 빠르게</small></span>
+            <span class="mo-arrow">›</span>
+          </button>
+          <button type="button" class="mode-opt" data-step2="1">
+            <span class="mo-ico">📋</span>
+            <span class="mo-txt"><b>스코어 전체</b><small>홀별 점수까지 상세하게</small></span>
+            <span class="mo-arrow">›</span>
+          </button>
+        </div>
+        <div id="modeStep2" hidden>
+          <button type="button" class="sheet-back" id="modeBack">‹ 뒤로</button>
+          <h2>전체 스코어, 어떻게?</h2>
+          <p class="sheet-sub">입력 방법을 선택하세요.</p>
+          <button type="button" class="mode-opt" data-choose="ocr">
+            <span class="mo-ico">📸</span>
+            <span class="mo-txt"><b>사진으로 등록</b><small>스마트스코어 사진 인식 (OCR)</small></span>
+            <span class="mo-arrow">›</span>
+          </button>
+          <button type="button" class="mode-opt" data-choose="manual">
+            <span class="mo-ico">🖊️</span>
+            <span class="mo-txt"><b>직접 입력</b><small>홀별로 하나씩 입력</small></span>
+            <span class="mo-arrow">›</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./db.js"></script>
+  <script src="./media.js"></script>
+
+  <script>
+    const STORAGE_KEY = 'golfrank.clubs';
+    const $ = (id) => document.getElementById(id);
+
+    const HOLE_PARS = [4,5,4,3,4,4,5,3,4, 4,5,4,3,4,4,5,3,4];
+    const COURSE_PAR = HOLE_PARS.reduce((a,b)=>a+b,0); // 72
+    const SS_PAR = [4,5,3,4,4,4,3,5,4];
+    const SKIP_WORDS = ['전반','후반','합계','번호입력','마운틴','스코어','리더보드','골프예약','스마트','파이팅','홀맵','핸디'];
+    const MODE_LABEL = { total: '총 스코어만', manual: '직접 입력', ocr: '사진 인식' };
+
+    const params = new URLSearchParams(location.search);
+    const clubId = params.get('club');
+    const editRoundId = params.get('round');
+    const preDate = params.get('date');       // 일정에서 넘어온 날짜
+    const preCourse = params.get('course');   // 일정에서 넘어온 코스
+    const schedId = params.get('sched');      // 기록 후 소멸시킬 일정 id
+    let clubs = load();
+    let club = clubs.find((c)=>c.id===clubId);
+
+    function load(){ try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch(e){ return []; } }
+    function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(clubs)); }
+    function escapeHtml(str){ return String(str).replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    let toastTimer;
+    function showToast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2200); }
+    function badgeHtml(role){ return role==='owner'?'<span class="role-emoji" title="모임장">👑</span>':role==='staff'?'<span class="role-emoji" title="운영진">⭐</span>':role==='guest'?'<span class="badge guest">게스트</span>':''; }
+
+    if (!club) {
+      document.querySelector('main').innerHTML = '<div class="empty"><div class="icon">🤔</div><h3>모임을 찾을 수 없어요</h3><p>대시보드에서 다시 들어와 주세요.</p></div>';
+      $('clubTitle').textContent = '라운드 기록';
+    } else {
+      $('clubTitle').childNodes[0].nodeValue = club.name;
+      $('clubSub').textContent = editRoundId ? '라운드 수정' : '새 라운드 기록';
+    }
+
+    /* ── 상태 ── */
+    let mode = null;
+    let roster = (club && club.members && club.members.length)
+      ? club.members.map((m)=>({ id:m.id, name:m.name, role:m.role }))
+      : [{ id:'me', name:'나', role:'owner' }];
+    let selected = new Set(roster.map((m)=>m.id));   // 이번 라운드 참여 멤버
+    let guests = [];                                  // 이번 라운드 게스트
+    let totalsById = {};                              // id → 합계 문자열 (총스코어 모드)
+    let cards = {};                                   // id → 18홀 (직접입력 모드)
+    let activeId = roster[0] ? roster[0].id : 'me';
+    let currentFile = null, ocrParsed = [];
+    let mediaItems = [];   // [{id,type,mime,url,blob?,existing}]
+
+    function currentPar(){ const p=parseInt($('roundPar').value,10); return (p>=60 && p<=80)?p:72; }
+    function normalizeCourse(name){ const v=(name||'').trim(); if(!v) return ''; return /CC|GC|C\.C|컨트리|골프/i.test(v) ? v : v+'CC'; }
+
+    function included(){ return roster.filter((m)=>selected.has(m.id)).concat(guests); }
+    function ensureCards(){ included().forEach((p)=>{ if(!cards[p.id]) cards[p.id]=HOLE_PARS.slice(); }); }
+    function fixActive(){ const inc=included(); if(!inc.some((p)=>p.id===activeId)) activeId = inc[0] ? inc[0].id : null; }
+
+    /* ============================================================
+       등록 방식 모달
+    ============================================================ */
+    function openModeModal(){ $('modeStep1').hidden=false; $('modeStep2').hidden=true; $('modeOverlay').classList.add('open'); }
+    function closeModeModal(){ $('modeOverlay').classList.remove('open'); }
+    $('modeBack').addEventListener('click', ()=>{ $('modeStep1').hidden=false; $('modeStep2').hidden=true; });
+    $('changeMode').addEventListener('click', openModeModal);
+    $('modeOverlay').addEventListener('click', (e)=>{
+      if(e.target===$('modeOverlay')){ if(mode) closeModeModal(); return; }
+      const step2=e.target.closest('[data-step2]'); if(step2){ $('modeStep1').hidden=true; $('modeStep2').hidden=false; return; }
+      const opt=e.target.closest('[data-choose]'); if(opt) setMode(opt.dataset.choose);
+    });
+
+    function setMode(m){
+      mode=m; closeModeModal();
+      $('modeBar').hidden=false; $('modeLabel').textContent=MODE_LABEL[m];
+      const roundMode = (m==='total'||m==='manual');
+      $('participantPanel').hidden = !roundMode;
+      $('totalPanel').hidden  = m!=='total';
+      $('manualPanel').hidden = m!=='manual';
+      $('ocrPanel').hidden    = m!=='ocr';
+      $('footerBar').style.display = (m==='ocr') ? 'none' : '';
+      $('totalBar').style.display  = (m==='manual') ? '' : 'none';
+      if(roundMode) renderParticipants();
+      if(m==='total') renderTotalRows();
+      if(m==='manual'){ ensureCards(); fixActive(); renderAll(); }
+    }
+
+    /* ============================================================
+       참여자 선택
+    ============================================================ */
+    function renderParticipants(){
+      $('rosterChips').innerHTML = roster.map((m)=>{
+        const on = selected.has(m.id);
+        const tag = m.role==='owner' ? ' <span class="role-emoji" title="모임장">👑</span>' : (m.role==='staff' ? ' <span class="role-emoji" title="운영진">⭐</span>' : '');
+        return `<div class="player-chip ${on?'active':''}" data-mid="${m.id}"><span>${escapeHtml(m.name)}${tag}</span>${on?'<span class="chk">✓</span>':''}</div>`;
+      }).join('');
+      $('guestChips').innerHTML = guests.map((g)=>
+        `<div class="player-chip guest active" data-gid="${g.id}"><span>${escapeHtml(g.name)} <span style="font-size:10px;opacity:.7;">게스트</span></span><span class="rm" data-grm="${g.id}">×</span></div>`
+      ).join('');
+    }
+    $('rosterChips').addEventListener('click', (e)=>{
+      const chip=e.target.closest('[data-mid]'); if(!chip) return;
+      const id=chip.dataset.mid;
+      if(selected.has(id)) selected.delete(id); else selected.add(id);
+      fixActive(); renderParticipants(); refreshActivePanel();
+    });
+    $('guestChips').addEventListener('click', (e)=>{
+      const rm=e.target.closest('[data-grm]'); if(!rm) return;
+      guests=guests.filter((g)=>g.id!==rm.dataset.grm); delete cards[rm.dataset.grm]; delete totalsById[rm.dataset.grm];
+      fixActive(); renderParticipants(); refreshActivePanel();
+    });
+    $('guestAdd').addEventListener('click', addGuest);
+    $('guestName').addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); addGuest(); }});
+    function addGuest(){
+      const v=$('guestName').value.trim(); if(!v){ showToast('게스트 이름을 입력해주세요'); return; }
+      guests.push({ id:'g_'+Date.now()+'_'+Math.floor(Math.random()*1000), name:v, role:'guest' });
+      $('guestName').value=''; renderParticipants(); refreshActivePanel(); $('guestName').focus();
+    }
+    function refreshActivePanel(){ if(mode==='total') renderTotalRows(); else if(mode==='manual'){ ensureCards(); renderAll(); } }
+
+    /* ============================================================
+       공통 저장
+    ============================================================ */
+    async function commitRound(scores){
+      if(!club){ showToast('모임 정보가 없어요'); return; }
+      if(!scores.length){ showToast('저장할 스코어가 없어요'); return; }
+      const course=normalizeCourse($('roundCourse').value)||'미입력 코스';
+      const date=$('roundDate').value||new Date().toISOString().slice(0,10);
+      const par=currentPar();
+      // 새 미디어 파일을 IndexedDB에 저장 후, 참조만 라운드에 기록
+      for(const m of mediaItems){ if(!m.existing && m.blob){ try{ await mediaPut(m.id, m.blob); }catch(e){} } }
+      const media = mediaItems.map((m)=>({ id:m.id, type:m.type, mime:m.mime }));
+      if(!club.rounds) club.rounds=[];
+      if(!club.members) club.members=[];
+      if(editRoundId){
+        const idx=club.rounds.findIndex((r)=>r.id===editRoundId);
+        if(idx>=0) club.rounds[idx]={ ...club.rounds[idx], date, course, par, scores, media, updatedAt:Date.now() };
+        else club.rounds.push({ id:editRoundId, date, course, par, scores, media, createdAt:Date.now() });
+      } else {
+        club.rounds.push({ id:'round_'+Date.now(), date, course, par, scores, media, createdAt:Date.now() });
+        if(schedId) club.schedules = (club.schedules||[]).filter((x)=>x.id!==schedId);   // 예정 일정 소멸
+      }
+      scores.filter((s)=>s.role!=='guest').forEach((s)=>{ if(!club.members.some((m)=>m.name===s.name)) club.members.push({ id:s.playerId, name:s.name, role:s.role }); });
+      club.currentMembers=club.members.length||1;
+      recomputeClubStats(club);
+      save();
+      await pushClub(club);   // 공유 서버에 반영
+      showToast(editRoundId?'라운드가 수정됐어요! ✏️':'라운드가 저장됐어요! 🏌️');
+      setTimeout(()=>{ location.href='ranking.html?club='+encodeURIComponent(club.id); }, 900);
+    }
+    $('saveBtn').addEventListener('click', ()=>{
+      if(mode==='manual') commitRound(buildManualScores());
+      else if(mode==='total') commitRound(buildTotalScores());
+    });
+
+    /* ============================================================
+       ① 총 스코어만
+    ============================================================ */
+    function renderTotalRows(){
+      const list=included();
+      $('totalRows').innerHTML = list.length ? list.map((p)=>
+        `<div class="total-row"><span class="tr-nm">${escapeHtml(p.name)} ${badgeHtml(p.role)}</span>
+          <input class="tr-total" data-id="${p.id}" inputmode="numeric" placeholder="합계" value="${escapeHtml(totalsById[p.id]||'')}" /></div>`
+      ).join('') : '<div class="ocr-empty">참여자를 한 명 이상 선택하세요.</div>';
+    }
+    $('totalRows').addEventListener('input', (e)=>{ const el=e.target; if(el.classList.contains('tr-total')) totalsById[el.dataset.id]=el.value.replace(/[^\d]/g,''); });
+    function buildTotalScores(){
+      return included().map((p)=>{ const t=parseInt(totalsById[p.id],10); return { playerId:p.id, name:p.name, role:p.role, total:isNaN(t)?null:t, source:'total' }; }).filter((s)=>typeof s.total==='number');
+    }
+
+    /* ============================================================
+       ② 직접 입력
+    ============================================================ */
+    function renderPlayers(){
+      $('players').innerHTML = included().map((p)=>{
+        const total=(cards[p.id]||HOLE_PARS).reduce((a,b)=>a+b,0);
+        return `<div class="player-chip ${p.id===activeId?'active':''} ${p.role==='guest'?'guest':''}" data-id="${p.id}"><span>${escapeHtml(p.name)}</span><span class="chip-total">${total}</span></div>`;
+      }).join('');
+    }
+    function renderActiveLabel(){
+      const p=included().find((x)=>x.id===activeId);
+      if(!p){ $('activePlayerLabel').innerHTML=''; return; }
+      $('activePlayerLabel').innerHTML = `${escapeHtml(p.name)} ${badgeHtml(p.role)} <span style="font-size:12px;font-weight:500;color:var(--muted)">의 스코어카드</span>`;
+    }
+    function renderScorecard(){
+      if(!activeId || !cards[activeId]){ $('scorecard').innerHTML='<div class="ocr-empty">참여자를 선택하세요.</div>'; $('totalVal').textContent='—'; $('totalDiff').textContent=''; return; }
+      const arr=cards[activeId]; let html='<div class="nine-label">전반 9홀 (OUT)</div>';
+      for(let i=0;i<18;i++){
+        if(i===9) html+='<div class="nine-label">후반 9홀 (IN)</div>';
+        const par=HOLE_PARS[i], score=arr[i], diff=score-par, cls=diff<0?'under':diff>0?'over':'';
+        html+=`<div class="hole-row"><div class="hole-info"><span class="hole-no">${i+1}번홀</span><span class="hole-par">Par ${par}</span></div>
+          <div class="stepper"><button type="button" data-act="dec" data-i="${i}" ${score<=1?'disabled':''}>−</button><span class="hole-score ${cls}">${score}</span><button type="button" data-act="inc" data-i="${i}">+</button></div></div>`;
+      }
+      $('scorecard').innerHTML=html; renderTotal();
+    }
+    function renderTotal(){ const total=cards[activeId].reduce((a,b)=>a+b,0), diff=total-currentPar(); $('totalVal').textContent=total; $('totalDiff').textContent=diff===0?'E':(diff>0?'+'+diff:diff); }
+    function renderAll(){ renderPlayers(); renderActiveLabel(); renderScorecard(); }
+
+    $('scorecard').addEventListener('click', (e)=>{
+      const btn=e.target.closest('button'); if(!btn||!activeId) return;
+      const i=+btn.dataset.i, act=btn.dataset.act, arr=cards[activeId];
+      if(act==='inc') arr[i]++; else if(act==='dec'&&arr[i]>1) arr[i]--;
+      renderScorecard(); renderPlayers();
+    });
+    $('players').addEventListener('click', (e)=>{ const chip=e.target.closest('.player-chip'); if(chip){ activeId=chip.dataset.id; renderAll(); } });
+
+    function buildManualScores(){
+      return included().map((p)=>{ const c=cards[p.id]||HOLE_PARS.slice(); return { playerId:p.id, name:p.name, role:p.role, holes:c.slice(), total:c.reduce((a,b)=>a+b,0), source:'manual' }; });
+    }
+
+    /* ============================================================
+       ③ 사진 인식 (OCR)
+    ============================================================ */
+    $('fileInput').addEventListener('change', (e)=>{ if(e.target.files[0]) loadPreview(e.target.files[0]); });
+    const uz=$('uploadZone');
+    ['dragenter','dragover'].forEach((ev)=>uz.addEventListener(ev,(e)=>{ e.preventDefault(); uz.classList.add('drag'); }));
+    ['dragleave','drop'].forEach((ev)=>uz.addEventListener(ev,(e)=>{ e.preventDefault(); uz.classList.remove('drag'); }));
+    uz.addEventListener('drop',(e)=>{ const f=e.dataTransfer.files[0]; if(f&&f.type.startsWith('image/')) loadPreview(f); else showToast('이미지 파일만 올릴 수 있어요'); });
+    function loadPreview(file){ currentFile=file; $('preview').src=URL.createObjectURL(file); $('preview').hidden=false; $('recognizeBtn').hidden=false; $('ocrResults').hidden=true; $('uzInner').innerHTML='<div class="uz-icon">🖼️</div><div class="uz-title">다른 사진 선택</div><div class="uz-sub">'+escapeHtml(file.name)+'</div>'; }
+
+    $('recognizeBtn').addEventListener('click', runOCR);
+    function setProgress(frac,msg){ $('barFill').style.width=Math.round((frac||0)*100)+'%'; $('ocrStatus').textContent=msg; }
+    function statusKo(s){ return ({'loading tesseract core':'엔진 로딩...','initializing tesseract':'엔진 초기화...','loading language traineddata':'한글 데이터 받는 중... (처음엔 오래 걸려요)','initializing api':'준비 중...','recognizing text':'글자 인식 중...'})[s]||s; }
+    function fileToImage(file){ return new Promise((res,rej)=>{ const img=new Image(); img.onload=()=>res(img); img.onerror=rej; img.src=URL.createObjectURL(file); }); }
+    async function preprocess(file){
+      try{ const img=await fileToImage(file); const scale=img.width<1600?2:1; const w=Math.round(img.width*scale), h=Math.round(img.height*scale);
+        const cv=document.createElement('canvas'); cv.width=w; cv.height=h; const ctx=cv.getContext('2d'); ctx.drawImage(img,0,0,w,h);
+        const d=ctx.getImageData(0,0,w,h), a=d.data;
+        for(let i=0;i<a.length;i+=4){ const g=0.299*a[i]+0.587*a[i+1]+0.114*a[i+2]; let v=(g-128)*1.6+128; v=v<0?0:v>255?255:v; a[i]=a[i+1]=a[i+2]=v; }
+        ctx.putImageData(d,0,0); return cv;
+      }catch(e){ return file; }
+    }
+    async function runOCR(){
+      if(!currentFile){ showToast('사진을 먼저 올려주세요'); return; }
+      if(typeof Tesseract==='undefined'){ showToast('OCR 로드 실패 — 인터넷 연결을 확인하세요'); return; }
+      $('ocrProgress').hidden=false; $('recognizeBtn').disabled=true; setProgress(0,'이미지 보정 중...');
+      try{ const source=await preprocess(currentFile);
+        const { data }=await Tesseract.recognize(source,'kor+eng',{ logger:(m)=>setProgress(m.progress, statusKo(m.status)) });
+        setProgress(1,'완료 ✓'); ocrParsed=parseSmartScore(data.text); renderOcrResults();
+      }catch(err){ console.error(err); showToast('인식 실패: '+(err.message||'알 수 없는 오류')); }
+      finally{ $('recognizeBtn').disabled=false; setTimeout(()=>{ $('ocrProgress').hidden=true; },700); }
+    }
+    function parseSmartScore(text){
+      const rows=[];
+      (text||'').split('\n').forEach((line)=>{
+        const kor=(line.match(/[가-힣]{2,4}/g)||[]).filter((w)=>!SKIP_WORDS.includes(w));
+        if(!kor.length) return; const name=kor[0];
+        const ints=(line.match(/-?\d+/g)||[]).map(Number); if(ints.length<3) return;
+        const bigs=ints.filter((n)=>n>=40&&n<=200); const total=bigs.length?bigs[bigs.length-1]:'';
+        const rest=ints.filter((n)=>n!==total);
+        const holes=rest.slice(0,9).map(String); while(holes.length<9) holes.push('');
+        const front=rest.length>9?String(rest[9]):''; const back=rest.length>10?String(rest[10]):'';
+        rows.push({ name, holes, front, back, total:String(total) });
+      });
+      return rows;
+    }
+    function ensureTotal(r){ let t=parseInt(r.total,10); const f=parseInt(r.front,10), b=parseInt(r.back,10); if(isNaN(t)&&!isNaN(f)&&!isNaN(b)) t=currentPar()+f+b; return isNaN(t)?null:t; }
+    function renderOcrResults(){
+      const t=$('ocrTable');
+      if(!ocrParsed.length){ t.innerHTML='<div class="ocr-empty">이름/점수 행을 찾지 못했어요 😥<br/>사진이 흐리거나 각도가 기울어졌을 수 있어요. 아래 <b>+ 선수 추가</b>로 직접 넣으세요.</div>'; }
+      else {
+        let head='<div class="ss-head name-h">이름</div>'; for(let i=1;i<=9;i++) head+=`<div class="ss-head">${i}</div>`;
+        head+='<div class="ss-head agg">전반</div><div class="ss-head agg">후반</div><div class="ss-head total-h">합계</div><div class="ss-head"></div>';
+        let par='<div class="ss-par" style="text-align:left">Par</div>'; SS_PAR.forEach((p)=>par+=`<div class="ss-par">${p}</div>`);
+        par+='<div class="ss-par">·</div><div class="ss-par">·</div><div class="ss-par">타</div><div class="ss-par"></div>';
+        const body=ocrParsed.map((r,ri)=>{
+          let cells=`<input class="ss-name" data-ri="${ri}" data-f="name" placeholder="이름" value="${escapeHtml(r.name)}" />`;
+          for(let hi=0;hi<9;hi++) cells+=`<input class="ss-in" data-ri="${ri}" data-f="h" data-hi="${hi}" inputmode="text" value="${escapeHtml(r.holes[hi]||'')}" />`;
+          cells+=`<input class="ss-in agg" data-ri="${ri}" data-f="front" inputmode="text" value="${escapeHtml(r.front||'')}" />`;
+          cells+=`<input class="ss-in agg" data-ri="${ri}" data-f="back" inputmode="text" value="${escapeHtml(r.back||'')}" />`;
+          cells+=`<input class="ss-in total" data-ri="${ri}" data-f="total" inputmode="numeric" value="${escapeHtml(r.total||'')}" />`;
+          cells+=`<button type="button" class="ss-rm" data-rrm="${ri}" aria-label="삭제">×</button>`;
+          return cells;
+        }).join('');
+        t.innerHTML=`<div class="ss-hint">📷 위 사진과 비교하며 <b>이름</b>과 <b>합계(총타수)</b>를 꼭 확인·수정하세요. 홀 점수는 par 대비 ±값이에요.</div><div class="ss-table"><div class="ss-grid">${head}${par}${body}</div></div>`;
+      }
+      t.insertAdjacentHTML('beforeend','<button type="button" class="ocr-addrow" id="ocrAddRow">+ 선수 추가</button>');
+      $('ocrResults').hidden=false;
+    }
+    $('ocrTable').addEventListener('input',(e)=>{
+      const el=e.target, ri=+el.dataset.ri, f=el.dataset.f; if(isNaN(ri)||!f) return;
+      if(f==='name') ocrParsed[ri].name=el.value;
+      else if(f==='h') ocrParsed[ri].holes[+el.dataset.hi]=el.value.replace(/[^\d-]/g,'');
+      else ocrParsed[ri][f]=el.value.replace(/[^\d-]/g,'');
+    });
+    $('ocrTable').addEventListener('click',(e)=>{
+      const rm=e.target.closest('[data-rrm]'); if(rm){ ocrParsed.splice(+rm.dataset.rrm,1); renderOcrResults(); return; }
+      if(e.target.id==='ocrAddRow'){ ocrParsed.push({ name:'', holes:Array(9).fill(''), front:'', back:'', total:'' }); renderOcrResults(); }
+    });
+    function buildOcrScores(){
+      const valid=ocrParsed.filter((r)=>(r.name||'').trim()||r.total!==''||r.front!=='');
+      return valid.map((r,idx)=>{
+        const total=ensureTotal(r), front=parseInt(r.front,10), back=parseInt(r.back,10);
+        const name=(r.name||'').trim()||('선수'+(idx+1));
+        const m=(club.members||[]).find((x)=>x.name===name);   // 로스터 매칭 → 역할·id 승계 (오너 중복 방지)
+        return { playerId: m?m.id:('p_'+Date.now()+'_'+idx), name, role: m?m.role:'member',
+          total, front:isNaN(front)?null:front, back:isNaN(back)?null:back, holesRel:r.holes.map((h)=>{const n=parseInt(h,10); return isNaN(n)?null:n;}), source:'ocr' };
+      }).filter((s)=>typeof s.total==='number');
+    }
+    $('applyBtn').addEventListener('click', ()=>{ const scores=buildOcrScores(); if(!scores.length){ showToast('합계(총타수)를 한 명 이상 입력해주세요'); return; } commitRound(scores); });
+
+    /* ============================================================
+       통계 & 랭킹 (대시보드용)
+    ============================================================ */
+    function recomputeClubStats(club){
+      const last=club.rounds[club.rounds.length-1]; if(!last) return;
+      club.latestRound=new Date(last.date).getTime();
+      const me=last.scores.find((s)=>s.role==='owner')||last.scores[0]; if(!me) return;
+      club.myScore=me.total;
+      const myTotals=club.rounds.map((r)=>{ const s=r.scores.find((x)=>x.role==='owner')||r.scores[0]||{}; return s.total; }).filter((t)=>typeof t==='number').slice(-3);
+      club.myHandicap=myTotals.length?Math.round(myTotals.reduce((a,b)=>a+b,0)/myTotals.length-last.par):null;
+      const ranked=[...last.scores].sort((a,b)=>a.total-b.total);
+      const idx=ranked.findIndex((s)=>s.playerId===me.playerId);
+      club.myRank=idx>=0?idx+1:null;
+    }
+
+    /* ============================================================
+       수정 모드 프리필
+    ============================================================ */
+    function detectMode(r){
+      if(r.source) return r.source==='total'?'total':r.source==='ocr'?'ocr':'manual';
+      const s0=r.scores[0];
+      if(s0&&s0.holes&&s0.holes.length===18) return 'manual';
+      if(s0&&s0.holesRel) return 'ocr';
+      return 'total';
+    }
+    function prefillEdit(r){
+      $('editBanner').hidden=false;
+      const d=new Date(r.date);
+      $('editBanner').textContent='✏️ 이전 라운드 수정 중 · '+(d.getMonth()+1)+'월 '+d.getDate()+'일';
+      $('roundDate').value=r.date; $('roundCourse').value=r.course||''; $('roundPar').value=r.par||72;
+      loadEditMedia(r);
+      $('saveBtn').textContent='수정 저장하기'; $('applyBtn').textContent='✏️ 수정 저장하기';
+      const m=detectMode(r);
+      if(m==='ocr'){
+        ocrParsed=r.scores.map((s)=>({ name:s.name, holes:(s.holesRel||Array(9).fill(null)).map((x)=>x==null?'':String(x)), front:s.front==null?'':String(s.front), back:s.back==null?'':String(s.back), total:s.total==null?'':String(s.total) }));
+        $('uploadZone').style.display='none';
+        document.querySelector('.ocr-intro').innerHTML='✏️ 저장된 값을 표에서 수정한 뒤 아래 버튼으로 저장하세요.';
+        setMode('ocr'); renderOcrResults(); return;
+      }
+      // total / manual: 참여자를 그 라운드 기록으로 재구성
+      const memberScores=r.scores.filter((s)=>s.role!=='guest');
+      roster = memberScores.length ? memberScores.map((s)=>({ id:s.playerId, name:s.name, role:s.role })) : [{ id:'me', name:'나', role:'owner' }];
+      selected = new Set(roster.map((m)=>m.id));
+      guests = r.scores.filter((s)=>s.role==='guest').map((s)=>({ id:s.playerId, name:s.name, role:'guest' }));
+      totalsById={}; cards={};
+      r.scores.forEach((s)=>{ totalsById[s.playerId]= s.total==null?'':String(s.total); cards[s.playerId]=(s.holes&&s.holes.length===18)?s.holes.slice():HOLE_PARS.slice(); });
+      activeId=(r.scores[0]||{}).playerId||(roster[0]&&roster[0].id);
+      setMode(m);
+    }
+
+    /* ============================================================
+       📸 라운드 사진/영상
+    ============================================================ */
+    const MEDIA_MAX = 2;
+    function renderMediaThumbs(){
+      const thumbs = mediaItems.map((m, i)=>{
+        const inner = m.type==='video'
+          ? `<video src="${m.url}" muted playsinline preload="metadata"></video><span class="m-vtag">▶ 영상</span>`
+          : `<img src="${m.url}" alt="" />`;
+        return `<div class="media-thumb">${inner}<button type="button" class="m-rm" data-mi="${i}" aria-label="삭제">×</button></div>`;
+      }).join('');
+      const add = mediaItems.length < MEDIA_MAX ? `<div class="media-add" id="mediaAdd">＋</div>` : '';
+      $('mediaThumbs').innerHTML = thumbs + add;
+    }
+    $('mediaThumbs').addEventListener('click', (e)=>{
+      if(e.target.closest('#mediaAdd')){ $('mediaFile').click(); return; }
+      const rm = e.target.closest('[data-mi]');
+      if(rm){ const i=+rm.dataset.mi; const m=mediaItems[i]; if(m){ if(m.existing) mediaDel(m.id); if(m.url && !m.existing) URL.revokeObjectURL(m.url); mediaItems.splice(i,1); renderMediaThumbs(); } }
+    });
+    $('mediaFile').addEventListener('change', async (e)=>{
+      const files = [...e.target.files].slice(0, MEDIA_MAX - mediaItems.length);
+      for(const f of files){
+        const blob = await fileToMediaBlob(f);
+        mediaItems.push({ id:newMediaId(), type:mediaKind(f), mime:(f.type||'image/jpeg'), blob, url:URL.createObjectURL(blob), existing:false });
+      }
+      $('mediaFile').value=''; renderMediaThumbs();
+    });
+    async function loadEditMedia(r){
+      mediaItems = [];
+      for(const ref of (r.media||[])){
+        const blob = await mediaGet(ref.id);
+        if(blob) mediaItems.push({ id:ref.id, type:ref.type, mime:ref.mime, url:URL.createObjectURL(blob), existing:true });
+      }
+      renderMediaThumbs();
+    }
+
+    /* ── 초기화 ── */
+    renderMediaThumbs();
+    // 이전에 간 골프장 → 입력창 아래로 펼쳐지는 목록
+    const COURSES = club ? [...new Set((club.rounds||[]).map((r)=>r.course).concat((club.schedules||[]).map((s)=>s.course)).filter(Boolean))] : [];
+    function renderCourseSuggest(){
+      const q=$('roundCourse').value.trim().toLowerCase();
+      const matches = COURSES.filter((c)=> q==='' ? true : c.toLowerCase().includes(q))
+        .sort((a,b)=> (a.toLowerCase().startsWith(q)?0:1) - (b.toLowerCase().startsWith(q)?0:1));
+      if(!matches.length){ $('courseSuggest').hidden=true; return; }
+      $('courseSuggest').innerHTML = matches.slice(0,8).map((c)=>`<button type="button" class="cs-item" data-c="${escapeHtml(c)}">⛳ ${escapeHtml(c)}</button>`).join('');
+      $('courseSuggest').hidden=false;
+    }
+    $('roundCourse').addEventListener('focus', renderCourseSuggest);
+    $('roundCourse').addEventListener('input', renderCourseSuggest);
+    $('roundCourse').addEventListener('blur', ()=> setTimeout(()=>{ $('courseSuggest').hidden=true; }, 150));
+    $('courseSuggest').addEventListener('mousedown', (e)=>{ const b=e.target.closest('[data-c]'); if(b){ $('roundCourse').value=b.dataset.c; $('courseSuggest').hidden=true; } });
+    $('backBtn').addEventListener('click', ()=>{ location.href = clubId ? ('home.html?club='+encodeURIComponent(clubId)) : 'dashboard.html'; });
+    $('roundDate').value = new Date().toISOString().slice(0,10);
+
+    if(club && editRoundId){
+      const r = club.rounds && club.rounds.find((x)=>x.id===editRoundId);
+      if(r) prefillEdit(r); else { showToast('수정할 라운드를 찾을 수 없어요'); openModeModal(); }
+    } else if(club){
+      if(preDate) $('roundDate').value = preDate;         // 일정에서 넘어온 값 자동 채움
+      if(preCourse) $('roundCourse').value = preCourse;
+      openModeModal();
+    }
+  </script>
+</body>
+</html>

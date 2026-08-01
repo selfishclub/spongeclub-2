@@ -1,0 +1,13 @@
+{
+  "name": "imprint-os-p0-brief",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "흔적 OS v2 · P0 — 전환 브리핑 (저녁 승인 + 아침 배달). 의존성 없음, fetch만 사용.",
+  "scripts": {
+    "test": "node test/dry-run.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
