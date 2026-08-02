@@ -63,4 +63,7 @@ date: 2026-08-02
 
 - **다음 단계 생각 (뭘 더 하고 싶은지 / 남은 것 / 어디로):** 내 관심에 기대지 않고도 굴러가는 구조, 그리고 내 목소리 콘텐츠를 꾸준히 내보내는 발행 리듬. 개인 프로덕트에서 언젠가 서비스로.
 
-- **SNS 인증 링크:** https://www.instagram.com/p/DbiCTbLFLRE/
+- **SNS 인증 링크:**
+  - 인스타그램: https://www.instagram.com/p/DbiCTbLFLRE/
+  - 링크드인: https://www.linkedin.com/feed/update/urn:li:share:7489613409064263680
+  - 스레드: https://www.threads.com/@young_g97/post/DbiEeL7FJHP
