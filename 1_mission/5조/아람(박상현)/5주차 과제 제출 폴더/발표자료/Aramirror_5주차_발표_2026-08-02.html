@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>더한 게 아니라 지운 주 — 아람미러 최종본</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+  :root{ --fg:#1a1a1c; --muted:#71717a; --soft:#3f3f46; --line:#d6d6db; --line2:#ececf0; --bg:#fff; --wash:#f6f6f8; }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+    background:#e9e9ec; color:var(--fg); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    display:flex; align-items:center; justify-content:center; min-height:100%;
+  }
+  .stage{
+    position:relative; width:min(96vw,1180px); aspect-ratio:16/9; background:var(--bg);
+    box-shadow:0 22px 70px rgba(0,0,0,.16); overflow:hidden;
+  }
+  .slide{ position:absolute; inset:0; padding:6.6% 7.2% 6%; display:none; flex-direction:column;
+    opacity:0; transition:opacity .28s ease; }
+  .slide.on{display:flex; opacity:1;}
+  @media (prefers-reduced-motion:reduce){ .slide{transition:none;} }
+  .kicker{font-size:1.1vw; font-weight:700; color:var(--muted); letter-spacing:.07em;}
+  .accent{width:3.4vw; height:.22vw; min-height:2px; background:var(--fg); margin:.85vw 0 0;}
+  .h1{font-size:3.9vw; font-weight:800; letter-spacing:-.02em; line-height:1.05; text-wrap:balance;}
+  .h2{font-size:2.85vw; font-weight:800; letter-spacing:-.02em; line-height:1.1; text-wrap:balance;}
+  .sub{font-size:1.48vw; color:var(--soft); margin-top:1.6vw;}
+  .meta{font-size:1.06vw; color:var(--muted); margin-top:1vw; letter-spacing:.01em;}
+  ul.b{list-style:none; margin-top:2.2vw; display:flex; flex-direction:column; gap:1.15vw;}
+  ul.b li{display:flex; gap:.9vw; align-items:baseline; font-size:1.5vw; line-height:1.26;}
+  ul.b li .d{font-weight:800; white-space:nowrap;}
+  ul.b li b{font-weight:800; color:var(--fg);}
+  ul.b li span{color:var(--muted); font-size:1.3vw;}
+  ol.five{list-style:none; margin-top:2vw; display:flex; flex-direction:column; gap:.95vw;}
+  ol.five li{display:flex; gap:1vw; align-items:baseline; font-size:1.42vw; line-height:1.24;}
+  ol.five li .n{font-weight:800; min-width:1.4em; color:var(--fg);}
+  ol.five li b{font-weight:800;}
+  ol.five li span{color:var(--muted); font-size:1.24vw;}
+  .band{margin-top:1.8vw; background:var(--wash); border:1px solid var(--line2); border-radius:.7vw; padding:1.1vw 1.3vw; font-size:1.34vw;}
+  .band b{font-weight:800;}
+  .spacer{flex:1;}
+  .quote{font-size:2.1vw; font-weight:800; letter-spacing:-.01em; padding-top:1.6vw; border-top:1px solid var(--line);}
+  .foot{position:absolute; left:7.2%; right:7.2%; bottom:3.2%; display:flex; justify-content:space-between;
+        align-items:center; font-size:.95vw; color:var(--muted); border-top:1px solid var(--line); padding-top:.9vw;}
+  .foot b{font-weight:700;}
+  mark{background:none; color:var(--fg); box-shadow:inset 0 -0.5vw 0 #e8e8ed;}
+  /* 이번 주 추가 — 지운 것/남긴 것 대비, 숫자 띠 */
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:1.6vw; margin-top:2vw;}
+  .two .box{border:1px solid var(--line2); border-radius:.7vw; padding:1.3vw 1.4vw; background:var(--wash);}
+  .two .box.keep{background:#fff; border-color:var(--line);}
+  .two .box h5{font-size:1.16vw; font-weight:800; margin-bottom:.9vw; letter-spacing:-.01em;}
+  .two .box p{font-size:1.22vw; line-height:1.5; color:var(--soft); margin-bottom:.5vw;}
+  .two .box p:last-child{margin-bottom:0;}
+  .nums{display:grid; grid-template-columns:repeat(4,1fr); gap:1vw; margin-top:2vw;}
+  .nums div{border:1px solid var(--line2); border-radius:.7vw; padding:1.1vw; text-align:center;}
+  .nums b{display:block; font-size:2.5vw; font-weight:800; letter-spacing:-.03em; line-height:1;}
+  .nums span{display:block; margin-top:.5vw; font-size:1.02vw; color:var(--muted);}
+  .shot{margin-top:1.6vw; display:grid; grid-template-columns:1fr 1fr; gap:1.2vw; flex:1; min-height:0;}
+  .shot figure{display:flex; flex-direction:column; min-height:0;}
+  .shot img{width:100%; flex:1; min-height:0; object-fit:cover; object-position:top center;
+            border:1px solid var(--line); border-radius:.6vw;}
+  .shot figcaption{margin-top:.7vw; font-size:1.02vw; color:var(--muted); line-height:1.4;}
+  .tap{position:absolute; top:0; bottom:9%; width:34%; z-index:4; cursor:pointer; -webkit-tap-highlight-color:transparent;}
+  .tap.l{left:0;} .tap.r{right:0;}
+  .ctl{position:fixed; bottom:16px; left:50%; transform:translateX(-50%); display:flex; gap:6px; align-items:center;
+       background:#fff; border:1px solid var(--line); border-radius:999px; padding:6px 8px; box-shadow:0 6px 20px rgba(0,0,0,.12); z-index:10;}
+  .ctl button{font-family:inherit; border:none; background:none; cursor:pointer; font-size:14px; color:var(--fg); padding:8px 12px; border-radius:999px;}
+  .ctl button:hover{background:#f2f2f4;} .ctl button:focus-visible{outline:2px solid var(--fg); outline-offset:2px;}
+  .ctl .pg{font-variant-numeric:tabular-nums; color:var(--muted); font-size:13px; min-width:52px; text-align:center;}
+  .notes{position:fixed; left:0; right:0; bottom:0; max-height:46vh; overflow:auto; background:#111; color:#eee;
+         padding:22px 26px 30px; font-size:15px; line-height:1.75; display:none; z-index:9;}
+  .notes.on{display:block;}
+  .notes h4{font-size:12px; letter-spacing:.1em; color:#9a9a9a; text-transform:uppercase; margin-bottom:8px; font-weight:700;}
+  @media print{ body{background:#fff;} .ctl,.notes,.tap{display:none!important;} .stage{box-shadow:none; page-break-after:always;} }
+  @media (min-width:1230px){
+    .kicker{font-size:13px;} .h1{font-size:46px;} .h2{font-size:34px;} .sub{font-size:17px;} .meta{font-size:12.5px;}
+    ul.b li{font-size:17.5px;} ul.b li span{font-size:15px;} ol.five li{font-size:16.5px;} ol.five li span{font-size:14.5px;}
+    .band{font-size:15.5px; border-radius:9px;} .quote{font-size:25px;} .foot{font-size:11px;} .accent{height:3px;}
+    .two .box h5{font-size:14px;} .two .box p{font-size:14.5px;} .nums b{font-size:30px;} .nums span{font-size:12px;}
+    .shot figcaption{font-size:12px;}
+  }
+</style>
+</head>
+<body>
+  <div class="stage" id="stage">
+    <div class="tap l" id="tapL" aria-label="이전"></div>
+    <div class="tap r" id="tapR" aria-label="다음"></div>
+
+    <!-- 01 표지 -->
+    <section class="slide">
+      <div class="kicker">ARAMIRROR · 5주차 마지막 과제</div><div class="accent"></div>
+      <div style="margin-top:5vw">
+        <div class="h1">더한 게 아니라<br><mark>지운</mark> 주.</div>
+      </div>
+      <div class="sub">페이지 4개, 데이터 파일 5개, 지도 칸 46개를 삭제했습니다. 남긴 건 글이 아니라 <b>동작으로 사는 것</b>뿐입니다.</div>
+      <div class="meta">2026.08.02 · 박상현(아람) · 5조</div>
+      <div class="foot"><span><b>Aramirror</b> — 빼기도 결과물이다</span><span>01 / 08</span></div>
+    </section>
+
+    <!-- 02 1주차 약속 -->
+    <section class="slide">
+      <div class="kicker">01 · 시작할 때 한 약속</div><div class="accent"></div>
+      <div class="h2" style="margin-top:1.4vw">절반은 지켰고, <mark>절반은 틀렸습니다</mark></div>
+      <div class="band" style="margin-top:2vw">1주차에 이렇게 적었습니다 — “나는 메모앱이 아니라 <b>내 생각이 값(자산)이 되는 환경</b>을 만들었다.”</div>
+      <ul class="b" style="margin-top:1.8vw">
+        <li><span class="d">○</span><div><b>지킨 것 — 환경은 만들었다.</b> <span>텔레그램 한 줄이 저널이 되고, 웹에서 눌러 볼 수 있게 됐다.</span></div></li>
+        <li><span class="d">✕</span><div><b>틀린 것 — “쌓이면 자산이 된다”.</b> <span><mark>쌓이는 건 그냥 쌓인다.</mark> 자산이 되려면 <b>올라가는 계단</b>이 있어야 했다.</span></div></li>
+      </ul>
+      <div class="spacer"></div>
+      <div class="band">💡 <b>이번 기수 최대의 수정</b> — 쌓는 도구에서 <mark>올라가는 도구</mark>로.</div>
+      <div class="foot"><span><b>Aramirror</b> — 빼기도 결과물이다</span><span>02 / 08</span></div>
+    </section>
+
+    <!-- 03 지운 것 / 남긴 것 -->
+    <section class="slide">
+      <div class="kicker">02 · 이번 주에 한 일</div><div class="accent"></div>
+      <div class="h2" style="margin-top:1.4vw">기능을 더하는 대신 <mark>덜어냈습니다</mark></div>
+      <div class="two">
+        <div class="box">
+          <h5>🗑 지운 것</h5>
+          <p>· 남의 것을 모아 보여주던 페이지 <b>4개</b></p>
+          <p>· 그걸 떠받치던 데이터 파일 <b>5개</b></p>
+          <p>· 출처만 붙어 있던 지도 칸 <b>46개</b></p>
+          <p>· 이미 제출했던 과제까지 <b>내렸다</b></p>
+        </div>
+        <div class="box keep">
+          <h5>💎 남긴 것 — 커널 하나</h5>
+          <p>· <b>⚡ 퀵캡처</b> — 던지는 순간 = 저장되는 순간</p>
+          <p>· <b>4단계 승격</b> — 인박스 → 정리 → 지식 → 자산</p>
+          <p>· <b>3상태 검증</b> — 확인함 / 미확인 / <b>틀림</b></p>
+          <p>· <b>결정 카드 · 먼저 말 거는 루프 · 사용 로그</b></p>
+        </div>
+      </div>
+      <div class="spacer"></div>
+      <div class="band">💡 <b>기준은 하나였습니다.</b> 글로만 있는 건 <mark>읽을거리</mark>, 버튼으로 도는 건 <mark>내 것</mark>. 안 도는 건 다 지웠습니다.</div>
+      <div class="foot"><span><b>Aramirror</b> — 빼기도 결과물이다</span><span>03 / 08</span></div>
+    </section>
+
+    <!-- 04 결과물 · 숫자 -->
+    <section class="slide">
+      <div class="kicker">03 · 최종 결과물</div><div class="accent"></div>
+      <div class="h2" style="margin-top:1.4vw">커널 하나로 도는 <mark>개인 OS</mark></div>
+      <div class="nums">
+        <div><b>105</b><span>페이지</span></div>
+        <div><b>10</b><span>레벨 (씨앗→거울)</span></div>
+        <div><b>18</b><span>업적</span></div>
+        <div><b>0</b><span>서버 전송</span></div>
+      </div>
+      <ul class="b" style="margin-top:1.8vw">
+        <li><span class="d">—</span><div><b>XP는 오직 행동에서.</b> <span>구경하면 0점. 던져야(+2) · 올려야(+3~10) · 근거를 확인해야(+3) · 결정해야(+8) 오른다.</span></div></li>
+        <li><span class="d">—</span><div><b>데이터는 내 브라우저에만.</b> <span>서버로 나가는 게 0. 3주차에 배운 원칙 그대로 — 보안은 자물쇠 UI가 아니라 데이터가 어디 사는가다.</span></div></li>
+      </ul>
+      <div class="spacer"></div>
+      <div class="meta">🚀 hyun-arch.github.io — 받은칸 /inbox · 지도 /mirror · 관제실 /hq</div>
+      <div class="foot"><span><b>Aramirror</b> — 빼기도 결과물이다</span><span>04 / 08</span></div>
+    </section>
+
+    <!-- 05 실제 화면 -->
+    <section class="slide">
+      <div class="kicker">04 · 실제로 굴려본 화면</div><div class="accent"></div>
+      <div class="h2" style="margin-top:1.2vw">구경만 했으면 <mark>전부 0</mark>이었습니다</div>
+      <div class="shot">
+        <figure>
+          <img src="../이미지첨부/01_홈-한화면.png" alt="아람미러 홈 — 레벨 3 줄기, 승격 파이프라인" />
+          <figcaption><b>홈</b> — 8개를 던지고 올린 실제 상태. Lv3 줄기 · 95XP · 승격률 50% · 업적 4/18.</figcaption>
+        </figure>
+        <figure>
+          <img src="../이미지첨부/02_받은칸-4단계승격.png" alt="받은칸 — 4단계 승격 파이프라인" />
+          <figcaption><b>받은칸</b> — 인박스 2 → 정리됨 2 → 지식 2 → 자산 2. 카드마다 3상태와 [승격 →].</figcaption>
+        </figure>
+      </div>
+      <div class="foot"><span><b>Aramirror</b> — 빼기도 결과물이다</span><span>05 / 08</span></div>
+    </section>
+
+    <!-- 06 유저 피드백 -->
+    <section class="slide">
+      <div class="kicker">05 · 받은 유저 피드백</div><div class="accent"></div>
+      <div class="h2" style="margin-top:1.4vw">가장 혹독한 유저는 <mark>나 자신</mark>이었습니다</div>
+      <ul class="b">
+        <li><span class="d">①</span><div><b>실제 유저 (5조 · 필리줄리 님).</b> <span>“잘쓸게요!!🫶” — 그런데 <mark>“그 마지막 단계에서 걸려서 못 쓰고 있어요…”</mark> 제가 배운 건 <b>뒷문장</b>이었습니다.</span></div></li>
+        <li><span class="d">②</span><div><b>나 자신 — 이번 주 반려 3회.</b> <span>“보기만 하고 요약만 해서는 아무짝에도 쓸모없어” · “찔끔 추가해 둔 게 다야?” · “늘어놓기만 하면 어떡해, 다 지워.”</span></div></li>
+        <li><span class="d">③</span><div><b>정직하게 — 최종본 외부 피드백은 아직 못 받았습니다.</b> <span>어제 갈아엎고 오늘 배포했습니다. <mark>없는 걸 있다고 적지 않겠습니다.</mark></span></div></li>
+      </ul>
+      <div class="spacer"></div>
+      <div class="band">💡 <b>제1원칙이 여기서 나왔습니다</b> — 던지는 순간 = 저장되는 순간. 어느 페이지에서든 <b>⚡ 하나</b>로 끝나게.</div>
+      <div class="foot"><span><b>Aramirror</b> — 빼기도 결과물이다</span><span>06 / 08</span></div>
+    </section>
+
+    <!-- 07 그 다음의 것 -->
+    <section class="slide">
+      <div class="kicker">06 · 구현, 그 다음의 것</div><div class="accent"></div>
+      <div class="h2" style="margin-top:1.4vw">“내 손엔 붙었는데, <mark>회사 사람 손엔 안 붙는다</mark>”</div>
+      <ul class="b">
+        <li><span class="d">벽①</span><div><b>안 보이면 안 움직인다.</b> <span>7월에 연간 달성률 <b>29.5%</b> — 비교 기준이 없어 아무도 안 봤다. → <b>진도율</b>(실적÷경과월 누적목표)로 바꾸니 같은 데이터가 <mark>53.4%</mark>. 신호등 🟢🟡🟠🔴 + 히트맵으로 <b>누가 언제부터 꺾였는지</b>를 그림으로.</span></div></li>
+        <li><span class="d">벽②</span><div><b>보이게 만들면, 그 다음은 법(法)이다.</b> <span>보이는 순간 “못하는 사람은 어떻게?”가 온다. 여기부턴 코드가 아니라 근로기준법 — §94·§95·§23, 2024.12 통상임금 전합. <mark>잘못 만들면 동기부여가 아니라 분쟁</mark>이 된다. → 급여를 <b>3층</b>(고정·변동·일시금)으로 나누고 노무사 검토 예정.</span></div></li>
+      </ul>
+      <div class="spacer"></div>
+      <div class="band">💡 <b>둘 다 소프트웨어 문제가 아니었습니다.</b> 기술로 만드는 건 30분, <mark>법으로 지키는 건 몇 주</mark> — 순서를 바꾸지 않겠습니다.</div>
+      <div class="foot"><span><b>Aramirror</b> — 빼기도 결과물이다</span><span>07 / 08</span></div>
+    </section>
+
+    <!-- 08 마무리 -->
+    <section class="slide">
+      <div class="kicker">07 · 5주를 지나며</div><div class="accent"></div>
+      <div class="h2" style="margin-top:1.4vw">배운 것 <mark>세 가지</mark></div>
+      <ol class="five">
+        <li><span class="n">①</span><div><b>흡수는 “옮겨 적기”가 아니라 “동작이 되기”다.</b> <span>문장으로 적으면 읽을거리, 버튼이 되면 내 것.</span></div></li>
+        <li><span class="n">②</span><div><b>빼기도 결과물이다.</b> <span>마지막 주에 한 건 삭제였고, 그게 가장 잘한 일이었다.</span></div></li>
+        <li><span class="n">③</span><div><b>가장 냉정한 유저는 나 자신이어야 한다.</b> <span>그래서 업적에 「버리는 용기」를 넣었다.</span></div></li>
+      </ol>
+      <div class="spacer"></div>
+      <div class="quote">“거울은 예쁜 걸 비출 때가 아니라, <br><mark>내가 안 보고 싶은 걸</mark> 비출 때 쓸모가 있었다.”</div>
+      <div class="meta" style="margin-top:1vw">다음 단계 — <b>한 명</b>에게 붙인다 · 급여 구조는 <b>노무사</b>에게 검증받는다 · <b>사용 로그</b>를 정직하게 읽는다. 만드는 건 끝났는데, 이제 시작입니다. 감사합니다.</div>
+      <div class="foot"><span><b>Aramirror</b> — 빼기도 결과물이다</span><span>08 / 08</span></div>
+    </section>
+  </div>
+
+  <div class="ctl">
+    <button id="prev" aria-label="이전 슬라이드">‹ 이전</button>
+    <span class="pg" id="pg">1 / 8</span>
+    <button id="next" aria-label="다음 슬라이드">다음 ›</button>
+    <button id="notesBtn" title="발표자 노트 (N)">노트</button>
+  </div>
+  <div class="notes" id="notes"><h4>발표자 노트</h4><div id="noteBody"></div></div>
+
+<script>
+  const NOTES = [
+    "안녕하세요, 박상현입니다. 마지막 발표인데 자랑할 얘기를 준비하지 못했습니다. 이번 주에 제가 한 가장 큰 일은 기능을 더한 게 아니라 지운 거였거든요. 페이지 네 개, 데이터 파일 다섯 개, 지도 칸 마흔여섯 개를 지웠습니다. 오늘은 왜 지웠는지, 그리고 지우고 나서 뭐가 남았는지를 말씀드리겠습니다.",
+    "먼저 1주차에 제가 한 약속부터 꺼내볼게요. '메모앱이 아니라 내 생각이 값이 되는 환경을 만들겠다'고 썼습니다. 5주 지나서 다시 읽어보니 절반은 지켰고 절반은 틀렸더라고요. 환경은 만들었습니다. 그런데 제가 '쌓이면 자산이 된다'고 생각했던 게 틀렸어요. 쌓이는 건 그냥 쌓입니다. 자산이 되려면 올라가는 계단이 필요했습니다. 이게 이번 기수 최대의 수정이었습니다.",
+    "그래서 이번 주에 한 일이 이겁니다. 저는 사실 다른 분들 잘한 걸 모아서 보여주는 페이지를 만들었었어요. 예쁘게 나왔습니다. 그런데 다시 보니 제 앱에서 아무것도 달라진 게 없더라고요. 진열장이 하나 늘었을 뿐이었습니다. 그래서 기준을 하나 세웠습니다. 글로만 있는 건 읽을거리, 버튼으로 도는 건 내 것. 그 기준으로 안 도는 걸 다 지우고, 남은 걸 커널 하나로 합쳤습니다. 퀵캡처, 4단계 승격, 3상태 검증, 결정 카드, 먼저 말 거는 루프, 사용 로그 — 이제 이것들이 특정 페이지가 아니라 모든 페이지에서 삽니다.",
+    "결과물은 105페이지짜리 개인 OS입니다. 숫자보다 중요한 건 XP가 오직 행동에서만 나온다는 겁니다. 페이지를 아무리 구경해도 0점이에요. 던져야, 올려야, 근거를 확인해야, 결정을 내려야 오릅니다. 그리고 데이터는 전부 제 브라우저 안에만 있습니다. 서버로 나가는 게 0이에요. 3주차에 배운 걸 그대로 지켰습니다 — 보안은 예쁜 자물쇠 UI가 아니라 데이터가 물리적으로 어디 사는가라는 것.",
+    "실제로 굴려본 화면입니다. 왼쪽이 홈인데, 8개를 던지고 올린 실제 상태예요. 레벨 3 줄기, 95XP, 승격률 50%, 업적 4개. 구경만 했으면 전부 0이었을 숫자입니다. 오른쪽이 받은칸인데 인박스 2, 정리됨 2, 지식 2, 자산 2로 실제로 올라간 모습이고요. 카드마다 확인됨·미확인 상태랑 승격 버튼이 붙습니다.",
+    "피드백 이야기입니다. 세 가지로 나눠서 정직하게 말씀드릴게요. 첫째, 5조 필리줄리 님이 지난주에 주신 실제 피드백. '잘쓸게요' 하셨는데 뒤에 '그 마지막 단계에서 걸려서 못 쓰고 있어요'라고 하셨어요. 제가 배운 건 앞문장이 아니라 뒷문장이었습니다. 쓰고 싶은데 마지막 한 번의 마찰에서 멈췄다는 것. 이게 이번 최종본의 제1원칙이 됐습니다. 둘째, 가장 혹독한 유저는 저 자신이었습니다. 이번 주에 제가 제 앱을 세 번 반려했어요. 그래서 지운 겁니다. 셋째, 정직하게 말씀드리면 최종본에 대한 외부 피드백은 아직 못 받았습니다. 어제 갈아엎고 오늘 배포했거든요. 없는 걸 있다고 적지는 않겠습니다.",
+    "만드는 건 끝났는데 그 다음이 진짜 시작이더라고요. 지금 제가 걸린 고민은 하나입니다. 제 손엔 붙었는데 회사 사람 손엔 안 붙는다는 것. 두 개의 벽이 있는데 둘 다 소프트웨어 문제가 아니었습니다. 첫째, 안 보이면 안 움직입니다. 저희 매출 대시보드가 7월에 연간 달성률 29.5%라고 떴는데 아무도 안 봤어요. 비교 기준이 없었으니까요. 진도율로 바꾸니 같은 데이터가 53.4%로 보입니다. 신호등이랑 히트맵을 붙여서 누가 언제부터 꺾였는지를 그림으로 보이게 했습니다. 둘째, 보이게 만들면 그 다음은 법입니다. 보이는 순간 '그럼 못하는 사람은 어떻게 할 건데'가 오는데, 여기서부턴 코드가 아니라 근로기준법이에요. 잘못 만들면 동기부여가 아니라 분쟁이 됩니다. 그래서 급여를 3층으로 나누고 노무사 검토를 받으려고 합니다.",
+    "정리하겠습니다. 5주 동안 배운 건 세 가지예요. 첫째, 흡수는 옮겨 적기가 아니라 동작이 되는 겁니다. 좋은 원칙을 문장으로 적으면 읽을거리고, 버튼으로 만들면 그때 제 것이 됩니다. 둘째, 빼기도 결과물입니다. 마지막 주에 기능을 더 넣고 싶었는데 실제로 한 건 삭제였고, 그게 이번 기수에서 가장 잘한 일이었습니다. 셋째, 가장 냉정한 유저는 나 자신이어야 합니다. 그래서 업적 중에 '버리는 용기'를 넣었어요. 1주차에 'AI는 나를 대신하지 않는다, 거울이 된다'고 썼는데 그 문장은 맞았습니다. 다만 거울은 예쁜 걸 비출 때가 아니라 내가 안 보고 싶은 걸 비출 때 쓸모가 있더라고요. 다음 단계는 한 명에게 붙이는 것, 급여 구조를 노무사에게 검증받는 것, 사용 로그를 정직하게 읽는 겁니다. 만드는 건 끝났는데 이제 시작입니다. 감사합니다."
+  ];
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;
+  function show(n){
+    i=(n+slides.length)%slides.length;
+    slides.forEach((s,k)=>s.classList.toggle('on',k===i));
+    document.getElementById('pg').textContent=(i+1)+" / "+slides.length;
+    document.getElementById('noteBody').textContent=NOTES[i];
+    if(location.hash!=='#'+(i+1)) history.replaceState(null,'','#'+(i+1));
+  }
+  document.getElementById('prev').onclick=()=>show(i-1);
+  document.getElementById('next').onclick=()=>show(i+1);
+  document.getElementById('tapL').onclick=()=>show(i-1);
+  document.getElementById('tapR').onclick=()=>show(i+1);
+  document.getElementById('notesBtn').onclick=()=>document.getElementById('notes').classList.toggle('on');
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown')show(i+1);
+    else if(e.key==='ArrowLeft'||e.key==='PageUp')show(i-1);
+    else if(e.key.toLowerCase()==='n')document.getElementById('notes').classList.toggle('on');
+    else if(e.key==='Home')show(0); else if(e.key==='End')show(slides.length-1);
+  });
+  const start=parseInt((location.hash||'#1').slice(1),10);
+  show(isNaN(start)?0:start-1);
+</script>
+</body>
+</html>
