@@ -18,7 +18,7 @@ Julie OS 웨이트리스트 홍보를 여러 채널(인스타 프로필/릴스/�
 
 - **Next.js (App Router)** 단일 앱. `npm install && npm run dev`로 로컬 실행.
 - **DB: SQLite (better-sqlite3)** — 리포지토리 내 파일(`data.db`)에 저장. 서버 프로세스나 클라우드 계정 불필요.
-- **스타일: Tailwind CSS.** Julie OS 브랜드 팔레트(노랑 `#F5C518` 계열 + 다크 블랙 `#111`)를 CSS 변수로 정의해 라이트/다크 공통 사용.
+- **스타일: 일반 CSS (`globals.css`).** Julie OS 브랜드 팔레트(노랑 `#F5C518` 계열 + 다크 블랙 `#111`)를 CSS 변수로 정의. 페이지 수가 적어 Tailwind 같은 빌드 단계가 추가로 필요한 도구는 붙이지 않음(설정 파일·의존성을 줄여서 Node.js를 막 설치한 환경에서도 설치가 매끄럽게 되도록).
 - **QR 코드:** `qrcode` npm 패키지로 서버에서 SVG 생성 (외부 CDN 호출 없음).
 - 인증 없음 — `localhost`에서만 접근하는 내부 도구로 취급.
 
