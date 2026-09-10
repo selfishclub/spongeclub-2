@@ -94,7 +94,7 @@ waitlist_signups (
 ## 트래킹 메커니즘
 
 - 클릭 카운트는 **`/l/[code]`를 실제로 거친 방문만** 집계 (장부 화면 안내 문구와 동일하게).
-- 봇 제외: User-Agent에 `bot|crawler|preview|facebookexternalhit|kakaotalk|slackbot` 등이 포함되면 `link_clicks`에 기록하지 않고 리다이렉트만 수행.
+- 봇 제외: User-Agent에 `bot|crawler|spider|preview|facebookexternalhit|kakaotalk-scrap|slackbot|telegrambot|discordbot|whatsapp|twitterbot|linkedinbot` 등 링크 미리보기 크롤러 패턴이 포함되면 `link_clicks`에 기록하지 않고 리다이렉트만 수행. (카카오톡·왓츠앱 등의 인앱 브라우저에서 온 실제 방문은 집계한다 — 미리보기 스크래퍼 UA만 제외.)
 - 신청 귀속은 **UTM 파라미터 매칭 방식**(쿠키/세션 없음): 단축 링크가 신청 폼으로 UTM을 쿼리스트링으로 그대로 넘기고, 폼 제출 시 그 값을 신청 레코드에 저장. 클릭 이벤트와 신청 이벤트는 직접 조인하지 않고, 대시보드에서 `utm_source+utm_medium+utm_content` 기준으로 같은 그룹으로 묶어 집계.
 
 ## 디자인 톤
