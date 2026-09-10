@@ -16,7 +16,8 @@ export default function AdminPage() {
   useEffect(() => {
     fetch("/api/channels")
       .then((r) => r.json())
-      .then((d) => setChannels(d.channels));
+      .then((d) => setChannels(Array.isArray(d.channels) ? d.channels : []))
+      .catch(() => setStatus("채널을 불러오지 못했어요. 서버가 켜져 있는지 확인해주세요."));
   }, []);
 
   useEffect(() => {
@@ -31,7 +32,8 @@ export default function AdminPage() {
     if (ledgerFilter.includeArchived) params.set("includeArchived", "true");
     fetch(`/api/links?${params.toString()}`)
       .then((r) => r.json())
-      .then((d) => setLinks(d.links));
+      .then((d) => setLinks(Array.isArray(d.links) ? d.links : []))
+      .catch(() => setStatus("장부를 불러오지 못했어요."));
   }
 
   function toggleChannel(id) {
@@ -54,6 +56,10 @@ export default function AdminPage() {
       return;
     }
     setJustCreated(data.links);
+    if (!data.links || data.links.length === 0) {
+      setStatus("링크가 만들어지지 않았어요.");
+      return;
+    }
     const firstShortUrl = `${window.location.origin}${data.links[0].shortUrl}`;
     try {
       await navigator.clipboard.writeText(firstShortUrl);
@@ -67,8 +73,12 @@ export default function AdminPage() {
   }
 
   async function toggleArchive(id) {
-    await fetch(`/api/links/${id}/archive`, { method: "POST" });
-    loadLinks();
+    try {
+      await fetch(`/api/links/${id}/archive`, { method: "POST" });
+      loadLinks();
+    } catch {
+      setStatus("보관 상태를 바꾸지 못했어요.");
+    }
   }
 
   return (
