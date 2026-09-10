@@ -10,6 +10,8 @@
 
 Reference spec: `DESIGN.md` in this same folder (already committed).
 
+> **Post-review note (error handling):** The shipped API routes harden request/response handling beyond the reference code shown in Tasks 7/10/11/12: a `lib/http.js` `readJson(request)` helper returns `400` on a missing/invalid JSON body, and client fetches guard list responses with `|| []`. Where those tasks' inline snippets differ, the shipped implementation is authoritative.
+
 ## Global Constraints
 
 - Runs entirely on `localhost` — no accounts, no deployment, no auth (per DESIGN.md "비목표").
