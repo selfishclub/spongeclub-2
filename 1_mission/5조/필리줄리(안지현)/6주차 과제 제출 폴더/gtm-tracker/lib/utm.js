@@ -12,7 +12,6 @@ export function sourceAbbr(source) {
 }
 
 export function suggestContentCode(medium, existingCount) {
-  if (medium === "bio") return "";
   return `${medium}${String(existingCount + 1).padStart(2, "0")}`;
 }
 

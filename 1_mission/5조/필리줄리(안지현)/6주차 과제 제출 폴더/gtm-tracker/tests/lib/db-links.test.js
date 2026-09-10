@@ -37,6 +37,28 @@ describe("createLink", () => {
   it("throws for an unknown channel id", () => {
     expect(() => createLink({ channelId: 9999, contentCode: "", memo: "", createdBy: "" })).toThrow();
   });
+
+  it("gives two bio links distinct content codes so signups are not double-counted", () => {
+    const bio = listChannels().find((c) => c.medium === "bio");
+    const first = createLink({ channelId: bio.id, contentCode: "", memo: "", createdBy: "" });
+    const second = createLink({ channelId: bio.id, contentCode: "", memo: "", createdBy: "" });
+
+    expect(first.content_code).toBe("bio01");
+    expect(second.content_code).toBe("bio02");
+    expect(first.content_code).not.toBe(second.content_code);
+    expect(first.short_code).not.toBe(second.short_code);
+
+    const db = getDb();
+    db.prepare(
+      "INSERT INTO waitlist_signups (email, utm_source, utm_medium, utm_content, created_at) VALUES (?, ?, ?, ?, ?)"
+    ).run("bio@example.com", bio.source, bio.medium, "bio01", new Date().toISOString());
+
+    const links = listLinks();
+    const link01 = links.find((l) => l.content_code === "bio01");
+    const link02 = links.find((l) => l.content_code === "bio02");
+    expect(link01.signups).toBe(1);
+    expect(link02.signups).toBe(0);
+  });
 });
 
 describe("getLinkByShortCode", () => {

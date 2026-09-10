@@ -4,6 +4,13 @@ import { suggestContentCode, generateShortCode } from "./utm.js";
 
 let dbInstance;
 
+// Day-range predicate for a timestamp column. Compares on the LOCAL calendar day
+// (date(col, 'localtime')) so "오늘" tracks the operator's timezone, not UTC.
+// `col` is always a hardcoded column name from our own code — never user input —
+// so string interpolation here is safe.
+const dayInRange = (col) =>
+  `(@from = '' OR date(${col}, 'localtime') >= @from) AND (@to = '' OR date(${col}, 'localtime') <= @to)`;
+
 const SEED_CHANNELS = [
   { name: "인스타 프로필", source: "instagram", medium: "bio", note: "프로필 상단 링크. 하나만 둔다" },
   { name: "인스타 릴스", source: "instagram", medium: "reel", note: "릴스 댓글·스티커. 릴스마다 새 번호" },
@@ -17,7 +24,10 @@ export function getDb() {
 
   const dbPath = process.env.GTM_DB_PATH || path.join(process.cwd(), "data.db");
   dbInstance = new Database(dbPath);
-  dbInstance.pragma("journal_mode = WAL");
+  // DELETE (not WAL): this folder is OneDrive-synced and WAL's -wal/-shm sidecars
+  // have a history of desyncing into sqlite corruption here.
+  dbInstance.pragma("journal_mode = DELETE");
+  dbInstance.pragma("foreign_keys = ON");
   initSchema(dbInstance);
   seedChannels(dbInstance);
   return dbInstance;
@@ -113,8 +123,22 @@ export function createLink({ channelId, contentCode, memo, createdBy = "" }) {
   const { n: existingCount } = db
     .prepare("SELECT COUNT(*) as n FROM utm_links WHERE channel_id = ?")
     .get(channelId);
-  const finalContentCode =
+  let finalContentCode =
     contentCode && contentCode.trim() ? contentCode.trim() : suggestContentCode(channel.medium, existingCount);
+
+  // Guard against a same-channel duplicate content_code: two links on the same
+  // channel with the same code would each claim every matching signup.
+  const channelCodes = new Set(
+    db
+      .prepare("SELECT content_code FROM utm_links WHERE channel_id = ? AND archived = 0")
+      .all(channelId)
+      .map((r) => r.content_code || "")
+  );
+  if (channelCodes.has(finalContentCode)) {
+    let suffix = 2;
+    while (channelCodes.has(`${finalContentCode}-${suffix}`)) suffix += 1;
+    finalContentCode = `${finalContentCode}-${suffix}`;
+  }
 
   const existingCodes = new Set(db.prepare("SELECT short_code FROM utm_links").all().map((r) => r.short_code));
   const shortCode = generateShortCode(channel, finalContentCode, existingCodes);
@@ -166,8 +190,9 @@ export function recordClick(linkId, { deviceType = null, referrer = null } = {})
   ).run(linkId, new Date().toISOString(), deviceType, referrer);
 }
 
-export function listLinks({ channelId = null, search = "", includeArchived = false } = {}) {
+export function listLinks({ channelId = null, search = "", includeArchived = false, from = null, to = null } = {}) {
   const db = getDb();
+  const range = { from: from || "", to: to || "" };
   const rows = db
     .prepare(
       `SELECT
@@ -189,12 +214,24 @@ export function listLinks({ channelId = null, search = "", includeArchived = fal
     });
 
   return rows.map((row) => {
-    const { n: clicks } = db.prepare("SELECT COUNT(*) as n FROM link_clicks WHERE link_id = ?").get(row.id);
+    const { n: clicks } = db
+      .prepare(
+        `SELECT COUNT(*) as n FROM link_clicks
+         WHERE link_id = @linkId AND ${dayInRange("clicked_at")}`
+      )
+      .get({ linkId: row.id, ...range });
     const { n: signups } = db
       .prepare(
-        "SELECT COUNT(*) as n FROM waitlist_signups WHERE utm_source = ? AND utm_medium = ? AND utm_content = ?"
+        `SELECT COUNT(*) as n FROM waitlist_signups
+         WHERE utm_source = @source AND utm_medium = @medium AND utm_content = @content
+           AND ${dayInRange("created_at")}`
       )
-      .get(row.channel_source, row.channel_medium, row.content_code || "");
+      .get({
+        source: row.channel_source,
+        medium: row.channel_medium,
+        content: row.content_code || "",
+        ...range,
+      });
     return {
       ...row,
       clicks,
@@ -234,14 +271,14 @@ export function getDashboardStats({ from = null, to = null } = {}) {
   const { n: totalClicks } = db
     .prepare(
       `SELECT COUNT(*) as n FROM link_clicks
-       WHERE (@from = '' OR date(clicked_at) >= @from) AND (@to = '' OR date(clicked_at) <= @to)`
+       WHERE ${dayInRange("clicked_at")}`
     )
     .get(range);
 
   const { n: totalSignups } = db
     .prepare(
       `SELECT COUNT(*) as n FROM waitlist_signups
-       WHERE (@from = '' OR date(created_at) >= @from) AND (@to = '' OR date(created_at) <= @to)`
+       WHERE ${dayInRange("created_at")}`
     )
     .get(range);
 
@@ -250,15 +287,15 @@ export function getDashboardStats({ from = null, to = null } = {}) {
 
   const dailyClicks = db
     .prepare(
-      `SELECT date(clicked_at) as day, COUNT(*) as n FROM link_clicks
-       WHERE (@from = '' OR date(clicked_at) >= @from) AND (@to = '' OR date(clicked_at) <= @to)
+      `SELECT date(clicked_at, 'localtime') as day, COUNT(*) as n FROM link_clicks
+       WHERE ${dayInRange("clicked_at")}
        GROUP BY day`
     )
     .all(range);
   const dailySignups = db
     .prepare(
-      `SELECT date(created_at) as day, COUNT(*) as n FROM waitlist_signups
-       WHERE (@from = '' OR date(created_at) >= @from) AND (@to = '' OR date(created_at) <= @to)
+      `SELECT date(created_at, 'localtime') as day, COUNT(*) as n FROM waitlist_signups
+       WHERE ${dayInRange("created_at")}
        GROUP BY day`
     )
     .all(range);
@@ -272,14 +309,14 @@ export function getDashboardStats({ from = null, to = null } = {}) {
           `SELECT COUNT(*) as n FROM link_clicks lc
            JOIN utm_links l ON l.id = lc.link_id
            WHERE l.channel_id = @id
-             AND (@from = '' OR date(lc.clicked_at) >= @from) AND (@to = '' OR date(lc.clicked_at) <= @to)`
+             AND ${dayInRange("lc.clicked_at")}`
         )
         .get({ id: c.id, ...range });
       const { n: signups } = db
         .prepare(
           `SELECT COUNT(*) as n FROM waitlist_signups
            WHERE utm_source = @source AND utm_medium = @medium
-             AND (@from = '' OR date(created_at) >= @from) AND (@to = '' OR date(created_at) <= @to)`
+             AND ${dayInRange("created_at")}`
         )
         .get({ source: c.source, medium: c.medium, ...range });
       return {
@@ -293,7 +330,7 @@ export function getDashboardStats({ from = null, to = null } = {}) {
     })
     .sort((a, b) => b.clicks - a.clicks);
 
-  const topContent = listLinks({ includeArchived: true })
+  const topContent = listLinks({ includeArchived: true, from, to })
     .map((l) => ({
       linkId: l.id,
       channelName: l.channel_name,

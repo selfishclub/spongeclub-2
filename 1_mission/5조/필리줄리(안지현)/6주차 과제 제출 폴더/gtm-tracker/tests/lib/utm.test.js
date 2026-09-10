@@ -14,9 +14,9 @@ describe("sourceAbbr", () => {
 });
 
 describe("suggestContentCode", () => {
-  it("returns an empty string for the bio medium (single canonical link)", () => {
-    expect(suggestContentCode("bio", 0)).toBe("");
-    expect(suggestContentCode("bio", 3)).toBe("");
+  it("numbers the bio medium like every other medium", () => {
+    expect(suggestContentCode("bio", 0)).toBe("bio01");
+    expect(suggestContentCode("bio", 3)).toBe("bio04");
   });
 
   it("numbers other media starting at 01, padded to 2 digits", () => {

@@ -3,7 +3,7 @@ import { classifyRequest } from "../../lib/redirect.js";
 
 describe("classifyRequest", () => {
   it("marks bot user agents and skips device classification", () => {
-    expect(classifyRequest("KAKAOTALK")).toEqual({ isBot: true, deviceType: null });
+    expect(classifyRequest("kakaotalk-scrap/1.0")).toEqual({ isBot: true, deviceType: null });
   });
 
   it("classifies an iPhone user agent as mobile", () => {

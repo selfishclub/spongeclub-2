@@ -65,14 +65,16 @@ describe("getDashboardStats", () => {
   });
 
   it("only counts clicks/signups inside the requested date range", () => {
+    // Midday timestamps: date(col, 'localtime') can't cross a day boundary for
+    // any realistic test-runner timezone, so this stays stable under localtime.
     vi.useFakeTimers();
-    vi.setSystemTime(new Date("2026-01-01T00:00:00.000Z"));
+    vi.setSystemTime(new Date("2026-01-15T12:00:00.000Z"));
 
     const reel = listChannels().find((c) => c.medium === "reel");
     const link = createLink({ channelId: reel.id, contentCode: "reel01", memo: "", createdBy: "" });
     recordClick(link.id, { deviceType: "mobile", referrer: null });
 
-    vi.setSystemTime(new Date("2026-02-01T00:00:00.000Z"));
+    vi.setSystemTime(new Date("2026-02-15T12:00:00.000Z"));
     recordClick(link.id, { deviceType: "mobile", referrer: null });
 
     vi.useRealTimers();
@@ -82,5 +84,25 @@ describe("getDashboardStats", () => {
 
     const all = getDashboardStats({});
     expect(all.totalClicks).toBe(2);
+  });
+
+  it("scopes topContent to the requested date range, matching the tiles", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-03-10T12:00:00.000Z"));
+
+    const reel = listChannels().find((c) => c.medium === "reel");
+    const link = createLink({ channelId: reel.id, contentCode: "reel01", memo: "", createdBy: "" });
+    recordClick(link.id, { deviceType: "mobile", referrer: null });
+    createSignup({ email: "mar@example.com", utm_source: "instagram", utm_medium: "reel", utm_content: "reel01" });
+
+    vi.setSystemTime(new Date("2026-04-10T12:00:00.000Z"));
+    recordClick(link.id, { deviceType: "mobile", referrer: null });
+
+    vi.useRealTimers();
+
+    const marOnly = getDashboardStats({ from: "2026-03-01", to: "2026-03-31" });
+    const row = marOnly.topContent.find((t) => t.shortCode === link.short_code);
+    expect(row).toMatchObject({ clicks: 1, signups: 1 });
+    expect(row.clicks).toBe(marOnly.totalClicks);
   });
 });

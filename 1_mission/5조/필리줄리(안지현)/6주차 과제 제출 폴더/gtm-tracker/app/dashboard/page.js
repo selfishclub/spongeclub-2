@@ -10,14 +10,17 @@ const RANGES = [
   { key: "all", label: "전체" },
 ];
 
+function ymd(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 function rangeToDates(key) {
   const today = new Date();
-  const toStr = today.toISOString().slice(0, 10);
   if (key === "all") return { from: "", to: "" };
   const days = key === "today" ? 0 : key === "7d" ? 6 : 29;
   const from = new Date(today);
   from.setDate(from.getDate() - days);
-  return { from: from.toISOString().slice(0, 10), to: toStr };
+  return { from: ymd(from), to: ymd(today) };
 }
 
 export default function DashboardPage() {
@@ -31,7 +34,7 @@ export default function DashboardPage() {
     if (to) params.set("to", to);
     fetch(`/api/dashboard?${params.toString()}`)
       .then((r) => r.json())
-      .then((d) => setStats(d && typeof d === "object" ? d : null))
+      .then((d) => setStats(d && typeof d.totalClicks === "number" ? d : null))
       .catch(() => setStats(null));
   }, [rangeKey]);
 
