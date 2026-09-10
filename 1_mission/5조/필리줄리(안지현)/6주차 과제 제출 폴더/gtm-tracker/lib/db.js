@@ -1,5 +1,6 @@
 import Database from "better-sqlite3";
 import path from "node:path";
+import { suggestContentCode, generateShortCode } from "./utm.js";
 
 let dbInstance;
 
@@ -102,4 +103,104 @@ export function createChannel({ name, source, medium, note = "" }) {
     )
     .run(name, source, medium, note);
   return db.prepare("SELECT * FROM channels WHERE id = ?").get(result.lastInsertRowid);
+}
+
+export function createLink({ channelId, contentCode, memo, createdBy = "" }) {
+  const db = getDb();
+  const channel = db.prepare("SELECT * FROM channels WHERE id = ?").get(channelId);
+  if (!channel) throw new Error(`channel not found: ${channelId}`);
+
+  const { n: existingCount } = db
+    .prepare("SELECT COUNT(*) as n FROM utm_links WHERE channel_id = ?")
+    .get(channelId);
+  const finalContentCode =
+    contentCode && contentCode.trim() ? contentCode.trim() : suggestContentCode(channel.medium, existingCount);
+
+  const existingCodes = new Set(db.prepare("SELECT short_code FROM utm_links").all().map((r) => r.short_code));
+  const shortCode = generateShortCode(channel, finalContentCode, existingCodes);
+  const targetUrl = buildTargetUrl(channel, finalContentCode);
+  const createdAt = new Date().toISOString();
+
+  const result = db
+    .prepare(
+      `INSERT INTO utm_links (channel_id, content_code, memo, short_code, target_url, created_by, created_at, archived)
+       VALUES (@channelId, @contentCode, @memo, @shortCode, @targetUrl, @createdBy, @createdAt, 0)`
+    )
+    .run({
+      channelId,
+      contentCode: finalContentCode,
+      memo: memo || "",
+      shortCode,
+      targetUrl,
+      createdBy,
+      createdAt,
+    });
+
+  return db.prepare("SELECT * FROM utm_links WHERE id = ?").get(result.lastInsertRowid);
+}
+
+function buildTargetUrl(channel, contentCode) {
+  const params = new URLSearchParams({
+    utm_source: channel.source,
+    utm_medium: channel.medium,
+    utm_campaign: "julie-os-waitlist",
+    utm_content: contentCode || "",
+  });
+  return `/waitlist?${params.toString()}`;
+}
+
+export function getLinkByShortCode(shortCode) {
+  const db = getDb();
+  return db.prepare("SELECT * FROM utm_links WHERE short_code = ?").get(shortCode);
+}
+
+export function setLinkArchived(id, archived) {
+  const db = getDb();
+  db.prepare("UPDATE utm_links SET archived = ? WHERE id = ?").run(archived ? 1 : 0, id);
+}
+
+export function recordClick(linkId, { deviceType = null, referrer = null } = {}) {
+  const db = getDb();
+  db.prepare(
+    "INSERT INTO link_clicks (link_id, clicked_at, device_type, referrer) VALUES (?, ?, ?, ?)"
+  ).run(linkId, new Date().toISOString(), deviceType, referrer);
+}
+
+export function listLinks({ channelId = null, search = "", includeArchived = false } = {}) {
+  const db = getDb();
+  const rows = db
+    .prepare(
+      `SELECT
+         l.id, l.channel_id, l.content_code, l.memo, l.short_code, l.target_url,
+         l.created_by, l.created_at, l.archived,
+         c.name as channel_name, c.source as channel_source, c.medium as channel_medium
+       FROM utm_links l
+       JOIN channels c ON c.id = l.channel_id
+       WHERE (@includeArchived = 1 OR l.archived = 0)
+         AND (@channelId IS NULL OR l.channel_id = @channelId)
+         AND (@search = '' OR l.memo LIKE @searchLike OR l.content_code LIKE @searchLike)
+       ORDER BY l.created_at DESC`
+    )
+    .all({
+      includeArchived: includeArchived ? 1 : 0,
+      channelId,
+      search,
+      searchLike: `%${search}%`,
+    });
+
+  return rows.map((row) => {
+    const { n: clicks } = db.prepare("SELECT COUNT(*) as n FROM link_clicks WHERE link_id = ?").get(row.id);
+    const { n: signups } = db
+      .prepare(
+        "SELECT COUNT(*) as n FROM waitlist_signups WHERE utm_source = ? AND utm_medium = ? AND utm_content = ?"
+      )
+      .get(row.channel_source, row.channel_medium, row.content_code || "");
+    return {
+      ...row,
+      clicks,
+      signups,
+      conversionRate: clicks > 0 ? signups / clicks : 0,
+      shortUrl: `/l/${row.short_code}`,
+    };
+  });
 }
