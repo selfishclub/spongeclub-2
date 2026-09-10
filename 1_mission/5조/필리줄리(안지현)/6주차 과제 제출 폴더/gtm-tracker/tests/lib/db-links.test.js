@@ -7,6 +7,7 @@ import {
   listLinks,
   recordClick,
   setLinkArchived,
+  getDb,
 } from "../../lib/db.js";
 
 beforeEach(() => {
@@ -78,5 +79,33 @@ describe("recordClick + listLinks", () => {
     expect(listLinks({ channelId: channel.id })).toHaveLength(2);
     expect(listLinks({ search: "이벤트" })).toHaveLength(1);
     expect(listLinks({ search: "이벤트" })[0].content_code).toBe("reel02");
+  });
+
+  it("attributes matching signups to a link and calculates conversion rate", () => {
+    const channel = reelChannel();
+    const link = createLink({ channelId: channel.id, contentCode: "reel01", memo: "", createdBy: "" });
+
+    // Record 2 clicks
+    recordClick(link.id, { deviceType: "mobile", referrer: null });
+    recordClick(link.id, { deviceType: "desktop", referrer: null });
+
+    // Insert 1 matching signup
+    const db = getDb();
+    db.prepare(
+      "INSERT INTO waitlist_signups (email, utm_source, utm_medium, utm_content, created_at) VALUES (?, ?, ?, ?, ?)"
+    ).run("test@example.com", "instagram", "reel", "reel01", new Date().toISOString());
+
+    // Insert 1 non-matching signup (to prove the filter is real)
+    db.prepare(
+      "INSERT INTO waitlist_signups (email, utm_source, utm_medium, utm_content, created_at) VALUES (?, ?, ?, ?, ?)"
+    ).run("other@example.com", "instagram", "reel", "reel99", new Date().toISOString());
+
+    const links = listLinks();
+    const reel01Link = links.find((l) => l.content_code === "reel01");
+
+    expect(reel01Link).toBeDefined();
+    expect(reel01Link.clicks).toBe(2);
+    expect(reel01Link.signups).toBe(1);
+    expect(reel01Link.conversionRate).toBe(0.5);
   });
 });
