@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import { createSignup } from "@/lib/db";
+import { readJson } from "@/lib/http";
 
 export async function POST(request) {
-  const body = await request.json();
+  const body = await readJson(request);
+  if (!body) {
+    return NextResponse.json({ error: "요청 본문(JSON)이 필요해요" }, { status: 400 });
+  }
   try {
     const signup = createSignup({
       name: body.name || "",

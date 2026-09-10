@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { listLinks, createLink } from "@/lib/db";
+import { readJson } from "@/lib/http";
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -16,7 +17,10 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  const body = await request.json();
+  const body = await readJson(request);
+  if (!body) {
+    return NextResponse.json({ error: "요청 본문(JSON)이 필요해요" }, { status: 400 });
+  }
   const channelIds = Array.isArray(body.channelIds) ? body.channelIds : [body.channelId];
   if (!channelIds.length || channelIds.some((id) => !id)) {
     return NextResponse.json({ error: "채널을 선택해주세요" }, { status: 400 });
