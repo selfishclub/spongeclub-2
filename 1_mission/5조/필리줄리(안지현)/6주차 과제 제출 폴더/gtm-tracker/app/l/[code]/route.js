@@ -11,10 +11,12 @@ export async function GET(request, { params }) {
   const userAgent = request.headers.get("user-agent") || "";
   const { isBot, deviceType } = classifyRequest(userAgent);
   if (!isBot) {
-    recordClick(link.id, {
-      deviceType,
-      referrer: request.headers.get("referer") || null,
-    });
+    try {
+      recordClick(link.id, {
+        deviceType,
+        referrer: request.headers.get("referer") || null,
+      });
+    } catch {}
   }
 
   return NextResponse.redirect(new URL(link.target_url, request.url), 302);

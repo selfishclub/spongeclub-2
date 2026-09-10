@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { listChannels, createChannel } from "@/lib/db";
 import { readJson } from "@/lib/http";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   return NextResponse.json({ channels: listChannels() });
 }
