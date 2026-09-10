@@ -18,7 +18,7 @@ Reference spec: `DESIGN.md` in this same folder (already committed).
 - Click counting only happens through `/l/[code]` redirects; known bot/preview User-Agents are excluded (see `lib/bots.js`).
 - Signup attribution is UTM-parameter matching (no cookies/sessions) — a signup's `utm_source/medium/content` is compared against a link's `channel.source/medium` + `content_code` to compute per-link stats.
 - Node.js v24 (LTS) and npm are already installed on this machine — confirmed via `node --version` (v24.19.0) / `npm --version` (11.17.0) immediately before this plan was written.
-- **Windows/better-sqlite3 risk:** `better-sqlite3` ships prebuilt binaries for common Node versions; if `npm install` fails trying to compile it from source (no Visual Studio Build Tools on this machine), stop and swap `lib/db.js`'s `better-sqlite3` import for Node's built-in `node:sqlite` module (available in Node 24) — the rest of `lib/db.js`'s public functions can keep the same signatures, only the low-level `new Database(...)`/`.prepare()`/`.run()`/`.get()`/`.all()` calls change shape slightly. Flag this to the user before making that swap.
+- **better-sqlite3 version:** use `better-sqlite3@^13.0.3` — verified to install a prebuilt binary and run on this machine's Node v24.19.0 (no compiler needed). Earlier `^11.x` had no Node 24 prebuild and tried (and failed) to compile from source. Do not downgrade it.
 
 ---
 
@@ -101,7 +101,7 @@ gtm-tracker/
     "test": "vitest run"
   },
   "dependencies": {
-    "better-sqlite3": "^11.3.0",
+    "better-sqlite3": "^13.0.3",
     "next": "^14.2.0",
     "qrcode": "^1.5.3",
     "react": "^18.3.0",
